@@ -2,6 +2,7 @@ package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.ehp246.aufjms.api.endpoint.ActionInstanceResolver;
@@ -30,10 +31,12 @@ public class AutowireCapableTypeActionResolver implements ActionInstanceResolver
 	}
 
 	@Override
-	public List<ResolvedInstance> get(Msg msg) {
+	public List<ResolvedInstance> resolve(final Msg msg) {
+		Objects.requireNonNull(msg);
+
 		final var registered = this.actionResolver.resolve(msg.getType());
 		if (registered == null || registered.size() == 0) {
-			return null;
+			return List.of();
 		}
 
 		return registered.stream().map(one -> new ResolvedInstance() {

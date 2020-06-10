@@ -29,12 +29,12 @@ public class JacksonActionBinder extends AbstractActionInvocationBinder {
 		// Single parameter
 		if (positions.size() == 1) {
 			final var position = positions.get(0);
-			arguments[position] = objectMapper.readValue(mq.getBody(String.class), parameters[position].getType());
+			arguments[position] = objectMapper.readValue(mq.getBodyAsText(), parameters[position].getType());
 			return;
 		}
 
 		// Multiple parameters
-		final var jsons = objectMapper.readValue(mq.getBody(String.class), String[].class);
+		final var jsons = objectMapper.readValue(mq.getBodyAsText(), String[].class);
 		for (int i = 0; i < positions.size(); i++) {
 			final var position = positions.get(i);
 			arguments[position] = objectMapper.readValue(jsons[position], parameters[position].getType());

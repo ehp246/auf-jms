@@ -11,6 +11,8 @@ import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -18,6 +20,8 @@ import org.ehp246.aufjms.api.jms.Msg;
  *
  */
 public class DefaultMsgDispatcher implements MsgDispatcher {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
+
 	private final ActionInstanceResolver actionResolver;
 	private final ActionExecutor actionExecutor;
 	private final List<Consumer<ExecutedInstance>> postPerforms = new ArrayList<>();
@@ -37,11 +41,15 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 	public void dispatch(final Msg msg) {
 		final List<ResolvedInstance> actions;
 		try {
-			actions = this.actionResolver.get(msg);
+			actions = this.actionResolver.resolve(msg);
 			if (actions == null || actions.size() == 0) {
+				LOGGER.info("Un-matched message type: {}", msg.getType());
+
 				return;
 			}
 		} catch (Exception e) {
+			LOGGER.error("Resolution failed: {}", e.getMessage());
+
 			return;
 		}
 

@@ -13,7 +13,7 @@ import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.api.jms.MsgPipe;
 import org.ehp246.aufjms.api.jms.MsgSinkContext;
 import org.ehp246.aufjms.api.jms.MsgSupplier;
-import org.ehp246.aufjms.api.jms.ToMsg;
+import org.ehp246.aufjms.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class JmsConnectionPipe implements MsgPipe {
 
 				LOGGER.trace("Sent {} ", mqSupplier.getCorrelationId());
 
-				return ToMsg.wrap(message);
+				return ToMsg.from(message);
 			}
 		} catch (JMSException e) {
 			LOGGER.error("Failed to take: to {}, type {}, correclation id {}", mqSupplier.getTo(), mqSupplier.getType(),

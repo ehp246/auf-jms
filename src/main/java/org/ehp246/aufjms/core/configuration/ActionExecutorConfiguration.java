@@ -25,10 +25,7 @@ public class ActionExecutorConfiguration {
 	@Bean()
 	public ThreadPoolTaskExecutor actionThreadPool(
 			@Value("${org.ehp246.aufjms.actionexecutor.pool-size:10}") int poolSize) {
-		if (poolSize <= 0) {
-			return null;
-		}
-		final ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+		final var threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
 		threadPoolTaskExecutor.setCorePoolSize(poolSize);
 		threadPoolTaskExecutor.setMaxPoolSize(poolSize);
 		threadPoolTaskExecutor.setQueueCapacity(-1);

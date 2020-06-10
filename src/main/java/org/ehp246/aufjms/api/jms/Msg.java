@@ -3,7 +3,9 @@ package org.ehp246.aufjms.api.jms;
 import java.time.Instant;
 
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.TextMessage;
 
 /**
  * Custom version of JMS Message which does not throw.
@@ -41,6 +43,12 @@ public interface Msg {
 	Instant getTimestamp();
 
 	Message getMessage();
-	
-	<T> T getBody(Class<T> type);
+
+	default String getBodyAsText() {
+		try {
+			return ((TextMessage) getMessage()).getText();
+		} catch (JMSException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

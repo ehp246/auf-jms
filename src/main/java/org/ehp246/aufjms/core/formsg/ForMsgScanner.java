@@ -3,7 +3,6 @@ package org.ehp246.aufjms.core.formsg;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,11 +25,11 @@ import org.springframework.util.StringUtils;
  *
  */
 public class ForMsgScanner {
-	private final List<Class<?>> scanBases;
+	private final Set<String> scanPackages;
 
-	public ForMsgScanner(List<Class<?>> scanBases) {
+	public ForMsgScanner(Set<String> scanPackages) {
 		super();
-		this.scanBases = scanBases;
+		this.scanPackages = scanPackages;
 	}
 
 	public Set<TypeActionDefinition> perform() {
@@ -42,16 +41,14 @@ public class ForMsgScanner {
 		};
 		scanner.addIncludeFilter(new AnnotationTypeFilter(ForMsg.class));
 
-		return StreamOf.nonNull(scanBases).map(c -> c.getPackage().getName()).distinct()
-				.map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
-					try {
-						return Class.forName(bean.getBeanClassName());
-					} catch (ClassNotFoundException e) {
-						// Should not happen
-					}
-					return null;
-				}).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull)
-				.collect(Collectors.toSet());
+		return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
+			try {
+				return Class.forName(bean.getBeanClassName());
+			} catch (ClassNotFoundException e) {
+				// Should not happen
+			}
+			return null;
+		}).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
 	private TypeActionDefinition newDefinition(Class<?> actionClass) {
