@@ -77,10 +77,10 @@ public class ForMsgScanner {
 		reflected.findMethods(Executing.class).stream().forEach(method -> {
 			final String[] matchTypes = method.getAnnotation(Executing.class).value();
 			if (matchTypes.length == 0) {
-				if (exes.containsKey(null)) {
-					throw new RuntimeException("Duplicate executing method found on " + instanceType.getName());
+				if (exes.containsKey(instanceType.getSimpleName())) {
+					throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 				}
-				exes.put("", method);
+				exes.put(instanceType.getSimpleName(), method);
 			} else {
 				final var intersect = new HashSet<String>(exes.keySet());
 				intersect.retainAll(Set.of(matchTypes));
@@ -100,7 +100,7 @@ public class ForMsgScanner {
 				throw new RuntimeException("Duplicate by-convention methods found on " + instanceType.getName());
 			}
 			if (found.size() == 1) {
-				exes.put("", found.get(0));
+				exes.put(instanceType.getSimpleName(), found.get(0));
 			}
 		}
 

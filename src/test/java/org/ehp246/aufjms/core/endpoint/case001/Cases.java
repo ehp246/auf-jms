@@ -5,17 +5,6 @@ import org.ehp246.aufjms.annotation.ForMsg;
 
 public class Cases {
 	@ForMsg
-	public static class Error001 {
-		@Executing
-		public void m001() {
-		}
-
-		@Executing
-		public void m002() {
-		}
-	}
-
-	@ForMsg
 	public static class Case001 {
 		public void execute() {
 
@@ -25,6 +14,9 @@ public class Cases {
 	@ForMsg
 	public static class Case002 {
 
+		/**
+		 * This method should take precedence.
+		 */
 		@Executing
 		public void m001() {
 

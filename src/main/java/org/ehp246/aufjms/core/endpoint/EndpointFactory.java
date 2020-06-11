@@ -38,8 +38,8 @@ public class EndpointFactory {
 		};
 	}
 
-	private DefaultMsgTypeActionResolver newActionRegistry(Set<String> scanPackages) {
-		final var actionRegistry = new DefaultMsgTypeActionResolver();
+	private DefaultInstanceTypeResolver newActionRegistry(Set<String> scanPackages) {
+		final var actionRegistry = new DefaultInstanceTypeResolver();
 		new ForMsgScanner(scanPackages).perform().stream().forEach(actionRegistry::register);
 		return actionRegistry;
 	}
