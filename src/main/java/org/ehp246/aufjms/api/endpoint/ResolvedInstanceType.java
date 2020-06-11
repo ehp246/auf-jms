@@ -7,12 +7,10 @@ import java.lang.reflect.Method;
  * @author Lei Yang
  *
  */
-public interface ResolvedTypeAction {
-	String getType();
+public interface ResolvedInstanceType {
+	Class<?> getInstanceType();
 
-	Class<?> getActionClass();
-
-	Method getPerformMethod();
+	Method getMethod();
 
 	InstanceScope getScope();
 	

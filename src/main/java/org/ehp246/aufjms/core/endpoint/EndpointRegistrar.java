@@ -32,7 +32,7 @@ public class EndpointRegistrar implements ImportBeanDefinitionRegistrar {
 
 		Stream.of((Object[]) enablerAttributes.get("value")).map(attribute -> ((Map<String, Object>) attribute))
 				.forEach(endpoint -> {
-					final var beanDefinition = getBeanDefination(endpoint);
+					final var beanDefinition = getBeanDefinition(endpoint);
 
 					Set<String> scanThese = null;
 					final var base = (Class<?>[]) endpoint.get("scanBasePackageClasses");
@@ -51,7 +51,7 @@ public class EndpointRegistrar implements ImportBeanDefinitionRegistrar {
 				});
 	}
 
-	private GenericBeanDefinition getBeanDefination(Map<String, Object> annotationAttributes) {
+	private GenericBeanDefinition getBeanDefinition(Map<String, Object> annotationAttributes) {
 		final var beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(MsgEndpoint.class);
 		beanDefinition.setFactoryBeanName(EndpointFactory.class.getName());

@@ -1,20 +1,23 @@
 package org.ehp246.demo.case002.calc;
 
 import org.ehp246.aufjms.annotation.ForMsg;
+import org.ehp246.aufjms.annotation.Executing;
 
 @ForMsg
 public class Calc {
 	private int mem = 0;
-	
-	void mem(int i) {
+
+	public void mem(int i) {
 		mem = i;
 	}
-	
-	int add(int i, int j) {
+
+	@Executing
+	public int add(int i, int j) {
 		return i + j;
 	}
-	
-	int addMem(int i) {
+
+	@Executing
+	public int addMem(int i) {
 		return mem + i;
 	}
 }

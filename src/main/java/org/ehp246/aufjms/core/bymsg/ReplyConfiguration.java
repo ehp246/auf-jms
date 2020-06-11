@@ -3,7 +3,7 @@ package org.ehp246.aufjms.core.bymsg;
 import java.util.List;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
-import org.ehp246.aufjms.api.endpoint.ActionInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.ReplyDestinationSupplier;
@@ -23,7 +23,7 @@ public class ReplyConfiguration {
 			final @Qualifier(ReplyToConfiguration.BEAN_NAME_CORRELATION_MAP) Cache<String, ResolvedInstance> correlMap,
 			final ActionExecutor actionExecutor) {
 		return new MsgEndpoint() {
-			final ActionInstanceResolver resolver = msg -> List.of(correlMap.getIfPresent(msg.getCorrelationId()));
+			final ExecutingInstanceResolver resolver = msg -> List.of(correlMap.getIfPresent(msg.getCorrelationId()));
 
 			@Override
 			public String getDestinationName() {
@@ -32,7 +32,7 @@ public class ReplyConfiguration {
 			}
 
 			@Override
-			public ActionInstanceResolver getResolver() {
+			public ExecutingInstanceResolver getResolver() {
 				return resolver;
 			}
 

@@ -15,20 +15,20 @@ public class ReflectingType<T> {
 	}
 
 	/**
-	 * Finds the named method that does not have any parameter. 
-	 * Returns null if not found.
+	 * Returns the named method that does not have any parameter. Returns null if
+	 * not found.
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public Method findMethod(String name) {
 		try {
-			return type.getMethod(name, (Class<?>[])null);
+			return type.getMethod(name, (Class<?>[]) null);
 		} catch (Exception e) {
 			return null;
 		}
 	}
-	
+
 	public Method findMethod(String name, Class<?>... parameters) {
 		try {
 			return type.getMethod(name, parameters);
@@ -37,17 +37,28 @@ public class ReflectingType<T> {
 		}
 	}
 
-	
+	/**
+	 * Returns all methods that have the given name.
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public List<Method> findMethods(String name) {
 		return Stream.of(type.getMethods()).filter(method -> method.getName().equals(name))
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Returns all methods that have the given annotation.
+	 * 
+	 * @param annotationClass
+	 * @return
+	 */
 	public List<Method> findMethods(Class<? extends Annotation> annotationClass) {
 		return Stream.of(type.getMethods()).filter(method -> method.getDeclaredAnnotation(annotationClass) != null)
 				.collect(Collectors.toList());
 	}
-	
+
 	public Class<T> getType() {
 		return type;
 	}

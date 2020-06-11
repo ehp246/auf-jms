@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.ehp246.aufjms.api.endpoint.ActionInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.endpoint.TypeActionResolver;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
@@ -19,34 +19,34 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @author Lei Yang
  *
  */
-public class AutowireCapableTypeActionResolver implements ActionInstanceResolver {
+public class AutowireCapableInstanceResolver implements ExecutingInstanceResolver {
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-	private final TypeActionResolver actionResolver;
+	private final ExecutingTypeResolver typeResolver;
 
-	public AutowireCapableTypeActionResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-			final TypeActionResolver resolver) {
+	public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+			final ExecutingTypeResolver resolver) {
 		super();
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-		this.actionResolver = resolver;
+		this.typeResolver = resolver;
 	}
 
 	@Override
 	public List<ResolvedInstance> resolve(final Msg msg) {
 		Objects.requireNonNull(msg);
 
-		final var registered = this.actionResolver.resolve(msg.getType());
+		final var registered = this.typeResolver.resolve(msg);
 		if (registered == null || registered.size() == 0) {
 			return List.of();
 		}
 
 		return registered.stream().map(one -> new ResolvedInstance() {
 			final Object actionInstance = one.getScope().equals(InstanceScope.BEAN)
-					? autowireCapableBeanFactory.getBean(one.getActionClass())
-					: autowireCapableBeanFactory.createBean(one.getActionClass());
+					? autowireCapableBeanFactory.getBean(one.getInstanceType())
+					: autowireCapableBeanFactory.createBean(one.getInstanceType());
 
 			@Override
 			public Method getMethod() {
-				return one.getPerformMethod();
+				return one.getMethod();
 			}
 
 			@Override

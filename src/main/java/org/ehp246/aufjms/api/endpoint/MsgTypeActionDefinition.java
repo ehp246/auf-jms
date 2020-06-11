@@ -10,12 +10,12 @@ import java.util.Set;
  * @author Lei Yang
  *
  */
-public interface TypeActionDefinition {
-	Set<String> getType();
+public interface MsgTypeActionDefinition {
+	Set<String> getMsgType();
 
-	Class<?> getActionClass();
+	Class<?> getInstanceType();
 
-	Map<String, Method> getPerformMethods();
+	Map<String, Method> getMethods();
 
 	InstanceScope getScope();
 

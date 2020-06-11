@@ -10,6 +10,6 @@ import org.ehp246.aufjms.api.jms.Msg;
  *
  */
 @FunctionalInterface
-public interface ActionInstanceResolver {
+public interface ExecutingInstanceResolver {
 	List<ResolvedInstance> resolve(Msg msg);
 }

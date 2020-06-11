@@ -2,7 +2,7 @@ package org.ehp246.demo.case002;
 
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.demo.case001.Calc;
+import org.ehp246.demo.case002.calc.Calc;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,6 @@ public class DemoApplicationTest {
 		final var resolved = appCtx.getBean(MsgEndpoint.class).getResolver().resolve(msg);
 
 		Assertions.assertEquals(1, resolved.size());
-		Assertions.assertEquals(Calc.class, resolved.get(0));
-
+		Assertions.assertEquals(Calc.class, resolved.get(0).getInstance().getClass());
 	}
 }

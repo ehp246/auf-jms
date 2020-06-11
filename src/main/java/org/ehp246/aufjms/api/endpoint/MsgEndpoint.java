@@ -8,5 +8,5 @@ package org.ehp246.aufjms.api.endpoint;
 public interface MsgEndpoint {
 	String getDestinationName();
 
-	ActionInstanceResolver getResolver();
+	ExecutingInstanceResolver getResolver();
 }

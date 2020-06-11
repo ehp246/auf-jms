@@ -8,7 +8,7 @@ import org.ehp246.aufjms.api.jms.Msg;
  *
  */
 public interface ActionRegistration {
-	ResolvedTypeAction match(Msg msg);
+	ResolvedInstanceType match(Msg msg);
 	
 	default InstanceScope getScope() {
 		return InstanceScope.MESSAGE;
