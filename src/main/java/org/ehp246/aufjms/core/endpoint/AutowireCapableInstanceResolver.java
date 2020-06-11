@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutionModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -52,6 +53,11 @@ public class AutowireCapableInstanceResolver implements ExecutingInstanceResolve
 			@Override
 			public Object getInstance() {
 				return actionInstance;
+			}
+
+			@Override
+			public ExecutionModel getExecutionModel() {
+				return one.getExecutionModel();
 			}
 		}).collect(Collectors.toList());
 

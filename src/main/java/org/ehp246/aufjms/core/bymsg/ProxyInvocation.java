@@ -140,5 +140,4 @@ class ProxyInvocation implements MsgSupplier, ResolvedInstance {
 	public Method getMethod() {
 		return ONREPLY;
 	}
-
 }

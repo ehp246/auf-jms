@@ -11,7 +11,7 @@ public interface ResolvedInstance {
 	Object getInstance();
 
 	Method getMethod();
-	
+
 	default ExecutionModel getExecutionModel() {
 		return ExecutionModel.DEFAULT;
 	}

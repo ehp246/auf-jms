@@ -6,8 +6,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
-
 /**
  * 
  * @author Lei Yang
@@ -17,6 +15,4 @@ import org.ehp246.aufjms.api.endpoint.ExecutionModel;
 @Target({ METHOD })
 public @interface Executing {
 	String[] value() default {};
-
-	ExecutionModel execution() default ExecutionModel.DEFAULT;
 }

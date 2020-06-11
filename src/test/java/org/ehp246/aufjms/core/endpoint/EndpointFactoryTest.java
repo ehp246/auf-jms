@@ -10,6 +10,7 @@ import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.endpoint.case001.Cases;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case001;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case002;
+import org.ehp246.aufjms.core.endpoint.case001.Cases.Case003;
 import org.ehp246.aufjms.core.endpoint.error001.Error001;
 import org.ehp246.aufjms.core.endpoint.error002.Error002;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
@@ -86,5 +87,23 @@ public class EndpointFactoryTest {
 		Assertions.assertEquals(Case002.class, resolvedInstance.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case002.class).findMethod("m001"), resolvedInstance.getMethod());
 		Assertions.assertEquals(ExecutionModel.DEFAULT, resolvedInstance.getExecutionModel());
+	}
+
+	@Test
+	public void resolverAnnotatedMethod004() {
+		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+
+		final var msg = Mockito.mock(Msg.class);
+		Mockito.when(msg.getType()).thenReturn(Case003.class.getSimpleName());
+
+		final var resolved = resolver.resolve(msg);
+
+		Assertions.assertEquals(1, resolved.size());
+
+		final var resolvedInstance = resolved.get(0);
+
+		Assertions.assertEquals(Case003.class, resolvedInstance.getInstance().getClass());
+		Assertions.assertEquals(new ReflectingType<>(Case003.class).findMethod("m001"), resolvedInstance.getMethod());
+		Assertions.assertEquals(ExecutionModel.SYNC, resolvedInstance.getExecutionModel());
 	}
 }
