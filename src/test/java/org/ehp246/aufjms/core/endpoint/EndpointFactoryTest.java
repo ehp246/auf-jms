@@ -14,6 +14,8 @@ import org.ehp246.aufjms.core.endpoint.case001.Cases.Case003;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case004;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case005;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case006;
+import org.ehp246.aufjms.core.endpoint.case007.DuplicateType007;
+import org.ehp246.aufjms.core.endpoint.case008.MultiType008;
 import org.ehp246.aufjms.core.endpoint.error001.Error001;
 import org.ehp246.aufjms.core.endpoint.error002.Error002;
 import org.ehp246.aufjms.core.endpoint.error003.Error003;
@@ -37,6 +39,18 @@ public class EndpointFactoryTest {
 	private final AnnotationConfigApplicationContext appCtx = new AnnotationConfigApplicationContext(
 			EndpointFactory.class, Case004.class, Case005.class);
 	private final EndpointFactory factory = appCtx.getBean(EndpointFactory.class);
+
+	@Test
+	public void destination001() {
+		Assertions.assertEquals(null,
+				factory.newEndpoint(null, Set.of(Case001.class.getPackageName())).getDestinationName());
+
+		Assertions.assertEquals("",
+				factory.newEndpoint("", Set.of(Case001.class.getPackageName())).getDestinationName());
+
+		Assertions.assertEquals("1",
+				factory.newEndpoint("1", Set.of(Case001.class.getPackageName())).getDestinationName());
+	}
 
 	@Test
 	public void resolverConflicts001() {
@@ -173,10 +187,54 @@ public class EndpointFactoryTest {
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case006.class.getSimpleName());
 
-		final var e = Assertions.assertThrows(Exception.class, () -> {
-			resolver.resolve(msg);
-		}, "Should allow registration but not resolution");
+		final var e = Assertions.assertThrows(Exception.class, () -> resolver.resolve(msg),
+				"Should allow registration but not resolution");
 
 		LOGGER.info(e.getMessage());
+	}
+
+	@Test
+	public void resolverDuplicateType007() {
+		final var e = Assertions.assertThrows(RuntimeException.class,
+				() -> factory.newEndpoint("", Set.of(DuplicateType007.class.getPackageName())).getResolver());
+
+		LOGGER.info(e.getMessage());
+	}
+
+	@Test
+	public void resolverMultiType008() {
+		final var resolver = factory.newEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
+
+		final var msg = Mockito.mock(Msg.class);
+		Mockito.when(msg.getType()).thenReturn("");
+
+		final var resolved = resolver.resolve(msg);
+
+		Assertions.assertEquals(0, resolved.size(), "Should not match empty string");
+
+		Mockito.when(msg.getType()).thenReturn(" ");
+
+		Assertions.assertEquals(0, resolver.resolve(msg).size(), "Should not match blank string");
+
+		Mockito.when(msg.getType()).thenReturn("MultiType008");
+
+		Assertions.assertEquals(0, resolver.resolve(msg).size(), "Should not match default type");
+	}
+
+	@Test
+	public void resolverMultiType009() {
+		final var resolver = factory.newEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
+
+		final var msg = Mockito.mock(Msg.class);
+		Mockito.when(msg.getType()).thenReturn("MultiType008-v1");
+
+		final var resolved = resolver.resolve(msg);
+
+		Assertions.assertEquals(new ReflectingType<>(MultiType008.class).findMethod("m002"),
+				resolved.get(0).getMethod(), "Should match to m002");
+
+		Mockito.when(msg.getType()).thenReturn("MultiType008-v2");
+
+		Assertions.assertEquals(1, resolver.resolve(msg).size(), "Should match");
 	}
 }

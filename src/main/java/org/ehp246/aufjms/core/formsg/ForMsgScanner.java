@@ -74,24 +74,24 @@ public class ForMsgScanner {
 		final var reflected = new ReflectingType<>(instanceType);
 
 		// Search for the annotation first
-		reflected.findMethods(Executing.class).stream().forEach(method -> {
-			final String[] matchTypes = method.getAnnotation(Executing.class).value();
-			if (matchTypes.length == 0) {
+		for (Method method : reflected.findMethods(Executing.class)) {
+			final var matchTypes = new HashSet<>(Arrays.asList(method.getAnnotation(Executing.class).value()));
+			if (matchTypes.size() == 0) {
 				if (exes.containsKey(instanceType.getSimpleName())) {
 					throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 				}
 				exes.put(instanceType.getSimpleName(), method);
 			} else {
 				final var intersect = new HashSet<String>(exes.keySet());
-				intersect.retainAll(Set.of(matchTypes));
+				intersect.retainAll(matchTypes);
 				if (intersect.size() > 0) {
 					throw new RuntimeException(
 							"Duplicate types '" + intersect.toString() + "' found on " + instanceType.getName());
 				} else {
-					Arrays.stream(matchTypes).forEach(type -> exes.put(type, method));
+					matchTypes.stream().forEach(type -> exes.put(type, method));
 				}
 			}
-		});
+		}
 
 		// No annotated methods found. Fall back to name convention
 		if (exes.size() == 0) {
@@ -106,16 +106,19 @@ public class ForMsgScanner {
 
 		// There should be at least one Perform.
 		if (exes.size() == 0) {
-			throw new RuntimeException("No executing defined by " + instanceType.getName());
+			throw new RuntimeException("No executing method defined by " + instanceType.getName());
 		}
 
-		// Types from annotation or simple class name.
-		final var msgTypes = Set.of(
-				annotation.value().length == 0 ? new String[] { instanceType.getSimpleName() } : annotation.value());
+		// Annotation value takes precedence.Falls back to class name if no value is
+		// specified.
+		final var msgTypes = annotation.value().length == 0 ? Set.of(new String[] { instanceType.getSimpleName() })
+				: Set.copyOf(trimMsgTypes(annotation.value()));
 
 		if (msgTypes.size() == 0) {
 			throw new RuntimeException("No type defined by " + instanceType.getName());
 		}
+
+		LOGGER.debug("Scanned {} on {}", msgTypes, instanceType.getCanonicalName());
 
 		return new MsgTypeActionDefinition() {
 			private final Map<String, Method> methods = Map.copyOf(exes);
@@ -146,5 +149,13 @@ public class ForMsgScanner {
 			}
 		};
 
+	}
+
+	private static Set<String> trimMsgTypes(String[] types) {
+		if (types == null || types.length == 0) {
+			return new HashSet<>();
+		}
+
+		return Arrays.stream(types).map(String::trim).filter(type -> type.length() > 0).collect(Collectors.toSet());
 	}
 }

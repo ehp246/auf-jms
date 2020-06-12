@@ -23,7 +23,7 @@ import org.ehp246.aufjms.api.jms.Msg;
  * @author Lei Yang
  *
  */
-public class DefaultInstanceTypeResolver implements MsgTypeActionRegistry, ExecutingTypeResolver {
+public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, ExecutingTypeResolver {
 	private final Map<String, List<MsgTypeActionDefinition>> registeredActions = new ConcurrentHashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new ConcurrentHashMap<>();
 
@@ -46,7 +46,7 @@ public class DefaultInstanceTypeResolver implements MsgTypeActionRegistry, Execu
 	public List<ResolvedInstanceType> resolve(final Msg msg) {
 		final var msgType = Objects.requireNonNull(Objects.requireNonNull(msg).getType());
 
-		return this.registeredActions.keySet().stream().filter(msgType::matches).map(this.registeredActions::get)
+		return this.registeredActions.keySet().stream().filter(msgType::startsWith).map(this.registeredActions::get)
 				.flatMap(List::stream).map(definition -> new ResolvedInstanceType() {
 					private final Class<?> instanceType = definition.getInstanceType();
 					private final Method method = registereMethods.get(instanceType).get(msgType);
