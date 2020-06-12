@@ -22,7 +22,7 @@ public @interface ForMsg {
 	 * 
 	 * @return
 	 */
-	String[] value() default {};
+	String value() default "";
 
 	/**
 	 * Invocation instance resolution instruction.

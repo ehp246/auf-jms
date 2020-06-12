@@ -2,7 +2,6 @@ package org.ehp246.aufjms.api.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Abstraction of a message action by type to be registered in the registry.
@@ -11,7 +10,7 @@ import java.util.Set;
  *
  */
 public interface MsgTypeActionDefinition {
-	Set<String> getMsgType();
+	String getMsgType();
 
 	Class<?> getInstanceType();
 

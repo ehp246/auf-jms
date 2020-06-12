@@ -1,11 +1,11 @@
 package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
@@ -15,6 +15,8 @@ import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionRegistry;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
 import org.ehp246.aufjms.api.jms.Msg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -24,53 +26,64 @@ import org.ehp246.aufjms.api.jms.Msg;
  *
  */
 public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, ExecutingTypeResolver {
-	private final Map<String, List<MsgTypeActionDefinition>> registeredActions = new ConcurrentHashMap<>();
-	private final Map<Class<?>, Map<String, Method>> registereMethods = new ConcurrentHashMap<>();
+	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutingTypeResolver.class);
+
+	private final Map<String, MsgTypeActionDefinition> registeredActions = new HashMap<>();
+	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
 
 	@Override
 	public void register(final MsgTypeActionDefinition actionDefinition) {
-		actionDefinition.getMsgType().stream()
-				.forEach(type -> registeredActions
-						.computeIfAbsent(type, (key) -> new CopyOnWriteArrayList<MsgTypeActionDefinition>())
-						.add(actionDefinition));
+		registeredActions.put(actionDefinition.getMsgType(), actionDefinition);
 
 		registereMethods.put(actionDefinition.getInstanceType(), actionDefinition.getMethods());
 	}
 
 	@Override
 	public List<MsgTypeActionDefinition> getRegistered() {
-		return this.registeredActions.values().stream().flatMap(List::stream).collect(Collectors.toList());
+		return this.registeredActions.values().stream().collect(Collectors.toList());
 	}
 
 	@Override
-	public List<ResolvedInstanceType> resolve(final Msg msg) {
-		final var msgType = Objects.requireNonNull(Objects.requireNonNull(msg).getType());
+	public ResolvedInstanceType resolve(final Msg msg) {
+		final var msgType = Objects.requireNonNull(Objects.requireNonNull(msg).getType()).strip();
 
-		return this.registeredActions.keySet().stream().filter(msgType::startsWith).map(this.registeredActions::get)
-				.flatMap(List::stream).map(definition -> new ResolvedInstanceType() {
-					private final Class<?> instanceType = definition.getInstanceType();
-					private final Method method = registereMethods.get(instanceType).get(msgType);
+		final var definition = registeredActions.get(msgType);
+		if (definition == null) {
+			LOGGER.debug("Type {} not found", msgType);
+			return null;
+		}
 
-					@Override
-					public Method getMethod() {
-						return method;
-					}
+		final var executing = Optional.ofNullable(msg.getExecuting()).map(String::strip).orElse("");
 
-					@Override
-					public Class<?> getInstanceType() {
-						return instanceType;
-					}
+		final var method = registereMethods.get(definition.getInstanceType()).get(executing);
 
-					@Override
-					public InstanceScope getScope() {
-						return definition.getScope();
-					}
+		if (method == null) {
+			LOGGER.debug("Method {} not found", executing);
+			return null;
+		}
 
-					@Override
-					public ExecutionModel getExecutionModel() {
-						return definition.getExecutionModel();
-					}
-				}).collect(Collectors.toList());
+		return new ResolvedInstanceType() {
+
+			@Override
+			public Method getMethod() {
+				return method;
+			}
+
+			@Override
+			public Class<?> getInstanceType() {
+				return definition.getInstanceType();
+			}
+
+			@Override
+			public InstanceScope getScope() {
+				return definition.getScope();
+			}
+
+			@Override
+			public ExecutionModel getExecutionModel() {
+				return definition.getExecutionModel();
+			}
+		};
 	}
 
 }

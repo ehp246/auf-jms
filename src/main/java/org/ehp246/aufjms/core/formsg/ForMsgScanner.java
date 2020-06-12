@@ -2,11 +2,10 @@ package org.ehp246.aufjms.core.formsg;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,7 +48,7 @@ public class ForMsgScanner {
 
 		return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
 			try {
-				LOGGER.debug("Registering {}", bean.getBeanClassName());
+				LOGGER.debug("Scanning {}", bean.getBeanClassName());
 
 				return Class.forName(bean.getBeanClassName());
 			} catch (ClassNotFoundException e) {
@@ -70,62 +69,48 @@ public class ForMsgScanner {
 			throw new RuntimeException("Un-instantiable type " + instanceType.getName());
 		}
 
-		final var exes = new HashMap<String, Method>();
+		final var executings = new HashMap<String, Method>();
 		final var reflected = new ReflectingType<>(instanceType);
 
 		// Search for the annotation first
 		for (Method method : reflected.findMethods(Executing.class)) {
-			final var matchTypes = new HashSet<>(Arrays.asList(method.getAnnotation(Executing.class).value()));
-			if (matchTypes.size() == 0) {
-				if (exes.containsKey(instanceType.getSimpleName())) {
-					throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
-				}
-				exes.put(instanceType.getSimpleName(), method);
-			} else {
-				final var intersect = new HashSet<String>(exes.keySet());
-				intersect.retainAll(matchTypes);
-				if (intersect.size() > 0) {
-					throw new RuntimeException(
-							"Duplicate types '" + intersect.toString() + "' found on " + instanceType.getName());
-				} else {
-					matchTypes.stream().forEach(type -> exes.put(type, method));
-				}
+			final var executing = Optional.of(method.getAnnotation(Executing.class).value().strip())
+					.filter(name -> name.length() > 0).orElse("");
+			if (executings.containsKey(executing)) {
+				throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 			}
+			executings.put(executing, method);
 		}
 
 		// No annotated methods found. Fall back to name convention
-		if (exes.size() == 0) {
+		if (executings.size() == 0) {
 			final var found = reflected.findMethods("execute");
 			if (found.size() > 1) {
 				throw new RuntimeException("Duplicate by-convention methods found on " + instanceType.getName());
 			}
 			if (found.size() == 1) {
-				exes.put(instanceType.getSimpleName(), found.get(0));
+				executings.put("", found.get(0));
 			}
 		}
 
-		// There should be at least one Perform.
-		if (exes.size() == 0) {
+		// There should be at least one executing method.
+		if (executings.size() == 0) {
 			throw new RuntimeException("No executing method defined by " + instanceType.getName());
 		}
 
 		// Annotation value takes precedence.Falls back to class name if no value is
 		// specified.
-		final var msgTypes = annotation.value().length == 0 ? Set.of(new String[] { instanceType.getSimpleName() })
-				: Set.copyOf(trimMsgTypes(annotation.value()));
+		final var msgType = annotation.value().strip().length() == 0 ? instanceType.getSimpleName()
+				: annotation.value();
 
-		if (msgTypes.size() == 0) {
-			throw new RuntimeException("No type defined by " + instanceType.getName());
-		}
-
-		LOGGER.debug("Scanned {} on {}", msgTypes, instanceType.getCanonicalName());
+		LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
 		return new MsgTypeActionDefinition() {
-			private final Map<String, Method> methods = Map.copyOf(exes);
+			private final Map<String, Method> methods = Map.copyOf(executings);
 
 			@Override
-			public Set<String> getMsgType() {
-				return msgTypes;
+			public String getMsgType() {
+				return msgType;
 			}
 
 			@Override
@@ -149,13 +134,5 @@ public class ForMsgScanner {
 			}
 		};
 
-	}
-
-	private static Set<String> trimMsgTypes(String[] types) {
-		if (types == null || types.length == 0) {
-			return new HashSet<>();
-		}
-
-		return Arrays.stream(types).map(String::trim).filter(type -> type.length() > 0).collect(Collectors.toSet());
 	}
 }

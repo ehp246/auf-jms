@@ -51,4 +51,8 @@ public interface Msg {
 			throw new RuntimeException(e);
 		}
 	}
+
+	default String getExecuting() {
+		return null;
+	}
 }

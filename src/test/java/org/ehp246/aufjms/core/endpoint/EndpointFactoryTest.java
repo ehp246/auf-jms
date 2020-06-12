@@ -86,11 +86,7 @@ public class EndpointFactoryTest {
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case001.class.getSimpleName());
 
-		final var resolved = resolver.resolve(msg);
-
-		Assertions.assertEquals(1, resolved.size());
-
-		final var resolvedInstance = resolved.get(0);
+		final var resolvedInstance = resolver.resolve(msg);
 
 		Assertions.assertEquals(Case001.class, resolvedInstance.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case001.class).findMethod("execute"),
@@ -99,7 +95,7 @@ public class EndpointFactoryTest {
 
 		final var resolved2 = resolver.resolve(msg);
 
-		Assertions.assertNotEquals(resolved.get(0).getInstance(), resolved2.get(0).getInstance(),
+		Assertions.assertNotEquals(resolvedInstance.getInstance(), resolved2.getInstance(),
 				"Should be a new object for each resolution");
 	}
 
@@ -112,13 +108,9 @@ public class EndpointFactoryTest {
 
 		final var resolved = resolver.resolve(msg);
 
-		Assertions.assertEquals(1, resolved.size());
-
-		final var resolvedInstance = resolved.get(0);
-
-		Assertions.assertEquals(Case002.class, resolvedInstance.getInstance().getClass());
-		Assertions.assertEquals(new ReflectingType<>(Case002.class).findMethod("m001"), resolvedInstance.getMethod());
-		Assertions.assertEquals(ExecutionModel.DEFAULT, resolvedInstance.getExecutionModel());
+		Assertions.assertEquals(Case002.class, resolved.getInstance().getClass());
+		Assertions.assertEquals(new ReflectingType<>(Case002.class).findMethod("m001"), resolved.getMethod());
+		Assertions.assertEquals(ExecutionModel.DEFAULT, resolved.getExecutionModel());
 	}
 
 	@Test
@@ -130,13 +122,9 @@ public class EndpointFactoryTest {
 
 		final var resolved = resolver.resolve(msg);
 
-		Assertions.assertEquals(1, resolved.size());
-
-		final var resolvedInstance = resolved.get(0);
-
-		Assertions.assertEquals(Case003.class, resolvedInstance.getInstance().getClass());
-		Assertions.assertEquals(new ReflectingType<>(Case003.class).findMethod("m001"), resolvedInstance.getMethod());
-		Assertions.assertEquals(ExecutionModel.SYNC, resolvedInstance.getExecutionModel());
+		Assertions.assertEquals(Case003.class, resolved.getInstance().getClass());
+		Assertions.assertEquals(new ReflectingType<>(Case003.class).findMethod("m001"), resolved.getMethod());
+		Assertions.assertEquals(ExecutionModel.SYNC, resolved.getExecutionModel());
 	}
 
 	@Test
@@ -148,16 +136,11 @@ public class EndpointFactoryTest {
 
 		final var resolved = resolver.resolve(msg);
 
-		Assertions.assertEquals(1, resolved.size());
+		Assertions.assertEquals(Case004.class, resolved.getInstance().getClass());
 
-		final var resolvedInstance = resolved.get(0);
+		Assertions.assertEquals(true, appCtx.getBean(Case004.class) == resolved.getInstance(), "Should be the bean");
 
-		Assertions.assertEquals(Case004.class, resolvedInstance.getInstance().getClass());
-
-		Assertions.assertEquals(true, appCtx.getBean(Case004.class) == resolvedInstance.getInstance(),
-				"Should be the bean");
-
-		Assertions.assertEquals(true, appCtx.getBean(Case004.class) == resolver.resolve(msg).get(0).getInstance(),
+		Assertions.assertEquals(true, appCtx.getBean(Case004.class) == resolver.resolve(msg).getInstance(),
 				"Should be the bean again");
 	}
 
@@ -170,13 +153,9 @@ public class EndpointFactoryTest {
 
 		final var resolved = resolver.resolve(msg);
 
-		Assertions.assertEquals(1, resolved.size());
+		Assertions.assertEquals(Case005.class, resolved.getInstance().getClass());
 
-		final var resolvedInstance = resolved.get(0);
-
-		Assertions.assertEquals(Case005.class, resolvedInstance.getInstance().getClass());
-
-		Assertions.assertEquals(false, appCtx.getBean(Case005.class) == resolvedInstance.getInstance(),
+		Assertions.assertEquals(false, appCtx.getBean(Case005.class) == resolved.getInstance(),
 				"Should not be the bean");
 	}
 
@@ -210,15 +189,15 @@ public class EndpointFactoryTest {
 
 		final var resolved = resolver.resolve(msg);
 
-		Assertions.assertEquals(0, resolved.size(), "Should not match empty string");
+		Assertions.assertEquals(null, resolved, "Should not match empty string");
 
 		Mockito.when(msg.getType()).thenReturn(" ");
 
-		Assertions.assertEquals(0, resolver.resolve(msg).size(), "Should not match blank string");
+		Assertions.assertEquals(null, resolver.resolve(msg), "Should not match blank string");
 
 		Mockito.when(msg.getType()).thenReturn("MultiType008");
 
-		Assertions.assertEquals(0, resolver.resolve(msg).size(), "Should not match default type");
+		Assertions.assertEquals(null, resolver.resolve(msg), "Should not match default type");
 	}
 
 	@Test
@@ -226,15 +205,23 @@ public class EndpointFactoryTest {
 		final var resolver = factory.newEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
+
+		Mockito.when(msg.getType()).thenReturn("MultiType008");
+		Assertions.assertEquals(null, resolver.resolve(msg), "Should not match to the default");
+
 		Mockito.when(msg.getType()).thenReturn("MultiType008-v1");
 
-		final var resolved = resolver.resolve(msg);
-
 		Assertions.assertEquals(new ReflectingType<>(MultiType008.class).findMethod("m002"),
-				resolved.get(0).getMethod(), "Should match to m002");
+				resolver.resolve(msg).getMethod(), "Should match to m002");
 
-		Mockito.when(msg.getType()).thenReturn("MultiType008-v2");
+		Mockito.when(msg.getExecuting()).thenReturn("m001");
 
-		Assertions.assertEquals(1, resolver.resolve(msg).size(), "Should match");
+		Assertions.assertEquals(new ReflectingType<>(MultiType008.class).findMethod("m001"),
+				resolver.resolve(msg).getMethod(), "Should match to m001");
+		Mockito.when(msg.getExecuting()).thenReturn("m001");
+
+		Mockito.when(msg.getExecuting()).thenReturn("m002");
+
+		Assertions.assertEquals(null, resolver.resolve(msg), "Should not match");
 	}
 }

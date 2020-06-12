@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
-import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutableInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -39,10 +39,10 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 	@Override
 	public void dispatch(final Msg msg) {
-		final List<ResolvedInstance> actions;
+		final ResolvedInstance instance;
 		try {
-			actions = this.actionResolver.resolve(msg);
-			if (actions == null || actions.size() == 0) {
+			instance = this.actionResolver.resolve(msg);
+			if (instance == null) {
 				LOGGER.info("Un-matched message type: {}", msg.getType());
 
 				return;
@@ -53,7 +53,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			return;
 		}
 
-		actions.stream().forEach(instance -> this.actionExecutor.submit(new ExecutableInstance() {
+		this.actionExecutor.submit(new ExecutableInstance() {
 
 			@Override
 			public Msg getMsg() {
@@ -69,7 +69,6 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			public List<Consumer<ExecutedInstance>> postPerforms() {
 				return postPerforms;
 			}
-
-		}));
-	}
+		});
+	};
 }

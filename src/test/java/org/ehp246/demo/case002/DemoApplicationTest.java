@@ -35,7 +35,7 @@ public class DemoApplicationTest {
 
 		final var resolved = appCtx.getBean(MsgEndpoint.class).getResolver().resolve(msg);
 
-		Assertions.assertEquals(1, resolved.size());
-		Assertions.assertEquals(Calc.class, resolved.get(0).getInstance().getClass());
+		Assertions.assertEquals(true, resolved != null);
+		Assertions.assertEquals(Calc.class, resolved.getInstance().getClass());
 	}
 }

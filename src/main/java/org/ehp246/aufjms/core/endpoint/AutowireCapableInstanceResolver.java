@@ -1,9 +1,7 @@
 package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
@@ -32,22 +30,23 @@ public class AutowireCapableInstanceResolver implements ExecutingInstanceResolve
 	}
 
 	@Override
-	public List<ResolvedInstance> resolve(final Msg msg) {
+	public ResolvedInstance resolve(final Msg msg) {
 		Objects.requireNonNull(msg);
 
 		final var registered = this.typeResolver.resolve(msg);
-		if (registered == null || registered.size() == 0) {
-			return List.of();
+		if (registered == null) {
+			return null;
 		}
 
-		return registered.stream().map(one -> new ResolvedInstance() {
-			final Object actionInstance = one.getScope().equals(InstanceScope.BEAN)
-					? autowireCapableBeanFactory.getBean(one.getInstanceType())
-					: autowireCapableBeanFactory.createBean(one.getInstanceType());
+		final Object actionInstance = registered.getScope().equals(InstanceScope.BEAN)
+				? autowireCapableBeanFactory.getBean(registered.getInstanceType())
+				: autowireCapableBeanFactory.createBean(registered.getInstanceType());
+
+		return new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
-				return one.getMethod();
+				return registered.getMethod();
 			}
 
 			@Override
@@ -57,9 +56,9 @@ public class AutowireCapableInstanceResolver implements ExecutingInstanceResolve
 
 			@Override
 			public ExecutionModel getExecutionModel() {
-				return one.getExecutionModel();
+				return registered.getExecutionModel();
 			}
-		}).collect(Collectors.toList());
+		};
 
 	}
 }

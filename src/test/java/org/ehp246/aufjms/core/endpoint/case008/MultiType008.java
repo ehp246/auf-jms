@@ -13,7 +13,7 @@ import org.ehp246.aufjms.annotation.ForMsg;
  * @author Lei Yang
  *
  */
-@ForMsg({ "", " ", "MultiType008-v1", "MultiType008-v2" })
+@ForMsg("MultiType008-v1")
 public class MultiType008 {
 	@Executing("m001")
 	public void m001() {

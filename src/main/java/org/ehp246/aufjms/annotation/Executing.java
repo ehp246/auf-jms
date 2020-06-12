@@ -14,5 +14,5 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({ METHOD })
 public @interface Executing {
-	String[] value() default { "*" };
+	String value() default "";
 }
