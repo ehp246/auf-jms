@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface MessageSupplier {
-	String getTo();
-
 	String getCorrelationId();
 
 	String getType();

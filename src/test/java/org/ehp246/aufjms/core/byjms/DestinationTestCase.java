@@ -9,6 +9,7 @@ public interface DestinationTestCase {
 		void m001();
 	}
 
+	@ByMsg
 	interface Case002 {
 		void m001();
 	}

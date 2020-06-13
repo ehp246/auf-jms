@@ -4,21 +4,21 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.aufjms.api.jms.MessagePipe;
 import org.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  * @author Lei Yang
  *
  */
-public class ReplyMsgAction implements Consumer<ExecutedInstance> {
-	private final MessagePipe pipe;
+public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
+	private final MessagePortProvider portBinder;
 
-	public ReplyMsgAction(final MessagePipe pipe) {
+	public ReplyExecutedAction(final MessagePortProvider portBinder) {
 		super();
-		this.pipe = pipe;
+		this.portBinder = portBinder;
 	}
 
 	@Override
@@ -28,18 +28,12 @@ public class ReplyMsgAction implements Consumer<ExecutedInstance> {
 			return;
 		}
 
-		pipe.take(new MessageSupplier() {
+		portBinder.get(msg::getReplyTo).accept(new MessageSupplier() {
 			private final InvocationOutcome<?> outcome = instance.getOutcome();
 
 			@Override
 			public String getType() {
 				return msg.getType();
-			}
-
-			@Override
-			public String getTo() {
-				// TODO
-				return null;// msg.getReplyTo();
 			}
 
 			@Override

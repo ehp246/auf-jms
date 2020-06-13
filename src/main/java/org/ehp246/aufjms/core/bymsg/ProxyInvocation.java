@@ -10,14 +10,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfTimeout;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
+import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,11 +118,6 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	@Override
 	public String getCorrelationId() {
 		return this.correlationId;
-	}
-
-	@Override
-	public String getTo() {
-		return invoked.findOnDeclaringClass(ByMsg.class).map(ByMsg::value).orElse("");
 	}
 
 	@Override

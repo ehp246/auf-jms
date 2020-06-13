@@ -6,10 +6,8 @@ import javax.jms.JMSException;
 
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessageBuilder;
-import org.ehp246.aufjms.api.jms.MessagePipe;
-import org.ehp246.aufjms.core.jms.JmsConnectionPipe;
+import org.ehp246.aufjms.core.jms.ConnectionPortProvider;
 import org.springframework.context.annotation.Bean;
-
 
 /**
  * Defines infrastructure bean's that are used by both front-end and back-end.
@@ -24,7 +22,8 @@ public class ConnectionConfiguration {
 	}
 
 	@Bean
-	public MessagePipe msgPipe(Connection connection, DestinationNameResolver toResolver, MessageBuilder msgBuilder) {
-		return new JmsConnectionPipe(connection, toResolver, msgBuilder);
+	public ConnectionPortProvider portProvider(Connection connection, DestinationNameResolver toResolver,
+			MessageBuilder msgBuilder) {
+		return new ConnectionPortProvider(connection, msgBuilder);
 	}
 }
