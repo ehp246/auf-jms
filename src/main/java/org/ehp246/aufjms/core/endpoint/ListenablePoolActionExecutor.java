@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
-import org.ehp246.aufjms.api.endpoint.ExecutableInstance;
+import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutionModel;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
@@ -32,7 +32,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ListenablePoolActionExecutor.class);
 	private static final String TRACE_ID = "Msg-Correlation-Id";
 
-	private final Set<ExecutableInstance> executionTask = ConcurrentHashMap.newKeySet();
+	private final Set<BoundInstance> executionTask = ConcurrentHashMap.newKeySet();
 
 	private final ActionInvocationBinder binder;
 	private final AsyncListenableTaskExecutor pool;
@@ -44,7 +44,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 	}
 
 	@Override
-	public CompletableFuture<ExecutedInstance> submit(final ExecutableInstance task) {
+	public CompletableFuture<ExecutedInstance> submit(final BoundInstance task) {
 
 		if (task.getResolvedInstance().getExecutionModel() == ExecutionModel.SYNC) {
 			try {
@@ -78,7 +78,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 		return future;
 	}
 
-	private ExecutedInstance execute(final ExecutableInstance task) {
+	private ExecutedInstance execute(final BoundInstance task) {
 		final var msg = task.getMsg();
 		final var resolved = task.getResolvedInstance();
 
@@ -109,9 +109,8 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 		};
 
-		Optional.ofNullable(task.postPerforms()).map(List::stream).orElseGet(Stream::empty).forEach(consumer -> {
-			consumer.accept(performed);
-		});
+		Optional.ofNullable(task.getResolvedInstance().postExecution()).map(List::stream).orElseGet(Stream::empty)
+				.forEach(consumer -> consumer.accept(performed));
 
 		return performed;
 	}

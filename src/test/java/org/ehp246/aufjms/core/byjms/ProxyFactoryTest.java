@@ -6,8 +6,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.MsgPipe;
-import org.ehp246.aufjms.api.jms.MsgSupplier;
+import org.ehp246.aufjms.api.jms.MessagePipe;
+import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.core.bymsg.ProxyFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,8 +18,8 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitPlatform.class)
 public class ProxyFactoryTest {
 	private final Map<String, ResolvedInstance> correlMap = new HashMap<>();
-	private final AtomicReference<MsgSupplier> ref = new AtomicReference<MsgSupplier>(null);
-	private final MsgPipe mqSink = supplier -> {
+	private final AtomicReference<MessageSupplier> ref = new AtomicReference<MessageSupplier>(null);
+	private final MessagePipe mqSink = supplier -> {
 		ref.set(supplier);
 		return null;
 	};

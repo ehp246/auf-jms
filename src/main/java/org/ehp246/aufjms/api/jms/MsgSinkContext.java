@@ -8,7 +8,7 @@ import javax.jms.Session;
  *
  */
 public interface MsgSinkContext {
-	MsgSupplier getMsgSupplier();
+	MessageSupplier getMsgSupplier();
 
 	Session getSession();
 }

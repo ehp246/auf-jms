@@ -3,7 +3,7 @@ package org.ehp246.aufjms.api.jms;
 import java.util.List;
 import java.util.Map;
 
-public interface MsgSupplier {
+public interface MessageSupplier {
 	String getTo();
 
 	String getCorrelationId();
@@ -22,5 +22,9 @@ public interface MsgSupplier {
 
 	default Map<String, String> getPropertyMap() {
 		return null;
+	}
+
+	default boolean isException() {
+		return false;
 	}
 }

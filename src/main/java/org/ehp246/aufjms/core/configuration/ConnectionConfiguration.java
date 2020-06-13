@@ -6,7 +6,7 @@ import javax.jms.JMSException;
 
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessageBuilder;
-import org.ehp246.aufjms.api.jms.MsgPipe;
+import org.ehp246.aufjms.api.jms.MessagePipe;
 import org.ehp246.aufjms.core.jms.JmsConnectionPipe;
 import org.springframework.context.annotation.Bean;
 
@@ -24,7 +24,7 @@ public class ConnectionConfiguration {
 	}
 
 	@Bean
-	public MsgPipe msgPipe(Connection connection, DestinationNameResolver toResolver, MessageBuilder msgBuilder) {
+	public MessagePipe msgPipe(Connection connection, DestinationNameResolver toResolver, MessageBuilder msgBuilder) {
 		return new JmsConnectionPipe(connection, toResolver, msgBuilder);
 	}
 }

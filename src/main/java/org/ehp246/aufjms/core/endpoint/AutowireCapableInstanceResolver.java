@@ -1,8 +1,11 @@
 package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
+import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutionModel;
@@ -58,6 +61,13 @@ public class AutowireCapableInstanceResolver implements ExecutingInstanceResolve
 			public ExecutionModel getExecutionModel() {
 				return registered.getExecutionModel();
 			}
+
+			@Override
+			public List<Consumer<ExecutedInstance>> postExecution() {
+				// TODO Auto-generated method stub
+				return ResolvedInstance.super.postExecution();
+			}
+
 		};
 
 	}

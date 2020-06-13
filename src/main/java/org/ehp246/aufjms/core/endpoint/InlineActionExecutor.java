@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
-import org.ehp246.aufjms.api.endpoint.ExecutableInstance;
+import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -26,7 +26,7 @@ public class InlineActionExecutor implements ActionExecutor {
 	}
 
 	@Override
-	public CompletableFuture<ExecutedInstance> submit(final ExecutableInstance task) {
+	public CompletableFuture<ExecutedInstance> submit(final BoundInstance task) {
 		final var resolved = task.getResolvedInstance();
 		final var msg = task.getMsg();
 

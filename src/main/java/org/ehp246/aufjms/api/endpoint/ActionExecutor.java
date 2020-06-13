@@ -9,5 +9,5 @@ import java.util.concurrent.CompletableFuture;
  */
 @FunctionalInterface
 public interface ActionExecutor {
-	CompletableFuture<ExecutedInstance> submit(ExecutableInstance task);
+	CompletableFuture<ExecutedInstance> submit(BoundInstance task);
 }

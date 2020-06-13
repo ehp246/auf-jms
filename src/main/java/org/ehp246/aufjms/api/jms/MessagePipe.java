@@ -6,6 +6,6 @@ package org.ehp246.aufjms.api.jms;
  *
  */
 @FunctionalInterface
-public interface MsgPipe {
-	Msg take(MsgSupplier msgSupplier);
+public interface MessagePipe {
+	Msg take(MessageSupplier msgSupplier);
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
-import org.ehp246.aufjms.api.endpoint.ExecutableInstance;
+import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
@@ -39,6 +39,8 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 	@Override
 	public void dispatch(final Msg msg) {
+		LOGGER.trace("Dispatching {}", msg.getType());
+
 		final ResolvedInstance instance;
 		try {
 			instance = this.actionResolver.resolve(msg);
@@ -53,7 +55,9 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			return;
 		}
 
-		this.actionExecutor.submit(new ExecutableInstance() {
+		LOGGER.trace("Submitting {}", msg.getType());
+
+		this.actionExecutor.submit(new BoundInstance() {
 
 			@Override
 			public Msg getMsg() {
@@ -63,11 +67,6 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			@Override
 			public ResolvedInstance getResolvedInstance() {
 				return instance;
-			}
-
-			@Override
-			public List<Consumer<ExecutedInstance>> postPerforms() {
-				return postPerforms;
 			}
 		});
 	};

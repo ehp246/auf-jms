@@ -17,7 +17,7 @@ import org.ehp246.aufjms.annotation.OfTimeout;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.aufjms.api.jms.MsgSupplier;
+import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Lei Yang
  */
-class ProxyInvocation implements MsgSupplier, ResolvedInstance {
+class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyInvocation.class);
 
 	private static final Method ONREPLY;
