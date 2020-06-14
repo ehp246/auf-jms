@@ -6,14 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Destination;
 
 import org.apache.activemq.command.ActiveMQQueue;
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 /**
  * 
  * @author Lei Yang
  *
  */
-public class PrefixedNameResolver implements GoToNameResolver {
+public class PrefixedNameResolver implements DestinationNameResolver {
 	public static final String TOPIC_PREFIX = "topic://";
 	public static final String QUEUE_PREFIX = "queue://";
 

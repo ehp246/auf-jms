@@ -4,7 +4,7 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessageCreator;
 import org.ehp246.aufjms.core.jms.ConnectionPortProvider;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +22,8 @@ public class ConnectionConfiguration {
 	}
 
 	@Bean
-	public ConnectionPortProvider portProvider(Connection connection, GoToNameResolver toResolver,
-			MessageCreator msgBuilder) {
-		return new ConnectionPortProvider(connection, msgBuilder);
+	public ConnectionPortProvider portProvider(Connection connection, DestinationNameResolver toResolver,
+			MessageCreator<?> msgCreator) {
+		return new ConnectionPortProvider(connection, msgCreator);
 	}
 }

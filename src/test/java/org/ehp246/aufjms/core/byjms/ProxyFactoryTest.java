@@ -6,7 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
@@ -27,7 +27,7 @@ public class ProxyFactoryTest {
 		ref.set(msgSupplier);
 		return null;
 	};
-	private final GoToNameResolver nameResolver = name -> {
+	private final DestinationNameResolver nameResolver = name -> {
 		refDestination.set(name);
 		return null;
 	};

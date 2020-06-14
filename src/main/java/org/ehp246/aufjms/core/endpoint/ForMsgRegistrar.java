@@ -2,7 +2,6 @@ package org.ehp246.aufjms.core.endpoint;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,7 +18,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Lei Yang
  *
  */
-public class ForMsgEndpointRegistrar implements ImportBeanDefinitionRegistrar {
+public class ForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -35,7 +34,7 @@ public class ForMsgEndpointRegistrar implements ImportBeanDefinitionRegistrar {
 					final var beanDefinition = getBeanDefinition(endpoint);
 
 					Set<String> scanThese = null;
-					final var base = (Class<?>[]) endpoint.get("scanBasePackageClasses");
+					final var base = (Class<?>[]) endpoint.get("scan");
 					if (base.length > 0) {
 						scanThese = Stream.of(base).map(baseClass -> baseClass.getPackage().getName())
 								.collect(Collectors.toSet());
@@ -44,9 +43,11 @@ public class ForMsgEndpointRegistrar implements ImportBeanDefinitionRegistrar {
 						scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
 					}
 
-					beanDefinition.setConstructorArgumentValues(getParameters(endpoint.get("value"), scanThese));
+					final var destinationName = endpoint.get("value").toString();
+					beanDefinition.setConstructorArgumentValues(getParameters(destinationName, scanThese));
 
-					registry.registerBeanDefinition(UUID.randomUUID().toString(), beanDefinition);
+					registry.registerBeanDefinition(destinationName + "@" + importingClassMetadata.getClassName(),
+							beanDefinition);
 				});
 	}
 

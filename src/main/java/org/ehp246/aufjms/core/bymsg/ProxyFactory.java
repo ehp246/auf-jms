@@ -11,7 +11,7 @@ import javax.jms.Destination;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
@@ -28,13 +28,13 @@ public class ProxyFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyFactory.class);
 
 	private final MessagePortProvider portProvider;
-	private final GoToNameResolver nameResolver;
+	private final DestinationNameResolver nameResolver;
 	private final Map<String, ResolvedInstance> correlMap;
 	private final RespondToDestinationSupplier respondToSupplier;
 
 	public ProxyFactory(
 			final @Qualifier(ReqResConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
-			final MessagePortProvider pipeSupplier, final GoToNameResolver nameResolver,
+			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver,
 			final RespondToDestinationSupplier respondToSupplier) {
 		super();
 		this.portProvider = Objects.requireNonNull(pipeSupplier);

@@ -12,7 +12,7 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.ehp246.aufjms.activemq.AllQueuesResolver;
 import org.ehp246.aufjms.activemq.SingleTopicReplyToSupplier;
 import org.ehp246.aufjms.annotation.EnableByMsg;
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +105,7 @@ public class DemoApplication {
 	 */
 
 	@Bean
-	public GoToNameResolver destinationNameResolver() {
+	public DestinationNameResolver destinationNameResolver() {
 		return new AllQueuesResolver();
 	}
 

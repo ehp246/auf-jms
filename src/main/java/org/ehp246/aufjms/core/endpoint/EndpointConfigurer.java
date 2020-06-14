@@ -7,7 +7,7 @@ import javax.jms.MessageListener;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +30,12 @@ public class EndpointConfigurer implements JmsListenerConfigurer {
 
 	private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
 	private final Set<MsgEndpoint> endpoints;
-	private final GoToNameResolver destintationNameResolver;
+	private final DestinationNameResolver destintationNameResolver;
 	private final ActionExecutor actionExecutor;
 
 	public EndpointConfigurer(
 			final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
-			final Set<MsgEndpoint> endpoints, final GoToNameResolver destintationNameResolver,
+			final Set<MsgEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
 			final ActionExecutor actionExecutor) {
 		super();
 		this.listenerContainerFactory = listenerContainerFactory;

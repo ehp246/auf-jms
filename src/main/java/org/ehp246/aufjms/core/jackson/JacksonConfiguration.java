@@ -2,10 +2,10 @@ package org.ehp246.aufjms.core.jackson;
 
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.jms.MessageBodyWriter;
-import org.ehp246.aufjms.api.jms.MessageCreator;
-import org.ehp246.aufjms.api.jms.TextMessageCreator;
+import org.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 
+@Import(JsonMessageConfiguration.class)
 public class JacksonConfiguration {
 	public static final String BEAN_NAME_OBJECT_MAPPER = "7b5d7255-0201-42aa-93ad-e3b4f919f89b";
 
@@ -36,8 +37,4 @@ public class JacksonConfiguration {
 		return new JacksonActionBinder(objectMapper);
 	}
 
-	@Bean
-	public MessageCreator<?> textMessageBuilder(MessageBodyWriter<String> bodyWriter) {
-		return new TextMessageCreator(bodyWriter);
-	}
 }

@@ -1,35 +1,34 @@
-package org.ehp246.formsg;
+package org.ehp246.aufjms.enableformsg.case001;
 
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.demo.case002.calc.Calc;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = EnableForMsg001Configuration.class, properties = "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false")
 public class EnableForMsg001ConfigurationTest {
 	@Autowired
 	private AnnotationConfigApplicationContext appCtx;
-	// new AnnotationConfigApplicationContext(EnableForMsg001Configuration.class);
 
 	@BeforeEach
 	void setup() {
 	}
 
 	@Test
-	public void resolver001() {
+	public void destination001() {
 		final var resolver = appCtx.getBean(MsgEndpoint.class);
 
 		Assertions.assertEquals(true, resolver != null);
 		Assertions.assertEquals("", resolver.getDestinationName());
+
+		Assertions.assertEquals(EnableForMsg001Configuration.DefaultQueue,
+				appCtx.getBean(DestinationNameResolver.class).resolve(""));
 	}
 
 	@Test
