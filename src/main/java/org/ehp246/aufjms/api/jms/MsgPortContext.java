@@ -7,7 +7,7 @@ import javax.jms.Session;
  * @author Lei Yang
  *
  */
-public interface MsgSinkContext {
+public interface MsgPortContext {
 	MessageSupplier getMsgSupplier();
 
 	Session getSession();

@@ -9,7 +9,7 @@ import org.ehp246.aufjms.core.reflection.InvocationOutcome;
  *
  */
 public interface ExecutedInstance {
-	Msg getMq();
+	Msg getMsg();
 
 	ResolvedInstance getInstance();
 

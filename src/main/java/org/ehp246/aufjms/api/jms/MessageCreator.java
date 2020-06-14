@@ -8,6 +8,6 @@ import javax.jms.Message;
  *
  */
 @FunctionalInterface
-public interface MessageBuilder {
-	Message build(MsgSinkContext sinkContext);
+public interface MessageCreator<T extends Message> {
+	T create(MsgPortContext portContext);
 }

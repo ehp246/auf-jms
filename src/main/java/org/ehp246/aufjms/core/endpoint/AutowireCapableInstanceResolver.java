@@ -1,7 +1,6 @@
 package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -24,12 +23,14 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 public class AutowireCapableInstanceResolver implements ExecutingInstanceResolver {
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 	private final ExecutingTypeResolver typeResolver;
+	private final Consumer<ExecutedInstance> executedConsumer;
 
 	public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-			final ExecutingTypeResolver resolver) {
+			final ExecutingTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
 		super();
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
 		this.typeResolver = resolver;
+		this.executedConsumer = executedConsumer;
 	}
 
 	@Override
@@ -63,9 +64,8 @@ public class AutowireCapableInstanceResolver implements ExecutingInstanceResolve
 			}
 
 			@Override
-			public List<Consumer<ExecutedInstance>> postExecution() {
-				// TODO Auto-generated method stub
-				return ResolvedInstance.super.postExecution();
+			public Consumer<ExecutedInstance> postExecution() {
+				return executedConsumer;
 			}
 
 		};

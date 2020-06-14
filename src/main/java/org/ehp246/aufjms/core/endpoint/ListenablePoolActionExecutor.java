@@ -1,12 +1,10 @@
 package org.ehp246.aufjms.core.endpoint;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
@@ -50,7 +48,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			try {
 				return CompletableFuture.completedFuture(this.execute(task));
 			} catch (Exception e) {
-				LOGGER.error("", e);
+				LOGGER.error("Executiong failed:", e);
 				final var future = new CompletableFuture<ExecutedInstance>();
 				future.completeExceptionally(e);
 				return future;
@@ -69,7 +67,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			executionTask.remove(task);
 			future.complete(executed);
 		}, e -> {
-			LOGGER.error("", e);
+			LOGGER.error("Execution failed:", e);
 			MDC.remove(TRACE_ID);
 			executionTask.remove(task);
 			future.completeExceptionally(e);
@@ -99,7 +97,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 
 			@Override
-			public Msg getMq() {
+			public Msg getMsg() {
 				return msg;
 			}
 
@@ -109,8 +107,15 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 		};
 
-		Optional.ofNullable(task.getResolvedInstance().postExecution()).map(List::stream).orElseGet(Stream::empty)
-				.forEach(consumer -> consumer.accept(performed));
+		Optional.ofNullable(task.getResolvedInstance().postExecution()).ifPresent(consumer -> {
+			LOGGER.trace("Executing postExecution");
+
+			try {
+				consumer.accept(performed);
+			} catch (Exception e) {
+				LOGGER.error("postExecution failed:", e);
+			}
+		});
 
 		return performed;
 	}

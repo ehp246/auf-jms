@@ -49,7 +49,7 @@ public class InlineActionExecutor implements ActionExecutor {
 				}
 
 				@Override
-				public Msg getMq() {
+				public Msg getMsg() {
 					return msg;
 				}
 
@@ -65,7 +65,7 @@ public class InlineActionExecutor implements ActionExecutor {
 		return CompletableFuture.completedFuture(new ExecutedInstance() {
 
 			@Override
-			public Msg getMq() {
+			public Msg getMsg() {
 				return task.getMsg();
 			}
 

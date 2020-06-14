@@ -1,7 +1,6 @@
 package org.ehp246.aufjms.api.endpoint;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -18,7 +17,7 @@ public interface ResolvedInstance {
 		return ExecutionModel.DEFAULT;
 	}
 
-	default List<Consumer<ExecutedInstance>> postExecution() {
+	default Consumer<ExecutedInstance> postExecution() {
 		return null;
 	}
 }

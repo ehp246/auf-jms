@@ -8,6 +8,6 @@ import javax.jms.Destination;
  *
  */
 @FunctionalInterface
-public interface DestinationNameResolver {
-	Destination resolve(String name);
+public interface RespondToDestinationSupplier {
+	Destination get();
 }

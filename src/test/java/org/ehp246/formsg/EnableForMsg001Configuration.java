@@ -1,4 +1,4 @@
-package org.ehp246.demo.case002;
+package org.ehp246.formsg;
 
 import javax.jms.Destination;
 
@@ -6,7 +6,6 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.ehp246.aufjms.annotation.EnableForMsg;
 import org.ehp246.aufjms.api.jms.GoToNameResolver;
 import org.ehp246.aufjms.core.jackson.JacksonConfiguration;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -20,11 +19,7 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @EnableForMsg
 @Import({ JacksonConfiguration.class })
-public class DemoApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-	}
-
+public class EnableForMsg001Configuration {
 	@Bean
 	public GoToNameResolver destinationNameResolver() {
 		return new GoToNameResolver() {
@@ -36,4 +31,5 @@ public class DemoApplication {
 			}
 		};
 	}
+
 }

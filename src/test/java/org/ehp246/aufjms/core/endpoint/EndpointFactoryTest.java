@@ -43,19 +43,19 @@ public class EndpointFactoryTest {
 	@Test
 	public void destination001() {
 		Assertions.assertEquals(null,
-				factory.newEndpoint(null, Set.of(Case001.class.getPackageName())).getDestinationName());
+				factory.newMsgEndpoint(null, Set.of(Case001.class.getPackageName())).getDestinationName());
 
 		Assertions.assertEquals("",
-				factory.newEndpoint("", Set.of(Case001.class.getPackageName())).getDestinationName());
+				factory.newMsgEndpoint("", Set.of(Case001.class.getPackageName())).getDestinationName());
 
 		Assertions.assertEquals("1",
-				factory.newEndpoint("1", Set.of(Case001.class.getPackageName())).getDestinationName());
+				factory.newMsgEndpoint("1", Set.of(Case001.class.getPackageName())).getDestinationName());
 	}
 
 	@Test
 	public void resolverConflicts001() {
 		final var assertThrows = Assertions.assertThrows(RuntimeException.class,
-				() -> factory.newEndpoint("", Set.of(Error001.class.getPackageName())),
+				() -> factory.newMsgEndpoint("", Set.of(Error001.class.getPackageName())),
 				"Should throw for duplicate methods on scanning");
 
 		LOGGER.info(assertThrows.getMessage());
@@ -64,7 +64,7 @@ public class EndpointFactoryTest {
 	@Test
 	public void resolverConflicts002() {
 		final var assertThrows = Assertions.assertThrows(RuntimeException.class,
-				() -> factory.newEndpoint("", Set.of(Error002.class.getPackageName())),
+				() -> factory.newMsgEndpoint("", Set.of(Error002.class.getPackageName())),
 				"Should throw for duplicate methods on scanning");
 
 		LOGGER.info(assertThrows.getMessage());
@@ -73,7 +73,7 @@ public class EndpointFactoryTest {
 	@Test
 	public void resolverInstantation001() {
 		final var assertThrows = Assertions.assertThrows(RuntimeException.class,
-				() -> factory.newEndpoint("", Set.of(Error003.class.getPackageName())),
+				() -> factory.newMsgEndpoint("", Set.of(Error003.class.getPackageName())),
 				"Should throw for duplicate methods on scanning");
 
 		LOGGER.info(assertThrows.getMessage());
@@ -81,7 +81,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase001() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case001.class.getSimpleName());
@@ -101,7 +101,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase002() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case002.class.getSimpleName());
@@ -115,7 +115,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase003() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case003.class.getSimpleName());
@@ -129,7 +129,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase004() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case004.class.getSimpleName());
@@ -146,7 +146,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase005() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case005.class.getSimpleName());
@@ -161,7 +161,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverCase006() {
-		final var resolver = factory.newEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(Cases.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn(Case006.class.getSimpleName());
@@ -175,14 +175,14 @@ public class EndpointFactoryTest {
 	@Test
 	public void resolverDuplicateType007() {
 		final var e = Assertions.assertThrows(RuntimeException.class,
-				() -> factory.newEndpoint("", Set.of(DuplicateType007.class.getPackageName())).getResolver());
+				() -> factory.newMsgEndpoint("", Set.of(DuplicateType007.class.getPackageName())).getResolver());
 
 		LOGGER.info(e.getMessage());
 	}
 
 	@Test
 	public void resolverMultiType008() {
-		final var resolver = factory.newEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 		Mockito.when(msg.getType()).thenReturn("");
@@ -202,7 +202,7 @@ public class EndpointFactoryTest {
 
 	@Test
 	public void resolverMultiType009() {
-		final var resolver = factory.newEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
+		final var resolver = factory.newMsgEndpoint("", Set.of(MultiType008.class.getPackageName())).getResolver();
 
 		final var msg = Mockito.mock(Msg.class);
 

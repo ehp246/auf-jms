@@ -6,9 +6,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.DestinationNameResolver;
+import org.ehp246.aufjms.api.jms.GoToNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
+import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
 import org.ehp246.aufjms.core.bymsg.ProxyFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,15 +23,18 @@ public class ProxyFactoryTest {
 	private final AtomicReference<MessageSupplier> ref = new AtomicReference<MessageSupplier>(null);
 	private final AtomicReference<String> refDestination = new AtomicReference<>(null);
 	private final MessagePortProvider portProivder = supplier -> msgSupplier -> {
-		supplier.get();
+		supplier.getTo();
 		ref.set(msgSupplier);
 		return null;
 	};
-	private final DestinationNameResolver nameResolver = name -> {
+	private final GoToNameResolver nameResolver = name -> {
 		refDestination.set(name);
 		return null;
 	};
-	private final ProxyFactory aufProxyFactory = new ProxyFactory(correlMap, portProivder, nameResolver);
+
+	private final RespondToDestinationSupplier respondTo = () -> null;
+
+	private final ProxyFactory aufProxyFactory = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -60,7 +64,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void destination001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(DestinationTestCase.Case001.class);
 
 		newInstance.m001();
@@ -70,7 +74,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void destination002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(DestinationTestCase.Case002.class);
 
 		newInstance.m001();
@@ -88,7 +92,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void correlationId001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -118,7 +122,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void type001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -150,7 +154,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void type002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -166,7 +170,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void type003() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver)
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -179,21 +183,22 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void body001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver).newInstance(BodyTestCase.class);
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+				.newInstance(BodyTestCase.class);
 		newInstance.m001();
 
-		Assertions.assertEquals(0, ref.get().getBodyValue().size(), "Should always return a list");
+		Assertions.assertEquals(0, ref.get().getBodyValues().size(), "Should always return a list");
 
 		ref.set(null);
 		newInstance.m001(0);
-		var bodyValue = ref.get().getBodyValue();
+		var bodyValue = ref.get().getBodyValues();
 
 		Assertions.assertEquals(1, bodyValue.size(), "Should always return a list");
 		Assertions.assertEquals(0, bodyValue.get(0), "Should be argument");
 
 		ref.set(null);
 		newInstance.m001(10, 1);
-		bodyValue = ref.get().getBodyValue();
+		bodyValue = ref.get().getBodyValues();
 
 		Assertions.assertEquals(2, bodyValue.size(), "Should always return a list");
 		Assertions.assertEquals(10, bodyValue.get(0), "Should be argument");
@@ -201,7 +206,7 @@ public class ProxyFactoryTest {
 
 		ref.set(null);
 		newInstance.m001(null);
-		bodyValue = ref.get().getBodyValue();
+		bodyValue = ref.get().getBodyValues();
 
 		Assertions.assertEquals(1, bodyValue.size(), "Should always return a list");
 		Assertions.assertEquals(null, bodyValue.get(0), "Should be argument");
@@ -209,7 +214,7 @@ public class ProxyFactoryTest {
 		ref.set(null);
 		final var expected = new Object();
 		newInstance.m001(expected, 12);
-		bodyValue = ref.get().getBodyValue();
+		bodyValue = ref.get().getBodyValues();
 
 		Assertions.assertEquals(2, bodyValue.size(), "Should always return a list");
 		Assertions.assertEquals(expected, bodyValue.get(0), "Should be argument");
@@ -218,31 +223,34 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void body002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver).newInstance(BodyTestCase.class);
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+				.newInstance(BodyTestCase.class);
 		newInstance.m002("");
 
-		final var body = ref.get().getBodyValue();
+		final var body = ref.get().getBodyValues();
 		Assertions.assertEquals(0, body.size(), "Should skip annotated arguments");
 	}
 
 	@Test
 	public void body003() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver).newInstance(BodyTestCase.class);
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002("", null, expected);
 
-		final var body = ref.get().getBodyValue();
+		final var body = ref.get().getBodyValues();
 		Assertions.assertEquals(1, body.size(), "Should skip annotated arguments");
 		Assertions.assertEquals(expected, body.get(0), "Should have argument value");
 	}
 
 	@Test
 	public void body004() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver).newInstance(BodyTestCase.class);
+		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m003("", null, expected);
 
-		final var body = ref.get().getBodyValue();
+		final var body = ref.get().getBodyValues();
 		Assertions.assertEquals(2, body.size(), "Should skip annotated arguments");
 		Assertions.assertEquals("", body.get(0), "Should have argument value");
 		Assertions.assertEquals(expected, body.get(1), "Should have argument value");

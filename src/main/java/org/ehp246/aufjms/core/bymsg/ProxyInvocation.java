@@ -121,7 +121,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	}
 
 	@Override
-	public List<?> getBodyValue() {
+	public List<?> getBodyValues() {
 		return invoked.filterValueArgs(PARAMETER_ANNOTATIONS);
 	}
 

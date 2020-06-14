@@ -1,13 +1,10 @@
 package org.ehp246.aufjms.core.jackson;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-import javax.jms.TextMessage;
-
-import org.ehp246.aufjms.api.jms.AbstractMessageBuilder;
-import org.ehp246.aufjms.api.jms.MsgSinkContext;
-import org.ehp246.aufjms.api.jms.ReplyDestinationSupplier;
+import org.ehp246.aufjms.api.jms.MessageBodyWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,20 +15,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Lei Yang
  *
  */
-public class JacksonMessageBuilder extends AbstractMessageBuilder<TextMessage> {
-	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonMessageBuilder.class);
+public class JacksonBodyBuilder implements MessageBodyWriter<String> {
+	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonBodyBuilder.class);
 
 	private final ObjectMapper objectMapper;
 
-	public JacksonMessageBuilder(final ReplyDestinationSupplier replyToSupplier, final ObjectMapper objectMapper) {
-		super(replyToSupplier);
+	public JacksonBodyBuilder(final ObjectMapper objectMapper) {
 		this.objectMapper = Objects.requireNonNull(objectMapper);
 	}
 
 	@Override
-	protected TextMessage createMessage(MsgSinkContext sinkContext) {
+	public String write(final List<?> bodyValue) {
 		try {
-			final var bodyValue = sinkContext.getMsgSupplier().getBodyValue();
 			String json = null;
 			if (bodyValue == null) {
 				json = null;
@@ -45,7 +40,7 @@ public class JacksonMessageBuilder extends AbstractMessageBuilder<TextMessage> {
 				}
 				json = this.objectMapper.writeValueAsString(list);
 			}
-			return sinkContext.getSession().createTextMessage(json);
+			return json;
 		} catch (Exception e) {
 			LOGGER.error("Failed to create message: {} {}", e.getClass().getName(), e.getMessage());
 			throw new RuntimeException(e);

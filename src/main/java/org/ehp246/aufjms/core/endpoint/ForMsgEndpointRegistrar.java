@@ -19,7 +19,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Lei Yang
  *
  */
-public class EndpointRegistrar implements ImportBeanDefinitionRegistrar {
+public class ForMsgEndpointRegistrar implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -44,8 +44,7 @@ public class EndpointRegistrar implements ImportBeanDefinitionRegistrar {
 						scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
 					}
 
-					beanDefinition
-							.setConstructorArgumentValues(getParameters(endpoint.get("value"), scanThese));
+					beanDefinition.setConstructorArgumentValues(getParameters(endpoint.get("value"), scanThese));
 
 					registry.registerBeanDefinition(UUID.randomUUID().toString(), beanDefinition);
 				});
@@ -55,7 +54,7 @@ public class EndpointRegistrar implements ImportBeanDefinitionRegistrar {
 		final var beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(MsgEndpoint.class);
 		beanDefinition.setFactoryBeanName(EndpointFactory.class.getName());
-		beanDefinition.setFactoryMethodName("newEndpoint");
+		beanDefinition.setFactoryMethodName("newMsgEndpoint");
 
 		return beanDefinition;
 	}

@@ -19,7 +19,8 @@ import java.lang.annotation.Target;
  */
 public @interface ByMsg {
 	/**
-	 * Destination name for the outgoing message.
+	 * To name for the outgoing message.
+	 * 
 	 * @return
 	 */
 	String value() default "";

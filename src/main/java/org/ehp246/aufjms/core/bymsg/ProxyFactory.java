@@ -7,10 +7,14 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.jms.Destination;
+
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
-import org.ehp246.aufjms.api.jms.DestinationNameResolver;
+import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
+import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,22 +28,37 @@ public class ProxyFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyFactory.class);
 
 	private final MessagePortProvider portProvider;
-	private final DestinationNameResolver nameResolver;
+	private final GoToNameResolver nameResolver;
 	private final Map<String, ResolvedInstance> correlMap;
+	private final RespondToDestinationSupplier respondToSupplier;
 
 	public ProxyFactory(
-			final @Qualifier(ReplyToConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
-			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver) {
+			final @Qualifier(ReqResConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
+			final MessagePortProvider pipeSupplier, final GoToNameResolver nameResolver,
+			final RespondToDestinationSupplier respondToSupplier) {
 		super();
 		this.portProvider = Objects.requireNonNull(pipeSupplier);
 		this.correlMap = Objects.requireNonNull(correlMap);
 		this.nameResolver = Objects.requireNonNull(nameResolver);
+		this.respondToSupplier = respondToSupplier;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T newInstance(final Class<T> annotatedInterface) {
 		final var destinatinName = annotatedInterface.getAnnotation(ByMsg.class).value();
-		final var port = portProvider.get(() -> nameResolver.resolve(destinatinName));
+		final var port = portProvider.get(new MessagePortDestinationSupplier() {
+
+			@Override
+			public Destination getTo() {
+				return nameResolver.resolve(destinatinName);
+			}
+
+			@Override
+			public Destination getReplyTo() {
+				return respondToSupplier.get();
+			}
+
+		});
 
 		LOGGER.debug("Proxying {} to {}", annotatedInterface.getCanonicalName(), destinatinName);
 

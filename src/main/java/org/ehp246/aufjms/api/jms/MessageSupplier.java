@@ -8,7 +8,7 @@ public interface MessageSupplier {
 
 	String getType();
 
-	List<?> getBodyValue();
+	List<?> getBodyValues();
 
 	default Long getTtl() {
 		return null;

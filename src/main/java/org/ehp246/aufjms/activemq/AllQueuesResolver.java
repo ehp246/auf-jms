@@ -6,14 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Destination;
 
 import org.apache.activemq.command.ActiveMQQueue;
-import org.ehp246.aufjms.api.jms.DestinationNameResolver;
+import org.ehp246.aufjms.api.jms.GoToNameResolver;
 
 /**
  * 
  * @author Lei Yang
  *
  */
-public class AllQueuesResolver implements DestinationNameResolver {
+public class AllQueuesResolver implements GoToNameResolver {
 	private final Map<String, Destination> known = new ConcurrentHashMap<>();
 
 	@Override

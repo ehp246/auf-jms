@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutionModel;
@@ -30,6 +31,11 @@ public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, Exec
 
 	private final Map<String, MsgTypeActionDefinition> registeredActions = new HashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
+
+	public DefaultExecutingTypeResolver register(final Stream<MsgTypeActionDefinition> actionDefinitions) {
+		actionDefinitions.forEach(this::register);
+		return this;
+	}
 
 	@Override
 	public void register(final MsgTypeActionDefinition actionDefinition) {

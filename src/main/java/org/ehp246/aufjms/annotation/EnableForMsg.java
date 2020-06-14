@@ -12,7 +12,7 @@ import org.ehp246.aufjms.core.configuration.ActionExecutorConfiguration;
 import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import org.ehp246.aufjms.core.endpoint.EndpointConfigurer;
 import org.ehp246.aufjms.core.endpoint.EndpointFactory;
-import org.ehp246.aufjms.core.endpoint.EndpointRegistrar;
+import org.ehp246.aufjms.core.endpoint.ForMsgEndpointRegistrar;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ ConnectionConfiguration.class, EndpointRegistrar.class, EndpointFactory.class,
+@Import({ ConnectionConfiguration.class, ForMsgEndpointRegistrar.class, EndpointFactory.class,
 		EndpointConfigurer.class, ActionExecutorConfiguration.class })
 public @interface EnableForMsg {
 	Endpoint[] value() default @Endpoint;

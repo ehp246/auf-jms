@@ -12,8 +12,8 @@ import org.apache.activemq.command.ActiveMQQueue;
 import org.ehp246.aufjms.activemq.AllQueuesResolver;
 import org.ehp246.aufjms.activemq.SingleTopicReplyToSupplier;
 import org.ehp246.aufjms.annotation.EnableByMsg;
-import org.ehp246.aufjms.api.jms.DestinationNameResolver;
-import org.ehp246.aufjms.api.jms.ReplyDestinationSupplier;
+import org.ehp246.aufjms.api.jms.GoToNameResolver;
+import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -105,12 +105,12 @@ public class DemoApplication {
 	 */
 
 	@Bean
-	public DestinationNameResolver destinationNameResolver() {
+	public GoToNameResolver destinationNameResolver() {
 		return new AllQueuesResolver();
 	}
 
 	@Bean
-	public ReplyDestinationSupplier replyToResolver() {
+	public RespondToDestinationSupplier replyToResolver() {
 		return new SingleTopicReplyToSupplier(DemoApplication.class.getSimpleName() + ".Reply");
 	}
 }
