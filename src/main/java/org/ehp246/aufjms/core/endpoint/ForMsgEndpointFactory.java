@@ -15,11 +15,11 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  * @author Lei Yang
  *
  */
-public class EndpointFactory {
+public class ForMsgEndpointFactory {
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 	private final Consumer<ExecutedInstance> postExecution;
 
-	public EndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+	public ForMsgEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
 			final MessagePortProvider portProvider) {
 		super();
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;

@@ -25,15 +25,15 @@ import org.springframework.jms.listener.MessageListenerContainer;
  * @author Lei Yang
  *
  */
-public class EndpointConfigurer implements JmsListenerConfigurer {
-	private final static Logger LOGGER = LoggerFactory.getLogger(EndpointConfigurer.class);
+public class MsgEndpointConfigurer implements JmsListenerConfigurer {
+	private final static Logger LOGGER = LoggerFactory.getLogger(MsgEndpointConfigurer.class);
 
 	private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
 	private final Set<MsgEndpoint> endpoints;
 	private final DestinationNameResolver destintationNameResolver;
 	private final ActionExecutor actionExecutor;
 
-	public EndpointConfigurer(
+	public MsgEndpointConfigurer(
 			final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
 			final Set<MsgEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
 			final ActionExecutor actionExecutor) {

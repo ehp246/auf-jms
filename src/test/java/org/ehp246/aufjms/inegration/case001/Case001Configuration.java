@@ -1,6 +1,5 @@
-package org.ehp246.demo.case001;
+package org.ehp246.aufjms.inegration.case001;
 
-import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -10,10 +9,8 @@ import javax.jms.Message;
 
 import org.apache.activemq.command.ActiveMQQueue;
 import org.ehp246.aufjms.activemq.AllQueuesResolver;
-import org.ehp246.aufjms.activemq.SingleTopicReplyToSupplier;
 import org.ehp246.aufjms.annotation.EnableByMsg;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
-import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
@@ -28,7 +25,8 @@ import org.springframework.jms.support.destination.BeanFactoryDestinationResolve
 import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
- * The application uses AufMq on the client side, JmsListener on the server side.
+ * The application uses AufMq on the client side, JmsListener on the server
+ * side.
  * 
  * @author Lei Yang
  *
@@ -36,14 +34,14 @@ import org.springframework.jms.support.destination.DestinationResolver;
 @SpringBootApplication
 @EnableJms
 @EnableByMsg
-public class DemoApplication {
-	private final Logger LOGGER = LoggerFactory.getLogger(DemoApplication.class);
-	
+class Case001Configuration {
+	private final Logger LOGGER = LoggerFactory.getLogger(Case001Configuration.class);
+
 	@Autowired
 	private AtomicReference<CompletableFuture<Object>> ref1;
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		SpringApplication.run(Case001Configuration.class, args);
 	}
 
 	@Bean("ref1")
@@ -60,15 +58,15 @@ public class DemoApplication {
 	public int calc(int i, Message message) {
 		return i++;
 	}
-	
+
 	@JmsListener(destination = "calc.request", selector = "JMSType = 'Mem'")
 	public void mem(int i) {
 		LOGGER.debug("Mem " + Integer.valueOf(i).toString());
 		ref1.get().complete(i);
 	}
-	
+
 	@JmsListener(destination = "alarm.request", selector = "JMSType = 'Set'")
-	public void set(Instant instant) {
+	public void set(String instant) {
 		ref1.get().complete(instant);
 	}
 
@@ -81,20 +79,21 @@ public class DemoApplication {
 	public Destination alarmRequest() {
 		return new ActiveMQQueue("alarm.request");
 	}
-	
+
 	@Bean
 	public DestinationResolver destinationResolver(BeanFactory beanFactory) {
 		return new BeanFactoryDestinationResolver(beanFactory);
 	}
 
 	@Bean
-	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final ConnectionFactory connectionFactory, final DestinationResolver destinationResolver) {
+	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final ConnectionFactory connectionFactory,
+			final DestinationResolver destinationResolver) {
 		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 		factory.setConnectionFactory(connectionFactory);
 		factory.setDestinationResolver(destinationResolver);
 		factory.setSessionTransacted(false);
 		factory.setConcurrency("1");
-		
+
 		return factory;
 	}
 
@@ -107,10 +106,5 @@ public class DemoApplication {
 	@Bean
 	public DestinationNameResolver destinationNameResolver() {
 		return new AllQueuesResolver();
-	}
-
-	@Bean
-	public RespondToDestinationSupplier replyToResolver() {
-		return new SingleTopicReplyToSupplier(DemoApplication.class.getSimpleName() + ".Reply");
 	}
 }

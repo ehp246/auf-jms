@@ -9,8 +9,8 @@ import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
-import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
-import org.ehp246.aufjms.core.bymsg.ProxyFactory;
+import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
+import org.ehp246.aufjms.core.bymsg.ByMsgFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,9 +32,9 @@ public class ProxyFactoryTest {
 		return null;
 	};
 
-	private final RespondToDestinationSupplier respondTo = () -> null;
+	private final ReplyToNameSupplier respondTo = () -> null;
 
-	private final ProxyFactory aufProxyFactory = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo);
+	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -64,7 +64,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void destination001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(DestinationTestCase.Case001.class);
 
 		newInstance.m001();
@@ -74,7 +74,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void destination002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(DestinationTestCase.Case002.class);
 
 		newInstance.m001();
@@ -92,7 +92,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void correlationId001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -122,7 +122,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void type001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -154,7 +154,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void type002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -170,7 +170,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void type003() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -183,7 +183,7 @@ public class ProxyFactoryTest {
 	 */
 	@Test
 	public void body001() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(BodyTestCase.class);
 		newInstance.m001();
 
@@ -223,7 +223,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void body002() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(BodyTestCase.class);
 		newInstance.m002("");
 
@@ -233,7 +233,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void body003() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002("", null, expected);
@@ -245,7 +245,7 @@ public class ProxyFactoryTest {
 
 	@Test
 	public void body004() {
-		final var newInstance = new ProxyFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
 				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m003("", null, expected);

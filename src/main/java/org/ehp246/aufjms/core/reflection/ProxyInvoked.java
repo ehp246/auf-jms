@@ -41,11 +41,11 @@ public class ProxyInvoked<T> {
 	public Class<?> getReturnType() {
 		return this.method.getReturnType();
 	}
-	
+
 	public boolean isReturnDeclared() {
 		return this.method.getReturnType() != void.class;
 	}
-	
+
 	/**
 	 * Void is considered a declared return.
 	 * 
@@ -84,7 +84,7 @@ public class ProxyInvoked<T> {
 	@SuppressWarnings("unchecked")
 	public <A extends Annotation> Optional<AnnotatedArgument<A>> findUpArgument(final Class<A> annotationClass) {
 		for (int i = 0; i < parameterAnnotations.length; i++) {
-			final var found = (Optional<Annotation>) Stream.of(parameterAnnotations[i])
+			final var found = Stream.of(parameterAnnotations[i])
 					.filter(annotation -> annotation.annotationType() == annotationClass).findFirst();
 			if (found.isPresent()) {
 				final var arg = args.get(i);

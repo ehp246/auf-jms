@@ -28,7 +28,7 @@ public class JacksonConfiguration {
 
 	@Bean
 	public MessageBodyWriter<?> messageBodyWriter(@Qualifier(BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
-		return new JacksonBodyBuilder(objectMapper);
+		return new JacksonBodyWriter(objectMapper);
 	}
 
 	@Bean

@@ -14,7 +14,7 @@ import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
-import org.ehp246.aufjms.api.jms.RespondToDestinationSupplier;
+import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,23 +24,24 @@ import org.springframework.beans.factory.annotation.Qualifier;
  * @author Lei Yang
  *
  */
-public class ProxyFactory {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyFactory.class);
+public class ByMsgFactory {
+	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgFactory.class);
 
 	private final MessagePortProvider portProvider;
 	private final DestinationNameResolver nameResolver;
 	private final Map<String, ResolvedInstance> correlMap;
-	private final RespondToDestinationSupplier respondToSupplier;
+	private final ReplyToNameSupplier replyToSupplier;
 
-	public ProxyFactory(
+	public ByMsgFactory(
 			final @Qualifier(ReqResConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
 			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver,
-			final RespondToDestinationSupplier respondToSupplier) {
+			final ReplyToNameSupplier respondToSupplier) {
 		super();
 		this.portProvider = Objects.requireNonNull(pipeSupplier);
 		this.correlMap = Objects.requireNonNull(correlMap);
 		this.nameResolver = Objects.requireNonNull(nameResolver);
-		this.respondToSupplier = respondToSupplier;
+		// Allow null to forego request/response support.
+		this.replyToSupplier = respondToSupplier;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,12 +56,12 @@ public class ProxyFactory {
 
 			@Override
 			public Destination getReplyTo() {
-				return respondToSupplier.get();
+				return replyToSupplier == null ? null : nameResolver.resolve(replyToSupplier.get());
 			}
 
 		});
 
-		LOGGER.debug("Proxying {} to {}", annotatedInterface.getCanonicalName(), destinatinName);
+		LOGGER.debug("Proxying {}@{}", destinatinName, annotatedInterface.getCanonicalName());
 
 		return (T) Proxy.newProxyInstance(annotatedInterface.getClassLoader(), new Class[] { annotatedInterface },
 				(InvocationHandler) (proxy, method, args) -> {

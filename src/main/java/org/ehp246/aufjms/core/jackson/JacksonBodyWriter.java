@@ -15,12 +15,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Lei Yang
  *
  */
-public class JacksonBodyBuilder implements MessageBodyWriter<String> {
-	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonBodyBuilder.class);
+public class JacksonBodyWriter implements MessageBodyWriter<String> {
+	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonBodyWriter.class);
 
 	private final ObjectMapper objectMapper;
 
-	public JacksonBodyBuilder(final ObjectMapper objectMapper) {
+	public JacksonBodyWriter(final ObjectMapper objectMapper) {
 		this.objectMapper = Objects.requireNonNull(objectMapper);
 	}
 

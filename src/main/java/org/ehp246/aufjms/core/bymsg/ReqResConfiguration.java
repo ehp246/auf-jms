@@ -2,7 +2,11 @@ package org.ehp246.aufjms.core.bymsg;
 
 import java.util.Map;
 
+import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -14,4 +18,24 @@ public class ReqResConfiguration {
 	public Map<String, ResolvedInstance> correlMap() {
 		return Caffeine.newBuilder().weakValues().<String, ResolvedInstance>build().asMap();
 	}
+
+	@Bean
+	public MsgEndpoint resEndpoint(final ReplyToNameSupplier replyTo,
+			final @Qualifier(ReqResConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap) {
+		return new MsgEndpoint() {
+			private final ExecutingInstanceResolver resolver = msg -> correlMap.get(msg.getCorrelationId());
+
+			@Override
+			public String getDestinationName() {
+				return replyTo.get();
+			}
+
+			@Override
+			public ExecutingInstanceResolver getResolver() {
+				return resolver;
+			}
+
+		};
+	}
+
 }

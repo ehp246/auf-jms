@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ehp246.aufjms.annotation.EnableForMsg;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import org.ehp246.aufjms.core.formsg.EnableForMsg;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -54,7 +54,7 @@ public class ForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 	private GenericBeanDefinition getBeanDefinition(Map<String, Object> annotationAttributes) {
 		final var beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(MsgEndpoint.class);
-		beanDefinition.setFactoryBeanName(EndpointFactory.class.getName());
+		beanDefinition.setFactoryBeanName(ForMsgEndpointFactory.class.getName());
 		beanDefinition.setFactoryMethodName("newMsgEndpoint");
 
 		return beanDefinition;

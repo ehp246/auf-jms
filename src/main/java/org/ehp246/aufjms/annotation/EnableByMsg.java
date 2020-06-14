@@ -6,8 +6,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.ehp246.aufjms.core.bymsg.ProxyFactory;
-import org.ehp246.aufjms.core.bymsg.ProxyRegistrar;
+import org.ehp246.aufjms.core.bymsg.ByMsgFactory;
+import org.ehp246.aufjms.core.bymsg.ByMsgRegistrar;
+import org.ehp246.aufjms.core.bymsg.ReplyToNameSupplierFactory;
 import org.ehp246.aufjms.core.bymsg.ReqResConfiguration;
 import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import org.ehp246.aufjms.core.jackson.JacksonConfiguration;
@@ -21,8 +22,10 @@ import org.springframework.context.annotation.Import;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ ConnectionConfiguration.class, ReqResConfiguration.class, ProxyRegistrar.class, ProxyFactory.class,
-		JacksonConfiguration.class })
+@Import({ ConnectionConfiguration.class, ReqResConfiguration.class, ByMsgRegistrar.class, ByMsgFactory.class,
+		ReplyToNameSupplierFactory.class, JacksonConfiguration.class })
 public @interface EnableByMsg {
-	Class<?>[] scanBasePackageClasses() default {};
+	Class<?>[] scan() default {};
+
+	String replyTo() default "";
 }

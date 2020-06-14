@@ -9,12 +9,12 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-class ProxyScanner {
+class ByMsgScanner {
 	private final Class<? extends Annotation> enabler;
 	private final Class<? extends Annotation> enablee;
 	private final AnnotationMetadata metadata;
 
-	public ProxyScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
+	public ByMsgScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
 			AnnotationMetadata metaData) {
 		super();
 		this.enabler = enabler;
@@ -37,7 +37,7 @@ class ProxyScanner {
 		provider.addIncludeFilter(new AnnotationTypeFilter(this.enablee));
 
 		Stream<String> scanThese = null;
-		final var base = (Class<?>[]) enablerAttributes.get("scanBasePackageClasses");
+		final var base = (Class<?>[]) enablerAttributes.get("scan");
 		if (base.length > 0) {
 			scanThese = Stream.of(base).map(baseClass -> baseClass.getPackage().getName()).distinct();
 		} else {

@@ -1,4 +1,4 @@
-package org.ehp246.demo.case001;
+package org.ehp246.aufjms.inegration.case001;
 
 import java.time.Instant;
 
