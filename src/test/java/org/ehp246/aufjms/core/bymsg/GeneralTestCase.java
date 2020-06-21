@@ -1,9 +1,9 @@
-package org.ehp246.aufjms.core.byjms;
+package org.ehp246.aufjms.core.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 
 public class GeneralTestCase {
-	@ByMsg
+	@ByMsg("")
 	interface Case001 {
 		void m001();
 

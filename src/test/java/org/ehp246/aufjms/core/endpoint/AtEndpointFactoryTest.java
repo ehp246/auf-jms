@@ -34,11 +34,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  *
  */
 @RunWith(JUnitPlatform.class)
-public class ForMsgEndpointFactoryTest {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ForMsgEndpointFactoryTest.class);
+public class AtEndpointFactoryTest {
+	private final static Logger LOGGER = LoggerFactory.getLogger(AtEndpointFactoryTest.class);
 	private final AnnotationConfigApplicationContext appCtx = new AnnotationConfigApplicationContext(
-			ForMsgEndpointFactory.class, Case004.class, Case005.class);
-	private final ForMsgEndpointFactory factory = appCtx.getBean(ForMsgEndpointFactory.class);
+			AtEndpointFactory.class, Case004.class, Case005.class);
+	private final AtEndpointFactory factory = appCtx.getBean(AtEndpointFactory.class);
 
 	@Test
 	public void destination001() {

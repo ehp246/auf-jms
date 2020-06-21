@@ -5,8 +5,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.ehp246.aufjms.activemq.PrefixedNameResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.core.formsg.EnableForMsg;
+import org.ehp246.aufjms.util.Strings;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -43,7 +45,8 @@ public class ForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 						scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
 					}
 
-					final var destinationName = endpoint.get("value").toString();
+					final var destinationName = Strings.ifBlank(endpoint.get("value").toString(),
+							PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() + ".request");
 					beanDefinition.setConstructorArgumentValues(getParameters(destinationName, scanThese));
 
 					registry.registerBeanDefinition(destinationName + "@" + importingClassMetadata.getClassName(),
@@ -54,7 +57,7 @@ public class ForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 	private GenericBeanDefinition getBeanDefinition(Map<String, Object> annotationAttributes) {
 		final var beanDefinition = new GenericBeanDefinition();
 		beanDefinition.setBeanClass(MsgEndpoint.class);
-		beanDefinition.setFactoryBeanName(ForMsgEndpointFactory.class.getName());
+		beanDefinition.setFactoryBeanName(AtEndpointFactory.class.getName());
 		beanDefinition.setFactoryMethodName("newMsgEndpoint");
 
 		return beanDefinition;

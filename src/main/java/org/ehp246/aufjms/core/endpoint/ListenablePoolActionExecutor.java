@@ -2,9 +2,7 @@ package org.ehp246.aufjms.core.endpoint;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
@@ -14,6 +12,7 @@ import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutionModel;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
+import org.ehp246.aufjms.api.slf4j.MdcKeys;
 import org.ehp246.aufjms.core.reflection.CatchingInvoke;
 import org.ehp246.aufjms.core.reflection.InvocationOutcome;
 import org.slf4j.Logger;
@@ -28,9 +27,6 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
  */
 public class ListenablePoolActionExecutor implements ActionExecutor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ListenablePoolActionExecutor.class);
-	private static final String TRACE_ID = "Msg-Correlation-Id";
-
-	private final Set<BoundInstance> executionTask = ConcurrentHashMap.newKeySet();
 
 	private final ActionInvocationBinder binder;
 	private final AsyncListenableTaskExecutor pool;
@@ -55,21 +51,17 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 		}
 
-		executionTask.add(task);
-
 		final var future = new CompletableFuture<ExecutedInstance>();
 
 		this.pool.submitListenable(() -> {
-			MDC.put(TRACE_ID, task.getMsg().getCorrelationId());
+			MDC.put(MdcKeys.CORRELATION_ID, task.getMsg().getCorrelationId());
 			return this.execute(task);
 		}).addCallback(executed -> {
-			MDC.remove(TRACE_ID);
-			executionTask.remove(task);
+			MDC.remove(MdcKeys.CORRELATION_ID);
 			future.complete(executed);
 		}, e -> {
 			LOGGER.error("Execution failed:", e);
-			MDC.remove(TRACE_ID);
-			executionTask.remove(task);
+			MDC.remove(MdcKeys.CORRELATION_ID);
 			future.completeExceptionally(e);
 		});
 
@@ -78,6 +70,9 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 
 	private ExecutedInstance execute(final BoundInstance task) {
 		final var msg = task.getMsg();
+
+		LOGGER.debug("Executing {}", msg.getType());
+
 		final var resolved = task.getResolvedInstance();
 
 		final var bindOutcome = CatchingInvoke.invoke(() -> binder.bind(resolved, new ActionInvocationContext() {
@@ -116,6 +111,8 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 				LOGGER.error("postExecution failed:", e);
 			}
 		});
+
+		LOGGER.debug("Executed {}", msg.getType());
 
 		return performed;
 	}

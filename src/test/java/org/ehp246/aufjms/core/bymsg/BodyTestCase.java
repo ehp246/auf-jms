@@ -1,9 +1,9 @@
-package org.ehp246.aufjms.core.byjms;
+package org.ehp246.aufjms.core.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.OfType;
 
-@ByMsg
+@ByMsg("")
 public interface BodyTestCase {
 	void m001();
 

@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.byjms;
+package org.ehp246.aufjms.core.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 
@@ -9,7 +9,7 @@ public interface DestinationTestCase {
 		void m001();
 	}
 
-	@ByMsg
+	@ByMsg("")
 	interface Case002 {
 		void m001();
 	}

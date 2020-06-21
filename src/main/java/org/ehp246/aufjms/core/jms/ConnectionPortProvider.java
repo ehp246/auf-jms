@@ -43,7 +43,8 @@ public class ConnectionPortProvider implements MessagePortProvider {
 		return msgSupplier -> {
 			final var destination = supplier.getTo();
 
-			LOGGER.trace("Sending {} to {} ", msgSupplier.getCorrelationId(), destination.toString());
+			LOGGER.trace("Sending {}:{} to {} ", msgSupplier.getCorrelationId(), msgSupplier.getType(),
+					destination.toString());
 
 			try (final Session session = connection.createSession(true, Session.SESSION_TRANSACTED)) {
 				final var context = new MsgPortContext() {

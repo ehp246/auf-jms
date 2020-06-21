@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class DefaultMsgDispatcher implements MsgDispatcher {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
 
 	private final ExecutingInstanceResolver actionResolver;

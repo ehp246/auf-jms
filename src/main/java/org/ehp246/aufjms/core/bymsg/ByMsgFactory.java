@@ -33,7 +33,7 @@ public class ByMsgFactory {
 	private final ReplyToNameSupplier replyToSupplier;
 
 	public ByMsgFactory(
-			final @Qualifier(ReqResConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
+			final @Qualifier(ReplyConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
 			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver,
 			final ReplyToNameSupplier respondToSupplier) {
 		super();

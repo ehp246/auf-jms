@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.byjms;
+package org.ehp246.aufjms.core.bymsg;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,6 @@ import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
-import org.ehp246.aufjms.core.bymsg.ByMsgFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
-public class ProxyFactoryTest {
+public class ByMsgFactoryTest {
 	private final Map<String, ResolvedInstance> correlMap = new HashMap<>();
 	private final AtomicReference<MessageSupplier> ref = new AtomicReference<MessageSupplier>(null);
 	private final AtomicReference<String> refDestination = new AtomicReference<>(null);

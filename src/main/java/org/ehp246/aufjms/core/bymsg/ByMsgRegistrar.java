@@ -1,5 +1,6 @@
 package org.ehp246.aufjms.core.bymsg;
 
+import org.ehp246.aufjms.activemq.PrefixedNameResolver;
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.EnableByMsg;
 import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
@@ -20,8 +21,8 @@ public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
 		final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
 				.toString();
 
-		registry.registerBeanDefinition(ReplyToNameSupplier.class.getCanonicalName(),
-				getReplyToSupplier(replyTo.isBlank() ? metadata.getClassName() + ".reply" : replyTo));
+		registry.registerBeanDefinition(ReplyToNameSupplier.class.getCanonicalName(), getReplyToSupplier(
+				replyTo.isBlank() ? PrefixedNameResolver.TOPIC_PREFIX + metadata.getClassName() + ".reply" : replyTo));
 
 		LOGGER.debug("Scanning for {}", ByMsg.class.getCanonicalName());
 

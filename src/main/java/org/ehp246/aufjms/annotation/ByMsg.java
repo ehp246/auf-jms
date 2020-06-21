@@ -23,5 +23,5 @@ public @interface ByMsg {
 	 * 
 	 * @return
 	 */
-	String value() default "";
+	String value();
 }

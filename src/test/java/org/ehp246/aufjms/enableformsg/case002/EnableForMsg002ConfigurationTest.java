@@ -1,5 +1,6 @@
 package org.ehp246.aufjms.enableformsg.case002;
 
+import org.ehp246.aufjms.activemq.PrefixedNameResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.enableformsg.case002.endpoint002.Calc002;
@@ -26,11 +27,13 @@ public class EnableForMsg002ConfigurationTest {
 
 	@Test
 	public void endpoint001(@Mock Msg msg) {
-		final var endpoint = appCtx.getBean("@" + EnableForMsg002Configuration.class.getCanonicalName(),
-				MsgEndpoint.class);
+		final var destinationName = PrefixedNameResolver.QUEUE_PREFIX
+				+ EnableForMsg002Configuration.class.getCanonicalName() + ".request";
+		final var endpoint = appCtx.getBean(
+				destinationName + "@" + EnableForMsg002Configuration.class.getCanonicalName(), MsgEndpoint.class);
 
 		Assertions.assertEquals(true, endpoint != null);
-		Assertions.assertEquals("", endpoint.getDestinationName());
+		Assertions.assertEquals(destinationName, endpoint.getDestinationName());
 
 		Mockito.when(msg.getType()).thenReturn("Calc001");
 

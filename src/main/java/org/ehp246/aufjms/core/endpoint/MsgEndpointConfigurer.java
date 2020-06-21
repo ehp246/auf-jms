@@ -1,16 +1,17 @@
 package org.ehp246.aufjms.core.endpoint;
 
 import java.util.Set;
-import java.util.UUID;
 
 import javax.jms.MessageListener;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
+import org.ehp246.aufjms.api.slf4j.MdcKeys;
 import org.ehp246.aufjms.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpoint;
@@ -50,7 +51,7 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 			LOGGER.debug("Registering endpoint on destination '{}'", endpoint.getDestinationName());
 
 			final var defaultMsgDispatcher = new DefaultMsgDispatcher(endpoint.getResolver(), actionExecutor);
-			final var id = UUID.randomUUID().toString();
+			final var id = endpoint.getDestinationName() + "@" + MsgEndpoint.class.getCanonicalName();
 
 			registrar.registerEndpoint(new JmsListenerEndpoint() {
 
@@ -61,7 +62,9 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 					container.setDestinationResolver((session, destinationName,
 							pubSubDomain) -> destintationNameResolver.resolve(destinationName));
 					container.setupMessageListener((MessageListener) message -> {
-						defaultMsgDispatcher.dispatch(ToMsg.from(message));
+						final var msg = ToMsg.from(message);
+						MDC.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
+						defaultMsgDispatcher.dispatch(msg);
 					});
 				}
 

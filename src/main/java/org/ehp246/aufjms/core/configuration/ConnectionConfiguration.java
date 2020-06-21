@@ -7,6 +7,7 @@ import javax.jms.JMSException;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessageCreator;
 import org.ehp246.aufjms.core.jms.ConnectionPortProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Bean;
  */
 public class ConnectionConfiguration {
 	@Bean
+	@ConditionalOnMissingBean
 	public Connection connection(ConnectionFactory connectionFactory) throws JMSException {
 		return connectionFactory.createConnection();
 	}

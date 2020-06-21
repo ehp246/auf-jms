@@ -91,6 +91,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	}
 
 	public void onReply(Msg msg) {
+		LOGGER.trace("Received reply for {}", msg.getType());
 	}
 
 	@Override

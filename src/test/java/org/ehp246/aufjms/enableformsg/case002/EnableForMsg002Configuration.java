@@ -5,7 +5,7 @@ import javax.jms.Destination;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.core.formsg.EnableForMsg;
-import org.ehp246.aufjms.core.formsg.EnableForMsg.Endpoint;
+import org.ehp246.aufjms.core.formsg.EnableForMsg.At;
 import org.ehp246.aufjms.core.jackson.JacksonConfiguration;
 import org.ehp246.aufjms.enableformsg.case002.endpoint002.Calc002;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Import;
  *
  */
 @SpringBootApplication
-@EnableForMsg({ @Endpoint, @Endpoint(value = "endpoint002", scan = Calc002.class) })
+@EnableForMsg({ @At, @At(value = "endpoint002", scan = Calc002.class) })
 @Import({ JacksonConfiguration.class })
 class EnableForMsg002Configuration {
 	public final static ActiveMQQueue DefaultQueue = new ActiveMQQueue("default.queue");
