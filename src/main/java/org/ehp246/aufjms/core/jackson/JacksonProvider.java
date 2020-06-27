@@ -25,10 +25,6 @@ public class JacksonProvider implements FromBody<String> {
 
 	@Override
 	public void perform(final String body, final List<Receiver> receivers) {
-		if (body == null || body.isBlank()) {
-			return;
-		}
-
 		if (receivers == null || receivers.size() == 0) {
 			return;
 		}
@@ -36,7 +32,8 @@ public class JacksonProvider implements FromBody<String> {
 		try {
 			if (receivers.size() == 1) {
 				final var receiver = receivers.get(0);
-				receiver.receive(objectMapper.readValue(body, receiver.getType()));
+				receiver.receive(
+						body != null && !body.isBlank() ? objectMapper.readValue(body, receiver.getType()) : null);
 			}
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Failed to read value", e);

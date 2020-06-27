@@ -91,7 +91,7 @@ public class AtEndpointFactoryTest {
 		Assertions.assertEquals(Case001.class, resolvedInstance.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case001.class).findMethod("execute"),
 				resolvedInstance.getMethod());
-		Assertions.assertEquals(InvocationModel.DEFAULT, resolvedInstance.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.DEFAULT, resolvedInstance.getInvocationModel());
 
 		final var resolved2 = resolver.resolve(msg);
 
@@ -110,7 +110,7 @@ public class AtEndpointFactoryTest {
 
 		Assertions.assertEquals(Case002.class, resolved.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case002.class).findMethod("m001"), resolved.getMethod());
-		Assertions.assertEquals(InvocationModel.DEFAULT, resolved.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.DEFAULT, resolved.getInvocationModel());
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class AtEndpointFactoryTest {
 
 		Assertions.assertEquals(Case003.class, resolved.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case003.class).findMethod("m001"), resolved.getMethod());
-		Assertions.assertEquals(InvocationModel.SYNC, resolved.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.SYNC, resolved.getInvocationModel());
 	}
 
 	@Test
@@ -214,13 +214,13 @@ public class AtEndpointFactoryTest {
 		Assertions.assertEquals(new ReflectingType<>(MultiType008.class).findMethod("m002"),
 				resolver.resolve(msg).getMethod(), "Should match to m002");
 
-		Mockito.when(msg.getExecuting()).thenReturn("m001");
+		Mockito.when(msg.getInvoking()).thenReturn("m001");
 
 		Assertions.assertEquals(new ReflectingType<>(MultiType008.class).findMethod("m001"),
 				resolver.resolve(msg).getMethod(), "Should match to m001");
-		Mockito.when(msg.getExecuting()).thenReturn("m001");
+		Mockito.when(msg.getInvoking()).thenReturn("m001");
 
-		Mockito.when(msg.getExecuting()).thenReturn("m002");
+		Mockito.when(msg.getInvoking()).thenReturn("m002");
 
 		Assertions.assertEquals(null, resolver.resolve(msg), "Should not match");
 	}

@@ -12,10 +12,10 @@ import org.ehp246.aufjms.annotation.OfType;
 @OfType("Calculator")
 public interface Countor {
 	@Invoking("setMem")
-	public void set(int i);
+	public Void set(int i);
 
 	@Invoking("addMem")
-	public int inc();
+	public int add(int i);
 
 	@Invoking("getMem")
 	public int get();

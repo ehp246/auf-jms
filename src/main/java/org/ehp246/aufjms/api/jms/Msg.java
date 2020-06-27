@@ -18,6 +18,8 @@ public interface Msg {
 
 	String getType();
 
+	String getInvoking();
+
 	String getCorrelationId();
 
 	Destination getReplyTo();
@@ -50,9 +52,5 @@ public interface Msg {
 		} catch (JMSException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	default String getExecuting() {
-		return null;
 	}
 }

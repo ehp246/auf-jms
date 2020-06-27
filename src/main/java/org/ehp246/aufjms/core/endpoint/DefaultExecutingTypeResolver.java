@@ -5,13 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
-import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
+import org.ehp246.aufjms.api.endpoint.InvokingTypeResolver;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionRegistry;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, ExecutingTypeResolver {
+public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, InvokingTypeResolver {
 	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutingTypeResolver.class);
 
 	private final Map<String, MsgTypeActionDefinition> registeredActions = new HashMap<>();
@@ -59,12 +58,13 @@ public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, Exec
 			return null;
 		}
 
-		final var executing = Optional.ofNullable(msg.getExecuting()).map(String::strip).orElse("");
+		var invoking = msg.getInvoking();
+		invoking = invoking != null ? invoking.strip() : "";
 
-		final var method = registereMethods.get(definition.getInstanceType()).get(executing);
+		final var method = registereMethods.get(definition.getInstanceType()).get(invoking);
 
 		if (method == null) {
-			LOGGER.debug("Method {} not found", executing);
+			LOGGER.debug("Method {} not found", invoking);
 			return null;
 		}
 
@@ -86,7 +86,7 @@ public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, Exec
 			}
 
 			@Override
-			public InvocationModel getExecutionModel() {
+			public InvocationModel getInvocationModel() {
 				return definition.getInvocationModel();
 			}
 		};

@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfTimeout;
@@ -65,8 +66,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	}
 
 	public boolean isReplyExpected() {
-		final Class<?> returnType = this.invoked.getReturnType();
-		return returnType != void.class && returnType != Void.class;
+		return this.invoked.getReturnType() != void.class;
 	}
 
 	public Object returnInvocation() throws Throwable {
@@ -130,13 +130,18 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 			return Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null);
 		}
 
-		final var type = invoked.valueOnMethod(OfType.class, OfType::value, () -> "");
+		final var type = invoked.annotationValueOnMethod(OfType.class, OfType::value, () -> "");
 
 		if (!type.isEmpty()) {
 			return type;
 		}
 
-		return invoked.getMethodNameCapped();
+		return invoked.findOnDeclaringClass(OfType.class).map(OfType::value).orElseGet(invoked::getSimpleClassName);
+	}
+
+	@Override
+	public String getInvoking() {
+		return invoked.findOnMethod(Invoking.class).map(Invoking::value).orElse("");
 	}
 
 	@Override

@@ -40,7 +40,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 	@Override
 	public CompletableFuture<ExecutedInstance> submit(final BoundInstance task) {
 
-		if (task.getResolvedInstance().getExecutionModel() == InvocationModel.SYNC) {
+		if (task.getResolvedInstance().getInvocationModel() == InvocationModel.SYNC) {
 			try {
 				return CompletableFuture.completedFuture(this.execute(task));
 			} catch (Exception e) {

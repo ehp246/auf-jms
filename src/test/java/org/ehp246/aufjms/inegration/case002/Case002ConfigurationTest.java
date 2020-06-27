@@ -30,7 +30,7 @@ public class Case002ConfigurationTest {
 
 		Assertions.assertEquals(-1, countor.get());
 
-		Assertions.assertEquals(0, countor.inc());
+		Assertions.assertEquals(0, countor.add(1));
 
 		Assertions.assertEquals(0, countor.get());
 	}

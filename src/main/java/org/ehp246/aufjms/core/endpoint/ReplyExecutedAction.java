@@ -14,11 +14,11 @@ import org.ehp246.aufjms.core.reflection.InvocationOutcome;
  *
  */
 public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
-	private final MessagePortProvider portBinder;
+	private final MessagePortProvider portProvider;
 
 	public ReplyExecutedAction(final MessagePortProvider portProvider) {
 		super();
-		this.portBinder = portProvider;
+		this.portProvider = portProvider;
 	}
 
 	@Override
@@ -28,7 +28,7 @@ public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
 			return;
 		}
 
-		portBinder.get(msg::getReplyTo).accept(new MessageSupplier() {
+		portProvider.get(msg::getReplyTo).accept(new MessageSupplier() {
 			private final InvocationOutcome<?> outcome = instance.getOutcome();
 
 			@Override
@@ -43,7 +43,8 @@ public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
 
 			@Override
 			public List<?> getBodyValues() {
-				return outcome.hasReturned() ? List.of(instance.getOutcome().getReturned())
+				return outcome.hasReturned()
+						? outcome.getReturned() != null ? List.of(outcome.getReturned()) : List.of()
 						: List.of(outcome.getThrown());
 			}
 
@@ -60,6 +61,11 @@ public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
 			@Override
 			public String getGroupId() {
 				return msg.getGroupId();
+			}
+
+			@Override
+			public String getInvoking() {
+				return null;
 			}
 
 		});

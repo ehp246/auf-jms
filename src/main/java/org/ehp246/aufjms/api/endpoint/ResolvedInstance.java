@@ -13,7 +13,7 @@ public interface ResolvedInstance {
 
 	Method getMethod();
 
-	default InvocationModel getExecutionModel() {
+	default InvocationModel getInvocationModel() {
 		return InvocationModel.DEFAULT;
 	}
 

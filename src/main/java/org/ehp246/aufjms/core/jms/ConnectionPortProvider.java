@@ -15,6 +15,7 @@ import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.MsgPortContext;
+import org.ehp246.aufjms.api.jms.MsgPropertyName;
 import org.ehp246.aufjms.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,13 +72,18 @@ public class ConnectionPortProvider implements MessagePortProvider {
 
 				message.setJMSDestination(supplier.getTo());
 				message.setJMSReplyTo(supplier.getReplyTo());
+
 				/*
 				 * JMS headers
 				 */
 				message.setJMSType(msgSupplier.getType());
 				message.setJMSCorrelationID(msgSupplier.getCorrelationId());
+				message.setStringProperty(MsgPropertyName.GroupId, msgSupplier.getGroupId());
 
-				message.setStringProperty("JMSXGroupID", msgSupplier.getGroupId());
+				/*
+				 * Framework headers
+				 */
+				message.setStringProperty(MsgPropertyName.Invoking, msgSupplier.getInvoking());
 
 				try (final MessageProducer producer = session.createProducer(destination)) {
 

@@ -12,7 +12,7 @@ public class MsgPropertyName {
 		super();
 	}
 
-	public static final String Eexecuting = "AufJmsExecuting";
+	public static final String Invoking = "AufJmsInvoking";
 	public static final String ServerThrown = "ServerThrown";
 	public static final String TTL = "Ttl";
 	public static final String GroupId = "JMSXGroupID";

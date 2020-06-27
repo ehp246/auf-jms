@@ -121,7 +121,7 @@ public class ProxyInvoked<T> {
 	 * @param def
 	 * @return
 	 */
-	public <A extends Annotation, V> V valueOnMethod(final Class<A> annotationClass, Function<A, V> mapper,
+	public <A extends Annotation, V> V annotationValueOnMethod(final Class<A> annotationClass, Function<A, V> mapper,
 			Supplier<V> supplier) {
 		return this.findOnMethod(annotationClass).map(mapper).orElseGet(supplier);
 	}
@@ -137,5 +137,9 @@ public class ProxyInvoked<T> {
 	public String getMethodNameCapped() {
 		final var type = this.method.getName();
 		return type.substring(0, 1).toUpperCase() + type.substring(1);
+	}
+
+	public String getSimpleClassName() {
+		return target.getClass().getSimpleName();
 	}
 }

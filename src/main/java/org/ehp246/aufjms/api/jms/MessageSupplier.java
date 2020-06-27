@@ -8,6 +8,8 @@ public interface MessageSupplier {
 
 	String getType();
 
+	String getInvoking();
+
 	List<?> getBodyValues();
 
 	default Long getTtl() {
