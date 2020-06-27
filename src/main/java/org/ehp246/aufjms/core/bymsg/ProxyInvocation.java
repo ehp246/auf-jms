@@ -15,6 +15,7 @@ import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfTimeout;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
@@ -46,8 +47,10 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	private final ProxyInvoked<Object> invoked;
 	private final String correlationId;
 	private final long timeout;
+	private final FromBody<String> fromBody;
 
-	public ProxyInvocation(Object target, Method method, Object[] args) {
+	public ProxyInvocation(final Object target, final Method method, final Object[] args,
+			final FromBody<String> fromBody) {
 		super();
 
 		this.invoked = new ProxyInvoked<Object>(target, method, args);
@@ -58,6 +61,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 				? Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null)
 				: UUID.randomUUID().toString();
 		this.timeout = this.invoked.findOnMethod(OfTimeout.class).map(OfTimeout::value).orElse((long) -1);
+		this.fromBody = fromBody;
 	}
 
 	public boolean isReplyExpected() {
@@ -91,7 +95,26 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	}
 
 	public void onReply(Msg msg) {
-		LOGGER.trace("Received reply for {}", msg.getType());
+		LOGGER.trace("Received reply");
+
+		this.fromBody.perform(msg.getBodyAsText(), List.of(new FromBody.Receiver() {
+
+			@Override
+			public List<? extends Annotation> getAnnotations() {
+				return List.of(invoked.getMethod().getAnnotations());
+			}
+
+			@Override
+			public Class<?> getType() {
+				return invoked.getReturnType();
+			}
+
+			@Override
+			public void receive(Object value) {
+				future.complete(value);
+			}
+
+		}));
 	}
 
 	@Override

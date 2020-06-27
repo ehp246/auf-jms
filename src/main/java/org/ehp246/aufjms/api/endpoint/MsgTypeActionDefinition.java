@@ -16,7 +16,7 @@ public interface MsgTypeActionDefinition {
 
 	Map<String, Method> getMethods();
 
-	InstanceScope getScope();
+	InstanceScope getInstanceScope();
 
-	ExecutionModel getExecutionModel();
+	InvocationModel getInvocationModel();
 }

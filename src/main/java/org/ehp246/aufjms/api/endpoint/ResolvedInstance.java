@@ -13,8 +13,8 @@ public interface ResolvedInstance {
 
 	Method getMethod();
 
-	default ExecutionModel getExecutionModel() {
-		return ExecutionModel.DEFAULT;
+	default InvocationModel getExecutionModel() {
+		return InvocationModel.DEFAULT;
 	}
 
 	default Consumer<ExecutedInstance> postExecution() {

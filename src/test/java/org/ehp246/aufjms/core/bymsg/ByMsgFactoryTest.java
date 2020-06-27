@@ -33,7 +33,8 @@ public class ByMsgFactoryTest {
 
 	private final ReplyToNameSupplier respondTo = () -> null;
 
-	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo);
+	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo,
+			null);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -63,7 +64,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void destination001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(DestinationTestCase.Case001.class);
 
 		newInstance.m001();
@@ -73,7 +74,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void destination002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(DestinationTestCase.Case002.class);
 
 		newInstance.m001();
@@ -91,7 +92,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void correlationId001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -121,7 +122,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void type001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -153,7 +154,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -169,7 +170,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type003() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
@@ -182,7 +183,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void body001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(BodyTestCase.class);
 		newInstance.m001();
 
@@ -222,7 +223,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(BodyTestCase.class);
 		newInstance.m002("");
 
@@ -232,7 +233,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body003() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002("", null, expected);
@@ -244,7 +245,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body004() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo)
+		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
 				.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m003("", null, expected);

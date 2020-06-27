@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.ehp246.aufjms.api.jms.MessageBodyWriter;
+import org.ehp246.aufjms.api.jms.ToBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Lei Yang
  *
  */
-public class JacksonBodyWriter implements MessageBodyWriter<String> {
+public class JacksonBodyWriter implements ToBody<String> {
 	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonBodyWriter.class);
 
 	private final ObjectMapper objectMapper;
@@ -25,7 +25,7 @@ public class JacksonBodyWriter implements MessageBodyWriter<String> {
 	}
 
 	@Override
-	public String write(final List<?> bodyValue) {
+	public String perform(final List<?> bodyValue) {
 		try {
 			String json = null;
 			if (bodyValue == null) {

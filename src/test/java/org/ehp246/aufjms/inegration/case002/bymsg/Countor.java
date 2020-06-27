@@ -1,6 +1,7 @@
 package org.ehp246.aufjms.inegration.case002.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.OfType;
 
 /**
@@ -8,11 +9,14 @@ import org.ehp246.aufjms.annotation.OfType;
  *
  */
 @ByMsg("queue://org.ehp246.aufjms.inegration.case002.Case002Configuration.request")
-public interface Calculator {
-	public void setMem(int i);
+@OfType("Calculator")
+public interface Countor {
+	@Invoking("setMem")
+	public void set(int i);
 
-	public int incMem(int i);
+	@Invoking("addMem")
+	public int inc();
 
-	@OfType("Calculator")
-	public int add(int i, int j);
+	@Invoking("getMem")
+	public int get();
 }

@@ -63,7 +63,10 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 							pubSubDomain) -> destintationNameResolver.resolve(destinationName));
 					container.setupMessageListener((MessageListener) message -> {
 						final var msg = ToMsg.from(message);
+
+						MDC.put(MdcKeys.MSG_TYPE, msg.getType());
 						MDC.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
+
 						defaultMsgDispatcher.dispatch(msg);
 					});
 				}

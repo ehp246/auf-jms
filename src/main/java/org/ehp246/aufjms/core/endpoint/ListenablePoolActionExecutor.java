@@ -9,7 +9,7 @@ import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.api.slf4j.MdcKeys;
@@ -40,7 +40,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 	@Override
 	public CompletableFuture<ExecutedInstance> submit(final BoundInstance task) {
 
-		if (task.getResolvedInstance().getExecutionModel() == ExecutionModel.SYNC) {
+		if (task.getResolvedInstance().getExecutionModel() == InvocationModel.SYNC) {
 			try {
 				return CompletableFuture.completedFuture(this.execute(task));
 			} catch (Exception e) {
@@ -54,14 +54,20 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 		final var future = new CompletableFuture<ExecutedInstance>();
 
 		this.pool.submitListenable(() -> {
+			MDC.put(MdcKeys.MSG_TYPE, task.getMsg().getType());
 			MDC.put(MdcKeys.CORRELATION_ID, task.getMsg().getCorrelationId());
+
 			return this.execute(task);
 		}).addCallback(executed -> {
+			MDC.put(MdcKeys.MSG_TYPE, task.getMsg().getType());
 			MDC.remove(MdcKeys.CORRELATION_ID);
+
 			future.complete(executed);
 		}, e -> {
 			LOGGER.error("Execution failed:", e);
+			MDC.put(MdcKeys.MSG_TYPE, task.getMsg().getType());
 			MDC.remove(MdcKeys.CORRELATION_ID);
+
 			future.completeExceptionally(e);
 		});
 
@@ -71,7 +77,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 	private ExecutedInstance execute(final BoundInstance task) {
 		final var msg = task.getMsg();
 
-		LOGGER.debug("Executing {}", msg.getType());
+		LOGGER.trace("Executing");
 
 		final var resolved = task.getResolvedInstance();
 
@@ -112,7 +118,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 		});
 
-		LOGGER.debug("Executed {}", msg.getType());
+		LOGGER.trace("Executed");
 
 		return performed;
 	}

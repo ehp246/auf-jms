@@ -1,8 +1,8 @@
 package org.ehp246.aufjms.core.endpoint.case001;
 
-import org.ehp246.aufjms.annotation.Executing;
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.ForMsg;
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 
 public class Cases {
@@ -19,7 +19,7 @@ public class Cases {
 		/**
 		 * This method should take precedence.
 		 */
-		@Executing
+		@Invoking
 		public void m001() {
 
 		}
@@ -29,13 +29,13 @@ public class Cases {
 		}
 	}
 
-	@ForMsg(execution = ExecutionModel.SYNC)
+	@ForMsg(invocation = InvocationModel.SYNC)
 	public static class Case003 {
 
 		/**
 		 * This method should take precedence.
 		 */
-		@Executing
+		@Invoking
 		public void m001() {
 
 		}
@@ -44,7 +44,7 @@ public class Cases {
 	@ForMsg(scope = InstanceScope.BEAN)
 	public static class Case004 {
 
-		@Executing
+		@Invoking
 		public void m001() {
 
 		}
@@ -53,7 +53,7 @@ public class Cases {
 	@ForMsg
 	public static class Case005 {
 
-		@Executing
+		@Invoking
 		public void m001() {
 
 		}

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.ehp246.aufjms.api.endpoint.ExecutingTypeResolver;
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionRegistry;
@@ -82,12 +82,12 @@ public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, Exec
 
 			@Override
 			public InstanceScope getScope() {
-				return definition.getScope();
+				return definition.getInstanceScope();
 			}
 
 			@Override
-			public ExecutionModel getExecutionModel() {
-				return definition.getExecutionModel();
+			public InvocationModel getExecutionModel() {
+				return definition.getInvocationModel();
 			}
 		};
 	}

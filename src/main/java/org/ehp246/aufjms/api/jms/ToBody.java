@@ -7,6 +7,6 @@ import java.util.List;
  *
  */
 @FunctionalInterface
-public interface MessageBodyWriter<T> {
-	T write(List<?> values);
+public interface ToBody<T> {
+	T perform(List<?> values);
 }

@@ -6,7 +6,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 
 /**
@@ -31,5 +31,5 @@ public @interface ForMsg {
 	 */
 	InstanceScope scope() default InstanceScope.MESSAGE;
 
-	ExecutionModel execution() default ExecutionModel.DEFAULT;
+	InvocationModel invocation() default InvocationModel.DEFAULT;
 }

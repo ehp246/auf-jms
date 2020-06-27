@@ -1,6 +1,6 @@
 package org.ehp246.aufjms.core.endpoint.case008;
 
-import org.ehp246.aufjms.annotation.Executing;
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.ForMsg;
 
 /**
@@ -15,12 +15,12 @@ import org.ehp246.aufjms.annotation.ForMsg;
  */
 @ForMsg("MultiType008-v1")
 public class MultiType008 {
-	@Executing("m001")
+	@Invoking("m001")
 	public void m001() {
 
 	}
 
-	@Executing
+	@Invoking
 	public void m002() {
 
 	}

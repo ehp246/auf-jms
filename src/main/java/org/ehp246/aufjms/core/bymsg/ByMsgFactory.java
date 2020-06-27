@@ -12,6 +12,7 @@ import javax.jms.Destination;
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
+import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
@@ -31,17 +32,19 @@ public class ByMsgFactory {
 	private final DestinationNameResolver nameResolver;
 	private final Map<String, ResolvedInstance> correlMap;
 	private final ReplyToNameSupplier replyToSupplier;
+	private final FromBody<String> fromBody;
 
 	public ByMsgFactory(
 			final @Qualifier(ReplyConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
 			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver,
-			final ReplyToNameSupplier respondToSupplier) {
+			final ReplyToNameSupplier replyToSupplier, final FromBody<String> fromBody) {
 		super();
 		this.portProvider = Objects.requireNonNull(pipeSupplier);
 		this.correlMap = Objects.requireNonNull(correlMap);
 		this.nameResolver = Objects.requireNonNull(nameResolver);
 		// Allow null to forego request/response support.
-		this.replyToSupplier = respondToSupplier;
+		this.replyToSupplier = replyToSupplier;
+		this.fromBody = fromBody;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,7 +85,7 @@ public class ByMsgFactory {
 								.bindTo(proxy).invokeWithArguments(args);
 					}
 
-					final var invocation = new ProxyInvocation(proxy, method, args);
+					final var invocation = new ProxyInvocation(proxy, method, args, fromBody);
 
 					if (invocation.isReplyExpected()) {
 						this.correlMap.put(invocation.getCorrelationId(), invocation);

@@ -1,7 +1,8 @@
 package org.ehp246.aufjms.core.jackson;
 
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
-import org.ehp246.aufjms.api.jms.MessageBodyWriter;
+import org.ehp246.aufjms.api.jms.FromBody;
+import org.ehp246.aufjms.api.jms.ToBody;
 import org.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,7 @@ public class JacksonConfiguration {
 	}
 
 	@Bean
-	public MessageBodyWriter<?> messageBodyWriter(@Qualifier(BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
+	public ToBody<?> messageBodyWriter(@Qualifier(BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
 		return new JacksonBodyWriter(objectMapper);
 	}
 
@@ -37,4 +38,9 @@ public class JacksonConfiguration {
 		return new JacksonActionBinder(objectMapper);
 	}
 
+	@Bean
+	public FromBody<String> fromBody(
+			@Qualifier(JacksonConfiguration.BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
+		return new JacksonProvider(objectMapper);
+	}
 }

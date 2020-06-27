@@ -6,7 +6,7 @@ package org.ehp246.aufjms.api.endpoint;
  * @author Lei Yang
  *
  */
-public enum ExecutionModel {
+public enum InvocationModel {
 	/**
 	 * Default. No special treatment required. Determined by the executor service.
 	 */

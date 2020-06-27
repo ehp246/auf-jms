@@ -9,10 +9,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.ehp246.aufjms.annotation.Executing;
 import org.ehp246.aufjms.annotation.ForMsg;
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.ehp246.aufjms.util.StreamOf;
@@ -28,6 +28,46 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  *
  */
 public class ForMsgScanner {
+	private static class MsgTypeActionDefinitionImplementation implements MsgTypeActionDefinition {
+		private final ForMsg annotation;
+		private final String msgType;
+		private final Class<?> instanceType;
+		private final Map<String, Method> methods;
+
+		private MsgTypeActionDefinitionImplementation(HashMap<String, Method> invokings, ForMsg annotation,
+				String msgType, Class<?> instanceType) {
+			this.annotation = annotation;
+			this.msgType = msgType;
+			this.instanceType = instanceType;
+			this.methods = Map.copyOf(invokings);
+		}
+
+		@Override
+		public String getMsgType() {
+			return msgType;
+		}
+
+		@Override
+		public Class<?> getInstanceType() {
+			return instanceType;
+		}
+
+		@Override
+		public Map<String, Method> getMethods() {
+			return methods;
+		}
+
+		@Override
+		public InstanceScope getInstanceScope() {
+			return annotation.scope();
+		}
+
+		@Override
+		public InvocationModel getInvocationModel() {
+			return annotation.invocation();
+		}
+	}
+
 	private final static Logger LOGGER = LoggerFactory.getLogger(ForMsgScanner.class);
 
 	private final Set<String> scanPackages;
@@ -69,32 +109,32 @@ public class ForMsgScanner {
 			throw new RuntimeException("Un-instantiable type " + instanceType.getName());
 		}
 
-		final var executings = new HashMap<String, Method>();
+		final var invokings = new HashMap<String, Method>();
 		final var reflected = new ReflectingType<>(instanceType);
 
 		// Search for the annotation first
-		for (Method method : reflected.findMethods(Executing.class)) {
-			final var executing = Optional.of(method.getAnnotation(Executing.class).value().strip())
+		for (var method : reflected.findMethods(Invoking.class)) {
+			final var invokingName = Optional.of(method.getAnnotation(Invoking.class).value().strip())
 					.filter(name -> name.length() > 0).orElse("");
-			if (executings.containsKey(executing)) {
+			if (invokings.containsKey(invokingName)) {
 				throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 			}
-			executings.put(executing, method);
+			invokings.put(invokingName, method);
 		}
 
 		// No annotated methods found. Fall back to name convention
-		if (executings.size() == 0) {
+		if (invokings.size() == 0) {
 			final var found = reflected.findMethods("execute");
 			if (found.size() > 1) {
 				throw new RuntimeException("Duplicate by-convention methods found on " + instanceType.getName());
 			}
 			if (found.size() == 1) {
-				executings.put("", found.get(0));
+				invokings.put("", found.get(0));
 			}
 		}
 
 		// There should be at least one executing method.
-		if (executings.size() == 0) {
+		if (invokings.size() == 0) {
 			throw new RuntimeException("No executing method defined by " + instanceType.getName());
 		}
 
@@ -105,34 +145,6 @@ public class ForMsgScanner {
 
 		LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
-		return new MsgTypeActionDefinition() {
-			private final Map<String, Method> methods = Map.copyOf(executings);
-
-			@Override
-			public String getMsgType() {
-				return msgType;
-			}
-
-			@Override
-			public Class<?> getInstanceType() {
-				return instanceType;
-			}
-
-			@Override
-			public Map<String, Method> getMethods() {
-				return methods;
-			}
-
-			@Override
-			public InstanceScope getScope() {
-				return annotation.scope();
-			}
-
-			@Override
-			public ExecutionModel getExecutionModel() {
-				return annotation.execution();
-			}
-		};
-
+		return new MsgTypeActionDefinitionImplementation(invokings, annotation, msgType, instanceType);
 	}
 }

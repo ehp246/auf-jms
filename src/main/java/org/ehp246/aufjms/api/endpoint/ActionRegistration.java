@@ -14,7 +14,7 @@ public interface ActionRegistration {
 		return InstanceScope.MESSAGE;
 	}
 	
-	default ExecutionModel getExecutionModel() {
-		return ExecutionModel.DEFAULT;
+	default InvocationModel getExecutionModel() {
+		return InvocationModel.DEFAULT;
 	}
 }

@@ -1,6 +1,6 @@
 package org.ehp246.aufjms.enableformsg.case002;
 
-import org.ehp246.aufjms.annotation.Executing;
+import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.ForMsg;
 
 @ForMsg
@@ -11,7 +11,7 @@ public class Calc001 {
 		mem = i;
 	}
 
-	@Executing
+	@Invoking
 	public int add(int i, int j) {
 		return i + j;
 	}

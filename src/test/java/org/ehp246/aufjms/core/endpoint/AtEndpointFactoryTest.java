@@ -5,7 +5,7 @@ package org.ehp246.aufjms.core.endpoint;
 
 import java.util.Set;
 
-import org.ehp246.aufjms.api.endpoint.ExecutionModel;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.endpoint.case001.Cases;
 import org.ehp246.aufjms.core.endpoint.case001.Cases.Case001;
@@ -91,7 +91,7 @@ public class AtEndpointFactoryTest {
 		Assertions.assertEquals(Case001.class, resolvedInstance.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case001.class).findMethod("execute"),
 				resolvedInstance.getMethod());
-		Assertions.assertEquals(ExecutionModel.DEFAULT, resolvedInstance.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.DEFAULT, resolvedInstance.getExecutionModel());
 
 		final var resolved2 = resolver.resolve(msg);
 
@@ -110,7 +110,7 @@ public class AtEndpointFactoryTest {
 
 		Assertions.assertEquals(Case002.class, resolved.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case002.class).findMethod("m001"), resolved.getMethod());
-		Assertions.assertEquals(ExecutionModel.DEFAULT, resolved.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.DEFAULT, resolved.getExecutionModel());
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class AtEndpointFactoryTest {
 
 		Assertions.assertEquals(Case003.class, resolved.getInstance().getClass());
 		Assertions.assertEquals(new ReflectingType<>(Case003.class).findMethod("m001"), resolved.getMethod());
-		Assertions.assertEquals(ExecutionModel.SYNC, resolved.getExecutionModel());
+		Assertions.assertEquals(InvocationModel.SYNC, resolved.getExecutionModel());
 	}
 
 	@Test
