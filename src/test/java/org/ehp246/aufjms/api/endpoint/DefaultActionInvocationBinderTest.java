@@ -33,15 +33,15 @@ class DefaultActionInvocationBinderTest {
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 	private final ReflectingType<Case001> case001Type = new ReflectingType<Case001>(Case001.class);
-	private final DefaultActionInvocationBinder jacksonBinder = new DefaultActionInvocationBinder(
+	private final DefaultActionInvocationBinder binder = new DefaultActionInvocationBinder(
 			new JacksonProvider(objectMapper));
 
 	@Test
-	public void jacksonBinder001() throws Exception {
+	public void binder001() throws Exception {
 		final var mq = Mockito.mock(Msg.class);
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -66,11 +66,11 @@ class DefaultActionInvocationBinderTest {
 	}
 
 	@Test
-	public void jacksonBinder002() throws Exception {
+	public void binder002() throws Exception {
 		final var mq = Mockito.mock(Msg.class);
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -95,11 +95,11 @@ class DefaultActionInvocationBinderTest {
 	}
 
 	@Test
-	public void jacksonBinder003() throws Exception {
+	public void binder003() throws Exception {
 		final var mq = Mockito.mock(Msg.class);
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -128,44 +128,11 @@ class DefaultActionInvocationBinderTest {
 	}
 
 	@Test
-	public void jacksonBinder004() throws Exception {
+	public void binder005() throws Exception {
 		final var mq = Mockito.mock(Msg.class);
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
-
-			@Override
-			public Method getMethod() {
-				return case001Type.findMethod("m001", String.class, int.class, int.class);
-			}
-
-			@Override
-			public Object getInstance() {
-				return case001;
-			}
-		}, new ActionInvocationContext() {
-
-			@Override
-			public Msg getMsg() {
-				return mq;
-			}
-		}).invoke();
-
-		final var returned = outcome.getReturned();
-
-		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(Object[].class, returned.getClass());
-		Assertions.assertEquals(mq, ((Object[]) returned)[0]);
-		Assertions.assertEquals(null, ((Object[]) returned)[1]);
-		Assertions.assertEquals(null, outcome.getThrown());
-	}
-
-	@Test
-	public void jacksonBinder005() throws Exception {
-		final var mq = Mockito.mock(Msg.class);
-		final Case001 case001 = new Case001();
-
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -189,11 +156,11 @@ class DefaultActionInvocationBinderTest {
 	}
 
 	@Test
-	public void jacksonBinder006() throws Exception {
+	public void binder006() throws Exception {
 		final var mq = Mockito.mock(Msg.class);
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -218,14 +185,14 @@ class DefaultActionInvocationBinderTest {
 	}
 
 	@Test
-	public void jacksonBinder007() {
+	public void binder007() {
 		final var mq = Mockito.mock(Msg.class);
 		Mockito.when(mq.getCorrelationId()).thenReturn("1");
 		Mockito.when(mq.getBodyAsText()).thenReturn("1");
 
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
@@ -251,7 +218,7 @@ class DefaultActionInvocationBinderTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void jacksotnBinder008() throws JsonProcessingException {
+	public void binder008() throws JsonProcessingException {
 		final var mq = Mockito.mock(Msg.class);
 		final var msg = Mockito.mock(Message.class);
 		Mockito.when(mq.getCorrelationId()).thenReturn("1");
@@ -263,7 +230,7 @@ class DefaultActionInvocationBinderTest {
 
 		final Case001 case001 = new Case001();
 
-		final var outcome = jacksonBinder.bind(new ResolvedInstance() {
+		final var outcome = binder.bind(new ResolvedInstance() {
 
 			@Override
 			public Method getMethod() {
