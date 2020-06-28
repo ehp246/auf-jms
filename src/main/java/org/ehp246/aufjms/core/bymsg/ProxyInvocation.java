@@ -97,7 +97,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	public void onReply(Msg msg) {
 		LOGGER.trace("Received reply");
 
-		this.fromBody.perform(msg.getBodyAsText(), List.of(new FromBody.Receiver() {
+		this.fromBody.from(msg.getBodyAsText(), List.of(new FromBody.Receiver() {
 
 			@Override
 			public List<? extends Annotation> getAnnotations() {

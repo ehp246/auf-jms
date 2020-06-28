@@ -26,7 +26,7 @@ public class TextMessageCreator implements MessageCreator<TextMessage> {
 	public TextMessage create(MsgPortContext context) {
 		try {
 			return context.getSession()
-					.createTextMessage(this.bodyWriter.perform(context.getMsgSupplier().getBodyValues()));
+					.createTextMessage(this.bodyWriter.to(context.getMsgSupplier().getBodyValues()));
 		} catch (JMSException e) {
 			LOGGER.debug("Failed to create message: " + e.getMessage());
 

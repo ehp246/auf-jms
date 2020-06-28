@@ -9,7 +9,7 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface FromBody<B> {
-	void perform(B body, List<Receiver> receivers);
+	void from(B body, List<Receiver> receivers);
 
 	interface Receiver {
 		List<? extends Annotation> getAnnotations();

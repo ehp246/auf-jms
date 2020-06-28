@@ -80,7 +80,7 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 		}
 
 		if (receivers.size() > 0) {
-			fromBody.perform(ctx.getMsg().getBodyAsText(), receivers);
+			fromBody.from(ctx.getMsg().getBodyAsText(), receivers);
 		}
 
 		return new ReflectingInvocation(resolved.getInstance(), method, arguments);

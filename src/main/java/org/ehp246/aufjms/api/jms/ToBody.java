@@ -8,5 +8,5 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface ToBody<T> {
-	T perform(List<?> values);
+	T to(List<?> values);
 }
