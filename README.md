@@ -2,19 +2,18 @@
 A JMS development library that tries its best to hide JMS.
 
 # To do:
-* Logging
 * Tracing
-* Jackson provider re-factor
-* ByMsg scanner re-factor
-* Request/Response support
-* Executor Queue Re-factor
 * Instance field/setter binding
 * Configurable timeout
 * Configurable TTL
+* Exception propagation/Proxy Exception
+* CollectionOf
+* SpEL support
+* Async reply
+* ByMsg scanner re-factor
+* Executor Queue Re-factor
 * Dynamic ReplyTo
 * JMS GroupId
 * Custom Property
-* Exception propagation/Proxy Exception
-* CollectionOf
-* Delayed Action loading
+* Delayed ForMsg loading?
 * Object message support?
