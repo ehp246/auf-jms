@@ -1,5 +1,6 @@
 package org.ehp246.aufjms.core.jackson;
 
+import org.ehp246.aufjms.api.endpoint.DefaultActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.ToBody;
@@ -33,13 +34,12 @@ public class JacksonConfiguration {
 	}
 
 	@Bean
-	public ActionInvocationBinder actionInvocationBinder(
-			@Qualifier(JacksonConfiguration.BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
-		return new JacksonActionBinder(objectMapper);
+	public ActionInvocationBinder actionInvocationBinder(FromBody<String> fromBody) {
+		return new DefaultActionInvocationBinder(fromBody);
 	}
 
 	@Bean
-	public FromBody<String> fromBody(
+	public JacksonProvider jacksonProvider(
 			@Qualifier(JacksonConfiguration.BEAN_NAME_OBJECT_MAPPER) final ObjectMapper objectMapper) {
 		return new JacksonProvider(objectMapper);
 	}

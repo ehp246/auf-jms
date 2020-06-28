@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.action;
+package org.ehp246.aufjms.api.endpoint;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -6,10 +6,8 @@ import java.util.List;
 
 import javax.jms.Message;
 
-import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.aufjms.core.jackson.JacksonActionBinder;
+import org.ehp246.aufjms.core.jackson.JacksonProvider;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,14 +22,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+/**
+ * @author Lei Yang
+ *
+ */
 @RunWith(JUnitPlatform.class)
-public class JacksonBinderTest {
+class DefaultActionInvocationBinderTest {
 	private final ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 	private final ReflectingType<Case001> case001Type = new ReflectingType<Case001>(Case001.class);
-	private final JacksonActionBinder jacksonBinder = new JacksonActionBinder(objectMapper);
+	private final DefaultActionInvocationBinder jacksonBinder = new DefaultActionInvocationBinder(
+			new JacksonProvider(objectMapper));
 
 	@Test
 	public void jacksonBinder001() throws Exception {

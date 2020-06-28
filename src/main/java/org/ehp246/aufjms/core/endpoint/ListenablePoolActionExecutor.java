@@ -6,7 +6,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
-import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -81,12 +80,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 
 		final var resolved = task.getResolvedInstance();
 
-		final var bindOutcome = CatchingInvoke.invoke(() -> binder.bind(resolved, new ActionInvocationContext() {
-			@Override
-			public Msg getMsg() {
-				return msg;
-			}
-		}));
+		final var bindOutcome = CatchingInvoke.invoke(() -> binder.bind(resolved, () -> msg));
 
 		final var outcome = bindOutcome.getReturned().invoke();
 

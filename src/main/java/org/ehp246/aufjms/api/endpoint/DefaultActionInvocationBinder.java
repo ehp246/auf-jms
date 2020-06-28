@@ -14,6 +14,7 @@ import javax.jms.Message;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfProperty;
 import org.ehp246.aufjms.annotation.OfType;
+import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.ReflectingInvocation;
 import org.slf4j.Logger;
@@ -24,14 +25,21 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public abstract class AbstractActionInvocationBinder implements ActionInvocationBinder {
-	private final static Logger LOGGER = LoggerFactory.getLogger(AbstractActionInvocationBinder.class);
+public class DefaultActionInvocationBinder implements ActionInvocationBinder {
+	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultActionInvocationBinder.class);
 
 	protected static final Map<Class<? extends Annotation>, Function<Msg, String>> HEADER_VALUE_SUPPLIERS = Map
 			.of(OfCorrelationId.class, Msg::getCorrelationId, OfType.class, Msg::getType);
 
 	protected static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
 			.copyOf(HEADER_VALUE_SUPPLIERS.keySet());
+
+	private final FromBody<String> fromBody;
+
+	public DefaultActionInvocationBinder(final FromBody<String> fromBody) {
+		super();
+		this.fromBody = fromBody;
+	}
 
 	@Override
 	public ReflectingInvocation bind(final ResolvedInstance resolved, final ActionInvocationContext ctx) {
@@ -43,30 +51,40 @@ public abstract class AbstractActionInvocationBinder implements ActionInvocation
 		final var parameters = method.getParameters();
 		final var arguments = new Object[parameters.length];
 
-		final var boundMarkers = bindContextArgs(method.getParameters(), ctx, arguments);
+		final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
 
-		final var bodyArgPositions = new ArrayList<Integer>();
+		final var receivers = new ArrayList<FromBody.Receiver>();
 		for (int i = 0; i < boundMarkers.length; i++) {
 			if (boundMarkers[i]) {
 				continue;
 			}
-			bodyArgPositions.add(i);
+
+			final var ref = Integer.valueOf(i);
+			receivers.add(new FromBody.Receiver() {
+
+				@Override
+				public void receive(Object value) {
+					arguments[ref] = value;
+				}
+
+				@Override
+				public Class<?> getType() {
+					return parameters[ref].getType();
+				}
+
+				@Override
+				public List<? extends Annotation> getAnnotations() {
+					return List.of(parameters[ref].getAnnotations());
+				}
+			});
 		}
 
-		if (bodyArgPositions.size() > 0) {
-			try {
-				bindBodyArgs(parameters, bodyArgPositions, ctx.getMsg(), arguments);
-			} catch (Exception e) {
-				LOGGER.error("Failed to bind body arguments", e);
-				throw new RuntimeException();
-			}
+		if (receivers.size() > 0) {
+			fromBody.perform(ctx.getMsg().getBodyAsText(), receivers);
 		}
 
 		return new ReflectingInvocation(resolved.getInstance(), method, arguments);
 	}
-
-	protected abstract void bindBodyArgs(Parameter[] parameters, List<Integer> bodyArgPositions, final Msg mq,
-			Object[] arguments) throws Exception;
 
 	/**
 	 * Fills in the context arguments at the index position. Returns indices of
@@ -82,15 +100,15 @@ public abstract class AbstractActionInvocationBinder implements ActionInvocation
 
 		for (int i = 0; i < parameters.length; i++) {
 			final var parameter = parameters[i];
-			final var mq = ctx.getMsg();
+			final var msg = ctx.getMsg();
 
 			// Bind by type
 			final var type = parameter.getType();
 			if (type.isAssignableFrom(Msg.class)) {
-				arguments[i] = mq;
+				arguments[i] = msg;
 				markers[i] = true;
 			} else if (type.isAssignableFrom(Message.class)) {
-				arguments[i] = mq.getMessage();
+				arguments[i] = msg.getMessage();
 				markers[i] = true;
 			}
 
@@ -99,7 +117,7 @@ public abstract class AbstractActionInvocationBinder implements ActionInvocation
 			var found = Stream.of(annotations)
 					.filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
 			if (found.isPresent()) {
-				arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(mq);
+				arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
 				markers[i] = true;
 			}
 
@@ -107,7 +125,7 @@ public abstract class AbstractActionInvocationBinder implements ActionInvocation
 			found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
 					.findAny();
 			if (found.isPresent()) {
-				arguments[i] = mq.getProperty(((OfProperty) found.get()).value(), parameter.getType());
+				arguments[i] = msg.getProperty(((OfProperty) found.get()).value(), parameter.getType());
 				markers[i] = true;
 			}
 		}
