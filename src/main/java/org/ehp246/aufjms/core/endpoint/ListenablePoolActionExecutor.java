@@ -9,7 +9,7 @@ import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.api.slf4j.MdcKeys;
 import org.ehp246.aufjms.core.reflection.CatchingInvoke;
@@ -97,7 +97,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 			}
 
 			@Override
-			public ResolvedInstance getInstance() {
+			public ResolvedExecutable getInstance() {
 				return resolved;
 			}
 		};

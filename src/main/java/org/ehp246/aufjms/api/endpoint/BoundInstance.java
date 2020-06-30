@@ -10,5 +10,5 @@ import org.ehp246.aufjms.api.jms.Msg;
 public interface BoundInstance {
 	Msg getMsg();
 
-	ResolvedInstance getResolvedInstance();
+	ResolvedExecutable getResolvedInstance();
 }

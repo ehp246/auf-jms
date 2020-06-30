@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.InvocationInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.core.formsg.ForMsgScanner;
@@ -28,7 +28,7 @@ public class AtEndpointFactory {
 
 	public MsgEndpoint newMsgEndpoint(final String destination, final Set<String> scanPackages) {
 		return new MsgEndpoint() {
-			private final ExecutingInstanceResolver resolver = new AutowireCapableInstanceResolver(
+			private final InvocationInstanceResolver resolver = new AutowireCapableInstanceResolver(
 					autowireCapableBeanFactory, newForMsgRegistry(scanPackages), postExecution);
 
 			@Override
@@ -37,7 +37,7 @@ public class AtEndpointFactory {
 			}
 
 			@Override
-			public ExecutingInstanceResolver getResolver() {
+			public InvocationInstanceResolver getResolver() {
 				return resolver;
 			}
 

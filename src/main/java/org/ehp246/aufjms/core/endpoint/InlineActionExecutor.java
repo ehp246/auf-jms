@@ -7,7 +7,7 @@ import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
 import org.ehp246.aufjms.api.endpoint.ActionInvocationContext;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.CatchingInvoke;
 import org.ehp246.aufjms.core.reflection.InvocationOutcome;
@@ -54,7 +54,7 @@ public class InlineActionExecutor implements ActionExecutor {
 				}
 
 				@Override
-				public ResolvedInstance getInstance() {
+				public ResolvedExecutable getInstance() {
 					return resolved;
 				}
 			});
@@ -70,7 +70,7 @@ public class InlineActionExecutor implements ActionExecutor {
 			}
 
 			@Override
-			public ResolvedInstance getInstance() {
+			public ResolvedExecutable getInstance() {
 				return resolved;
 			}
 

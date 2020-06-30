@@ -42,7 +42,7 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 	}
 
 	@Override
-	public ReflectingInvocation bind(final ResolvedInstance resolved, final ActionInvocationContext ctx) {
+	public ReflectingInvocation bind(final ResolvedExecutable resolved, final ActionInvocationContext ctx) {
 		final var method = resolved.getMethod();
 		if (method.getParameterCount() == 0) {
 			return new ReflectingInvocation(resolved.getInstance(), method, null);

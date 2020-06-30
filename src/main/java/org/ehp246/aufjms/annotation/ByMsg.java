@@ -24,4 +24,6 @@ public @interface ByMsg {
 	 * @return
 	 */
 	String value();
+
+	long timeout() default -1;
 }

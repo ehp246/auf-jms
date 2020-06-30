@@ -4,21 +4,17 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.jms.Destination;
 
 import org.ehp246.aufjms.annotation.ByMsg;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
-import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
-import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
+import org.ehp246.aufjms.core.reflection.ProxyInvoked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  * 
@@ -28,29 +24,23 @@ import org.springframework.beans.factory.annotation.Qualifier;
 public class ByMsgFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgFactory.class);
 
+	private final ReplyEndpointConfiguration replyConfig;
 	private final MessagePortProvider portProvider;
 	private final DestinationNameResolver nameResolver;
-	private final Map<String, ResolvedInstance> correlMap;
-	private final ReplyToNameSupplier replyToSupplier;
-	private final FromBody<String> fromBody;
 
-	public ByMsgFactory(
-			final @Qualifier(ReplyConfiguration.BEAN_NAME_CORRELATION_MAP) Map<String, ResolvedInstance> correlMap,
-			final MessagePortProvider pipeSupplier, final DestinationNameResolver nameResolver,
-			final ReplyToNameSupplier replyToSupplier, final FromBody<String> fromBody) {
+	public ByMsgFactory(final MessagePortProvider portProvider, final DestinationNameResolver nameResolver,
+			final ReplyEndpointConfiguration replyConfig) {
 		super();
-		this.portProvider = Objects.requireNonNull(pipeSupplier);
-		this.correlMap = Objects.requireNonNull(correlMap);
+		this.portProvider = Objects.requireNonNull(portProvider);
 		this.nameResolver = Objects.requireNonNull(nameResolver);
-		// Allow null to forego request/response support.
-		this.replyToSupplier = replyToSupplier;
-		this.fromBody = fromBody;
+		this.replyConfig = replyConfig;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T newInstance(final Class<T> annotatedInterface) {
 		final var destinatinName = annotatedInterface.getAnnotation(ByMsg.class).value();
 		final var port = portProvider.get(new MessagePortDestinationSupplier() {
+			private final String replyTo = replyConfig.getReplyToName();
 
 			@Override
 			public Destination getTo() {
@@ -59,7 +49,7 @@ public class ByMsgFactory {
 
 			@Override
 			public Destination getReplyTo() {
-				return replyToSupplier == null ? null : nameResolver.resolve(replyToSupplier.get());
+				return replyTo == null ? null : nameResolver.resolve(replyTo);
 			}
 
 		});
@@ -85,16 +75,17 @@ public class ByMsgFactory {
 								.bindTo(proxy).invokeWithArguments(args);
 					}
 
-					final var invocation = new ProxyInvocation(proxy, method, args, fromBody);
+					final var invocation = new ProxyInvocation(new ProxyInvoked<Object>(proxy, method, args),
+							replyConfig.getFromBody(), replyConfig.getTimeout());
 
 					if (invocation.isReplyExpected()) {
-						this.correlMap.put(invocation.getCorrelationId(), invocation);
+						replyConfig.getCorrelMap().put(invocation.getCorrelationId(), invocation);
 					}
 
 					try {
 						port.accept(invocation);
 					} catch (Exception e) {
-						this.correlMap.remove(invocation.getCorrelationId());
+						replyConfig.getCorrelMap().remove(invocation.getCorrelationId());
 						throw e;
 					}
 

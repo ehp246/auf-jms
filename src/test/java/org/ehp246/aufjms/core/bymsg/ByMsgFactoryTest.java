@@ -1,15 +1,13 @@
 package org.ehp246.aufjms.core.bymsg;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
-import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,10 +16,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 public class ByMsgFactoryTest {
-	private final Map<String, ResolvedInstance> correlMap = new HashMap<>();
 	private final AtomicReference<MessageSupplier> ref = new AtomicReference<MessageSupplier>(null);
 	private final AtomicReference<String> refDestination = new AtomicReference<>(null);
-	private final MessagePortProvider portProivder = supplier -> msgSupplier -> {
+	private final MessagePortProvider portProvider = supplier -> msgSupplier -> {
 		supplier.getTo();
 		ref.set(msgSupplier);
 		return null;
@@ -31,10 +28,9 @@ public class ByMsgFactoryTest {
 		return null;
 	};
 
-	private final ReplyToNameSupplier respondTo = () -> null;
+	private final ReplyEndpointConfiguration replyConfig = new ReplyEndpointConfiguration(() -> null, 1, null);
 
-	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo,
-			null);
+	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(portProvider, nameResolver, replyConfig);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -64,8 +60,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void destination001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(DestinationTestCase.Case001.class);
+		final var newInstance = aufProxyFactory.newInstance(DestinationTestCase.Case001.class);
 
 		newInstance.m001();
 
@@ -74,8 +69,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void destination002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(DestinationTestCase.Case002.class);
+		final var newInstance = aufProxyFactory.newInstance(DestinationTestCase.Case002.class);
 
 		newInstance.m001();
 
@@ -92,8 +86,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void correlationId001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
 
@@ -122,16 +115,15 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void type001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
-		Assertions.assertNotNull(ref.get().getCorrelationId(), "Should have correlation id");
-		Assertions.assertEquals(ref.get().getCorrelationId(), ref.get().getCorrelationId(), "Should not change");
-		Assertions.assertEquals("M001", ref.get().getType(), "Should derive from method name");
+
+		Assertions.assertEquals("TypeCase001", ref.get().getType(), "Type should derive from class name by default");
 
 		ref.set(null);
 		newInstance.m005();
+
 		Assertions.assertEquals("M005", ref.get().getType(), "Should derive from method name");
 
 		ref.set(null);
@@ -154,8 +146,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002(expected);
@@ -170,12 +161,33 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type003() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m007(expected, UUID.randomUUID().toString());
 		Assertions.assertEquals(expected, ref.get().getType(), "Should take the first annotated");
+	}
+
+	@Test
+	public void timeout001() {
+		final var newInstance = aufProxyFactory.newInstance(TimeoutTestCases.Case001.class);
+
+		Assertions.assertTimeout(Duration.ofMillis(100),
+				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
+				"Should use timeout from the global setting");
+
+		Assertions.assertTimeout(Duration.ofMillis(100),
+				() -> Assertions.assertThrows(TimeoutException.class, newInstance::m002),
+				"Should throw the exception witout wrapping");
+	}
+
+	@Test
+	public void timeout002() {
+		final var newInstance = aufProxyFactory.newInstance(TimeoutTestCases.Case002.class);
+
+		Assertions.assertTimeout(Duration.ofMillis(1000),
+				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
+				"Should use timeout from the annotation");
 	}
 
 	/**
@@ -183,8 +195,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void body001() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(BodyTestCase.class);
+		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
 		newInstance.m001();
 
 		Assertions.assertEquals(0, ref.get().getBodyValues().size(), "Should always return a list");
@@ -223,8 +234,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body002() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(BodyTestCase.class);
+		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
 		newInstance.m002("");
 
 		final var body = ref.get().getBodyValues();
@@ -233,8 +243,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body003() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(BodyTestCase.class);
+		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002("", null, expected);
 
@@ -245,8 +254,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body004() {
-		final var newInstance = new ByMsgFactory(correlMap, portProivder, nameResolver, respondTo, null)
-				.newInstance(BodyTestCase.class);
+		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m003("", null, expected);
 

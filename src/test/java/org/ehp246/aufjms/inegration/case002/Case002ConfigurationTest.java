@@ -12,7 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = Case002Configuration.class, properties = "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false")
+@SpringBootTest(classes = Case002Configuration.class, properties = {
+		"spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false",
+		"org.ehp246.aufjms.bymsg.timeout=5000" })
 public class Case002ConfigurationTest {
 	@Autowired
 	private AutowireCapableBeanFactory beanFactory;

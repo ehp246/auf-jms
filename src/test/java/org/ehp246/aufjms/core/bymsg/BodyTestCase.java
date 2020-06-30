@@ -4,7 +4,7 @@ import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.OfType;
 
 @ByMsg("")
-public interface BodyTestCase {
+interface BodyTestCase {
 	void m001();
 
 	void m001(int i);

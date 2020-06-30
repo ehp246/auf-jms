@@ -8,6 +8,6 @@ import org.ehp246.aufjms.api.jms.Msg;
  *
  */
 @FunctionalInterface
-public interface ExecutingInstanceResolver {
-	ResolvedInstance resolve(Msg msg);
+public interface InvocationInstanceResolver {
+	ResolvedExecutable resolve(Msg msg);
 }

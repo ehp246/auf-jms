@@ -10,12 +10,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
-import org.ehp246.aufjms.annotation.OfTimeout;
 import org.ehp246.aufjms.annotation.OfType;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Lei Yang
  */
-class ProxyInvocation implements MessageSupplier, ResolvedInstance {
+class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyInvocation.class);
 
 	private static final Method ONREPLY;
@@ -47,22 +47,21 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 	private final CompletableFuture<Object> future = new CompletableFuture<>();
 	private final ProxyInvoked<Object> invoked;
 	private final String correlationId;
-	private final long timeout;
+	private long timeout;
 	private final FromBody<String> fromBody;
 
-	public ProxyInvocation(final Object target, final Method method, final Object[] args,
-			final FromBody<String> fromBody) {
+	public ProxyInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody,
+			final long globalTimeout) {
 		super();
 
-		this.invoked = new ProxyInvoked<Object>(target, method, args);
-
-		final var found = this.invoked.findUpArgument(OfCorrelationId.class);
-
+		this.invoked = invoked;
+		final var found = this.invoked.findOnArguments(OfCorrelationId.class);
 		this.correlationId = found.isPresent()
 				? Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null)
 				: UUID.randomUUID().toString();
-		this.timeout = this.invoked.findOnMethod(OfTimeout.class).map(OfTimeout::value).orElse((long) -1);
 		this.fromBody = fromBody;
+		this.timeout = invoked.findOnDeclaringClass(ByMsg.class).map(ByMsg::timeout).get();
+		this.timeout = this.timeout < 0 ? globalTimeout : this.timeout;
 	}
 
 	public boolean isReplyExpected() {
@@ -119,24 +118,31 @@ class ProxyInvocation implements MessageSupplier, ResolvedInstance {
 
 	@Override
 	public String getType() {
-		final var found = invoked.findUpArgument(OfType.class);
-		if (found.isPresent()) {
-			final var value = found.get().getAnnotation().value();
+		final var onArgs = invoked.findOnArguments(OfType.class);
+		if (onArgs.isPresent()) {
+			final var value = onArgs.get().getAnnotation().value();
 			if (!value.isEmpty()) {
 				// Annotated value takes precedence.
 				return value;
 			}
 			// If there is no annotated value, return argument value even if null.
-			return Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null);
+			return Optional.ofNullable(onArgs.get().getArgument()).map(Object::toString).orElse(null);
 		}
 
-		final var type = invoked.annotationValueOnMethod(OfType.class, OfType::value, () -> "");
+		final var onMethod = invoked.findOnMethod(OfType.class);
 
-		if (!type.isEmpty()) {
-			return type;
+		if (onMethod.isPresent()) {
+			final var type = onMethod.get().value();
+			if (type.isBlank()) {
+				// Method has the annotation without a specified value, use method name.
+				return invoked.getMethodNameCapped();
+			} else {
+				return type;
+			}
 		}
 
-		return invoked.findOnDeclaringClass(OfType.class).map(OfType::value).orElseGet(invoked::getSimpleClassName);
+		return invoked.findOnDeclaringClass(OfType.class).map(OfType::value)
+				.orElseGet(invoked::getSimpleDeclaringClassName);
 	}
 
 	@Override

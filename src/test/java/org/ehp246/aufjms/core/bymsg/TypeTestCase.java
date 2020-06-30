@@ -4,7 +4,7 @@ import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfType;
 
-public class TypeTestCase {
+class TypeTestCase {
 	@ByMsg("")
 	interface TypeCase001 {
 		void m001();
@@ -19,7 +19,7 @@ public class TypeTestCase {
 		@OfType("Type002")
 		void m004(String type);
 
-		@OfType()
+		@OfType
 		void m005();
 
 		@OfType("Type003")

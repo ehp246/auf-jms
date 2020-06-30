@@ -34,6 +34,10 @@ public class ProxyInvoked<T> {
 		return method;
 	}
 
+	public Class<?> getDeclaringClass() {
+		return method.getDeclaringClass();
+	}
+
 	public List<?> getArgs() {
 		return args;
 	}
@@ -82,7 +86,7 @@ public class ProxyInvoked<T> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <A extends Annotation> Optional<AnnotatedArgument<A>> findUpArgument(final Class<A> annotationClass) {
+	public <A extends Annotation> Optional<AnnotatedArgument<A>> findOnArguments(final Class<A> annotationClass) {
 		for (int i = 0; i < parameterAnnotations.length; i++) {
 			final var found = Stream.of(parameterAnnotations[i])
 					.filter(annotation -> annotation.annotationType() == annotationClass).findFirst();
@@ -141,5 +145,9 @@ public class ProxyInvoked<T> {
 
 	public String getSimpleClassName() {
 		return target.getClass().getSimpleName();
+	}
+
+	public String getSimpleDeclaringClassName() {
+		return getDeclaringClass().getSimpleName();
 	}
 }

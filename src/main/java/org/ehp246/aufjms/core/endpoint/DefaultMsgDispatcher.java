@@ -7,9 +7,9 @@ import java.util.function.Consumer;
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.ExecutingInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.InvocationInstanceResolver;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
-import org.ehp246.aufjms.api.endpoint.ResolvedInstance;
+import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +23,11 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
 
-	private final ExecutingInstanceResolver actionResolver;
+	private final InvocationInstanceResolver actionResolver;
 	private final ActionExecutor actionExecutor;
 	private final List<Consumer<ExecutedInstance>> postPerforms = new ArrayList<>();
 
-	public DefaultMsgDispatcher(final ExecutingInstanceResolver actionResolver, final ActionExecutor actionExecutor) {
+	public DefaultMsgDispatcher(final InvocationInstanceResolver actionResolver, final ActionExecutor actionExecutor) {
 		super();
 		this.actionResolver = actionResolver;
 		this.actionExecutor = actionExecutor;
@@ -42,7 +42,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 	public void dispatch(final Msg msg) {
 		LOGGER.trace("Dispatching {}", msg.getType());
 
-		final ResolvedInstance instance;
+		final ResolvedExecutable instance;
 		try {
 			instance = this.actionResolver.resolve(msg);
 			if (instance == null) {
@@ -66,7 +66,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			}
 
 			@Override
-			public ResolvedInstance getResolvedInstance() {
+			public ResolvedExecutable getResolvedInstance() {
 				return instance;
 			}
 		});
