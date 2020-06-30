@@ -13,6 +13,7 @@ import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
+import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,12 @@ public class ByMsgFactory {
 
 		});
 
+		final var reflectedInterface = new ReflectingType<>(annotatedInterface);
+		final var timeout = reflectedInterface.findOnType(ByMsg.class).map(ByMsg::timeout).filter(i -> i > 0)
+				.orElseGet(replyConfig::getTimeout);
+		final var ttl = reflectedInterface.findOnType(ByMsg.class).map(ByMsg::ttl).filter(i -> i > 0)
+				.orElseGet(replyConfig::getTtl);
+
 		LOGGER.debug("Proxying {}@{}", destinatinName, annotatedInterface.getCanonicalName());
 
 		return (T) Proxy.newProxyInstance(annotatedInterface.getClassLoader(), new Class[] { annotatedInterface },
@@ -76,7 +83,7 @@ public class ByMsgFactory {
 					}
 
 					final var invocation = new ProxyInvocation(new ProxyInvoked<Object>(proxy, method, args),
-							replyConfig.getFromBody(), replyConfig.getTimeout());
+							replyConfig.getFromBody(), timeout, ttl);
 
 					if (invocation.isReplyExpected()) {
 						replyConfig.getCorrelMap().put(invocation.getCorrelationId(), invocation);

@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
@@ -47,11 +46,12 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 	private final CompletableFuture<Object> future = new CompletableFuture<>();
 	private final ProxyInvoked<Object> invoked;
 	private final String correlationId;
-	private long timeout;
 	private final FromBody<String> fromBody;
+	private final long timeout;
+	private final long ttl;
 
-	public ProxyInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody,
-			final long globalTimeout) {
+	public ProxyInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody, final Long timeout,
+			final Long ttl) {
 		super();
 
 		this.invoked = invoked;
@@ -60,8 +60,8 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 				? Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null)
 				: UUID.randomUUID().toString();
 		this.fromBody = fromBody;
-		this.timeout = invoked.findOnDeclaringClass(ByMsg.class).map(ByMsg::timeout).get();
-		this.timeout = this.timeout < 0 ? globalTimeout : this.timeout;
+		this.timeout = timeout;
+		this.ttl = ttl;
 	}
 
 	public boolean isReplyExpected() {
@@ -143,6 +143,11 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 
 		return invoked.findOnDeclaringClass(OfType.class).map(OfType::value)
 				.orElseGet(invoked::getSimpleDeclaringClassName);
+	}
+
+	@Override
+	public Long getTtl() {
+		return ttl;
 	}
 
 	@Override

@@ -28,7 +28,7 @@ public class ByMsgFactoryTest {
 		return null;
 	};
 
-	private final ReplyEndpointConfiguration replyConfig = new ReplyEndpointConfiguration(() -> null, 1, null);
+	private final ReplyEndpointConfiguration replyConfig = new ReplyEndpointConfiguration(() -> null, null, 1, 1);
 
 	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(portProvider, nameResolver, replyConfig);
 
@@ -188,6 +188,20 @@ public class ByMsgFactoryTest {
 		Assertions.assertTimeout(Duration.ofMillis(1000),
 				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
 				"Should use timeout from the annotation");
+	}
+
+	@Test
+	public void ttl001() {
+		aufProxyFactory.newInstance(TtlTestCases.Case001.class).m001();
+
+		Assertions.assertEquals(1, ref.get().getTtl(), "Should be the value from the annotation");
+	}
+
+	@Test
+	public void ttl002() {
+		aufProxyFactory.newInstance(TtlTestCases.Case002.class).m001();
+
+		Assertions.assertEquals(500, ref.get().getTtl(), "Should be the value from the annotation");
 	}
 
 	/**

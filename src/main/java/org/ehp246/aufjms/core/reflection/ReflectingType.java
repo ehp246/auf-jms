@@ -3,6 +3,7 @@ package org.ehp246.aufjms.core.reflection;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,5 +62,9 @@ public class ReflectingType<T> {
 
 	public Class<T> getType() {
 		return type;
+	}
+
+	public <A extends Annotation> Optional<A> findOnType(Class<A> annotationType) {
+		return Optional.ofNullable(type.getAnnotation(annotationType));
 	}
 }

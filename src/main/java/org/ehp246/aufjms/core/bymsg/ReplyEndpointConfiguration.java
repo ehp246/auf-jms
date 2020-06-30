@@ -19,14 +19,16 @@ public class ReplyEndpointConfiguration {
 	private final ConcurrentMap<@NonNull String, @NonNull ResolvedExecutable> correlMap;
 	private final MsgEndpoint msgEndpoint;
 	private final long timeout;
+	private final long ttl;
 	private final ReplyToNameSupplier replyToNameSupplier;
 	private final FromBody<String> fromBody;
 
-	public ReplyEndpointConfiguration(ReplyToNameSupplier replyTo,
+	public ReplyEndpointConfiguration(ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
 			@Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") long timeout,
-			final FromBody<String> fromBody) {
+			@Value("${" + AufJmsProperties.TTL + ":0}") long ttl) {
 		super();
 		this.timeout = timeout;
+		this.ttl = ttl;
 		this.replyToNameSupplier = replyTo;
 		this.fromBody = fromBody;
 		this.correlMap = Caffeine.newBuilder().weakValues().<String, ResolvedExecutable>build().asMap();
@@ -57,6 +59,10 @@ public class ReplyEndpointConfiguration {
 
 	public long getTimeout() {
 		return this.timeout;
+	}
+
+	public long getTtl() {
+		return this.ttl;
 	}
 
 	public String getReplyToName() {
