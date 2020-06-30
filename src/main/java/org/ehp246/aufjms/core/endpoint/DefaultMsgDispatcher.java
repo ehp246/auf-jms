@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import org.ehp246.aufjms.api.endpoint.ActionExecutor;
 import org.ehp246.aufjms.api.endpoint.BoundInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.InvocationInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -23,11 +23,11 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
 
-	private final InvocationInstanceResolver actionResolver;
+	private final ExecutableResolver actionResolver;
 	private final ActionExecutor actionExecutor;
 	private final List<Consumer<ExecutedInstance>> postPerforms = new ArrayList<>();
 
-	public DefaultMsgDispatcher(final InvocationInstanceResolver actionResolver, final ActionExecutor actionExecutor) {
+	public DefaultMsgDispatcher(final ExecutableResolver actionResolver, final ActionExecutor actionExecutor) {
 		super();
 		this.actionResolver = actionResolver;
 		this.actionExecutor = actionExecutor;

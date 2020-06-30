@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.ehp246.aufjms.api.endpoint.InvocationInstanceResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.FromBody;
@@ -38,7 +38,7 @@ public class ReplyEndpointConfiguration {
 			}
 
 			@Override
-			public InvocationInstanceResolver getResolver() {
+			public ExecutableResolver getResolver() {
 				return msg -> correlMap.get(msg.getCorrelationId());
 			}
 
