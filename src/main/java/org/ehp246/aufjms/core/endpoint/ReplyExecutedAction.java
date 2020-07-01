@@ -65,9 +65,8 @@ public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
 
 			@Override
 			public String getInvoking() {
-				return null;
+				return msg.getInvoking();
 			}
-
 		});
 	}
 

@@ -13,5 +13,5 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 @EnableByMsg
 @EnableForMsg(@At(scan = Calculator.class))
-public class Case002Configuration {
+class Case002Configuration {
 }

@@ -122,17 +122,6 @@ public class ForMsgScanner {
 			invokings.put(invokingName, method);
 		}
 
-		// No annotated methods found. Fall back to name convention
-		if (invokings.size() == 0) {
-			final var found = reflected.findMethods("execute");
-			if (found.size() > 1) {
-				throw new RuntimeException("Duplicate by-convention methods found on " + instanceType.getName());
-			}
-			if (found.size() == 1) {
-				invokings.put("", found.get(0));
-			}
-		}
-
 		// There should be at least one executing method.
 		if (invokings.size() == 0) {
 			throw new RuntimeException("No executing method defined by " + instanceType.getName());

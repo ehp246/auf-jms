@@ -2,21 +2,16 @@ package org.ehp246.aufjms.inegration.case002.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.Invoking;
-import org.ehp246.aufjms.annotation.OfType;
 
 /**
  * @author Lei Yang
  *
  */
 @ByMsg("queue://org.ehp246.aufjms.inegration.case002.Case002Configuration.request")
-@OfType("Calculator")
-public interface Countor {
-	@Invoking("setMem")
-	public Void set(int i);
+public interface ExceptionThrower {
+	@Invoking("throw001")
+	Void throw001();
 
-	@Invoking("addMem")
-	public int add(int i);
-
-	@Invoking("getMem")
-	public int get();
+	@Invoking("throw002")
+	Void throw002() throws Exception;
 }
