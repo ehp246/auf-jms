@@ -25,13 +25,13 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public class DefaultExecutingTypeResolver implements MsgTypeActionRegistry, InvokingTypeResolver {
-	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutingTypeResolver.class);
+public class DefaultInvokingTypeResolver implements MsgTypeActionRegistry, InvokingTypeResolver {
+	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultInvokingTypeResolver.class);
 
 	private final Map<String, MsgTypeActionDefinition> registeredActions = new HashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
 
-	public DefaultExecutingTypeResolver register(final Stream<MsgTypeActionDefinition> actionDefinitions) {
+	public DefaultInvokingTypeResolver register(final Stream<MsgTypeActionDefinition> actionDefinitions) {
 		actionDefinitions.forEach(this::register);
 		return this;
 	}

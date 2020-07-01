@@ -44,7 +44,7 @@ public class AtEndpointFactory {
 		};
 	}
 
-	private DefaultExecutingTypeResolver newForMsgRegistry(Set<String> scanPackages) {
-		return new DefaultExecutingTypeResolver().register(new ForMsgScanner(scanPackages).perform().stream());
+	private DefaultInvokingTypeResolver newForMsgRegistry(Set<String> scanPackages) {
+		return new DefaultInvokingTypeResolver().register(new ForMsgScanner(scanPackages).perform().stream());
 	}
 }
