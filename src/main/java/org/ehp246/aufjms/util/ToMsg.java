@@ -60,8 +60,8 @@ public class ToMsg {
 		}
 
 		@Override
-		public String getThrown() {
-			return invoke(() -> message.getStringProperty(MsgPropertyName.ServerThrown));
+		public boolean isException() {
+			return invoke(() -> message.getBooleanProperty(MsgPropertyName.ServerThrown));
 		}
 
 		@Override

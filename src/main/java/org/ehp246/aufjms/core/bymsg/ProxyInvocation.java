@@ -15,6 +15,7 @@ import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
+import org.ehp246.aufjms.api.exception.ForMsgExecutionException;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -83,9 +84,9 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 
 			return this.future.get(timeout, TimeUnit.MILLISECONDS);
 		} catch (Exception e) {
-			final Throwable rethrow = e instanceof ExecutionException ? e.getCause() : e;
+			final var rethrow = e instanceof ExecutionException ? e.getCause() : e;
 			if (invoked.getThrows().stream().filter(declared -> declared.isAssignableFrom(rethrow.getClass())).findAny()
-					.isPresent()) {
+					.isPresent() || rethrow instanceof RuntimeException) {
 				throw rethrow;
 			} else {
 				throw new RuntimeException(rethrow);
@@ -96,7 +97,22 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 	public void onReply(Msg msg) {
 		LOGGER.trace("Received reply");
 
-		this.fromBody.from(msg.getBodyAsText(), List.of(new FromBody.Receiver() {
+		if (msg.isException()) {
+			this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver() {
+
+				@Override
+				public Class<?> getType() {
+					return String.class;
+				}
+
+				@Override
+				public void receive(Object value) {
+					future.completeExceptionally(new ForMsgExecutionException(value.toString()));
+				}
+			});
+			return;
+		}
+		this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver() {
 
 			@Override
 			public List<? extends Annotation> getAnnotations() {
@@ -113,7 +129,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 				future.complete(value);
 			}
 
-		}));
+		});
 	}
 
 	@Override

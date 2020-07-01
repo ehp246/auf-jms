@@ -84,6 +84,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 				 * Framework headers
 				 */
 				message.setStringProperty(MsgPropertyName.Invoking, msgSupplier.getInvoking());
+				message.setBooleanProperty(MsgPropertyName.ServerThrown, msgSupplier.isException());
 
 				try (final MessageProducer producer = session.createProducer(destination)) {
 

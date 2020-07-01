@@ -23,7 +23,7 @@ public class AtEndpointFactory {
 			final MessagePortProvider portProvider) {
 		super();
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-		this.postExecution = new ReplyExecutedAction(portProvider);
+		this.postExecution = new ReplyExecuted(portProvider);
 	}
 
 	public MsgEndpoint newMsgEndpoint(final String destination, final Set<String> scanPackages) {

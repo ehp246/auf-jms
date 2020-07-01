@@ -28,7 +28,7 @@ public interface Msg {
 
 	Integer getGroupSeq();
 
-	String getThrown();
+	boolean isException();
 
 	String getTraceId();
 

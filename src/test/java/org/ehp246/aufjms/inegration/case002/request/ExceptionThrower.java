@@ -11,7 +11,7 @@ import org.ehp246.aufjms.annotation.Invoking;
 public class ExceptionThrower {
 	@Invoking("throw001")
 	public void throw001() {
-		throw new RuntimeException("Throw 0001");
+		throw new RuntimeException("Throw 001");
 	}
 
 	@Invoking("throw002")

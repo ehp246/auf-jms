@@ -13,10 +13,10 @@ import org.ehp246.aufjms.core.reflection.InvocationOutcome;
  * @author Lei Yang
  *
  */
-public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
+public class ReplyExecuted implements Consumer<ExecutedInstance> {
 	private final MessagePortProvider portProvider;
 
-	public ReplyExecutedAction(final MessagePortProvider portProvider) {
+	public ReplyExecuted(final MessagePortProvider portProvider) {
 		super();
 		this.portProvider = portProvider;
 	}
@@ -45,7 +45,7 @@ public class ReplyExecutedAction implements Consumer<ExecutedInstance> {
 			public List<?> getBodyValues() {
 				return outcome.hasReturned()
 						? outcome.getReturned() != null ? List.of(outcome.getReturned()) : List.of()
-						: List.of(outcome.getThrown());
+						: List.of(outcome.getThrown().getMessage());
 			}
 
 			@Override

@@ -1,5 +1,6 @@
 package org.ehp246.aufjms.inegration.case002;
 
+import org.ehp246.aufjms.api.exception.ForMsgExecutionException;
 import org.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
 import org.ehp246.aufjms.inegration.case002.bymsg.Add;
 import org.ehp246.aufjms.inegration.case002.bymsg.Counter;
@@ -54,13 +55,15 @@ public class Case002ConfigurationTest {
 	public void exception001() {
 		final var thrower = beanFactory.getBean(ExceptionThrower.class);
 
-		Assertions.assertThrows(RuntimeException.class, thrower::throw001);
+		final var thrown = Assertions.assertThrows(ForMsgExecutionException.class, thrower::throw001);
+		Assertions.assertEquals("Throw 001", thrown.getMessage());
 	}
 
 	@Test
 	public void exception002() {
 		final var thrower = beanFactory.getBean(ExceptionThrower.class);
 
-		Assertions.assertThrows(Exception.class, thrower::throw002);
+		final var thrown = Assertions.assertThrows(Exception.class, thrower::throw002);
+		Assertions.assertEquals("Throw 002", thrown.getMessage());
 	}
 }

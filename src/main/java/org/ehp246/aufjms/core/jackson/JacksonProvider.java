@@ -50,33 +50,37 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 	}
 
 	@Override
-	public void from(final String body, final List<Receiver> receivers) {
+	public List<?> from(final String body, final List<Receiver> receivers) {
 		if (receivers == null || receivers.size() == 0) {
-			return;
+			return List.of();
 		}
 
 		try {
 			// Single parameter
 			if (receivers.size() == 1) {
-				receiveOne(body, receivers.get(0));
-				return;
+				return List.of(receiveOne(body, receivers.get(0)));
 			}
 
 			// Multiple parameters
 			final var jsons = objectMapper.readValue(body, String[].class);
+			final var values = new ArrayList<Object>();
 
 			for (int i = 0; i < receivers.size(); i++) {
-				receiveOne(jsons[i], receivers.get(i));
+				values.add(receiveOne(jsons[i], receivers.get(i)));
 			}
+
+			return values;
 		} catch (JsonProcessingException e) {
 			LOGGER.error("Failed to read from {}", body, e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private void receiveOne(String json, FromBody.Receiver receiver)
+	private Object receiveOne(String json, FromBody.Receiver receiver)
 			throws JsonMappingException, JsonProcessingException {
-		receiver.receive(json != null && !json.isBlank() ? objectMapper.readValue(json, receiver.getType()) : null);
+		final var value = json != null && !json.isBlank() ? objectMapper.readValue(json, receiver.getType()) : null;
+		receiver.receive(value);
+		return value;
 	}
 
 }
