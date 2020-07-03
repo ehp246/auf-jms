@@ -66,4 +66,13 @@ public class Case002ConfigurationTest {
 		final var thrown = Assertions.assertThrows(Exception.class, thrower::throw002);
 		Assertions.assertEquals("Throw 002", thrown.getMessage());
 	}
+
+	@Test
+	public void exception003() {
+		final var thrower = beanFactory.getBean(ExceptionThrower.class);
+
+		final var thrown = (ForMsgExecutionException) Assertions.assertThrows(Exception.class, thrower::throw003);
+		Assertions.assertEquals(3, thrown.getCode());
+		Assertions.assertEquals("Throw 003", thrown.getMessage());
+	}
 }

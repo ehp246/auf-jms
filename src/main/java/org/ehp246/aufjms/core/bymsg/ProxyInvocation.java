@@ -15,6 +15,7 @@ import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
+import org.ehp246.aufjms.api.exception.ExecutionThrown;
 import org.ehp246.aufjms.api.exception.ForMsgExecutionException;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
@@ -24,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Lei Yang
  */
 class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
@@ -35,7 +36,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 	static {
 		try {
 			ONREPLY = ProxyInvocation.class.getDeclaredMethod("onReply", Msg.class);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("This should not happen. Did you change the method signature?");
 			throw new RuntimeException(e);
 		}
@@ -83,7 +84,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 			}
 
 			return this.future.get(timeout, TimeUnit.MILLISECONDS);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			final var rethrow = e instanceof ExecutionException ? e.getCause() : e;
 			if (invoked.getThrows().stream().filter(declared -> declared.isAssignableFrom(rethrow.getClass())).findAny()
 					.isPresent() || rethrow instanceof RuntimeException) {
@@ -94,42 +95,49 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 		}
 	}
 
-	public void onReply(Msg msg) {
+	public void onReply(final Msg msg) {
 		LOGGER.trace("Received reply");
 
-		if (msg.isException()) {
-			this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver() {
+		try {
+			if (msg.isException()) {
+				this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver<ExecutionThrown>() {
+
+					@Override
+					public Class<ExecutionThrown> getType() {
+						return ExecutionThrown.class;
+					}
+
+					@Override
+					public void receive(final ExecutionThrown value) {
+						future.completeExceptionally(new ForMsgExecutionException(value.getCode(), value.getMessage()));
+					}
+				});
+				return;
+			}
+
+			this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver<>() {
+
+				@Override
+				public List<? extends Annotation> getAnnotations() {
+					return List.of(invoked.getMethod().getAnnotations());
+				}
 
 				@Override
 				public Class<?> getType() {
-					return String.class;
+					return invoked.getReturnType();
 				}
 
 				@Override
-				public void receive(Object value) {
-					future.completeExceptionally(new ForMsgExecutionException(value.toString()));
+				public void receive(final Object value) {
+					future.complete(value);
 				}
+
 			});
-			return;
+		} catch (final Exception e) {
+			LOGGER.error("onReply failed: {}", e.getMessage(), e);
+
+			future.completeExceptionally(e);
 		}
-		this.fromBody.from(msg.getBodyAsText(), new FromBody.Receiver() {
-
-			@Override
-			public List<? extends Annotation> getAnnotations() {
-				return List.of(invoked.getMethod().getAnnotations());
-			}
-
-			@Override
-			public Class<?> getType() {
-				return invoked.getReturnType();
-			}
-
-			@Override
-			public void receive(Object value) {
-				future.complete(value);
-			}
-
-		});
 	}
 
 	@Override

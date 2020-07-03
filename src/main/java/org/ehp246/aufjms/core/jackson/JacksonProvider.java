@@ -21,7 +21,7 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 
 	private final ObjectMapper objectMapper;
 
-	public JacksonProvider(ObjectMapper objectMapper) {
+	public JacksonProvider(final ObjectMapper objectMapper) {
 		super();
 		this.objectMapper = objectMapper;
 	}
@@ -43,14 +43,15 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 				json = this.objectMapper.writeValueAsString(list);
 			}
 			return json;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Failed to create message: {} {}", e.getClass().getName(), e.getMessage());
 			throw new RuntimeException(e);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<?> from(final String body, final List<Receiver> receivers) {
+	public List<?> from(final String body, final List<Receiver<?>> receivers) {
 		if (receivers == null || receivers.size() == 0) {
 			return List.of();
 		}
@@ -58,7 +59,7 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 		try {
 			// Single parameter
 			if (receivers.size() == 1) {
-				return List.of(receiveOne(body, receivers.get(0)));
+				return List.of(receiveOne(body, (Receiver<Object>) receivers.get(0)));
 			}
 
 			// Multiple parameters
@@ -66,17 +67,17 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 			final var values = new ArrayList<Object>();
 
 			for (int i = 0; i < receivers.size(); i++) {
-				values.add(receiveOne(jsons[i], receivers.get(i)));
+				values.add(receiveOne(jsons[i], (Receiver<Object>) receivers.get(i)));
 			}
 
 			return values;
-		} catch (JsonProcessingException e) {
+		} catch (final JsonProcessingException e) {
 			LOGGER.error("Failed to read from {}", body, e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private Object receiveOne(String json, FromBody.Receiver receiver)
+	private Object receiveOne(final String json, final FromBody.Receiver<Object> receiver)
 			throws JsonMappingException, JsonProcessingException {
 		final var value = json != null && !json.isBlank() ? objectMapper.readValue(json, receiver.getType()) : null;
 		receiver.receive(value);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import org.ehp246.aufjms.api.exception.ExecutionThrown;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
 import org.ehp246.aufjms.api.jms.MessageSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -22,7 +23,7 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 	}
 
 	@Override
-	public void accept(ExecutedInstance instance) {
+	public void accept(final ExecutedInstance instance) {
 		final Msg msg = instance.getMsg();
 		if (msg.getReplyTo() == null) {
 			return;
@@ -45,7 +46,23 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 			public List<?> getBodyValues() {
 				return outcome.hasReturned()
 						? outcome.getReturned() != null ? List.of(outcome.getReturned()) : List.of()
-						: List.of(outcome.getThrown().getMessage());
+						: List.of(new ExecutionThrown() {
+
+							@Override
+							public Integer getCode() {
+								final var thrown = outcome.getThrown();
+								if (thrown instanceof ExecutionThrown) {
+									return ((ExecutionThrown) thrown).getCode();
+								}
+								return null;
+							}
+
+							@Override
+							public String getMessage() {
+								return outcome.getThrown().getMessage();
+							}
+
+						});
 			}
 
 			@Override

@@ -21,7 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -53,17 +53,17 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 
 		final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
 
-		final var receivers = new ArrayList<FromBody.Receiver>();
+		final var receivers = new ArrayList<FromBody.Receiver<?>>();
 		for (int i = 0; i < boundMarkers.length; i++) {
 			if (boundMarkers[i]) {
 				continue;
 			}
 
 			final var ref = Integer.valueOf(i);
-			receivers.add(new FromBody.Receiver() {
+			receivers.add(new FromBody.Receiver<>() {
 
 				@Override
-				public void receive(Object value) {
+				public void receive(final Object value) {
 					arguments[ref] = value;
 				}
 
@@ -89,13 +89,14 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 	/**
 	 * Fills in the context arguments at the index position. Returns indices of
 	 * positions that have been filled.
-	 * 
+	 *
 	 * @param parameters
 	 * @param mq
 	 * @param arguments
 	 * @return
 	 */
-	private boolean[] bindContextArgs(Parameter[] parameters, final ActionInvocationContext ctx, Object[] arguments) {
+	private boolean[] bindContextArgs(final Parameter[] parameters, final ActionInvocationContext ctx,
+			final Object[] arguments) {
 		final boolean[] markers = new boolean[parameters.length];
 
 		for (int i = 0; i < parameters.length; i++) {

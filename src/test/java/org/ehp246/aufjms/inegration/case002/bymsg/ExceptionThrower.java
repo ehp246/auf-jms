@@ -14,4 +14,7 @@ public interface ExceptionThrower {
 
 	@Invoking("throw002")
 	Void throw002() throws Exception;
+
+	@Invoking("throw003")
+	Void throw003();
 }

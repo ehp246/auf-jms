@@ -9,20 +9,21 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface FromBody<B> {
-	List<?> from(B body, List<Receiver> receivers);
+	List<?> from(B body, List<Receiver<?>> receivers);
 
-	default Object from(B body, Receiver receiver) {
-		return this.from(body, List.of(receiver)).get(0);
+	@SuppressWarnings("unchecked")
+	default <T> T from(final B body, final Receiver<T> receiver) {
+		return (T) this.from(body, List.of(receiver)).get(0);
 	}
 
-	interface Receiver {
+	interface Receiver<T> {
 		default List<? extends Annotation> getAnnotations() {
 			return null;
 		}
 
-		Class<?> getType();
+		Class<? extends T> getType();
 
-		default void receive(Object value) {
+		default void receive(final T value) {
 
 		}
 	}
