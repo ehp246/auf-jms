@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.inegration.case003;
+package org.ehp246.aufjms.inegration.destination;
 
 import org.ehp246.aufjms.annotation.EnableByMsg;
 import org.ehp246.aufjms.core.formsg.EnableForMsg;

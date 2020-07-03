@@ -3,6 +3,7 @@ package org.ehp246.aufjms.core.jackson;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ehp246.aufjms.annotation.CollectionOf;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.ToBody;
 import org.slf4j.Logger;
@@ -79,9 +80,22 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 
 	private Object receiveOne(final String json, final FromBody.Receiver<Object> receiver)
 			throws JsonMappingException, JsonProcessingException {
-		final var value = json != null && !json.isBlank() ? objectMapper.readValue(json, receiver.getType()) : null;
+		final var value = json != null && !json.isBlank() ? readOne(json, receiver) : null;
 		receiver.receive(value);
 		return value;
 	}
 
+	private Object readOne(final String json, final Receiver<Object> receiver)
+			throws JsonMappingException, JsonProcessingException {
+		final var collectionOf = receiver.getAnnotations() == null ? null
+				: receiver.getAnnotations().stream().filter(ann -> ann instanceof CollectionOf).findAny()
+						.map(ann -> ((CollectionOf) ann).value()).orElse(null);
+
+		if (collectionOf == null) {
+			return objectMapper.readValue(json, receiver.getType());
+		} else {
+			return objectMapper.readValue(json,
+					objectMapper.getTypeFactory().constructParametricType(receiver.getType(), collectionOf));
+		}
+	}
 }

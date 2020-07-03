@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.inegration.case003;
+package org.ehp246.aufjms.inegration.destination;
 
 import java.util.stream.Collectors;
 

@@ -25,9 +25,9 @@ import org.springframework.jms.support.destination.BeanFactoryDestinationResolve
 import org.springframework.jms.support.destination.DestinationResolver;
 
 /**
- * The application uses AufMq on the client side, JmsListener on the server
+ * The application uses ByMsg on the client side, JmsListener on the server
  * side.
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -40,7 +40,7 @@ class AppConfiguration {
 	@Autowired
 	private AtomicReference<CompletableFuture<Object>> ref1;
 
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		SpringApplication.run(AppConfiguration.class, args);
 	}
 
@@ -50,23 +50,23 @@ class AppConfiguration {
 	}
 
 	@JmsListener(destination = "calc.request", selector = "JMSType = 'Add'")
-	public void calc(String body) {
+	public void calc(final String body) {
 		ref1.get().complete(body);
 	}
 
 	@JmsListener(destination = "calc.request", selector = "JMSType = 'Inc'")
-	public int calc(int i, Message message) {
+	public int calc(int i, final Message message) {
 		return i++;
 	}
 
 	@JmsListener(destination = "calc.request", selector = "JMSType = 'Mem'")
-	public void mem(int i) {
+	public void mem(final int i) {
 		LOGGER.debug("Mem " + Integer.valueOf(i).toString());
 		ref1.get().complete(i);
 	}
 
 	@JmsListener(destination = "alarm.request", selector = "JMSType = 'Set'")
-	public void set(String instant) {
+	public void set(final String instant) {
 		ref1.get().complete(instant);
 	}
 
@@ -81,14 +81,14 @@ class AppConfiguration {
 	}
 
 	@Bean
-	public DestinationResolver destinationResolver(BeanFactory beanFactory) {
+	public DestinationResolver destinationResolver(final BeanFactory beanFactory) {
 		return new BeanFactoryDestinationResolver(beanFactory);
 	}
 
 	@Bean
 	public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final ConnectionFactory connectionFactory,
 			final DestinationResolver destinationResolver) {
-		DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+		final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 		factory.setConnectionFactory(connectionFactory);
 		factory.setDestinationResolver(destinationResolver);
 		factory.setSessionTransacted(false);
@@ -99,7 +99,7 @@ class AppConfiguration {
 
 	/**
 	 * Infrastructure beans
-	 * 
+	 *
 	 * @return
 	 */
 

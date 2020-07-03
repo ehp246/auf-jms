@@ -20,7 +20,7 @@ import org.slf4j.MDC;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -42,7 +42,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 		if (task.getResolvedInstance().getInvocationModel() == InvocationModel.SYNC) {
 			try {
 				return CompletableFuture.completedFuture(this.execute(task));
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("Executiong failed:", e);
 				final var future = new CompletableFuture<ExecutedInstance>();
 				future.completeExceptionally(e);
@@ -107,7 +107,7 @@ public class ListenablePoolActionExecutor implements ActionExecutor {
 
 			try {
 				consumer.accept(performed);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOGGER.error("postExecution failed:", e);
 			}
 		});

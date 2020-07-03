@@ -18,7 +18,7 @@ public interface FromBody<B> {
 
 	interface Receiver<T> {
 		default List<? extends Annotation> getAnnotations() {
-			return null;
+			return List.of();
 		}
 
 		Class<? extends T> getType();
