@@ -4,9 +4,7 @@ A JMS development library that tries its best to hide JMS.
 # To do:
 * Tracing
 * Instance field/setter binding
-* Exception propagation/Proxy Exception
 * CollectionOf
-* SpEL support
 * Async reply
 * ByMsg scanner re-factor
 * Executor Queue Re-factor
