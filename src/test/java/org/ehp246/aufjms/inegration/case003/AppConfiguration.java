@@ -1,9 +1,8 @@
-package org.ehp246.aufjms.inegration.case002;
+package org.ehp246.aufjms.inegration.case003;
 
 import org.ehp246.aufjms.annotation.EnableByMsg;
 import org.ehp246.aufjms.core.formsg.EnableForMsg;
 import org.ehp246.aufjms.core.formsg.EnableForMsg.At;
-import org.ehp246.aufjms.inegration.case002.request.Calculator;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
@@ -11,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
-@EnableByMsg
-@EnableForMsg(@At(scan = Calculator.class))
-class Case002Configuration {
+@EnableByMsg(replyTo = "topic://${aufjms.reply.topic}")
+@EnableForMsg({ @At("queue://${aufjms.request.queue}"), @At("${aufjms.request.queue02}") })
+public class AppConfiguration {
 }

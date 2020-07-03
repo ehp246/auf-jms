@@ -15,9 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = Case002Configuration.class, properties = {
+@SpringBootTest(classes = AppConfiguration.class, properties = {
 		"spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false" })
-public class Case002ConfigurationTest {
+public class AppConfigurationTest {
 	@Autowired
 	private AutowireCapableBeanFactory beanFactory;
 

@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest(classes = Case001Configuration.class, properties = "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false")
-class Case001ConfigurationTest {
+@SpringBootTest(classes = AppConfiguration.class, properties = "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false")
+class AppConfigurationTest {
 	@Autowired
 	private ApplicationContext appCtx;
 
@@ -52,7 +52,7 @@ class Case001ConfigurationTest {
 
 	@Test
 	public void replyDestination001() {
-		Assertions.assertEquals(Case001Configuration.class.getCanonicalName() + ".reply",
+		Assertions.assertEquals(AppConfiguration.class.getCanonicalName() + ".reply",
 				appCtx.getBean(ReplyToNameSupplier.class).get());
 	}
 }

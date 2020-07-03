@@ -34,14 +34,14 @@ import org.springframework.jms.support.destination.DestinationResolver;
 @SpringBootApplication
 @EnableJms
 @EnableByMsg
-class Case001Configuration {
-	private final Logger LOGGER = LoggerFactory.getLogger(Case001Configuration.class);
+class AppConfiguration {
+	private final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
 
 	@Autowired
 	private AtomicReference<CompletableFuture<Object>> ref1;
 
 	public static void main(String[] args) {
-		SpringApplication.run(Case001Configuration.class, args);
+		SpringApplication.run(AppConfiguration.class, args);
 	}
 
 	@Bean("ref1")

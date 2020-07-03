@@ -6,10 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Destination;
 
 import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.command.ActiveMQTopic;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 /**
- * 
+ * Using Spring property placeholder for destination names.
+ *
  * @author Lei Yang
  *
  */
@@ -20,17 +22,19 @@ public class PrefixedNameResolver implements DestinationNameResolver {
 	private final Map<String, Destination> known = new ConcurrentHashMap<>();
 
 	@Override
-	public Destination resolve(String prefixedName) {
+	public Destination resolve(final String prefixedName) {
 		if (prefixedName == null || prefixedName.isBlank()) {
 			throw new IllegalArgumentException("Un-specified destination name");
 		}
 
-		if (!prefixedName.startsWith(TOPIC_PREFIX) && !prefixedName.startsWith(QUEUE_PREFIX)) {
-			throw new IllegalArgumentException("Un-known destination prefix");
-		}
+		return known.computeIfAbsent(prefixedName, this::toDestination);
+	}
 
-		return known.computeIfAbsent(prefixedName,
-				key -> new ActiveMQQueue(key.startsWith(TOPIC_PREFIX) ? key.replaceFirst(TOPIC_PREFIX, "")
-						: key.replaceFirst(QUEUE_PREFIX, "")));
+	private Destination toDestination(final String prefixedName) {
+		if (prefixedName.startsWith(TOPIC_PREFIX)) {
+			return new ActiveMQTopic(prefixedName.replaceFirst(TOPIC_PREFIX, ""));
+		} else {
+			return new ActiveMQQueue(prefixedName.replaceFirst(QUEUE_PREFIX, ""));
+		}
 	}
 }

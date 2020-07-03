@@ -20,7 +20,7 @@ import org.springframework.core.type.AnnotationMetadata;
  * @author Lei Yang
  *
  */
-public class ForMsgRegistrar implements ImportBeanDefinitionRegistrar {
+public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 
 	@SuppressWarnings("unchecked")
 	@Override
