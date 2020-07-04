@@ -61,8 +61,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.returned());
-		Assertions.assertEquals(null, outcome.thrown());
+		Assertions.assertEquals(null, outcome.getReturned());
+		Assertions.assertEquals(null, outcome.getThrown());
 	}
 
 	@Test
@@ -90,8 +90,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(mq, outcome.returned());
-		Assertions.assertEquals(null, outcome.thrown());
+		Assertions.assertEquals(mq, outcome.getReturned());
+		Assertions.assertEquals(null, outcome.getThrown());
 	}
 
 	@Test
@@ -118,13 +118,13 @@ class DefaultActionInvocationBinderTest {
 			}
 		}).invoke();
 
-		final var returned = outcome.returned();
+		final var returned = outcome.getReturned();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
 		Assertions.assertEquals(Object[].class, returned.getClass());
 		Assertions.assertEquals(mq, ((Object[]) returned)[0]);
 		Assertions.assertEquals(null, ((Object[]) returned)[1]);
-		Assertions.assertEquals(null, outcome.thrown());
+		Assertions.assertEquals(null, outcome.getThrown());
 	}
 
 	@Test
@@ -152,7 +152,7 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.returned());
+		Assertions.assertEquals(null, outcome.getReturned());
 	}
 
 	@Test
@@ -180,8 +180,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(false, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.returned());
-		Assertions.assertEquals(RuntimeException.class, outcome.thrown().getClass());
+		Assertions.assertEquals(null, outcome.getReturned());
+		Assertions.assertEquals(RuntimeException.class, outcome.getThrown().getClass());
 	}
 
 	@Test
@@ -212,8 +212,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals("11", outcome.returned().toString());
-		Assertions.assertEquals(null, outcome.thrown());
+		Assertions.assertEquals("11", outcome.getReturned().toString());
+		Assertions.assertEquals(null, outcome.getThrown());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -250,10 +250,10 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		final var returned = (Object[]) outcome.returned();
+		final var returned = (Object[]) outcome.getReturned();
 		Assertions.assertEquals(3, ((List<Integer>) (returned[0])).get(0));
 		Assertions.assertEquals(msg, returned[2]);
-		Assertions.assertEquals(null, outcome.thrown());
+		Assertions.assertEquals(null, outcome.getThrown());
 	}
 
 }

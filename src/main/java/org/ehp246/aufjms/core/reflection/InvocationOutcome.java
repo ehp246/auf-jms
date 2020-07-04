@@ -1,5 +1,7 @@
 package org.ehp246.aufjms.core.reflection;
 
+import java.util.Optional;
+
 public class InvocationOutcome<T> {
 	private final T returned;
 	private final Throwable thrown;
@@ -20,11 +22,11 @@ public class InvocationOutcome<T> {
 		return new InvocationOutcome<T>(null, thrown, false);
 	}
 
-	public T returned() {
+	public T getReturned() {
 		return returned;
 	}
 
-	public Throwable thrown() {
+	public Throwable getThrown() {
 		return thrown;
 	}
 
@@ -37,6 +39,10 @@ public class InvocationOutcome<T> {
 	}
 
 	public Object outcomeValue() {
-		return hasReturned() ? returned() : thrown();
+		return hasReturned() ? getReturned() : getThrown();
+	}
+
+	public Optional<T> ifReturnedPresent() {
+		return hasReturned() ? Optional.of(returned) : Optional.empty();
 	}
 }

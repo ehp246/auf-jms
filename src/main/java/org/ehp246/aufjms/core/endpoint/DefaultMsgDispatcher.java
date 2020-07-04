@@ -13,6 +13,7 @@ import org.ehp246.aufjms.api.slf4j.MdcKeys;
 import org.ehp246.aufjms.core.configuration.AufJmsProperties;
 import org.ehp246.aufjms.core.reflection.CatchingInvocation;
 import org.ehp246.aufjms.core.reflection.InvocationOutcome;
+import org.ehp246.aufjms.core.reflection.ReflectingInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -44,11 +45,11 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 		final var resolveOutcome = CatchingInvocation.invoke(() -> this.actionResolver.resolve(msg));
 		if (resolveOutcome.hasThrown()) {
-			LOGGER.error("Resolution failed", resolveOutcome.thrown());
+			LOGGER.error("Resolution failed", resolveOutcome.getThrown());
 			return;
 		}
 
-		final var resolved = resolveOutcome.returned();
+		final var resolved = resolveOutcome.getReturned();
 		if (resolved == null) {
 			LOGGER.info("Un-matched message");
 			return;
@@ -83,18 +84,8 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			final InvocationBinder binder) {
 		return () -> {
 			final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(resolved, () -> msg));
-
-			if (bindOutcome.hasThrown()) {
-				LOGGER.error("Invocation binding failed", bindOutcome.thrown());
-				// No point to continue;
-				return;
-			}
-
-			final var invocationOutcome = bindOutcome.returned().invoke();
-
-			if (invocationOutcome.hasThrown()) {
-				LOGGER.error("Invocation failed", invocationOutcome.thrown());
-			}
+			final var outcome = bindOutcome.ifReturnedPresent().map(ReflectingInvocation::invoke)
+					.orElseGet(() -> InvocationOutcome.thrown(bindOutcome.getThrown()));
 
 			final var postExecution = resolved.postExecution();
 
@@ -109,7 +100,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 					@Override
 					public InvocationOutcome<?> getOutcome() {
-						return invocationOutcome;
+						return outcome;
 					}
 
 					@Override
