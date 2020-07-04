@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public class DefaultActionInvocationBinder implements ActionInvocationBinder {
+public class DefaultActionInvocationBinder implements InvocationBinder {
 	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultActionInvocationBinder.class);
 
 	protected static final Map<Class<? extends Annotation>, Function<Msg, String>> HEADER_VALUE_SUPPLIERS = Map
@@ -42,7 +42,7 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 	}
 
 	@Override
-	public ReflectingInvocation bind(final ResolvedExecutable resolved, final ActionInvocationContext ctx) {
+	public ReflectingInvocation bind(final ResolvedExecutable resolved, final InvocationContext ctx) {
 		final var method = resolved.getMethod();
 		if (method.getParameterCount() == 0) {
 			return new ReflectingInvocation(resolved.getInstance(), method, null);
@@ -95,7 +95,7 @@ public class DefaultActionInvocationBinder implements ActionInvocationBinder {
 	 * @param arguments
 	 * @return
 	 */
-	private boolean[] bindContextArgs(final Parameter[] parameters, final ActionInvocationContext ctx,
+	private boolean[] bindContextArgs(final Parameter[] parameters, final InvocationContext ctx,
 			final Object[] arguments) {
 		final boolean[] markers = new boolean[parameters.length];
 

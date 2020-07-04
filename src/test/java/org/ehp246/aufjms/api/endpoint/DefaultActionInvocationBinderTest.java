@@ -52,7 +52,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -61,8 +61,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.getReturned());
-		Assertions.assertEquals(null, outcome.getThrown());
+		Assertions.assertEquals(null, outcome.returned());
+		Assertions.assertEquals(null, outcome.thrown());
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -90,8 +90,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(mq, outcome.getReturned());
-		Assertions.assertEquals(null, outcome.getThrown());
+		Assertions.assertEquals(mq, outcome.returned());
+		Assertions.assertEquals(null, outcome.thrown());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -118,13 +118,13 @@ class DefaultActionInvocationBinderTest {
 			}
 		}).invoke();
 
-		final var returned = outcome.getReturned();
+		final var returned = outcome.returned();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
 		Assertions.assertEquals(Object[].class, returned.getClass());
 		Assertions.assertEquals(mq, ((Object[]) returned)[0]);
 		Assertions.assertEquals(null, ((Object[]) returned)[1]);
-		Assertions.assertEquals(null, outcome.getThrown());
+		Assertions.assertEquals(null, outcome.thrown());
 	}
 
 	@Test
@@ -143,7 +143,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -152,7 +152,7 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.getReturned());
+		Assertions.assertEquals(null, outcome.returned());
 	}
 
 	@Test
@@ -171,7 +171,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -180,8 +180,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(false, outcome.hasReturned());
-		Assertions.assertEquals(null, outcome.getReturned());
-		Assertions.assertEquals(RuntimeException.class, outcome.getThrown().getClass());
+		Assertions.assertEquals(null, outcome.returned());
+		Assertions.assertEquals(RuntimeException.class, outcome.thrown().getClass());
 	}
 
 	@Test
@@ -203,7 +203,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -212,8 +212,8 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals("11", outcome.getReturned().toString());
-		Assertions.assertEquals(null, outcome.getThrown());
+		Assertions.assertEquals("11", outcome.returned().toString());
+		Assertions.assertEquals(null, outcome.thrown());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -241,7 +241,7 @@ class DefaultActionInvocationBinderTest {
 			public Object getInstance() {
 				return case001;
 			}
-		}, new ActionInvocationContext() {
+		}, new InvocationContext() {
 
 			@Override
 			public Msg getMsg() {
@@ -250,10 +250,10 @@ class DefaultActionInvocationBinderTest {
 		}).invoke();
 
 		Assertions.assertEquals(true, outcome.hasReturned());
-		final var returned = (Object[]) outcome.getReturned();
+		final var returned = (Object[]) outcome.returned();
 		Assertions.assertEquals(3, ((List<Integer>) (returned[0])).get(0));
 		Assertions.assertEquals(msg, returned[2]);
-		Assertions.assertEquals(null, outcome.getThrown());
+		Assertions.assertEquals(null, outcome.thrown());
 	}
 
 }

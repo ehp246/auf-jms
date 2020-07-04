@@ -10,7 +10,7 @@ import org.ehp246.aufjms.core.bymsg.ByMsgFactory;
 import org.ehp246.aufjms.core.bymsg.ByMsgRegistrar;
 import org.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
 import org.ehp246.aufjms.core.bymsg.ReplyToNameSupplierFactory;
-import org.ehp246.aufjms.core.configuration.ActionExecutorConfiguration;
+import org.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
 import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import org.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
 import org.ehp246.aufjms.core.jackson.JacksonConfiguration;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ ConnectionConfiguration.class, ReplyEndpointConfiguration.class, ByMsgRegistrar.class, ByMsgFactory.class,
-		ReplyToNameSupplierFactory.class, MsgEndpointConfigurer.class, ActionExecutorConfiguration.class,
+		ReplyToNameSupplierFactory.class, MsgEndpointConfigurer.class, PooledExecutorConfiguration.class,
 		JacksonConfiguration.class })
 public @interface EnableByMsg {
 	Class<?>[] scan() default {};

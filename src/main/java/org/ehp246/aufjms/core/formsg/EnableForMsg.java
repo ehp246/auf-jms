@@ -8,7 +8,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.ehp246.aufjms.core.configuration.ActionExecutorConfiguration;
+import org.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
 import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import org.ehp246.aufjms.core.endpoint.AtEndpointFactory;
 import org.ehp246.aufjms.core.endpoint.EnableForMsgRegistrar;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ ConnectionConfiguration.class, EnableForMsgRegistrar.class, AtEndpointFactory.class,
-		MsgEndpointConfigurer.class, ActionExecutorConfiguration.class, JacksonConfiguration.class })
+		MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JacksonConfiguration.class })
 public @interface EnableForMsg {
 	At[] value() default @At;
 

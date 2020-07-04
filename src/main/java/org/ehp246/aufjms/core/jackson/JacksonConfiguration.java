@@ -1,6 +1,6 @@
 package org.ehp246.aufjms.core.jackson;
 
-import org.ehp246.aufjms.api.endpoint.ActionInvocationBinder;
+import org.ehp246.aufjms.api.endpoint.InvocationBinder;
 import org.ehp246.aufjms.api.endpoint.DefaultActionInvocationBinder;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
@@ -18,7 +18,7 @@ import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 public class JacksonConfiguration {
 
 	@Bean
-	public ActionInvocationBinder actionInvocationBinder(FromBody<String> fromBody) {
+	public InvocationBinder actionInvocationBinder(FromBody<String> fromBody) {
 		return new DefaultActionInvocationBinder(fromBody);
 	}
 

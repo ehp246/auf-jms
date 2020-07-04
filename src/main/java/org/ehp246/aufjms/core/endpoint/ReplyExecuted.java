@@ -45,12 +45,12 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 			@Override
 			public List<?> getBodyValues() {
 				return outcome.hasReturned()
-						? outcome.getReturned() != null ? List.of(outcome.getReturned()) : List.of()
+						? outcome.returned() != null ? List.of(outcome.returned()) : List.of()
 						: List.of(new ExecutionThrown() {
 
 							@Override
 							public Integer getCode() {
-								final var thrown = outcome.getThrown();
+								final var thrown = outcome.thrown();
 								if (thrown instanceof ExecutionThrown) {
 									return ((ExecutionThrown) thrown).getCode();
 								}
@@ -59,7 +59,7 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 
 							@Override
 							public String getMessage() {
-								return outcome.getThrown().getMessage();
+								return outcome.thrown().getMessage();
 							}
 
 						});

@@ -1,74 +1,132 @@
 package org.ehp246.aufjms.core.endpoint;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.Executor;
 
-import org.ehp246.aufjms.api.endpoint.ActionExecutor;
-import org.ehp246.aufjms.api.endpoint.BoundInstance;
-import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import org.ehp246.aufjms.api.endpoint.InvocationBinder;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
+import org.ehp246.aufjms.api.slf4j.MdcKeys;
+import org.ehp246.aufjms.core.configuration.AufJmsProperties;
+import org.ehp246.aufjms.core.reflection.CatchingInvocation;
+import org.ehp246.aufjms.core.reflection.InvocationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
 public class DefaultMsgDispatcher implements MsgDispatcher {
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
 
 	private final ExecutableResolver actionResolver;
-	private final ActionExecutor actionExecutor;
-	private final List<Consumer<ExecutedInstance>> postPerforms = new ArrayList<>();
+	private final Executor executor;
+	private final InvocationBinder binder;
 
-	public DefaultMsgDispatcher(final ExecutableResolver actionResolver, final ActionExecutor actionExecutor) {
+	public DefaultMsgDispatcher(final ExecutableResolver actionResolver, final InvocationBinder binder,
+			@Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor executor) {
 		super();
 		this.actionResolver = actionResolver;
-		this.actionExecutor = actionExecutor;
-	}
-
-	public DefaultMsgDispatcher addPostConsumer(Consumer<ExecutedInstance> postPerform) {
-		this.postPerforms.add(postPerform);
-		return this;
+		this.binder = binder;
+		this.executor = executor;
 	}
 
 	@Override
 	public void dispatch(final Msg msg) {
-		LOGGER.trace("Dispatching {}", msg.getType());
+		LOGGER.trace("Dispatching");
 
-		final ResolvedExecutable instance;
-		try {
-			instance = this.actionResolver.resolve(msg);
-			if (instance == null) {
-				LOGGER.info("Un-matched message type: {}", msg.getType());
-
-				return;
-			}
-		} catch (Exception e) {
-			LOGGER.error("Resolution failed: {}", e.getMessage());
-
+		final var resolveOutcome = CatchingInvocation.invoke(() -> this.actionResolver.resolve(msg));
+		if (resolveOutcome.hasThrown()) {
+			LOGGER.error("Resolution failed", resolveOutcome.thrown());
 			return;
 		}
 
-		LOGGER.trace("Submitting {}", msg.getType());
+		final var resolved = resolveOutcome.returned();
+		if (resolved == null) {
+			LOGGER.info("Un-matched message");
+			return;
+		}
 
-		this.actionExecutor.submit(new BoundInstance() {
+		LOGGER.trace("Submitting");
 
-			@Override
-			public Msg getMsg() {
-				return msg;
-			}
+		final var runnable = newRunnable(msg, resolved, binder);
 
-			@Override
-			public ResolvedExecutable getResolvedInstance() {
-				return instance;
-			}
-		});
+		if (resolved.getInvocationModel() == InvocationModel.SYNC) {
+			LOGGER.trace("Executing");
+
+			runnable.run();
+
+			LOGGER.trace("Executed");
+		} else {
+			executor.execute(() -> {
+				MDC.put(MdcKeys.MSG_TYPE, msg.getType());
+				MDC.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
+				LOGGER.trace("Executing");
+
+				runnable.run();
+
+				LOGGER.trace("Executed");
+				MDC.remove(MdcKeys.MSG_TYPE);
+				MDC.remove(MdcKeys.CORRELATION_ID);
+			});
+		}
 	};
+
+	private static Runnable newRunnable(final Msg msg, final ResolvedExecutable resolved,
+			final InvocationBinder binder) {
+		return () -> {
+			final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(resolved, () -> msg));
+
+			if (bindOutcome.hasThrown()) {
+				LOGGER.error("Invocation binding failed", bindOutcome.thrown());
+				// No point to continue;
+				return;
+			}
+
+			final var invocationOutcome = bindOutcome.returned().invoke();
+
+			if (invocationOutcome.hasThrown()) {
+				LOGGER.error("Invocation failed", invocationOutcome.thrown());
+			}
+
+			final var postExecution = resolved.postExecution();
+
+			if (postExecution == null) {
+				return;
+			}
+
+			try {
+				LOGGER.trace("Executing postExecution");
+
+				postExecution.accept(new ExecutedInstance() {
+
+					@Override
+					public InvocationOutcome<?> getOutcome() {
+						return invocationOutcome;
+					}
+
+					@Override
+					public Msg getMsg() {
+						return msg;
+					}
+
+					@Override
+					public ResolvedExecutable getInstance() {
+						return resolved;
+					}
+				});
+
+				LOGGER.trace("Executed postExecution");
+			} catch (final Exception e) {
+				LOGGER.error("postExecution failed:", e);
+			}
+		};
+	}
 }

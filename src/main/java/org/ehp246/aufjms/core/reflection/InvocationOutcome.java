@@ -11,28 +11,32 @@ public class InvocationOutcome<T> {
 		this.hasReturned = hasReturned;
 		this.thrown = thrown;
 	}
-	
-	public static <T> InvocationOutcome<T> returned(T returned) {
+
+	public static <T> InvocationOutcome<T> returned(final T returned) {
 		return new InvocationOutcome<T>(returned, null, true);
 	}
-	
-	public static <T> InvocationOutcome<T> thrown(Throwable thrown) {
+
+	public static <T> InvocationOutcome<T> thrown(final Throwable thrown) {
 		return new InvocationOutcome<T>(null, thrown, false);
 	}
 
-	public T getReturned() {
+	public T returned() {
 		return returned;
 	}
-	
-	public Throwable getThrown() {
+
+	public Throwable thrown() {
 		return thrown;
 	}
-	
+
 	public boolean hasReturned() {
 		return hasReturned;
 	}
-	
+
 	public boolean hasThrown() {
 		return !hasReturned;
+	}
+
+	public Object outcomeValue() {
+		return hasReturned() ? returned() : thrown();
 	}
 }
