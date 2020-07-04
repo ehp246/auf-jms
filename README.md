@@ -7,7 +7,6 @@ A JMS development library that tries its best to hide JMS.
 * CollectionOf
 * Async reply
 * ByMsg scanner re-factor
-* Executor Queue Re-factor
 * Dynamic ReplyTo
 * JMS GroupId
 * Custom Property
