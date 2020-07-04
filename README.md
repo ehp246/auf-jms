@@ -2,7 +2,6 @@
 A JMS development library that tries its best to hide JMS.
 
 # To do:
-* Tracing
 * Instance field/setter binding
 * CollectionOf
 * Async reply
