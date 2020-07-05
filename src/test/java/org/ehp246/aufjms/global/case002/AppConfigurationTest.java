@@ -1,10 +1,10 @@
-package org.ehp246.aufjms.integration.case002;
+package org.ehp246.aufjms.global.case002;
 
 import org.ehp246.aufjms.api.exception.ForMsgExecutionException;
 import org.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
-import org.ehp246.aufjms.integration.case002.bymsg.Add;
-import org.ehp246.aufjms.integration.case002.bymsg.Counter;
-import org.ehp246.aufjms.integration.case002.bymsg.ExceptionThrower;
+import org.ehp246.aufjms.global.case002.bymsg.Add;
+import org.ehp246.aufjms.global.case002.bymsg.Counter;
+import org.ehp246.aufjms.global.case002.bymsg.ExceptionThrower;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

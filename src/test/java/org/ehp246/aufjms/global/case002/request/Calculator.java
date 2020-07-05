@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.case002.request;
+package org.ehp246.aufjms.global.case002.request;
 
 import java.util.concurrent.atomic.AtomicReference;
 

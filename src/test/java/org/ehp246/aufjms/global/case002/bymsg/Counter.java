@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.case002.bymsg;
+package org.ehp246.aufjms.global.case002.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
 import org.ehp246.aufjms.annotation.Invoking;
@@ -8,7 +8,7 @@ import org.ehp246.aufjms.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByMsg("queue://org.ehp246.aufjms.integration.case002.AppConfiguration.request")
+@ByMsg("queue://org.ehp246.aufjms.request")
 @OfType("Calculator")
 public interface Counter {
 	@Invoking("setMem")

@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.collectionof;
+package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
 import java.util.Set;
@@ -12,7 +12,7 @@ import org.ehp246.aufjms.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByMsg("org.ehp246.aufjms.inegration.collectionof.AppConfiguration.request")
+@ByMsg("org.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
 	void set(Set<Instant> instants);

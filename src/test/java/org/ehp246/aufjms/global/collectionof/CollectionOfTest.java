@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.collectionof;
+package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
 import java.util.Set;
@@ -9,9 +9,9 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = AppConfiguration.class, properties = {
+@SpringBootTest(classes = CollectionOfConfiguration.class, properties = {
 		"spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false" })
-public class AppConfigurationTest {
+public class CollectionOfTest {
 	@Autowired
 	private ListableBeanFactory beanFactory;
 
@@ -34,9 +34,8 @@ public class AppConfigurationTest {
 		final var expected = Instant.now();
 		alarm.set(Set.of(expected, expected.minusMillis(100)));
 
-		final Instant[] set = (Instant[]) alarm.get().toArray();
+		alarm.get().forEach(instant -> Assertions.assertEquals(Instant.class, instant.getClass()));
 
-		Assertions.assertEquals(expected, set[0]);
 	}
 
 }

@@ -1,6 +1,7 @@
-package org.ehp246.aufjms.integration.collectionof;
+package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import org.ehp246.aufjms.annotation.CollectionOf;
@@ -17,21 +18,21 @@ import org.springframework.stereotype.Service;
 @Service
 @ForMsg(scope = InstanceScope.BEAN, invocation = InvocationModel.SYNC)
 class Alarm {
-	private Set<Instant> instants;
+	private Instant[] instants;
 
 	@Invoking("set")
 	public void set(final Instant... instants) {
-		this.instants = Set.of(instants);
+		this.instants = instants;
 	}
 
 	@Invoking
 	public void set(@CollectionOf(Instant.class) final Set<Instant> instants) {
 		// Type checking
-		this.instants = Set.of((Instant[]) instants.toArray());
+		this.instants = instants.toArray(new Instant[] {});
 	}
 
 	@Invoking("get")
-	public Set<Instant> get() {
-		return instants;
+	public List<Instant> get() {
+		return List.of(instants);
 	}
 }

@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.case002.request;
+package org.ehp246.aufjms.global.case002.request;
 
 import org.ehp246.aufjms.annotation.ForMsg;
 import org.ehp246.aufjms.annotation.Invoking;

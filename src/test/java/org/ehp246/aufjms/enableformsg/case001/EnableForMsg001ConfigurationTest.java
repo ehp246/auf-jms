@@ -1,7 +1,6 @@
 package org.ehp246.aufjms.enableformsg.case001;
 
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,17 +17,6 @@ public class EnableForMsg001ConfigurationTest {
 
 	@BeforeEach
 	void setup() {
-	}
-
-	@Test
-	public void destination001() {
-		final var resolver = appCtx.getBean(MsgEndpoint.class);
-
-		Assertions.assertEquals(true, resolver != null);
-		Assertions.assertEquals("", resolver.getDestinationName());
-
-		Assertions.assertEquals(EnableForMsg001Configuration.DefaultQueue,
-				appCtx.getBean(DestinationNameResolver.class).resolve(""));
 	}
 
 	@Test

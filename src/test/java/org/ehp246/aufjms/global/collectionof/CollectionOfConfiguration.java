@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.integration.destination;
+package org.ehp246.aufjms.global.collectionof;
 
 import org.ehp246.aufjms.annotation.EnableByMsg;
 import org.ehp246.aufjms.core.formsg.EnableForMsg;
@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  */
 @SpringBootApplication
-@EnableByMsg(replyTo = "topic://${aufjms.reply.topic}")
-@EnableForMsg({ @At("queue://${aufjms.request.queue}"), @At("${aufjms.request.queue02}") })
-public class AppConfiguration {
+@EnableByMsg
+@EnableForMsg(@At("org.ehp246.aufjms.collectionof"))
+public class CollectionOfConfiguration {
 }
