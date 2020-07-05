@@ -15,5 +15,5 @@ import java.lang.annotation.Target;
  *
  */
 public @interface CollectionOf {
-	Class<?> value();
+	Class<?>[] value();
 }

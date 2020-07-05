@@ -1,8 +1,10 @@
 package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.ehp246.aufjms.annotation.CollectionOf;
 import org.ehp246.aufjms.annotation.ForMsg;
@@ -34,5 +36,13 @@ class Alarm {
 	@Invoking("get")
 	public List<Instant> get() {
 		return List.of(instants);
+	}
+
+	@Invoking("flatSet")
+	public Set<List<Instant>> flatSet(
+			@CollectionOf({ ArrayList.class, Instant.class }) final Set<List<Instant>> instants) {
+		final var list = instants.stream().flatMap(List::stream).collect(Collectors.toList());
+		this.instants = new Instant[list.size()];
+		return instants;
 	}
 }
