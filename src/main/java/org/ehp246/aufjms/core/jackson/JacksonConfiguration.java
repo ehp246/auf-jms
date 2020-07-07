@@ -23,8 +23,8 @@ public class JacksonConfiguration {
 	}
 
 	@Bean
-	public JacksonProvider jacksonProvider() {
-		return new JacksonProvider(new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+	public JsonByJackson jacksonProvider() {
+		return new JsonByJackson(new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 				.registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.registerModule(new MrBeanModule()));

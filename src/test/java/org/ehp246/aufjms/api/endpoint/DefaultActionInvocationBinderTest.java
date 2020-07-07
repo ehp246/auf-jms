@@ -7,7 +7,7 @@ import java.util.List;
 import javax.jms.Message;
 
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.aufjms.core.jackson.JacksonProvider;
+import org.ehp246.aufjms.core.jackson.JsonByJackson;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class DefaultActionInvocationBinderTest {
 
 	private final ReflectingType<Case001> case001Type = new ReflectingType<Case001>(Case001.class);
 	private final DefaultActionInvocationBinder binder = new DefaultActionInvocationBinder(
-			new JacksonProvider(objectMapper));
+			new JsonByJackson(objectMapper));
 
 	@Test
 	public void binder001() throws Exception {
