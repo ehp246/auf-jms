@@ -1,6 +1,7 @@
 package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -38,4 +39,24 @@ public class CollectionOfTest {
 
 	}
 
+	@Test
+	void collection003() {
+		final var alarm = beanFactory.getBean(SetAlarm.class);
+		final var expected = List.of(Set.of(List.of(Instant.now(), Instant.now().minusMillis(100)),
+				List.of(Instant.now().minusMillis(10)), List.of(Instant.now().minusMillis(20))));
+
+		final var flat = alarm.flatSet(expected);
+
+		Assertions.assertEquals(1, flat.size());
+
+		flat.stream().forEach(set -> {
+			Assertions.assertEquals(true, set instanceof Set);
+			Assertions.assertEquals(3, set.size());
+
+			set.stream().flatMap(List::stream).forEach(list -> {
+				Assertions.assertEquals(true, list instanceof Instant);
+			});
+
+		});
+	}
 }

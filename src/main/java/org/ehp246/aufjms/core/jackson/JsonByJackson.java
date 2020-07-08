@@ -17,12 +17,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Lei Yang
  *
  */
-public class JacksonProvider implements FromBody<String>, ToBody<String> {
-	private final static Logger LOGGER = LoggerFactory.getLogger(JacksonProvider.class);
+public class JsonByJackson implements FromBody<String>, ToBody<String> {
+	private final static Logger LOGGER = LoggerFactory.getLogger(JsonByJackson.class);
 
 	private final ObjectMapper objectMapper;
 
-	public JacksonProvider(final ObjectMapper objectMapper) {
+	public JsonByJackson(final ObjectMapper objectMapper) {
 		super();
 		this.objectMapper = objectMapper;
 	}
@@ -93,9 +93,22 @@ public class JacksonProvider implements FromBody<String>, ToBody<String> {
 
 		if (collectionOf == null) {
 			return objectMapper.readValue(json, receiver.getType());
-		} else {
+		}
+		if (collectionOf.length == 1) {
 			return objectMapper.readValue(json,
 					objectMapper.getTypeFactory().constructParametricType(receiver.getType(), collectionOf));
+		} else {
+			final var typeFactory = objectMapper.getTypeFactory();
+			final var types = new ArrayList<Class<?>>();
+			types.add(receiver.getType());
+			types.addAll(List.of(collectionOf));
+
+			final var size = types.size();
+			var type = typeFactory.constructParametricType(types.get(size - 2), types.get(size - 1));
+			for (int i = size - 3; i >= 0; i--) {
+				type = typeFactory.constructParametricType(types.get(i), type);
+			}
+			return objectMapper.readValue(json, type);
 		}
 	}
 }

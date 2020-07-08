@@ -1,6 +1,7 @@
 package org.ehp246.aufjms.global.collectionof;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import org.ehp246.aufjms.annotation.ByMsg;
@@ -23,4 +24,8 @@ interface SetAlarm {
 	@Invoking("get")
 	@CollectionOf(Instant.class)
 	Set<Instant> get();
+
+	@Invoking("flatSet")
+	@CollectionOf({ Set.class, List.class, Instant.class })
+	List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
 }
