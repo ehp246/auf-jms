@@ -42,11 +42,21 @@ public class CollectionOfTest {
 	@Test
 	void collection003() {
 		final var alarm = beanFactory.getBean(SetAlarm.class);
-		final var expected = Instant.now();
+		final var expected = List.of(Set.of(List.of(Instant.now(), Instant.now().minusMillis(100)),
+				List.of(Instant.now().minusMillis(10)), List.of(Instant.now().minusMillis(20))));
 
-		final var flat = alarm.flatSet(Set.of(List.of(expected, expected.minusMillis(100)),
-				List.of(expected.minusMillis(10)), List.of(expected.minusMillis(20))));
+		final var flat = alarm.flatSet(expected);
 
-		Assertions.assertEquals(4, flat.size());
+		Assertions.assertEquals(1, flat.size());
+
+		flat.stream().forEach(set -> {
+			Assertions.assertEquals(true, set instanceof Set);
+			Assertions.assertEquals(3, set.size());
+
+			set.stream().flatMap(List::stream).forEach(list -> {
+				Assertions.assertEquals(true, list instanceof Instant);
+			});
+
+		});
 	}
 }

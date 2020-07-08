@@ -26,6 +26,6 @@ interface SetAlarm {
 	Set<Instant> get();
 
 	@Invoking("flatSet")
-	@CollectionOf({ List.class, Instant.class })
-	Set<List<Instant>> flatSet(Set<List<Instant>> instantSet);
+	@CollectionOf({ Set.class, List.class, Instant.class })
+	List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
 }
