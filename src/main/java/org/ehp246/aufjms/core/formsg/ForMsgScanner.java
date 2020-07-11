@@ -23,7 +23,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -34,8 +34,8 @@ public class ForMsgScanner {
 		private final Class<?> instanceType;
 		private final Map<String, Method> methods;
 
-		private MsgTypeActionDefinitionImplementation(HashMap<String, Method> invokings, ForMsg annotation,
-				String msgType, Class<?> instanceType) {
+		private MsgTypeActionDefinitionImplementation(final HashMap<String, Method> invokings, final ForMsg annotation,
+				final String msgType, final Class<?> instanceType) {
 			this.annotation = annotation;
 			this.msgType = msgType;
 			this.instanceType = instanceType;
@@ -72,7 +72,7 @@ public class ForMsgScanner {
 
 	private final Set<String> scanPackages;
 
-	public ForMsgScanner(Set<String> scanPackages) {
+	public ForMsgScanner(final Set<String> scanPackages) {
 		super();
 		this.scanPackages = scanPackages;
 	}
@@ -80,7 +80,7 @@ public class ForMsgScanner {
 	public Set<MsgTypeActionDefinition> perform() {
 		final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
 			@Override
-			protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+			protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
 				return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
 			}
 		};
@@ -91,7 +91,7 @@ public class ForMsgScanner {
 				LOGGER.debug("Scanning {}", bean.getBeanClassName());
 
 				return Class.forName(bean.getBeanClassName());
-			} catch (ClassNotFoundException e) {
+			} catch (final ClassNotFoundException e) {
 				LOGGER.error("This should not happen.", e);
 			}
 			return null;
@@ -113,9 +113,9 @@ public class ForMsgScanner {
 		final var reflected = new ReflectingType<>(instanceType);
 
 		// Search for the annotation first
-		for (var method : reflected.findMethods(Invoking.class)) {
+		for (final var method : reflected.findMethods(Invoking.class)) {
 			final var invokingName = Optional.of(method.getAnnotation(Invoking.class).value().strip())
-					.filter(name -> name.length() > 0).orElse("");
+					.filter(name -> name.length() > 0).orElseGet(method::getName);
 			if (invokings.containsKey(invokingName)) {
 				throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 			}

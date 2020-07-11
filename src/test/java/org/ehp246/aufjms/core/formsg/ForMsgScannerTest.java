@@ -9,13 +9,17 @@ import org.ehp246.aufjms.core.formsg.case002.Case002;
 import org.ehp246.aufjms.core.formsg.case003.Case003;
 import org.ehp246.aufjms.core.formsg.case004.Case004;
 import org.ehp246.aufjms.core.formsg.case005.Case005;
+import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 /**
  * @author Lei Yang
  *
  */
+@RunWith(JUnitPlatform.class)
 class ForMsgScannerTest {
 
 	@Test
@@ -33,7 +37,17 @@ class ForMsgScannerTest {
 
 		final var methods = one.getMethods();
 
-		Assertions.assertEquals(3, methods.size());
+		Assertions.assertEquals(4, methods.size());
+
+		final var reflected = new ReflectingType<>(Case001.class);
+
+		Assertions.assertEquals(reflected.findMethod("m001"), methods.get("m001"));
+		Assertions.assertEquals(reflected.findMethod("m003"), methods.get("m003"));
+		Assertions.assertEquals(reflected.findMethod("m001", int.class), methods.get("m001-1"));
+		Assertions.assertEquals(reflected.findMethod("m002", int.class), methods.get("m002"));
+
+		Assertions.assertEquals(false, methods.containsValue(reflected.findMethod("m002")),
+				"Should not have the un-annotated");
 	}
 
 	@Test

@@ -4,8 +4,9 @@ import org.ehp246.aufjms.annotation.ForMsg;
 import org.ehp246.aufjms.annotation.Invoking;
 
 /**
- * This class should not load because of two default target methods.
- * 
+ * This class should fail the scan because two same methods have the same
+ * Invoking name.
+ *
  * @author Lei Yang
  *
  */
@@ -17,7 +18,7 @@ public class Case002 {
 	}
 
 	@Invoking
-	public void m001(int i) {
+	public void m001(final int i) {
 	}
 
 }

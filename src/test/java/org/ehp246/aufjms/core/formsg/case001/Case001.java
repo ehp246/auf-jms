@@ -10,25 +10,25 @@ import org.ehp246.aufjms.annotation.Invoking;
 @ForMsg
 public class Case001 {
 
-	/**
-	 * Single default
-	 */
 	@Invoking
 	public void m001() {
 	}
 
+	@Invoking
+	public void m003() {
+	}
+
 	@Invoking("m001-1")
-	public void m001(int i) {
+	public void m001(final int i) {
 	}
 
 	@Invoking("m002")
-	public void m002(int i) {
+	public void m002(final int i) {
 	}
 
 	/**
 	 * Should not be registered
 	 */
 	public void m002() {
-
 	}
 }
