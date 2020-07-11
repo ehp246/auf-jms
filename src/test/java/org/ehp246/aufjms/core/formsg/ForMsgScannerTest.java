@@ -9,6 +9,7 @@ import org.ehp246.aufjms.core.formsg.case002.Case002;
 import org.ehp246.aufjms.core.formsg.case003.Case003;
 import org.ehp246.aufjms.core.formsg.case004.Case004;
 import org.ehp246.aufjms.core.formsg.case005.Case005;
+import org.ehp246.aufjms.core.formsg.case006.Case006;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -72,5 +73,19 @@ class ForMsgScannerTest {
 	void scope001() {
 		Assertions.assertThrows(RuntimeException.class,
 				() -> new ForMsgScanner(Set.of(Case005.class.getPackageName())).perform());
+	}
+
+	@Test
+	void scope002() {
+		final var found = new ForMsgScanner(Set.of(Case006.class.getPackageName())).perform();
+
+		Assertions.assertEquals(1, found.size());
+
+		final var one = found.stream().findAny().get();
+
+		Assertions.assertEquals(Case006.class, one.getInstanceType());
+		Assertions.assertEquals(Case006.class.getSimpleName(), one.getMsgType());
+		Assertions.assertEquals(InstanceScope.BEAN, one.getInstanceScope());
+		Assertions.assertEquals(InvocationModel.DEFAULT, one.getInvocationModel());
 	}
 }

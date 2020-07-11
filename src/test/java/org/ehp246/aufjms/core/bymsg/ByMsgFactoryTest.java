@@ -30,7 +30,7 @@ public class ByMsgFactoryTest {
 
 	private final ReplyEndpointConfiguration replyConfig = new ReplyEndpointConfiguration(() -> null, null, 1, 1);
 
-	private final ByMsgFactory aufProxyFactory = new ByMsgFactory(portProvider, nameResolver, replyConfig);
+	private final ByMsgFactory factory = new ByMsgFactory(portProvider, nameResolver, replyConfig);
 
 	@BeforeEach
 	public void beforeEach() {
@@ -44,12 +44,12 @@ public class ByMsgFactoryTest {
 	@Test
 	public void general001() {
 		Assertions.assertTrue(
-				aufProxyFactory.newInstance(GeneralTestCase.Case001.class) instanceof GeneralTestCase.Case001);
+				factory.newInstance(GeneralTestCase.Case001.class) instanceof GeneralTestCase.Case001);
 	}
 
 	@Test
 	public void general002() {
-		Assertions.assertEquals(2, aufProxyFactory.newInstance(GeneralTestCase.Case001.class).inc(1),
+		Assertions.assertEquals(2, factory.newInstance(GeneralTestCase.Case001.class).inc(1),
 				"Should call default implementation");
 
 		Assertions.assertNull(ref.get(), "Should not send message");
@@ -60,7 +60,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void destination001() {
-		final var newInstance = aufProxyFactory.newInstance(DestinationTestCase.Case001.class);
+		final var newInstance = factory.newInstance(DestinationTestCase.Case001.class);
 
 		newInstance.m001();
 
@@ -69,7 +69,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void destination002() {
-		final var newInstance = aufProxyFactory.newInstance(DestinationTestCase.Case002.class);
+		final var newInstance = factory.newInstance(DestinationTestCase.Case002.class);
 
 		newInstance.m001();
 
@@ -86,7 +86,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void correlationId001() {
-		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = factory.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
 
@@ -115,7 +115,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void type001() {
-		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = factory.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
 
@@ -146,7 +146,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type002() {
-		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = factory.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002(expected);
@@ -161,7 +161,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void type003() {
-		final var newInstance = aufProxyFactory.newInstance(TypeTestCase.TypeCase001.class);
+		final var newInstance = factory.newInstance(TypeTestCase.TypeCase001.class);
 
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m007(expected, UUID.randomUUID().toString());
@@ -170,7 +170,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void timeout001() {
-		final var newInstance = aufProxyFactory.newInstance(TimeoutTestCases.Case001.class);
+		final var newInstance = factory.newInstance(TimeoutTestCases.Case001.class);
 
 		Assertions.assertTimeout(Duration.ofMillis(100),
 				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
@@ -183,7 +183,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void timeout002() {
-		final var newInstance = aufProxyFactory.newInstance(TimeoutTestCases.Case002.class);
+		final var newInstance = factory.newInstance(TimeoutTestCases.Case002.class);
 
 		Assertions.assertTimeout(Duration.ofMillis(1000),
 				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
@@ -192,14 +192,14 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void ttl001() {
-		aufProxyFactory.newInstance(TtlTestCases.Case001.class).m001();
+		factory.newInstance(TtlTestCases.Case001.class).m001();
 
 		Assertions.assertEquals(1, ref.get().getTtl(), "Should be the value from the annotation");
 	}
 
 	@Test
 	public void ttl002() {
-		aufProxyFactory.newInstance(TtlTestCases.Case002.class).m001();
+		factory.newInstance(TtlTestCases.Case002.class).m001();
 
 		Assertions.assertEquals(500, ref.get().getTtl(), "Should be the value from the annotation");
 	}
@@ -209,7 +209,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void body001() {
-		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
+		final var newInstance = factory.newInstance(BodyTestCase.class);
 		newInstance.m001();
 
 		Assertions.assertEquals(0, ref.get().getBodyValues().size(), "Should always return a list");
@@ -248,7 +248,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body002() {
-		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
+		final var newInstance = factory.newInstance(BodyTestCase.class);
 		newInstance.m002("");
 
 		final var body = ref.get().getBodyValues();
@@ -257,7 +257,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body003() {
-		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
+		final var newInstance = factory.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m002("", null, expected);
 
@@ -268,7 +268,7 @@ public class ByMsgFactoryTest {
 
 	@Test
 	public void body004() {
-		final var newInstance = aufProxyFactory.newInstance(BodyTestCase.class);
+		final var newInstance = factory.newInstance(BodyTestCase.class);
 		final var expected = UUID.randomUUID().toString();
 		newInstance.m003("", null, expected);
 
