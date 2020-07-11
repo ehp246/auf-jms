@@ -82,7 +82,7 @@ public class ByMsgFactory {
 								.bindTo(proxy).invokeWithArguments(args);
 					}
 
-					final var invocation = new ProxyInvocation(new ProxyInvoked<Object>(proxy, method, args),
+					final var invocation = new ByMsgInvocation(new ProxyInvoked<Object>(proxy, method, args),
 							replyConfig.getFromBody(), timeout, ttl);
 
 					if (invocation.isReplyExpected()) {

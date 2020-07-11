@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InvokingTypeResolver;
-import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
+import org.ehp246.aufjms.api.endpoint.ForMsgExecutableDefinition;
 import org.ehp246.aufjms.api.endpoint.MsgTypeActionRegistry;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -28,23 +28,23 @@ import org.slf4j.LoggerFactory;
 public class DefaultInvokingTypeResolver implements MsgTypeActionRegistry, InvokingTypeResolver {
 	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultInvokingTypeResolver.class);
 
-	private final Map<String, MsgTypeActionDefinition> registeredActions = new HashMap<>();
+	private final Map<String, ForMsgExecutableDefinition> registeredActions = new HashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
 
-	public DefaultInvokingTypeResolver register(final Stream<MsgTypeActionDefinition> actionDefinitions) {
+	public DefaultInvokingTypeResolver register(final Stream<ForMsgExecutableDefinition> actionDefinitions) {
 		actionDefinitions.forEach(this::register);
 		return this;
 	}
 
 	@Override
-	public void register(final MsgTypeActionDefinition actionDefinition) {
+	public void register(final ForMsgExecutableDefinition actionDefinition) {
 		registeredActions.put(actionDefinition.getMsgType(), actionDefinition);
 
 		registereMethods.put(actionDefinition.getInstanceType(), actionDefinition.getMethods());
 	}
 
 	@Override
-	public List<MsgTypeActionDefinition> getRegistered() {
+	public List<ForMsgExecutableDefinition> getRegistered() {
 		return this.registeredActions.values().stream().collect(Collectors.toList());
 	}
 

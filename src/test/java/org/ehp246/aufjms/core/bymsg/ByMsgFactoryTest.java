@@ -43,8 +43,7 @@ public class ByMsgFactoryTest {
 	 */
 	@Test
 	public void general001() {
-		Assertions.assertTrue(
-				factory.newInstance(GeneralTestCase.Case001.class) instanceof GeneralTestCase.Case001);
+		Assertions.assertTrue(factory.newInstance(GeneralTestCase.Case001.class) instanceof GeneralTestCase.Case001);
 	}
 
 	@Test
@@ -276,5 +275,29 @@ public class ByMsgFactoryTest {
 		Assertions.assertEquals(2, body.size(), "Should skip annotated arguments");
 		Assertions.assertEquals("", body.get(0), "Should have argument value");
 		Assertions.assertEquals(expected, body.get(1), "Should have argument value");
+	}
+
+	@Test
+	public void invoking001() {
+		final var newInstance = factory.newInstance(InvokingTestCase.Case001.class);
+
+		newInstance.m001();
+
+		Assertions.assertEquals("m001", ref.get().getInvoking());
+
+		ref.set(null);
+		newInstance.m002();
+
+		Assertions.assertEquals("m002", ref.get().getInvoking());
+
+		ref.set(null);
+		newInstance.m003();
+
+		Assertions.assertEquals("m003", ref.get().getInvoking());
+
+		ref.set(null);
+		newInstance.m003(0);
+
+		Assertions.assertEquals("m003-1", ref.get().getInvoking());
 	}
 }

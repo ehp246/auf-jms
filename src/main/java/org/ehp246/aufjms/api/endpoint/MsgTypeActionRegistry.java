@@ -8,7 +8,7 @@ import java.util.List;
  *
  */
 public interface MsgTypeActionRegistry {
-	void register(MsgTypeActionDefinition actionDefinition);
+	void register(ForMsgExecutableDefinition actionDefinition);
 
-	List<MsgTypeActionDefinition> getRegistered();
+	List<ForMsgExecutableDefinition> getRegistered();
 }
