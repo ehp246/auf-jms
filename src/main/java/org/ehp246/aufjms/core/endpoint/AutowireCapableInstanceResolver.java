@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import org.ehp246.aufjms.api.endpoint.InvokingTypeResolver;
+import org.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
@@ -22,11 +22,11 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
  */
 public class AutowireCapableInstanceResolver implements ExecutableResolver {
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-	private final InvokingTypeResolver typeResolver;
+	private final ExecutableTypeResolver typeResolver;
 	private final Consumer<ExecutedInstance> executedConsumer;
 
 	public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-			final InvokingTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
+			final ExecutableTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
 		super();
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
 		this.typeResolver = resolver;

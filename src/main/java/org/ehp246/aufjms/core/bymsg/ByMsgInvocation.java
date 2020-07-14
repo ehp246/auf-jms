@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.annotation.OfCorrelationId;
@@ -28,14 +29,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lei Yang
  */
-class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ProxyInvocation.class);
+class ByMsgInvocation implements MessageSupplier, ResolvedExecutable {
+	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgInvocation.class);
 
 	private static final Method ONREPLY;
 
 	static {
 		try {
-			ONREPLY = ProxyInvocation.class.getDeclaredMethod("onReply", Msg.class);
+			ONREPLY = ByMsgInvocation.class.getDeclaredMethod("onReply", Msg.class);
 		} catch (final Exception e) {
 			LOGGER.error("This should not happen. Did you change the method signature?");
 			throw new RuntimeException(e);
@@ -52,7 +53,7 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 	private final long timeout;
 	private final long ttl;
 
-	public ProxyInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody, final Long timeout,
+	public ByMsgInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody, final Long timeout,
 			final Long ttl) {
 		super();
 
@@ -176,7 +177,8 @@ class ProxyInvocation implements MessageSupplier, ResolvedExecutable {
 
 	@Override
 	public String getInvoking() {
-		return invoked.findOnMethod(Invoking.class).map(Invoking::value).orElse("");
+		return invoked.findOnMethod(Invoking.class).map(Invoking::value).filter(Predicate.not(String::isBlank))
+				.orElseGet(invoked::getMethodName);
 	}
 
 	@Override

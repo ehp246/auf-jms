@@ -13,7 +13,7 @@ import org.ehp246.aufjms.annotation.ForMsg;
 import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.api.endpoint.MsgTypeActionDefinition;
+import org.ehp246.aufjms.api.endpoint.ForMsgInvokingDefinition;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.ehp246.aufjms.util.StreamOf;
 import org.slf4j.Logger;
@@ -23,19 +23,19 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
 public class ForMsgScanner {
-	private static class MsgTypeActionDefinitionImplementation implements MsgTypeActionDefinition {
+	private static class ExecutableDefinitionImplementation implements ForMsgInvokingDefinition {
 		private final ForMsg annotation;
 		private final String msgType;
 		private final Class<?> instanceType;
 		private final Map<String, Method> methods;
 
-		private MsgTypeActionDefinitionImplementation(HashMap<String, Method> invokings, ForMsg annotation,
-				String msgType, Class<?> instanceType) {
+		private ExecutableDefinitionImplementation(final HashMap<String, Method> invokings, final ForMsg annotation,
+				final String msgType, final Class<?> instanceType) {
 			this.annotation = annotation;
 			this.msgType = msgType;
 			this.instanceType = instanceType;
@@ -72,15 +72,15 @@ public class ForMsgScanner {
 
 	private final Set<String> scanPackages;
 
-	public ForMsgScanner(Set<String> scanPackages) {
+	public ForMsgScanner(final Set<String> scanPackages) {
 		super();
 		this.scanPackages = scanPackages;
 	}
 
-	public Set<MsgTypeActionDefinition> perform() {
+	public Set<ForMsgInvokingDefinition> perform() {
 		final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
 			@Override
-			protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+			protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
 				return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
 			}
 		};
@@ -91,14 +91,14 @@ public class ForMsgScanner {
 				LOGGER.debug("Scanning {}", bean.getBeanClassName());
 
 				return Class.forName(bean.getBeanClassName());
-			} catch (ClassNotFoundException e) {
+			} catch (final ClassNotFoundException e) {
 				LOGGER.error("This should not happen.", e);
 			}
 			return null;
 		}).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
-	private MsgTypeActionDefinition newDefinition(final Class<?> instanceType) {
+	private ForMsgInvokingDefinition newDefinition(final Class<?> instanceType) {
 		final var annotation = instanceType.getAnnotation(ForMsg.class);
 		if (annotation == null) {
 			return null;
@@ -113,9 +113,9 @@ public class ForMsgScanner {
 		final var reflected = new ReflectingType<>(instanceType);
 
 		// Search for the annotation first
-		for (var method : reflected.findMethods(Invoking.class)) {
+		for (final var method : reflected.findMethods(Invoking.class)) {
 			final var invokingName = Optional.of(method.getAnnotation(Invoking.class).value().strip())
-					.filter(name -> name.length() > 0).orElse("");
+					.filter(name -> name.length() > 0).orElseGet(method::getName);
 			if (invokings.containsKey(invokingName)) {
 				throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
 			}
@@ -134,6 +134,6 @@ public class ForMsgScanner {
 
 		LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
-		return new MsgTypeActionDefinitionImplementation(invokings, annotation, msgType, instanceType);
+		return new ExecutableDefinitionImplementation(invokings, annotation, msgType, instanceType);
 	}
 }
