@@ -1,9 +1,9 @@
 package org.ehp246.aufjms.core.bymsg;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
@@ -13,30 +13,27 @@ import org.ehp246.aufjms.core.configuration.AufJmsProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-
 public class ReplyEndpointConfiguration {
-	private final ConcurrentMap<@NonNull String, @NonNull ResolvedExecutable> correlMap;
+	private final ConcurrentMap<String, ResolvedExecutable> correlMap = new ConcurrentHashMap<>();
 	private final MsgEndpoint msgEndpoint;
 	private final long timeout;
 	private final long ttl;
 	private final ReplyToNameSupplier replyToNameSupplier;
 	private final FromBody<String> fromBody;
 
-	public ReplyEndpointConfiguration(ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
-			@Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") long timeout,
-			@Value("${" + AufJmsProperties.TTL + ":0}") long ttl) {
+	public ReplyEndpointConfiguration(final ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
+			@Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") final long timeout,
+			@Value("${" + AufJmsProperties.TTL + ":0}") final long ttl) {
 		super();
 		this.timeout = timeout;
 		this.ttl = ttl;
 		this.replyToNameSupplier = replyTo;
 		this.fromBody = fromBody;
-		this.correlMap = Caffeine.newBuilder().weakValues().<String, ResolvedExecutable>build().asMap();
 		this.msgEndpoint = new MsgEndpoint() {
 
 			@Override
 			public String getDestinationName() {
-				return replyTo.get();
+				return ReplyEndpointConfiguration.this.getReplyToName();
 			}
 
 			@Override

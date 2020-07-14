@@ -16,9 +16,10 @@ import org.ehp246.aufjms.annotation.OfType;
 @ByMsg("org.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
+	@Invoking("setCollection")
 	void set(Set<Instant> instants);
 
-	@Invoking("set")
+	@Invoking("setArray")
 	void set(Instant... instants);
 
 	@Invoking("get")

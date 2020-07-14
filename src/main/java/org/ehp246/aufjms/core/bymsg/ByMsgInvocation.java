@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.ehp246.aufjms.annotation.Invoking;
-import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
@@ -43,12 +42,11 @@ class ByMsgInvocation implements MessageSupplier, ResolvedExecutable {
 		}
 	}
 
-	private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfCorrelationId.class,
-			OfType.class, OfGroup.class);
+	private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfGroup.class);
 
 	private final CompletableFuture<Object> future = new CompletableFuture<>();
 	private final ProxyInvoked<Object> invoked;
-	private final String correlationId;
+	private final String correlationId = UUID.randomUUID().toString();
 	private final FromBody<String> fromBody;
 	private final long timeout;
 	private final long ttl;
@@ -58,10 +56,6 @@ class ByMsgInvocation implements MessageSupplier, ResolvedExecutable {
 		super();
 
 		this.invoked = invoked;
-		final var found = this.invoked.findOnArguments(OfCorrelationId.class);
-		this.correlationId = found.isPresent()
-				? Optional.ofNullable(found.get().getArgument()).map(Object::toString).orElse(null)
-				: UUID.randomUUID().toString();
 		this.fromBody = fromBody;
 		this.timeout = timeout;
 		this.ttl = ttl;

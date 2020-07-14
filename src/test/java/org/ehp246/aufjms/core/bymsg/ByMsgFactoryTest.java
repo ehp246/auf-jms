@@ -92,21 +92,6 @@ public class ByMsgFactoryTest {
 		Assertions.assertNotNull(ref.get().getCorrelationId(), "Should have id");
 		Assertions.assertEquals(ref.get().getCorrelationId(), ref.get().getCorrelationId(), "Should not change");
 
-		ref.set(null);
-		newInstance.m001(null);
-
-		Assertions.assertEquals(null, ref.get().getCorrelationId(), "Should allow argument overwrite");
-
-		ref.set(null);
-		final var expected = UUID.randomUUID().toString();
-		newInstance.m001(expected);
-
-		Assertions.assertEquals(expected, ref.get().getCorrelationId(), "Should allow argument overwrite");
-
-		ref.set(null);
-		newInstance.m001(Integer.valueOf(1));
-
-		Assertions.assertEquals(Integer.valueOf(1).toString(), ref.get().getCorrelationId(), "Should use toString");
 	}
 
 	/**

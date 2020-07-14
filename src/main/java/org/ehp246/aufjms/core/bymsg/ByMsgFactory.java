@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -84,19 +84,26 @@ public class ByMsgFactory {
 
 					final var invocation = new ByMsgInvocation(new ProxyInvoked<Object>(proxy, method, args),
 							replyConfig.getFromBody(), timeout, ttl);
+					final var correlMap = replyConfig.getCorrelMap();
 
 					if (invocation.isReplyExpected()) {
-						replyConfig.getCorrelMap().put(invocation.getCorrelationId(), invocation);
+						correlMap.put(invocation.getCorrelationId(), invocation);
 					}
 
 					try {
 						port.accept(invocation);
-					} catch (Exception e) {
-						replyConfig.getCorrelMap().remove(invocation.getCorrelationId());
+					} catch (final Exception e) {
+						correlMap.remove(invocation.getCorrelationId());
 						throw e;
 					}
 
-					return invocation.returnInvocation();
+					try {
+						return invocation.returnInvocation();
+					} catch (final Exception e) {
+						throw e;
+					} finally {
+						correlMap.remove(invocation.getCorrelationId());
+					}
 				});
 
 	}
