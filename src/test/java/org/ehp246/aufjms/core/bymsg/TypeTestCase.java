@@ -1,15 +1,12 @@
 package org.ehp246.aufjms.core.bymsg;
 
 import org.ehp246.aufjms.annotation.ByMsg;
-import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfType;
 
 class TypeTestCase {
 	@ByMsg("")
 	interface TypeCase001 {
 		void m001();
-
-		void m001(@OfCorrelationId Object id);
 
 		@OfType
 		void m002(@OfType String type);

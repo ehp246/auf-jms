@@ -21,12 +21,12 @@ import org.springframework.stereotype.Service;
 class Alarm {
 	private Instant[] instants;
 
-	@Invoking("set")
+	@Invoking("setArray")
 	public void set(final Instant... instants) {
 		this.instants = instants;
 	}
 
-	@Invoking
+	@Invoking("setCollection")
 	public void set(@CollectionOf(Instant.class) final Set<Instant> instants) {
 		// Type checking
 		this.instants = instants.toArray(new Instant[] {});

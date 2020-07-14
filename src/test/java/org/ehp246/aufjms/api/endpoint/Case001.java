@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.jms.Message;
 
-import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.jms.Msg;
 
@@ -14,25 +13,21 @@ class Case001 {
 
 	}
 
-	public Msg m001(Msg msg) {
+	public Msg m001(final Msg msg) {
 		return msg;
 	}
 
-	public Object[] m001(Msg msg, Message message) {
+	public Object[] m001(final Msg msg, final Message message) {
 		return new Object[] { msg, message };
 	}
 
-	public String m001(@OfCorrelationId String correlId, int i) {
-		return correlId + Integer.valueOf(i).toString();
-	}
-
-	public Object[] m001(List<Integer> integers, Instant[] instants, Message message) {
+	public Object[] m001(final List<Integer> integers, final Instant[] instants, final Message message) {
 		final var instant = instants[0];
 
 		return new Object[] { integers, instant, message };
 	}
 
-	public void m001(Msg msg, @OfType String type, String str) {
+	public void m001(final Msg msg, @OfType final String type, final String str) {
 
 	}
 

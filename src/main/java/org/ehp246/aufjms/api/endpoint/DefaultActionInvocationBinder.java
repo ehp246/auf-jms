@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import javax.jms.Message;
 
-import org.ehp246.aufjms.annotation.OfCorrelationId;
 import org.ehp246.aufjms.annotation.OfProperty;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.jms.FromBody;
@@ -29,7 +28,7 @@ public class DefaultActionInvocationBinder implements InvocationBinder {
 	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultActionInvocationBinder.class);
 
 	protected static final Map<Class<? extends Annotation>, Function<Msg, String>> HEADER_VALUE_SUPPLIERS = Map
-			.of(OfCorrelationId.class, Msg::getCorrelationId, OfType.class, Msg::getType);
+			.of(OfType.class, Msg::getType);
 
 	protected static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
 			.copyOf(HEADER_VALUE_SUPPLIERS.keySet());

@@ -184,38 +184,6 @@ class DefaultActionInvocationBinderTest {
 		Assertions.assertEquals(RuntimeException.class, outcome.getThrown().getClass());
 	}
 
-	@Test
-	public void binder007() {
-		final var mq = Mockito.mock(Msg.class);
-		Mockito.when(mq.getCorrelationId()).thenReturn("1");
-		Mockito.when(mq.getBodyAsText()).thenReturn("1");
-
-		final Case001 case001 = new Case001();
-
-		final var outcome = binder.bind(new ResolvedExecutable() {
-
-			@Override
-			public Method getMethod() {
-				return case001Type.findMethod("m001", String.class, int.class);
-			}
-
-			@Override
-			public Object getInstance() {
-				return case001;
-			}
-		}, new InvocationContext() {
-
-			@Override
-			public Msg getMsg() {
-				return mq;
-			}
-		}).invoke();
-
-		Assertions.assertEquals(true, outcome.hasReturned());
-		Assertions.assertEquals("11", outcome.getReturned().toString());
-		Assertions.assertEquals(null, outcome.getThrown());
-	}
-
 	@SuppressWarnings("unchecked")
 	@Test
 	public void binder008() throws JsonProcessingException {
