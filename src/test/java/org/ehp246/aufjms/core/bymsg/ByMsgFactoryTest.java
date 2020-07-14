@@ -81,10 +81,10 @@ public class ByMsgFactoryTest {
 	 */
 
 	/**
-	 * Correlation Id
+	 * Correlation Map
 	 */
 	@Test
-	public void correlationId001() {
+	public void correlationMap001() {
 		final var newInstance = factory.newInstance(TypeTestCase.TypeCase001.class);
 
 		newInstance.m001();
@@ -156,13 +156,17 @@ public class ByMsgFactoryTest {
 	public void timeout001() {
 		final var newInstance = factory.newInstance(TimeoutTestCases.Case001.class);
 
-		Assertions.assertTimeout(Duration.ofMillis(100),
+		Assertions.assertTimeout(Duration.ofMillis(250),
 				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
 				"Should use timeout from the global setting");
 
-		Assertions.assertTimeout(Duration.ofMillis(100),
+		Assertions.assertEquals(0, replyConfig.getCorrelMap().size(), "Should not be left in the map");
+
+		Assertions.assertTimeout(Duration.ofMillis(250),
 				() -> Assertions.assertThrows(TimeoutException.class, newInstance::m002),
 				"Should throw the exception witout wrapping");
+
+		Assertions.assertEquals(0, replyConfig.getCorrelMap().size(), "Should not be left in the map");
 	}
 
 	@Test
@@ -172,6 +176,8 @@ public class ByMsgFactoryTest {
 		Assertions.assertTimeout(Duration.ofMillis(1000),
 				() -> Assertions.assertThrows(RuntimeException.class, newInstance::m001),
 				"Should use timeout from the annotation");
+
+		Assertions.assertEquals(0, replyConfig.getCorrelMap().size(), "Should not be left in the map");
 	}
 
 	@Test
