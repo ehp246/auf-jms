@@ -8,11 +8,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.ehp246.aufjms.api.endpoint.ForMsgInvokingDefinition;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.api.endpoint.InvokingTypeResolver;
-import org.ehp246.aufjms.api.endpoint.ForMsgExecutableDefinition;
-import org.ehp246.aufjms.api.endpoint.MsgTypeActionRegistry;
+import org.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
+import org.ehp246.aufjms.api.endpoint.ForMsgRegistry;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.slf4j.Logger;
@@ -20,31 +20,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * Action by Type Registry.
- * 
+ * Executable by Type Registry.
+ *
  * @author Lei Yang
  *
  */
-public class DefaultInvokingTypeResolver implements MsgTypeActionRegistry, InvokingTypeResolver {
-	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultInvokingTypeResolver.class);
+public class DefaultExecutableTypeResolver implements ForMsgRegistry, ExecutableTypeResolver {
+	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutableTypeResolver.class);
 
-	private final Map<String, ForMsgExecutableDefinition> registeredActions = new HashMap<>();
+	private final Map<String, ForMsgInvokingDefinition> registeredActions = new HashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
 
-	public DefaultInvokingTypeResolver register(final Stream<ForMsgExecutableDefinition> actionDefinitions) {
-		actionDefinitions.forEach(this::register);
+	public DefaultExecutableTypeResolver register(final Stream<ForMsgInvokingDefinition> invokingDefinitions) {
+		invokingDefinitions.forEach(this::register);
 		return this;
 	}
 
 	@Override
-	public void register(final ForMsgExecutableDefinition actionDefinition) {
-		registeredActions.put(actionDefinition.getMsgType(), actionDefinition);
+	public void register(final ForMsgInvokingDefinition invokingDefinition) {
+		registeredActions.put(invokingDefinition.getMsgType(), invokingDefinition);
 
-		registereMethods.put(actionDefinition.getInstanceType(), actionDefinition.getMethods());
+		registereMethods.put(invokingDefinition.getInstanceType(), invokingDefinition.getMethods());
 	}
 
 	@Override
-	public List<ForMsgExecutableDefinition> getRegistered() {
+	public List<ForMsgInvokingDefinition> getRegistered() {
 		return this.registeredActions.values().stream().collect(Collectors.toList());
 	}
 

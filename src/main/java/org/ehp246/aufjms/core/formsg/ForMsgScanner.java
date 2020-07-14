@@ -13,7 +13,7 @@ import org.ehp246.aufjms.annotation.ForMsg;
 import org.ehp246.aufjms.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.api.endpoint.ForMsgExecutableDefinition;
+import org.ehp246.aufjms.api.endpoint.ForMsgInvokingDefinition;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.ehp246.aufjms.util.StreamOf;
 import org.slf4j.Logger;
@@ -28,13 +28,13 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  *
  */
 public class ForMsgScanner {
-	private static class MsgTypeActionDefinitionImplementation implements ForMsgExecutableDefinition {
+	private static class ExecutableDefinitionImplementation implements ForMsgInvokingDefinition {
 		private final ForMsg annotation;
 		private final String msgType;
 		private final Class<?> instanceType;
 		private final Map<String, Method> methods;
 
-		private MsgTypeActionDefinitionImplementation(final HashMap<String, Method> invokings, final ForMsg annotation,
+		private ExecutableDefinitionImplementation(final HashMap<String, Method> invokings, final ForMsg annotation,
 				final String msgType, final Class<?> instanceType) {
 			this.annotation = annotation;
 			this.msgType = msgType;
@@ -77,7 +77,7 @@ public class ForMsgScanner {
 		this.scanPackages = scanPackages;
 	}
 
-	public Set<ForMsgExecutableDefinition> perform() {
+	public Set<ForMsgInvokingDefinition> perform() {
 		final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
 			@Override
 			protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
@@ -98,7 +98,7 @@ public class ForMsgScanner {
 		}).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
-	private ForMsgExecutableDefinition newDefinition(final Class<?> instanceType) {
+	private ForMsgInvokingDefinition newDefinition(final Class<?> instanceType) {
 		final var annotation = instanceType.getAnnotation(ForMsg.class);
 		if (annotation == null) {
 			return null;
@@ -134,6 +134,6 @@ public class ForMsgScanner {
 
 		LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
-		return new MsgTypeActionDefinitionImplementation(invokings, annotation, msgType, instanceType);
+		return new ExecutableDefinitionImplementation(invokings, annotation, msgType, instanceType);
 	}
 }

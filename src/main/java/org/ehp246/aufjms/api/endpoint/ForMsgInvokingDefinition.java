@@ -9,7 +9,7 @@ import java.util.Map;
  * @author Lei Yang
  *
  */
-public interface ForMsgExecutableDefinition {
+public interface ForMsgInvokingDefinition {
 	String getMsgType();
 
 	Class<?> getInstanceType();
