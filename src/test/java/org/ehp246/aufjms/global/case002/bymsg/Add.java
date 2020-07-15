@@ -1,7 +1,7 @@
 package org.ehp246.aufjms.global.case002.bymsg;
 
-import org.ehp246.aufjms.annotation.ByMsg;
-import org.ehp246.aufjms.annotation.OfType;
+import org.ehp246.aufjms.api.annotation.ByMsg;
+import org.ehp246.aufjms.api.annotation.OfType;
 
 /**
  * @author Lei Yang

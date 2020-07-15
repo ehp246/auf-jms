@@ -1,9 +1,9 @@
 package org.ehp246.aufjms.core.bymsg;
 
-import org.ehp246.aufjms.activemq.PrefixedNameResolver;
-import org.ehp246.aufjms.annotation.ByMsg;
-import org.ehp246.aufjms.annotation.EnableByMsg;
+import org.ehp246.aufjms.api.annotation.ByMsg;
+import org.ehp246.aufjms.api.annotation.EnableByMsg;
 import org.ehp246.aufjms.api.jms.ReplyToNameSupplier;
+import org.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;

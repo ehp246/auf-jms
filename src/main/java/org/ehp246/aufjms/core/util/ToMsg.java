@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.util;
+package org.ehp246.aufjms.core.util;
 
 import java.time.Instant;
 import java.util.concurrent.Callable;

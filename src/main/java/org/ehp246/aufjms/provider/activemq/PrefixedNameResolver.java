@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.activemq;
+package org.ehp246.aufjms.provider.activemq;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,7 +10,6 @@ import org.apache.activemq.command.ActiveMQTopic;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 /**
- * Using Spring property placeholder for destination names.
  *
  * @author Lei Yang
  *

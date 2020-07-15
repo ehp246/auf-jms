@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.jms.Message;
 
-import org.ehp246.aufjms.annotation.OfType;
+import org.ehp246.aufjms.api.annotation.OfType;
 import org.ehp246.aufjms.api.jms.Msg;
 
 class Case001 {

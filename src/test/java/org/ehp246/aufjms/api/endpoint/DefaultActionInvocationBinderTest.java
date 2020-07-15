@@ -7,8 +7,9 @@ import java.util.List;
 import javax.jms.Message;
 
 import org.ehp246.aufjms.api.jms.Msg;
-import org.ehp246.aufjms.core.jackson.JsonByJackson;
+import org.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
+import org.ehp246.aufjms.provider.jackson.JsonByJackson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

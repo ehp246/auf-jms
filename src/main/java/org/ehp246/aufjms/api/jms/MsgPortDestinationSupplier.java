@@ -6,7 +6,7 @@ import javax.jms.Destination;
  * @author Lei Yang
  *
  */
-public interface MessagePortDestinationSupplier {
+public interface MsgPortDestinationSupplier {
 	Destination getTo();
 
 	default Destination getReplyTo() {

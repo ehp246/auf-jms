@@ -9,13 +9,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.ehp246.aufjms.annotation.ForMsg;
-import org.ehp246.aufjms.annotation.Invoking;
+import org.ehp246.aufjms.api.annotation.ForMsg;
+import org.ehp246.aufjms.api.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.api.endpoint.ForMsgInvokingDefinition;
+import org.ehp246.aufjms.api.endpoint.InvokingDefinition;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
-import org.ehp246.aufjms.util.StreamOf;
+import org.ehp246.aufjms.core.util.StreamOf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -28,7 +28,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  *
  */
 public class ForMsgScanner {
-	private static class ExecutableDefinitionImplementation implements ForMsgInvokingDefinition {
+	private static class ExecutableDefinitionImplementation implements InvokingDefinition {
 		private final ForMsg annotation;
 		private final String msgType;
 		private final Class<?> instanceType;
@@ -77,7 +77,7 @@ public class ForMsgScanner {
 		this.scanPackages = scanPackages;
 	}
 
-	public Set<ForMsgInvokingDefinition> perform() {
+	public Set<InvokingDefinition> perform() {
 		final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
 			@Override
 			protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
@@ -98,7 +98,7 @@ public class ForMsgScanner {
 		}).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
 	}
 
-	private ForMsgInvokingDefinition newDefinition(final Class<?> instanceType) {
+	private InvokingDefinition newDefinition(final Class<?> instanceType) {
 		final var annotation = instanceType.getAnnotation(ForMsg.class);
 		if (annotation == null) {
 			return null;

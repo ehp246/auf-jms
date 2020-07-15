@@ -5,8 +5,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import org.ehp246.aufjms.annotation.CollectionOf;
+import org.ehp246.aufjms.api.annotation.CollectionOf;
 import org.ehp246.aufjms.api.jms.FromBody;
+import org.ehp246.aufjms.provider.jackson.JsonByJackson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;

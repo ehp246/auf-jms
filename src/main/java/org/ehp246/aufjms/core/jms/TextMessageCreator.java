@@ -1,8 +1,11 @@
-package org.ehp246.aufjms.api.jms;
+package org.ehp246.aufjms.core.jms;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import org.ehp246.aufjms.api.jms.MessageCreator;
+import org.ehp246.aufjms.api.jms.MsgPortContext;
+import org.ehp246.aufjms.api.jms.ToBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

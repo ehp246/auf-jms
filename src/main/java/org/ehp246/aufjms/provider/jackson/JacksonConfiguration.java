@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.jackson;
+package org.ehp246.aufjms.provider.jackson;
 
 import java.util.Optional;
 

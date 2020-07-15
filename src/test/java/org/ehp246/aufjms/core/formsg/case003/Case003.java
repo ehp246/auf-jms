@@ -1,7 +1,7 @@
 package org.ehp246.aufjms.core.formsg.case003;
 
-import org.ehp246.aufjms.annotation.ForMsg;
-import org.ehp246.aufjms.annotation.Invoking;
+import org.ehp246.aufjms.api.annotation.ForMsg;
+import org.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * This class should not be scanned because of duplicate named invocations.

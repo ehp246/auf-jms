@@ -19,7 +19,7 @@ public class JsonProviderSelector implements ImportSelector {
 	@Override
 	public String[] selectImports(final AnnotationMetadata importingClassMetadata) {
 		if (JACKSON_PRESENT) {
-			return new String[] { "org.ehp246.aufjms.core.jackson.JacksonConfiguration" };
+			return new String[] { "org.ehp246.aufjms.provider.jackson.JacksonConfiguration" };
 		}
 		return null;
 	}

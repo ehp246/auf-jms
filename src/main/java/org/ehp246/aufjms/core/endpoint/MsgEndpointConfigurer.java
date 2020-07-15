@@ -10,7 +10,7 @@ import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.slf4j.MdcKeys;
 import org.ehp246.aufjms.core.configuration.AufJmsProperties;
-import org.ehp246.aufjms.util.ToMsg;
+import org.ehp246.aufjms.core.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;

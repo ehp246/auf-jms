@@ -11,12 +11,12 @@ import javax.jms.Session;
 
 import org.ehp246.aufjms.api.jms.MessageCreator;
 import org.ehp246.aufjms.api.jms.MsgPortContext;
-import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
-import org.ehp246.aufjms.api.jms.MessagePortProvider;
+import org.ehp246.aufjms.api.jms.MsgPortDestinationSupplier;
+import org.ehp246.aufjms.api.jms.MsgPortProvider;
 import org.ehp246.aufjms.api.jms.MsgPort;
 import org.ehp246.aufjms.api.jms.MsgPropertyName;
 import org.ehp246.aufjms.api.jms.MsgSupplier;
-import org.ehp246.aufjms.util.ToMsg;
+import org.ehp246.aufjms.core.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public class ConnectionPortProvider implements MessagePortProvider {
+public class ConnectionPortProvider implements MsgPortProvider {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ConnectionPortProvider.class);
 
 	private final Connection connection;
@@ -38,7 +38,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 	}
 
 	@Override
-	public MsgPort get(final MessagePortDestinationSupplier supplier) {
+	public MsgPort get(final MsgPortDestinationSupplier supplier) {
 		Objects.requireNonNull(supplier);
 
 		return msgSupplier -> {

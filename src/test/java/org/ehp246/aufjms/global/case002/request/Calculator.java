@@ -2,8 +2,8 @@ package org.ehp246.aufjms.global.case002.request;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ehp246.aufjms.annotation.ForMsg;
-import org.ehp246.aufjms.annotation.Invoking;
+import org.ehp246.aufjms.api.annotation.ForMsg;
+import org.ehp246.aufjms.api.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.springframework.stereotype.Service;
 

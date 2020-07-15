@@ -1,6 +1,6 @@
 package org.ehp246.aufjms.core.bymsg;
 
-import org.ehp246.aufjms.annotation.ByMsg;
+import org.ehp246.aufjms.api.annotation.ByMsg;
 
 public interface DestinationTestCase {
 

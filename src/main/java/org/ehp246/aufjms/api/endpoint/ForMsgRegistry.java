@@ -8,7 +8,7 @@ import java.util.List;
  *
  */
 public interface ForMsgRegistry {
-	void register(ForMsgInvokingDefinition invokingDefinition);
+	void register(InvokingDefinition invokingDefinition);
 
-	List<ForMsgInvokingDefinition> getRegistered();
+	List<InvokingDefinition> getRegistered();
 }

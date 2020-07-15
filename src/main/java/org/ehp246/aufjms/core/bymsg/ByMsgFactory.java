@@ -8,10 +8,10 @@ import java.util.Objects;
 
 import javax.jms.Destination;
 
-import org.ehp246.aufjms.annotation.ByMsg;
+import org.ehp246.aufjms.api.annotation.ByMsg;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
-import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
-import org.ehp246.aufjms.api.jms.MessagePortProvider;
+import org.ehp246.aufjms.api.jms.MsgPortDestinationSupplier;
+import org.ehp246.aufjms.api.jms.MsgPortProvider;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.slf4j.Logger;
@@ -26,10 +26,10 @@ public class ByMsgFactory {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgFactory.class);
 
 	private final ReplyEndpointConfiguration replyConfig;
-	private final MessagePortProvider portProvider;
+	private final MsgPortProvider portProvider;
 	private final DestinationNameResolver nameResolver;
 
-	public ByMsgFactory(final MessagePortProvider portProvider, final DestinationNameResolver nameResolver,
+	public ByMsgFactory(final MsgPortProvider portProvider, final DestinationNameResolver nameResolver,
 			final ReplyEndpointConfiguration replyConfig) {
 		super();
 		this.portProvider = Objects.requireNonNull(portProvider);
@@ -40,7 +40,7 @@ public class ByMsgFactory {
 	@SuppressWarnings("unchecked")
 	public <T> T newInstance(final Class<T> annotatedInterface) {
 		final var destinatinName = annotatedInterface.getAnnotation(ByMsg.class).value();
-		final var port = portProvider.get(new MessagePortDestinationSupplier() {
+		final var port = portProvider.get(new MsgPortDestinationSupplier() {
 			private final String replyTo = replyConfig.getReplyToName();
 
 			@Override

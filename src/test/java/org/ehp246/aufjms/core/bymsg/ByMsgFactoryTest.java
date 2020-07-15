@@ -6,7 +6,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
-import org.ehp246.aufjms.api.jms.MessagePortProvider;
+import org.ehp246.aufjms.api.jms.MsgPortProvider;
 import org.ehp246.aufjms.api.jms.MsgSupplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 public class ByMsgFactoryTest {
 	private final AtomicReference<MsgSupplier> ref = new AtomicReference<MsgSupplier>(null);
 	private final AtomicReference<String> refDestination = new AtomicReference<>(null);
-	private final MessagePortProvider portProvider = supplier -> msgSupplier -> {
+	private final MsgPortProvider portProvider = supplier -> msgSupplier -> {
 		supplier.getTo();
 		ref.set(msgSupplier);
 		return null;

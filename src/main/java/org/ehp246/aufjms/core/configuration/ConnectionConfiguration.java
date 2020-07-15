@@ -4,10 +4,10 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
-import org.ehp246.aufjms.activemq.PrefixedNameResolver;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessageCreator;
 import org.ehp246.aufjms.core.jms.ConnectionPortProvider;
+import org.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 

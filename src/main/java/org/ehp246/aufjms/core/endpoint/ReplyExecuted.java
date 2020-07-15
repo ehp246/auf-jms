@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.exception.ExecutionThrown;
-import org.ehp246.aufjms.api.jms.MessagePortProvider;
+import org.ehp246.aufjms.api.jms.MsgPortProvider;
 import org.ehp246.aufjms.api.jms.MsgSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.InvocationOutcome;
@@ -15,9 +15,9 @@ import org.ehp246.aufjms.core.reflection.InvocationOutcome;
  *
  */
 public class ReplyExecuted implements Consumer<ExecutedInstance> {
-	private final MessagePortProvider portProvider;
+	private final MsgPortProvider portProvider;
 
-	public ReplyExecuted(final MessagePortProvider portProvider) {
+	public ReplyExecuted(final MsgPortProvider portProvider) {
 		super();
 		this.portProvider = portProvider;
 	}

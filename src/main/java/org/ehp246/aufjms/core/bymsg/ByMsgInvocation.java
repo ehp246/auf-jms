@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import org.ehp246.aufjms.annotation.Invoking;
-import org.ehp246.aufjms.annotation.OfType;
+import org.ehp246.aufjms.api.annotation.Invoking;
+import org.ehp246.aufjms.api.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.exception.ExecutionThrown;
 import org.ehp246.aufjms.api.exception.ForMsgExecutionException;

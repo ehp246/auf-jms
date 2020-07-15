@@ -9,7 +9,7 @@ import java.util.Map;
  * @author Lei Yang
  *
  */
-public interface ForMsgInvokingDefinition {
+public interface InvokingDefinition {
 	String getMsgType();
 
 	Class<?> getInstanceType();

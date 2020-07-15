@@ -1,9 +1,9 @@
-package org.ehp246.aufjms.core.jackson;
+package org.ehp246.aufjms.provider.jackson;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ehp246.aufjms.annotation.CollectionOf;
+import org.ehp246.aufjms.api.annotation.CollectionOf;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.ToBody;
 import org.slf4j.Logger;

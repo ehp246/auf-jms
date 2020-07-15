@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.api.endpoint;
+package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -11,8 +11,11 @@ import java.util.stream.Stream;
 
 import javax.jms.Message;
 
-import org.ehp246.aufjms.annotation.OfProperty;
-import org.ehp246.aufjms.annotation.OfType;
+import org.ehp246.aufjms.api.annotation.OfProperty;
+import org.ehp246.aufjms.api.annotation.OfType;
+import org.ehp246.aufjms.api.endpoint.ExecutableBinder;
+import org.ehp246.aufjms.api.endpoint.InvocationContext;
+import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.ReflectingInvocation;

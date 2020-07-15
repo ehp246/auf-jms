@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.ehp246.aufjms.annotation;
+package org.ehp246.aufjms.api.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
 
