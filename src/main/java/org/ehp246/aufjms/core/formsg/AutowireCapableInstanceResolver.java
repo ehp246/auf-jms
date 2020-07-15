@@ -1,14 +1,14 @@
-package org.ehp246.aufjms.core.endpoint;
+package org.ehp246.aufjms.core.formsg;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
-import org.ehp246.aufjms.api.endpoint.InvocationModel;
+import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -16,14 +16,14 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 /**
  * Resolves an Action by the given registry to a bean/object created by the
  * given bean factory.
- * 
+ *
  * @author Lei Yang
  *
  */
 public class AutowireCapableInstanceResolver implements ExecutableResolver {
 	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 	private final ExecutableTypeResolver typeResolver;
-	private final Consumer<ExecutedInstance> executedConsumer;
+	private Consumer<ExecutedInstance> executedConsumer;
 
 	public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
 			final ExecutableTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
@@ -31,6 +31,11 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
 		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
 		this.typeResolver = resolver;
 		this.executedConsumer = executedConsumer;
+	}
+
+	public AutowireCapableInstanceResolver withPostExecutionConsumer(final Consumer<ExecutedInstance> consumer) {
+		this.executedConsumer = consumer;
+		return this;
 	}
 
 	@Override
@@ -42,7 +47,7 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
 			return null;
 		}
 
-		final Object actionInstance = registered.getScope().equals(InstanceScope.BEAN)
+		final Object executableInstance = registered.getScope().equals(InstanceScope.BEAN)
 				? autowireCapableBeanFactory.getBean(registered.getInstanceType())
 				: autowireCapableBeanFactory.createBean(registered.getInstanceType());
 
@@ -55,7 +60,7 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
 
 			@Override
 			public Object getInstance() {
-				return actionInstance;
+				return executableInstance;
 			}
 
 			@Override

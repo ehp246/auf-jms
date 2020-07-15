@@ -12,9 +12,9 @@ import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import org.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
 import org.ehp246.aufjms.core.configuration.JsonProviderSelector;
 import org.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
-import org.ehp246.aufjms.core.endpoint.AtEndpointFactory;
-import org.ehp246.aufjms.core.endpoint.EnableForMsgRegistrar;
 import org.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
+import org.ehp246.aufjms.core.formsg.AtEndpointFactory;
+import org.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
 import org.springframework.context.annotation.Import;
 
 /**
