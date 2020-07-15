@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.formsg;
+package org.ehp246.aufjms.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -8,12 +8,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
 import org.ehp246.aufjms.core.configuration.ConnectionConfiguration;
+import org.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
+import org.ehp246.aufjms.core.configuration.JsonProviderSelector;
+import org.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
 import org.ehp246.aufjms.core.endpoint.AtEndpointFactory;
 import org.ehp246.aufjms.core.endpoint.EnableForMsgRegistrar;
 import org.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
-import org.ehp246.aufjms.core.jackson.JacksonConfiguration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -25,7 +26,8 @@ import org.springframework.context.annotation.Import;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ ConnectionConfiguration.class, EnableForMsgRegistrar.class, AtEndpointFactory.class,
-		MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JacksonConfiguration.class })
+		MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JsonMessageConfiguration.class,
+		JsonProviderSelector.class })
 public @interface EnableForMsg {
 	At[] value() default @At;
 

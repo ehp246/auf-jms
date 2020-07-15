@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
  * @author Lei Yang
  *
  */
-public class DefaultActionInvocationBinder implements InvocationBinder {
-	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultActionInvocationBinder.class);
+public class DefaultExecutableBinder implements ExecutableBinder {
+	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutableBinder.class);
 
 	protected static final Map<Class<? extends Annotation>, Function<Msg, String>> HEADER_VALUE_SUPPLIERS = Map
 			.of(OfType.class, Msg::getType);
@@ -35,7 +35,7 @@ public class DefaultActionInvocationBinder implements InvocationBinder {
 
 	private final FromBody<String> fromBody;
 
-	public DefaultActionInvocationBinder(final FromBody<String> fromBody) {
+	public DefaultExecutableBinder(final FromBody<String> fromBody) {
 		super();
 		this.fromBody = fromBody;
 	}

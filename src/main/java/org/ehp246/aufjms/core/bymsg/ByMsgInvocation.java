@@ -12,13 +12,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.ehp246.aufjms.annotation.Invoking;
-import org.ehp246.aufjms.annotation.OfGroup;
 import org.ehp246.aufjms.annotation.OfType;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.exception.ExecutionThrown;
 import org.ehp246.aufjms.api.exception.ForMsgExecutionException;
 import org.ehp246.aufjms.api.jms.FromBody;
-import org.ehp246.aufjms.api.jms.MessageSupplier;
+import org.ehp246.aufjms.api.jms.MsgSupplier;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.ehp246.aufjms.core.reflection.ProxyInvoked;
 import org.slf4j.Logger;
@@ -28,7 +27,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lei Yang
  */
-class ByMsgInvocation implements MessageSupplier, ResolvedExecutable {
+class ByMsgInvocation implements MsgSupplier, ResolvedExecutable {
 	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgInvocation.class);
 
 	private static final Method ONREPLY;
@@ -42,7 +41,7 @@ class ByMsgInvocation implements MessageSupplier, ResolvedExecutable {
 		}
 	}
 
-	private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfGroup.class);
+	private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class);
 
 	private final CompletableFuture<Object> future = new CompletableFuture<>();
 	private final ProxyInvoked<Object> invoked;

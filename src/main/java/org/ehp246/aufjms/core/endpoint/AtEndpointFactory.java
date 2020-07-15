@@ -7,7 +7,6 @@ import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
-import org.ehp246.aufjms.core.formsg.ForMsgScanner;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 /**

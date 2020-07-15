@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
-import org.ehp246.aufjms.api.jms.MessageSupplier;
+import org.ehp246.aufjms.api.jms.MsgSupplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(JUnitPlatform.class)
 public class ByMsgFactoryTest {
-	private final AtomicReference<MessageSupplier> ref = new AtomicReference<MessageSupplier>(null);
+	private final AtomicReference<MsgSupplier> ref = new AtomicReference<MsgSupplier>(null);
 	private final AtomicReference<String> refDestination = new AtomicReference<>(null);
 	private final MessagePortProvider portProvider = supplier -> msgSupplier -> {
 		supplier.getTo();

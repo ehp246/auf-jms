@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 
 import javax.jms.MessageListener;
 
-import org.ehp246.aufjms.api.endpoint.InvocationBinder;
+import org.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import org.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import org.ehp246.aufjms.api.jms.DestinationNameResolver;
 import org.ehp246.aufjms.api.slf4j.MdcKeys;
@@ -36,12 +36,12 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 	private final Set<MsgEndpoint> endpoints;
 	private final DestinationNameResolver destintationNameResolver;
 	private final Executor actionExecutor;
-	private final InvocationBinder binder;
+	private final ExecutableBinder binder;
 
 	public MsgEndpointConfigurer(
 			final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
 			final Set<MsgEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
-			@Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor actionExecutor, final InvocationBinder binder) {
+			@Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor actionExecutor, final ExecutableBinder binder) {
 		super();
 		this.listenerContainerFactory = listenerContainerFactory;
 		this.endpoints = endpoints;

@@ -4,7 +4,7 @@ import java.util.concurrent.Executor;
 
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.InvocationBinder;
+import org.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
@@ -29,9 +29,9 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 	private final ExecutableResolver actionResolver;
 	private final Executor executor;
-	private final InvocationBinder binder;
+	private final ExecutableBinder binder;
 
-	public DefaultMsgDispatcher(final ExecutableResolver actionResolver, final InvocationBinder binder,
+	public DefaultMsgDispatcher(final ExecutableResolver actionResolver, final ExecutableBinder binder,
 			@Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor executor) {
 		super();
 		this.actionResolver = actionResolver;
@@ -81,7 +81,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 	};
 
 	private static Runnable newRunnable(final Msg msg, final ResolvedExecutable resolved,
-			final InvocationBinder binder) {
+			final ExecutableBinder binder) {
 		return () -> {
 			final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(resolved, () -> msg));
 			final var outcome = bindOutcome.ifReturnedPresent().map(ReflectingInvocation::invoke)

@@ -3,7 +3,7 @@ package org.ehp246.aufjms.api.jms;
 import java.util.List;
 import java.util.Map;
 
-public interface MessageSupplier {
+public interface MsgSupplier {
 	String getCorrelationId();
 
 	String getType();

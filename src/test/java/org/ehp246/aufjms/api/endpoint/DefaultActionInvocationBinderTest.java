@@ -33,7 +33,7 @@ class DefaultActionInvocationBinderTest {
 			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 	private final ReflectingType<Case001> case001Type = new ReflectingType<Case001>(Case001.class);
-	private final DefaultActionInvocationBinder binder = new DefaultActionInvocationBinder(
+	private final DefaultExecutableBinder binder = new DefaultExecutableBinder(
 			new JsonByJackson(objectMapper));
 
 	@Test
