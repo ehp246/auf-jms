@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.function.Consumer;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
 import org.ehp246.aufjms.api.endpoint.InvocationModel;
-import org.ehp246.aufjms.core.endpoint.ForMsgScanner;
 import org.ehp246.aufjms.core.formsg.case001.Case001;
 import org.ehp246.aufjms.core.formsg.case002.Case002;
 import org.ehp246.aufjms.core.formsg.case003.Case003;
