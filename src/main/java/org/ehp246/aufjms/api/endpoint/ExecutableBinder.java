@@ -8,6 +8,6 @@ import org.ehp246.aufjms.core.reflection.ReflectingInvocation;
  *
  */
 @FunctionalInterface
-public interface InvocationBinder {
+public interface ExecutableBinder {
 	ReflectingInvocation bind(ResolvedExecutable resolved, InvocationContext invocationContext);
 }

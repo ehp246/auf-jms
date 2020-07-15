@@ -6,6 +6,6 @@ package org.ehp246.aufjms.api.jms;
  *
  */
 @FunctionalInterface
-public interface MessagePort {
-	Msg accept(MessageSupplier msgSupplier);
+public interface MsgPort {
+	Msg accept(MsgSupplier msgSupplier);
 }

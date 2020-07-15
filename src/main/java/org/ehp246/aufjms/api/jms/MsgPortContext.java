@@ -8,7 +8,7 @@ import javax.jms.Session;
  *
  */
 public interface MsgPortContext {
-	MessageSupplier getMsgSupplier();
+	MsgSupplier getMsgSupplier();
 
 	Session getSession();
 }

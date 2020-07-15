@@ -10,18 +10,18 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.ehp246.aufjms.api.jms.MessageCreator;
-import org.ehp246.aufjms.api.jms.MessagePort;
+import org.ehp246.aufjms.api.jms.MsgPortContext;
 import org.ehp246.aufjms.api.jms.MessagePortDestinationSupplier;
 import org.ehp246.aufjms.api.jms.MessagePortProvider;
-import org.ehp246.aufjms.api.jms.MessageSupplier;
-import org.ehp246.aufjms.api.jms.MsgPortContext;
+import org.ehp246.aufjms.api.jms.MsgPort;
 import org.ehp246.aufjms.api.jms.MsgPropertyName;
+import org.ehp246.aufjms.api.jms.MsgSupplier;
 import org.ehp246.aufjms.util.ToMsg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * @author Lei Yang
  *
  */
@@ -38,7 +38,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 	}
 
 	@Override
-	public MessagePort get(final MessagePortDestinationSupplier supplier) {
+	public MsgPort get(final MessagePortDestinationSupplier supplier) {
 		Objects.requireNonNull(supplier);
 
 		return msgSupplier -> {
@@ -56,7 +56,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 					}
 
 					@Override
-					public MessageSupplier getMsgSupplier() {
+					public MsgSupplier getMsgSupplier() {
 						return msgSupplier;
 					}
 				};
@@ -66,7 +66,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 				// Fill the customs first so the framework ones won't get over-written.
 				final var map = Optional.ofNullable(msgSupplier.getPropertyMap())
 						.orElseGet(HashMap<String, String>::new);
-				for (String key : map.keySet()) {
+				for (final String key : map.keySet()) {
 					message.setStringProperty(key, map.get(key));
 				}
 
@@ -96,7 +96,7 @@ public class ConnectionPortProvider implements MessagePortProvider {
 
 					return ToMsg.from(message);
 				}
-			} catch (JMSException e) {
+			} catch (final JMSException e) {
 				LOGGER.error("Failed to take: to {}, type {}, correclation id {}", destination.toString(),
 						msgSupplier.getType(), msgSupplier.getCorrelationId(), e);
 				throw new RuntimeException(e);

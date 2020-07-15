@@ -6,5 +6,5 @@ package org.ehp246.aufjms.api.jms;
  */
 @FunctionalInterface
 public interface MessagePortProvider {
-	MessagePort get(MessagePortDestinationSupplier destinationSupplier);
+	MsgPort get(MessagePortDestinationSupplier destinationSupplier);
 }

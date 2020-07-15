@@ -1,4 +1,4 @@
-package org.ehp246.aufjms.core.formsg;
+package org.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
