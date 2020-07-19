@@ -10,6 +10,7 @@ import org.ehp246.aufjms.core.jms.ConnectionPortProvider;
 import org.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
 /**
  * Defines infrastructure bean's that are used by both front-end and back-end.
@@ -31,7 +32,7 @@ public class ConnectionConfiguration {
 	}
 
 	@Bean
-	public DestinationNameResolver destinationNameResolver() {
-		return new PrefixedNameResolver();
+	public DestinationNameResolver destinationNameResolver(final Environment env) {
+		return new PrefixedNameResolver(env);
 	}
 }

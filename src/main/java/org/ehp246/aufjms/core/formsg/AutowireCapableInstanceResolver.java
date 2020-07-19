@@ -8,7 +8,7 @@ import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
-import org.ehp246.aufjms.api.endpoint.InvocationModel;
+import org.ehp246.aufjms.api.endpoint.InvocationMode;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -64,8 +64,8 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
 			}
 
 			@Override
-			public InvocationModel getInvocationModel() {
-				return registered.getInvocationModel();
+			public InvocationMode getInvocationMode() {
+				return registered.getInvocationMode();
 			}
 
 			@Override

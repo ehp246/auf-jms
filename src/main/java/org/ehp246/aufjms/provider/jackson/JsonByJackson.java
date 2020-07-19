@@ -3,6 +3,7 @@ package org.ehp246.aufjms.provider.jackson;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.assertj.core.util.Arrays;
 import org.ehp246.aufjms.api.annotation.CollectionOf;
 import org.ehp246.aufjms.api.jms.FromBody;
 import org.ehp246.aufjms.api.jms.ToBody;
@@ -60,7 +61,8 @@ public class JsonByJackson implements FromBody<String>, ToBody<String> {
 		try {
 			// Single parameter
 			if (receivers.size() == 1) {
-				return List.of(receiveOne(body, (Receiver<Object>) receivers.get(0)));
+				// List.of does not take null.
+				return Arrays.asList(new Object[] { receiveOne(body, (Receiver<Object>) receivers.get(0)) });
 			}
 
 			// Multiple parameters

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.ehp246.aufjms.api.annotation.ForMsg;
 import org.ehp246.aufjms.api.annotation.Invoking;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
-import org.ehp246.aufjms.api.endpoint.InvocationModel;
+import org.ehp246.aufjms.api.endpoint.InvocationMode;
 import org.ehp246.aufjms.api.endpoint.InvokingDefinition;
 import org.ehp246.aufjms.core.reflection.ReflectingType;
 import org.ehp246.aufjms.core.util.StreamOf;
@@ -63,7 +63,7 @@ public class ForMsgScanner {
 		}
 
 		@Override
-		public InvocationModel getInvocationModel() {
+		public InvocationMode getInvocationMode() {
 			return annotation.invocation();
 		}
 	}

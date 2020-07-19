@@ -18,5 +18,5 @@ public interface InvokingDefinition {
 
 	InstanceScope getInstanceScope();
 
-	InvocationModel getInvocationModel();
+	InvocationMode getInvocationMode();
 }
