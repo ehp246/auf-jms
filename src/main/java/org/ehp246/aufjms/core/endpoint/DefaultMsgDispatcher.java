@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 import org.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import org.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import org.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import org.ehp246.aufjms.api.endpoint.InvocationMode;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import org.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import org.ehp246.aufjms.api.jms.Msg;
@@ -59,7 +59,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 
 		final var runnable = newRunnable(msg, resolved, binder);
 
-		if (resolved.getInvocationMode() == null || resolved.getInvocationMode() == InvocationMode.SYNC) {
+		if (resolved.getInvocationModel() == null || resolved.getInvocationModel() == InvocationModel.SYNC) {
 			LOGGER.trace("Executing");
 
 			runnable.run();

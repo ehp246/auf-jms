@@ -13,8 +13,8 @@ public interface ResolvedExecutable {
 
 	Method getMethod();
 
-	default InvocationMode getInvocationMode() {
-		return InvocationMode.DEFAULT;
+	default InvocationModel getInvocationModel() {
+		return InvocationModel.DEFAULT;
 	}
 
 	default Consumer<ExecutedInstance> postExecution() {

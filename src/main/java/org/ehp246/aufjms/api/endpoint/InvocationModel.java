@@ -6,7 +6,7 @@ package org.ehp246.aufjms.api.endpoint;
  * @author Lei Yang
  *
  */
-public enum InvocationMode {
+public enum InvocationModel {
 	/**
 	 * Default. After binding the incoming message to an executable, the dispatcher
 	 * submits the bound to the executor service for execution. Once handed-off, the

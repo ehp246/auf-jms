@@ -3,7 +3,7 @@ package org.ehp246.aufjms.core.formsg;
 import java.util.Set;
 
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
-import org.ehp246.aufjms.api.endpoint.InvocationMode;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.core.formsg.case001.Case001;
 import org.ehp246.aufjms.core.formsg.case002.Case002;
 import org.ehp246.aufjms.core.formsg.case003.Case003;
@@ -34,7 +34,7 @@ class ForMsgScannerTest {
 		Assertions.assertEquals(Case001.class, one.getInstanceType());
 		Assertions.assertEquals(Case001.class.getSimpleName(), one.getMsgType());
 		Assertions.assertEquals(InstanceScope.MESSAGE, one.getInstanceScope());
-		Assertions.assertEquals(InvocationMode.DEFAULT, one.getInvocationMode());
+		Assertions.assertEquals(InvocationModel.DEFAULT, one.getInvocationModel());
 
 		final var methods = one.getMethods();
 
@@ -86,6 +86,6 @@ class ForMsgScannerTest {
 		Assertions.assertEquals(Case006.class, one.getInstanceType());
 		Assertions.assertEquals(Case006.class.getSimpleName(), one.getMsgType());
 		Assertions.assertEquals(InstanceScope.BEAN, one.getInstanceScope());
-		Assertions.assertEquals(InvocationMode.DEFAULT, one.getInvocationMode());
+		Assertions.assertEquals(InvocationModel.DEFAULT, one.getInvocationModel());
 	}
 }

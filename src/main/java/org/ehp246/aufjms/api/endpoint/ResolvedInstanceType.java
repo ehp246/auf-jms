@@ -14,5 +14,5 @@ public interface ResolvedInstanceType {
 
 	InstanceScope getScope();
 	
-	InvocationMode getInvocationMode();
+	InvocationModel getInvocationModel();
 }

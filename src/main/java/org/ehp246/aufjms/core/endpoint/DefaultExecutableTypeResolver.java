@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import org.ehp246.aufjms.api.endpoint.InvokingDefinition;
 import org.ehp246.aufjms.api.endpoint.InstanceScope;
-import org.ehp246.aufjms.api.endpoint.InvocationMode;
+import org.ehp246.aufjms.api.endpoint.InvocationModel;
 import org.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
 import org.ehp246.aufjms.api.endpoint.ForMsgRegistry;
 import org.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
@@ -86,8 +86,8 @@ public class DefaultExecutableTypeResolver implements ForMsgRegistry, Executable
 			}
 
 			@Override
-			public InvocationMode getInvocationMode() {
-				return definition.getInvocationMode();
+			public InvocationModel getInvocationModel() {
+				return definition.getInvocationModel();
 			}
 		};
 	}
