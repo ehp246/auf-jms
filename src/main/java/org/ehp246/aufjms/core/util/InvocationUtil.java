@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.ehp246.aufjms.core.util;
 
@@ -15,11 +15,19 @@ public class InvocationUtil {
 		super();
 	}
 
-	public static <V> V invoke(Callable<V> callable) {
+	public static <V> V invoke(final Callable<V> callable) {
 		try {
 			return callable.call();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public static <V> V invoke(final Callable<V> callable, final V def) {
+		try {
+			return callable.call();
+		} catch (final Exception e) {
+			return def;
 		}
 	}
 }
