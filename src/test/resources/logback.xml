@@ -5,7 +5,7 @@
     </encoder>
   </appender>
 
-  <logger name="org.ehp246.aufjms" level="TRACE"/>
+  <logger name="in.ehp246.aufjms" level="TRACE"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
