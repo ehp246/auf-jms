@@ -7,11 +7,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import in.ehp246.aufjms.api.annotation.CollectionOf;
-import in.ehp246.aufjms.api.annotation.ForMsg;
-import in.ehp246.aufjms.api.annotation.Invoking;
-import in.ehp246.aufjms.api.endpoint.InstanceScope;
-import in.ehp246.aufjms.api.endpoint.InvocationModel;
+import me.ehp246.aufjms.api.annotation.CollectionOf;
+import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.endpoint.InstanceScope;
+import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
 /**
  * @author Lei Yang

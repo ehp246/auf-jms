@@ -1,7 +1,7 @@
 package in.ehp246.aufjms.core.formsg.case002;
 
-import in.ehp246.aufjms.api.annotation.ForMsg;
-import in.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * This class should fail the scan because two same methods have the same

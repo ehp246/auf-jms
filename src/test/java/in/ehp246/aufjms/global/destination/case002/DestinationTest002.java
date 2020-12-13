@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import in.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
 
 /**
  * @author Lei Yang

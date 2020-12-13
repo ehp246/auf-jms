@@ -2,9 +2,9 @@ package in.ehp246.aufjms.global.collectionof;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import in.ehp246.aufjms.api.annotation.EnableByMsg;
-import in.ehp246.aufjms.api.annotation.EnableForMsg;
-import in.ehp246.aufjms.api.annotation.EnableForMsg.At;
+import me.ehp246.aufjms.api.annotation.EnableByMsg;
+import me.ehp246.aufjms.api.annotation.EnableForMsg;
+import me.ehp246.aufjms.api.annotation.EnableForMsg.At;
 
 /**
  * @author Lei Yang
@@ -12,6 +12,6 @@ import in.ehp246.aufjms.api.annotation.EnableForMsg.At;
  */
 @SpringBootApplication
 @EnableByMsg
-@EnableForMsg(@At("in.ehp246.aufjms.collectionof"))
+@EnableForMsg(@At("me.ehp246.aufjms.collectionof"))
 public class CollectionOfConfiguration {
 }

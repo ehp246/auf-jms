@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
  *
  */
 @RunWith(JUnitPlatform.class)
-@SelectPackages("in.ehp246.aufjms")
+@SelectPackages("me.ehp246.aufjms")
 public class AllTests {
 
 }

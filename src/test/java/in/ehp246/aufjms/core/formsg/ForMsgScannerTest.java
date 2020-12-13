@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
-import in.ehp246.aufjms.api.endpoint.InstanceScope;
-import in.ehp246.aufjms.api.endpoint.InvocationModel;
-import in.ehp246.aufjms.core.formsg.ForMsgScanner;
 import in.ehp246.aufjms.core.formsg.case001.Case001;
 import in.ehp246.aufjms.core.formsg.case002.Case002;
 import in.ehp246.aufjms.core.formsg.case003.Case003;
 import in.ehp246.aufjms.core.formsg.case004.Case004;
 import in.ehp246.aufjms.core.formsg.case005.Case005;
 import in.ehp246.aufjms.core.formsg.case006.Case006;
-import in.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.api.endpoint.InstanceScope;
+import me.ehp246.aufjms.api.endpoint.InvocationModel;
+import me.ehp246.aufjms.core.formsg.ForMsgScanner;
+import me.ehp246.aufjms.core.reflection.ReflectingType;
 
 /**
  * @author Lei Yang

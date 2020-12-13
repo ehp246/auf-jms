@@ -9,7 +9,7 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 import org.springframework.mock.env.MockEnvironment;
 
-import in.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
+import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 
 /**
  * @author Lei Yang

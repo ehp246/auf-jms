@@ -11,8 +11,8 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import in.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import in.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 @SpringBootTest(classes = DestinationConfiguration001.class, properties = {
 		"spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false",

@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import in.ehp246.aufjms.api.exception.ForMsgExecutionException;
-import in.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
 import in.ehp246.aufjms.global.case002.bymsg.Add;
 import in.ehp246.aufjms.global.case002.bymsg.Counter;
 import in.ehp246.aufjms.global.case002.bymsg.ExceptionThrower;
+import me.ehp246.aufjms.api.exception.ForMsgExecutionException;
+import me.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
 
 /**
  * @author Lei Yang

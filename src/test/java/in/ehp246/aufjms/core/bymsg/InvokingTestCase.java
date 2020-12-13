@@ -1,7 +1,7 @@
 package in.ehp246.aufjms.core.bymsg;
 
-import in.ehp246.aufjms.api.annotation.ByMsg;
-import in.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * @author Lei Yang

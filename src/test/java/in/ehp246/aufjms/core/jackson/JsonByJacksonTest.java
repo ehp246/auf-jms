@@ -19,9 +19,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 
-import in.ehp246.aufjms.api.annotation.CollectionOf;
-import in.ehp246.aufjms.api.jms.FromBody;
-import in.ehp246.aufjms.provider.jackson.JsonByJackson;
+import me.ehp246.aufjms.api.annotation.CollectionOf;
+import me.ehp246.aufjms.api.jms.FromBody;
+import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
  * @author Lei Yang

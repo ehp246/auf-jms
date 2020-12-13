@@ -1,8 +1,8 @@
 package in.ehp246.aufjms.core.formsg.case006;
 
-import in.ehp246.aufjms.api.annotation.ForMsg;
-import in.ehp246.aufjms.api.annotation.Invoking;
-import in.ehp246.aufjms.api.endpoint.InstanceScope;
+import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.endpoint.InstanceScope;
 
 /**
  * Should scan as a bean.

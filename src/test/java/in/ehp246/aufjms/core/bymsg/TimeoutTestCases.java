@@ -2,7 +2,7 @@ package in.ehp246.aufjms.core.bymsg;
 
 import java.util.concurrent.TimeoutException;
 
-import in.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByMsg;
 
 /**
  * @author Lei Yang

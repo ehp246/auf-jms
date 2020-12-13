@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
-import in.ehp246.aufjms.api.jms.DestinationNameResolver;
-import in.ehp246.aufjms.api.jms.MsgPortProvider;
-import in.ehp246.aufjms.api.jms.MsgSupplier;
-import in.ehp246.aufjms.core.bymsg.ByMsgFactory;
-import in.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
+import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.MsgPortProvider;
+import me.ehp246.aufjms.api.jms.MsgSupplier;
+import me.ehp246.aufjms.core.bymsg.ByMsgFactory;
+import me.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
 
 @RunWith(JUnitPlatform.class)
 public class ByMsgFactoryTest {

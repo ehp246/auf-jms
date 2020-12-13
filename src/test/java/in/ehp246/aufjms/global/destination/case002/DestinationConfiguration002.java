@@ -2,8 +2,8 @@ package in.ehp246.aufjms.global.destination.case002;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import in.ehp246.aufjms.api.annotation.EnableByMsg;
-import in.ehp246.aufjms.api.annotation.EnableForMsg;
+import me.ehp246.aufjms.api.annotation.EnableByMsg;
+import me.ehp246.aufjms.api.annotation.EnableForMsg;
 
 /**
  * @author Lei Yang

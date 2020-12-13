@@ -1,7 +1,7 @@
 package in.ehp246.aufjms.core.formsg.case001;
 
-import in.ehp246.aufjms.api.annotation.ForMsg;
-import in.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * @author Lei Yang
