@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 
 public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgRegistrar.class);
+	private final static Logger LOGGER = LogManager.getLogger(ByMsgRegistrar.class);
 
 	@Override
 	public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
@@ -47,11 +47,11 @@ public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
 		return beanDefinition;
 	}
 
-	private BeanDefinition getProxyBeanDefinition(BeanDefinition beanDefinition) {
+	private BeanDefinition getProxyBeanDefinition(final BeanDefinition beanDefinition) {
 		Class<?> clazz = null;
 		try {
 			clazz = Class.forName(beanDefinition.getBeanClassName());
-		} catch (ClassNotFoundException ignored) {
+		} catch (final ClassNotFoundException ignored) {
 			// Class scanning started this. Should not happen.
 			throw new RuntimeException("Class scanning started this. Should not happen.");
 		}

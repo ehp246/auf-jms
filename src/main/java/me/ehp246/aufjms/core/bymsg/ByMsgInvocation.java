@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -29,7 +29,7 @@ import me.ehp246.aufjms.core.reflection.ProxyInvoked;
  * @author Lei Yang
  */
 class ByMsgInvocation implements MsgSupplier, ResolvedExecutable {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgInvocation.class);
+	private final static Logger LOGGER = LogManager.getLogger(ByMsgInvocation.class);
 
 	private static final Method ONREPLY;
 

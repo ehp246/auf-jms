@@ -8,8 +8,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
 import me.ehp246.aufjms.api.endpoint.ForMsgRegistry;
@@ -27,7 +27,7 @@ import me.ehp246.aufjms.api.jms.Msg;
  *
  */
 public class DefaultExecutableTypeResolver implements ForMsgRegistry, ExecutableTypeResolver {
-	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutableTypeResolver.class);
+	private final static Logger LOGGER = LogManager.getLogger(DefaultExecutableTypeResolver.class);
 
 	private final Map<String, InvokingDefinition> registeredActions = new HashMap<>();
 	private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();

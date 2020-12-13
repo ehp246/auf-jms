@@ -9,8 +9,8 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.jms.MessageCreator;
 import me.ehp246.aufjms.api.jms.MsgPort;
@@ -27,7 +27,7 @@ import me.ehp246.aufjms.core.util.ToMsg;
  *
  */
 public class ConnectionPortProvider implements MsgPortProvider {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ConnectionPortProvider.class);
+	private final static Logger LOGGER = LogManager.getLogger(ConnectionPortProvider.class);
 
 	private final Connection connection;
 	private final MessageCreator<?> msgBuilder;

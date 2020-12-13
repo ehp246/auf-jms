@@ -8,8 +8,8 @@ import java.util.Objects;
 
 import javax.jms.Destination;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByMsg;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
@@ -24,7 +24,7 @@ import me.ehp246.aufjms.core.reflection.ReflectingType;
  *
  */
 public class ByMsgFactory {
-	private final static Logger LOGGER = LoggerFactory.getLogger(ByMsgFactory.class);
+	private final static Logger LOGGER = LogManager.getLogger(ByMsgFactory.class);
 
 	private final ReplyEndpointConfiguration replyConfig;
 	private final MsgPortProvider portProvider;

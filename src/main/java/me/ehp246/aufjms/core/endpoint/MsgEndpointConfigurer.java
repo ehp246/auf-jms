@@ -5,9 +5,9 @@ import java.util.concurrent.Executor;
 
 import javax.jms.MessageListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.JmsListenerContainerFactory;
@@ -31,7 +31,7 @@ import me.ehp246.aufjms.core.util.ToMsg;
  *
  */
 public class MsgEndpointConfigurer implements JmsListenerConfigurer {
-	private final static Logger LOGGER = LoggerFactory.getLogger(MsgEndpointConfigurer.class);
+	private final static Logger LOGGER = LogManager.getLogger(MsgEndpointConfigurer.class);
 
 	private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
 	private final Set<MsgEndpoint> endpoints;
@@ -70,13 +70,13 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 					container.setupMessageListener((MessageListener) message -> {
 						final var msg = ToMsg.from(message);
 
-						MDC.put(MdcKeys.MSG_TYPE, msg.getType());
-						MDC.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
+						ThreadContext.put(MdcKeys.MSG_TYPE, msg.getType());
+						ThreadContext.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
 
 						defaultMsgDispatcher.dispatch(msg);
 
-						MDC.remove(MdcKeys.MSG_TYPE);
-						MDC.remove(MdcKeys.CORRELATION_ID);
+						ThreadContext.remove(MdcKeys.MSG_TYPE);
+						ThreadContext.remove(MdcKeys.CORRELATION_ID);
 					});
 				}
 

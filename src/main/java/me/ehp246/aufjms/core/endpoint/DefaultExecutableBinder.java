@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 import javax.jms.Message;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -29,7 +29,7 @@ import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
  *
  */
 public class DefaultExecutableBinder implements ExecutableBinder {
-	private final static Logger LOGGER = LoggerFactory.getLogger(DefaultExecutableBinder.class);
+	private final static Logger LOGGER = LogManager.getLogger(DefaultExecutableBinder.class);
 
 	protected static final Map<Class<? extends Annotation>, Function<Msg, String>> HEADER_VALUE_SUPPLIERS = Map
 			.of(OfType.class, Msg::getType);

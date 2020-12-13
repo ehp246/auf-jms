@@ -2,9 +2,9 @@ package me.ehp246.aufjms.core.endpoint;
 
 import java.util.concurrent.Executor;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
@@ -26,7 +26,7 @@ import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
  *
  */
 public class DefaultMsgDispatcher implements MsgDispatcher {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultMsgDispatcher.class);
+	private static final Logger LOGGER = LogManager.getLogger(DefaultMsgDispatcher.class);
 
 	private final ExecutableResolver actionResolver;
 	private final Executor executor;
@@ -68,15 +68,15 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
 			LOGGER.trace("Executed");
 		} else {
 			executor.execute(() -> {
-				MDC.put(MdcKeys.MSG_TYPE, msg.getType());
-				MDC.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
+				ThreadContext.put(MdcKeys.MSG_TYPE, msg.getType());
+				ThreadContext.put(MdcKeys.CORRELATION_ID, msg.getCorrelationId());
 				LOGGER.trace("Executing");
 
 				runnable.run();
 
 				LOGGER.trace("Executed");
-				MDC.remove(MdcKeys.MSG_TYPE);
-				MDC.remove(MdcKeys.CORRELATION_ID);
+				ThreadContext.remove(MdcKeys.MSG_TYPE);
+				ThreadContext.remove(MdcKeys.CORRELATION_ID);
 			});
 		}
 	};

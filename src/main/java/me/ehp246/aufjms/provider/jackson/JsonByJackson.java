@@ -1,11 +1,11 @@
 package me.ehp246.aufjms.provider.jackson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import org.assertj.core.util.Arrays;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -20,7 +20,7 @@ import me.ehp246.aufjms.api.jms.ToBody;
  *
  */
 public class JsonByJackson implements FromBody<String>, ToBody<String> {
-	private final static Logger LOGGER = LoggerFactory.getLogger(JsonByJackson.class);
+	private final static Logger LOGGER = LogManager.getLogger(JsonByJackson.class);
 
 	private final ObjectMapper objectMapper;
 
