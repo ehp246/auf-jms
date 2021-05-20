@@ -26,87 +26,87 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  *
  */
 class JsonByJacksonTest {
-	private final ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
-			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
-			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule());
-	private final JsonByJackson jackson = new JsonByJackson(objectMapper);
+    private final ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule());
+    private final JsonByJackson jackson = new JsonByJackson(objectMapper);
 
-	@Test
-	void collectionOf001() throws JsonMappingException, JsonProcessingException {
-		final var expected = List.of(Set.of(List.of(Instant.now(), Instant.now())));
+    @Test
+    void collectionOf001() throws JsonMappingException, JsonProcessingException {
+        final var expected = List.of(Set.of(List.of(Instant.now(), Instant.now())));
 
-		final var json = jackson.to(List.of(expected));
+        final var json = jackson.to(List.of(expected));
 
-		final var from = jackson.from(json, new FromBody.Receiver<>() {
+        final var from = jackson.from(json, new FromBody.Receiver<>() {
 
-			@Override
-			public List<? extends Annotation> getAnnotations() {
-				return List.of(new CollectionOf() {
+            @Override
+            public List<? extends Annotation> getAnnotations() {
+                return List.of(new CollectionOf() {
 
-					@Override
-					public Class<? extends Annotation> annotationType() {
-						return null;
-					}
+                    @Override
+                    public Class<? extends Annotation> annotationType() {
+                        return null;
+                    }
 
-					@Override
-					public Class<?>[] value() {
-						return new Class<?>[] { Set.class, List.class, Instant.class };
-					}
-				});
-			}
+                    @Override
+                    public Class<?>[] value() {
+                        return new Class<?>[] { Set.class, List.class, Instant.class };
+                    }
+                });
+            }
 
-			@Override
-			public Class<?> getType() {
-				return List.class;
-			}
-		});
+            @Override
+            public Class<?> getType() {
+                return List.class;
+            }
+        });
 
-		Assertions.assertEquals(true, from instanceof List);
+        Assertions.assertEquals(true, from instanceof List);
 
-		((List<?>) from).stream().forEach(set -> {
-			Assertions.assertEquals(true, set instanceof Set);
-			((Set<?>) set).stream().forEach(list -> {
-				Assertions.assertEquals(true, list instanceof List);
-				Assertions.assertEquals(2, ((List<?>) list).size());
-				((List<?>) list).stream().forEach(value -> {
-					Assertions.assertEquals(true, value instanceof Instant);
-				});
-			});
-		});
-	}
+        ((List<?>) from).stream().forEach(set -> {
+            Assertions.assertEquals(true, set instanceof Set);
+            ((Set<?>) set).stream().forEach(list -> {
+                Assertions.assertEquals(true, list instanceof List);
+                Assertions.assertEquals(2, ((List<?>) list).size());
+                ((List<?>) list).stream().forEach(value -> {
+                    Assertions.assertEquals(true, value instanceof Instant);
+                });
+            });
+        });
+    }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Test
-	void collectionOf002() {
-		final var expected = Set.of(Instant.now());
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    void collectionOf002() {
+        final var expected = Set.of(Instant.now());
 
-		final var json = jackson.to(List.of(expected));
+        final var json = jackson.to(List.of(expected));
 
-		final var from = jackson.from(json, new FromBody.Receiver<Set>() {
+        final var from = jackson.from(json, new FromBody.Receiver<Set>() {
 
-			@Override
-			public List<? extends Annotation> getAnnotations() {
-				return List.of(new CollectionOf() {
+            @Override
+            public List<? extends Annotation> getAnnotations() {
+                return List.of(new CollectionOf() {
 
-					@Override
-					public Class<? extends Annotation> annotationType() {
-						return null;
-					}
+                    @Override
+                    public Class<? extends Annotation> annotationType() {
+                        return null;
+                    }
 
-					@Override
-					public Class<?>[] value() {
-						return new Class<?>[] { Instant.class };
-					}
-				});
-			}
+                    @Override
+                    public Class<?>[] value() {
+                        return new Class<?>[] { Instant.class };
+                    }
+                });
+            }
 
-			@Override
-			public Class<Set> getType() {
-				return Set.class;
-			}
-		});
+            @Override
+            public Class<Set> getType() {
+                return Set.class;
+            }
+        });
 
-		from.stream().forEach(instant -> Assertions.assertEquals(Instant.class, instant.getClass()));
-	}
+        from.stream().forEach(instant -> Assertions.assertEquals(Instant.class, instant.getClass()));
+    }
 
 }

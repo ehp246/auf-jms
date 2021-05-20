@@ -19,19 +19,19 @@ import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
  *
  */
 public class ConnectionConfiguration {
-	@Bean
-	public Connection connection(final ConnectionFactory connectionFactory) throws JMSException {
-		return connectionFactory.createConnection();
-	}
+    @Bean
+    public Connection connection(final ConnectionFactory connectionFactory) throws JMSException {
+        return connectionFactory.createConnection();
+    }
 
-	@Bean
-	public ConnectionPortProvider portProvider(final Connection connection, final DestinationNameResolver toResolver,
-			final MessageCreator<?> msgCreator) {
-		return new ConnectionPortProvider(connection, msgCreator);
-	}
+    @Bean
+    public ConnectionPortProvider portProvider(final Connection connection, final DestinationNameResolver toResolver,
+            final MessageCreator<?> msgCreator) {
+        return new ConnectionPortProvider(connection, msgCreator);
+    }
 
-	@Bean
-	public DestinationNameResolver destinationNameResolver(final Environment env) {
-		return new PrefixedNameResolver(env);
-	}
+    @Bean
+    public DestinationNameResolver destinationNameResolver(final Environment env) {
+        return new PrefixedNameResolver(env);
+    }
 }

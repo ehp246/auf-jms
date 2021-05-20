@@ -13,12 +13,12 @@ import me.ehp246.aufjms.api.annotation.Invoking;
 @ForMsg
 public class Case002 {
 
-	@Invoking
-	public void m001() {
-	}
+    @Invoking
+    public void m001() {
+    }
 
-	@Invoking
-	public void m001(final int i) {
-	}
+    @Invoking
+    public void m001(final int i) {
+    }
 
 }

@@ -1,56 +1,36 @@
 package me.ehp246.aufjms.api.jms;
 
 import java.time.Instant;
+import java.util.List;
 
 import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
 
 /**
- * Custom version of JMS Message which does not throw.
- * 
  * @author Lei Yang
  *
  */
 public interface Msg {
-	String getId();
+    String id();
 
-	String getType();
+    String type();
 
-	String getInvoking();
+    Destination destination();
 
-	String getCorrelationId();
+    List<?> bodyValues();
 
-	Destination getReplyTo();
+    String correlationId();
 
-	String getGroupId();
+    Destination replyTo();
 
-	Integer getGroupSeq();
+    String groupId();
 
-	boolean isException();
+    Integer groupSeq();
 
-	String getTraceId();
+    long expiration();
 
-	String getSpanId();
+    <T> T property(String name, Class<T> type);
 
-	long getExpiration();
+    long ttl();
 
-	Destination getDestination();
-
-	<T> T getProperty(String name, Class<T> type);
-
-	long getTtl();
-
-	Instant getTimestamp();
-
-	Message getMessage();
-
-	default String getBodyAsText() {
-		try {
-			return ((TextMessage) getMessage()).getText();
-		} catch (JMSException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    Instant timestamp();
 }

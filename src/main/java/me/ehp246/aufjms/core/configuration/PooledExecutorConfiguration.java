@@ -12,22 +12,22 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
  *
  */
 public class PooledExecutorConfiguration {
-	/**
-	 * The executor must implement CallerRunsPolicy.
-	 *
-	 * @param poolSize
-	 * @return
-	 */
-	@Bean(AufJmsProperties.EXECUTOR_BEAN)
-	public ThreadPoolTaskExecutor pooledExecutor(@Value("${" + AufJmsProperties.POOL_SIZE + ":"
-			+ AufJmsProperties.POOL_SIZE_DEFAULT + "}") final int poolSize) {
-		final var threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-		threadPoolTaskExecutor.setCorePoolSize(poolSize);
-		threadPoolTaskExecutor.setMaxPoolSize(poolSize);
-		threadPoolTaskExecutor.setQueueCapacity(-1);
-		threadPoolTaskExecutor.setThreadNamePrefix("AufJms-Executor-");
-		threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-		threadPoolTaskExecutor.initialize();
-		return threadPoolTaskExecutor;
-	}
+    /**
+     * The executor must implement CallerRunsPolicy.
+     *
+     * @param poolSize
+     * @return
+     */
+    @Bean(AufJmsProperties.EXECUTOR_BEAN)
+    public ThreadPoolTaskExecutor pooledExecutor(@Value("${" + AufJmsProperties.POOL_SIZE + ":"
+            + AufJmsProperties.POOL_SIZE_DEFAULT + "}") final int poolSize) {
+        final var threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
+        threadPoolTaskExecutor.setCorePoolSize(poolSize);
+        threadPoolTaskExecutor.setMaxPoolSize(poolSize);
+        threadPoolTaskExecutor.setQueueCapacity(-1);
+        threadPoolTaskExecutor.setThreadNamePrefix("AufJms-Executor-");
+        threadPoolTaskExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        threadPoolTaskExecutor.initialize();
+        return threadPoolTaskExecutor;
+    }
 }

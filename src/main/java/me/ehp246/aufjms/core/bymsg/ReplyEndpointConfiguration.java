@@ -15,59 +15,59 @@ import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 
 public class ReplyEndpointConfiguration {
-	private final ConcurrentMap<String, ResolvedExecutable> correlMap = new ConcurrentHashMap<>();
-	private final MsgEndpoint msgEndpoint;
-	private final long timeout;
-	private final long ttl;
-	private final ReplyToNameSupplier replyToNameSupplier;
-	private final FromBody<String> fromBody;
+    private final ConcurrentMap<String, ResolvedExecutable> correlMap = new ConcurrentHashMap<>();
+    private final MsgEndpoint msgEndpoint;
+    private final long timeout;
+    private final long ttl;
+    private final ReplyToNameSupplier replyToNameSupplier;
+    private final FromBody<String> fromBody;
 
-	public ReplyEndpointConfiguration(final ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
-			@Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") final long timeout,
-			@Value("${" + AufJmsProperties.TTL + ":0}") final long ttl) {
-		super();
-		this.timeout = timeout;
-		this.ttl = ttl;
-		this.replyToNameSupplier = replyTo;
-		this.fromBody = fromBody;
-		this.msgEndpoint = new MsgEndpoint() {
+    public ReplyEndpointConfiguration(final ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
+            @Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") final long timeout,
+            @Value("${" + AufJmsProperties.TTL + ":0}") final long ttl) {
+        super();
+        this.timeout = timeout;
+        this.ttl = ttl;
+        this.replyToNameSupplier = replyTo;
+        this.fromBody = fromBody;
+        this.msgEndpoint = new MsgEndpoint() {
 
-			@Override
-			public String getDestinationName() {
-				return ReplyEndpointConfiguration.this.getReplyToName();
-			}
+            @Override
+            public String getDestinationName() {
+                return ReplyEndpointConfiguration.this.getReplyToName();
+            }
 
-			@Override
-			public ExecutableResolver getResolver() {
-				return msg -> correlMap.get(msg.getCorrelationId());
-			}
+            @Override
+            public ExecutableResolver getResolver() {
+                return msg -> correlMap.get(msg.correlationId());
+            }
 
-		};
+        };
 
-	}
+    }
 
-	public Map<String, ResolvedExecutable> getCorrelMap() {
-		return correlMap;
-	}
+    public Map<String, ResolvedExecutable> getCorrelMap() {
+        return correlMap;
+    }
 
-	@Bean
-	public MsgEndpoint getReplyEndpoint() {
-		return msgEndpoint;
-	}
+    @Bean
+    public MsgEndpoint getReplyEndpoint() {
+        return msgEndpoint;
+    }
 
-	public long getTimeout() {
-		return this.timeout;
-	}
+    public long getTimeout() {
+        return this.timeout;
+    }
 
-	public long getTtl() {
-		return this.ttl;
-	}
+    public long getTtl() {
+        return this.ttl;
+    }
 
-	public String getReplyToName() {
-		return replyToNameSupplier.get();
-	}
+    public String getReplyToName() {
+        return replyToNameSupplier.get();
+    }
 
-	public FromBody<String> getFromBody() {
-		return fromBody;
-	}
+    public FromBody<String> getFromBody() {
+        return fromBody;
+    }
 }

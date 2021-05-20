@@ -18,35 +18,35 @@ import me.ehp246.aufjms.core.endpoint.ReplyExecuted;
  *
  */
 public class AtEndpointFactory {
-	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-	private final Consumer<ExecutedInstance> reply;
+    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
+    private final Consumer<ExecutedInstance> reply;
 
-	public AtEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-			final MsgPortProvider portProvider) {
-		super();
-		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-		this.reply = new ReplyExecuted(portProvider);
-	}
+    public AtEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+            final MsgPortProvider portProvider) {
+        super();
+        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
+        this.reply = new ReplyExecuted(portProvider);
+    }
 
-	public MsgEndpoint newMsgEndpoint(final String destination, final Set<String> scanPackages) {
-		return new MsgEndpoint() {
-			private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
-					newForMsgRegistry(scanPackages), reply);
+    public MsgEndpoint newMsgEndpoint(final String destination, final Set<String> scanPackages) {
+        return new MsgEndpoint() {
+            private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
+                    newForMsgRegistry(scanPackages), reply);
 
-			@Override
-			public String getDestinationName() {
-				return destination;
-			}
+            @Override
+            public String getDestinationName() {
+                return destination;
+            }
 
-			@Override
-			public ExecutableResolver getResolver() {
-				return resolver;
-			}
+            @Override
+            public ExecutableResolver getResolver() {
+                return resolver;
+            }
 
-		};
-	}
+        };
+    }
 
-	private DefaultExecutableTypeResolver newForMsgRegistry(final Set<String> scanPackages) {
-		return new DefaultExecutableTypeResolver().register(new ForMsgScanner(scanPackages).perform().stream());
-	}
+    private DefaultExecutableTypeResolver newForMsgRegistry(final Set<String> scanPackages) {
+        return new DefaultExecutableTypeResolver().register(new ForMsgScanner(scanPackages).perform().stream());
+    }
 }

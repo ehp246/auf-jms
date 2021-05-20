@@ -15,15 +15,15 @@ import me.ehp246.aufjms.api.jms.DestinationNameResolver;
  *
  */
 public class AllQueuesResolver implements DestinationNameResolver {
-	private final Map<String, Destination> known = new ConcurrentHashMap<>();
+    private final Map<String, Destination> known = new ConcurrentHashMap<>();
 
-	@Override
-	public Destination resolve(String name) {
-		if (name == null || name.isBlank()) {
-			throw new IllegalArgumentException("Un-specified destination name");
-		}
+    @Override
+    public Destination resolve(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Un-specified destination name");
+        }
 
-		return known.computeIfAbsent(name, key -> new ActiveMQQueue(key));
-	}
+        return known.computeIfAbsent(name, key -> new ActiveMQQueue(key));
+    }
 
 }

@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.Msg;
+import me.ehp246.aufjms.api.jms.Received;
 
 /**
  * 
@@ -9,5 +9,5 @@ import me.ehp246.aufjms.api.jms.Msg;
  */
 @FunctionalInterface
 public interface ExecutableTypeResolver {
-	ResolvedInstanceType resolve(Msg msg);
+    ResolvedInstanceType resolve(Received msg);
 }

@@ -15,62 +15,62 @@ import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 
 public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
-	private final static Logger LOGGER = LogManager.getLogger(ByMsgRegistrar.class);
+    private final static Logger LOGGER = LogManager.getLogger(ByMsgRegistrar.class);
 
-	@Override
-	public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
-		final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
-				.toString();
+    @Override
+    public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
+        final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
+                .toString();
 
-		registry.registerBeanDefinition(ReplyToNameSupplier.class.getCanonicalName(), getReplyToSupplier(
-				replyTo.isBlank() ? PrefixedNameResolver.TOPIC_PREFIX + metadata.getClassName() + ".reply" : replyTo));
+        registry.registerBeanDefinition(ReplyToNameSupplier.class.getCanonicalName(), getReplyToSupplier(
+                replyTo.isBlank() ? PrefixedNameResolver.TOPIC_PREFIX + metadata.getClassName() + ".reply" : replyTo));
 
-		LOGGER.debug("Scanning for {}", ByMsg.class.getCanonicalName());
+        LOGGER.debug("Scanning for {}", ByMsg.class.getCanonicalName());
 
-		new ByMsgScanner(EnableByMsg.class, ByMsg.class, metadata).perform().forEach(beanDefinition -> {
-			registry.registerBeanDefinition(beanDefinition.getBeanClassName(),
-					this.getProxyBeanDefinition(beanDefinition));
-		});
-	}
+        new ByMsgScanner(EnableByMsg.class, ByMsg.class, metadata).perform().forEach(beanDefinition -> {
+            registry.registerBeanDefinition(beanDefinition.getBeanClassName(),
+                    this.getProxyBeanDefinition(beanDefinition));
+        });
+    }
 
-	private BeanDefinition getReplyToSupplier(final String name) {
-		final var beanDefinition = new GenericBeanDefinition();
-		beanDefinition.setBeanClass(ReplyToNameSupplier.class);
+    private BeanDefinition getReplyToSupplier(final String name) {
+        final var beanDefinition = new GenericBeanDefinition();
+        beanDefinition.setBeanClass(ReplyToNameSupplier.class);
 
-		final var args = new ConstructorArgumentValues();
-		args.addGenericArgumentValue(name);
+        final var args = new ConstructorArgumentValues();
+        args.addGenericArgumentValue(name);
 
-		beanDefinition.setConstructorArgumentValues(args);
-		beanDefinition.setFactoryBeanName(ReplyToNameSupplierFactory.class.getName());
-		beanDefinition.setFactoryMethodName("newInstance");
+        beanDefinition.setConstructorArgumentValues(args);
+        beanDefinition.setFactoryBeanName(ReplyToNameSupplierFactory.class.getName());
+        beanDefinition.setFactoryMethodName("newInstance");
 
-		return beanDefinition;
-	}
+        return beanDefinition;
+    }
 
-	private BeanDefinition getProxyBeanDefinition(final BeanDefinition beanDefinition) {
-		Class<?> clazz = null;
-		try {
-			clazz = Class.forName(beanDefinition.getBeanClassName());
-		} catch (final ClassNotFoundException ignored) {
-			// Class scanning started this. Should not happen.
-			throw new RuntimeException("Class scanning started this. Should not happen.");
-		}
+    private BeanDefinition getProxyBeanDefinition(final BeanDefinition beanDefinition) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(beanDefinition.getBeanClassName());
+        } catch (final ClassNotFoundException ignored) {
+            // Class scanning started this. Should not happen.
+            throw new RuntimeException("Class scanning started this. Should not happen.");
+        }
 
-		LOGGER.trace("Defining {}", beanDefinition.getBeanClassName());
+        LOGGER.trace("Defining {}", beanDefinition.getBeanClassName());
 
-		final var proxyBeanDefinition = new GenericBeanDefinition();
-		proxyBeanDefinition.setBeanClass(clazz);
+        final var proxyBeanDefinition = new GenericBeanDefinition();
+        proxyBeanDefinition.setBeanClass(clazz);
 
-		final var args = new ConstructorArgumentValues();
-		args.addGenericArgumentValue(clazz);
+        final var args = new ConstructorArgumentValues();
+        args.addGenericArgumentValue(clazz);
 
-		proxyBeanDefinition.setConstructorArgumentValues(args);
+        proxyBeanDefinition.setConstructorArgumentValues(args);
 
-		proxyBeanDefinition.setFactoryBeanName(ByMsgFactory.class.getName());
+        proxyBeanDefinition.setFactoryBeanName(ByMsgFactory.class.getName());
 
-		proxyBeanDefinition.setFactoryMethodName("newInstance");
+        proxyBeanDefinition.setFactoryMethodName("newInstance");
 
-		return proxyBeanDefinition;
-	}
+        return proxyBeanDefinition;
+    }
 
 }

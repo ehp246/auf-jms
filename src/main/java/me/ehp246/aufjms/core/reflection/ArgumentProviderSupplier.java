@@ -2,5 +2,5 @@ package me.ehp246.aufjms.core.reflection;
 
 @FunctionalInterface
 public interface ArgumentProviderSupplier<T> {
-	ArgumentsProvider get(T source);
+    ArgumentsProvider get(T source);
 }

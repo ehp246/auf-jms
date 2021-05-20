@@ -14,13 +14,13 @@ import me.ehp246.aufjms.core.jms.TextMessageCreator;
  *
  */
 public class JsonMessageConfiguration {
-	@Bean
-	public MessageCreator<?> textMessageBuilder(final ToBody<String> bodyWriter) {
-		return new TextMessageCreator(bodyWriter);
-	}
+    @Bean
+    public MessageCreator<?> textMessageBuilder(final ToBody<String> bodyWriter) {
+        return new TextMessageCreator(bodyWriter);
+    }
 
-	@Bean
-	public ExecutableBinder actionInvocationBinder(final FromBody<String> fromBody) {
-		return new DefaultExecutableBinder(fromBody);
-	}
+    @Bean
+    public ExecutableBinder actionInvocationBinder(final FromBody<String> fromBody) {
+        return new DefaultExecutableBinder(fromBody);
+    }
 }

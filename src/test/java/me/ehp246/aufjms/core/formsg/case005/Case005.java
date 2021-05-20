@@ -11,8 +11,8 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  */
 @ForMsg
 public abstract class Case005 {
-	@Invoking
-	public void m001() {
+    @Invoking
+    public void m001() {
 
-	}
+    }
 }

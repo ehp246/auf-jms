@@ -10,13 +10,13 @@ import java.util.Map;
  *
  */
 public interface InvokingDefinition {
-	String getMsgType();
+    String getMsgType();
 
-	Class<?> getInstanceType();
+    Class<?> getInstanceType();
 
-	Map<String, Method> getMethods();
+    Map<String, Method> getMethods();
 
-	InstanceScope getInstanceScope();
+    InstanceScope getInstanceScope();
 
-	InvocationModel getInvocationModel();
+    InvocationModel getInvocationModel();
 }

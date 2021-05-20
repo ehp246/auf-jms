@@ -9,19 +9,19 @@ import org.springframework.util.ClassUtils;
  *
  */
 public class JsonProviderSelector implements ImportSelector {
-	private static final boolean JACKSON_PRESENT;
+    private static final boolean JACKSON_PRESENT;
 
-	static {
-		JACKSON_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
-				JsonProviderSelector.class.getClassLoader());
-	}
+    static {
+        JACKSON_PRESENT = ClassUtils.isPresent("com.fasterxml.jackson.databind.ObjectMapper",
+                JsonProviderSelector.class.getClassLoader());
+    }
 
-	@Override
-	public String[] selectImports(final AnnotationMetadata importingClassMetadata) {
-		if (JACKSON_PRESENT) {
-			return new String[] { "me.ehp246.aufjms.provider.jackson.JacksonConfiguration" };
-		}
-		return null;
-	}
+    @Override
+    public String[] selectImports(final AnnotationMetadata importingClassMetadata) {
+        if (JACKSON_PRESENT) {
+            return new String[] { "me.ehp246.aufjms.provider.jackson.JacksonConfiguration" };
+        }
+        return null;
+    }
 
 }

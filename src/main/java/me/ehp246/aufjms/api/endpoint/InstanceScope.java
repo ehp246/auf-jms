@@ -6,5 +6,5 @@ package me.ehp246.aufjms.api.endpoint;
  *
  */
 public enum InstanceScope {
-	BEAN, MESSAGE,
+    BEAN, MESSAGE,
 }

@@ -9,15 +9,15 @@ import me.ehp246.aufjms.api.annotation.ByMsg;
  *
  */
 interface TimeoutTestCases {
-	@ByMsg("")
-	interface Case001 {
-		Void m001();
+    @ByMsg("")
+    interface Case001 {
+        Void m001();
 
-		Void m002() throws TimeoutException;
-	}
+        Void m002() throws TimeoutException;
+    }
 
-	@ByMsg(value = "", timeout = 500)
-	interface Case002 {
-		Void m001();
-	}
+    @ByMsg(value = "", timeout = 500)
+    interface Case002 {
+        Void m001();
+    }
 }

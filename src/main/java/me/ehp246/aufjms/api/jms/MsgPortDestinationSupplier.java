@@ -7,9 +7,9 @@ import javax.jms.Destination;
  *
  */
 public interface MsgPortDestinationSupplier {
-	Destination getTo();
+    Destination getTo();
 
-	default Destination getReplyTo() {
-		return null;
-	}
+    default Destination getReplyTo() {
+        return null;
+    }
 }

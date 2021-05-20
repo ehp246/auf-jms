@@ -12,6 +12,6 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
  */
 @ForMsg(scope = InstanceScope.BEAN)
 public interface Case006 {
-	@Invoking
-	void m001();
+    @Invoking
+    void m001();
 }

@@ -9,6 +9,6 @@ import me.ehp246.aufjms.api.annotation.OfType;
  */
 @ByMsg("queue://me.ehp246.aufjms.request")
 public interface Add {
-	@OfType("Calculator")
-	public int add(int i, int j);
+    @OfType("Calculator")
+    public int add(int i, int j);
 }

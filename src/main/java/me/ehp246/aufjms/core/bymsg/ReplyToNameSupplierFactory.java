@@ -7,8 +7,8 @@ import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
  *
  */
 public class ReplyToNameSupplierFactory {
-	public ReplyToNameSupplier newInstance(final String name) {
-		return name != null ? name::toString : () -> null;
-	}
+    public ReplyToNameSupplier newInstance(final String name) {
+        return name != null ? name::toString : () -> null;
+    }
 
 }

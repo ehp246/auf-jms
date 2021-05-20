@@ -3,11 +3,11 @@ package me.ehp246.aufjms.core.reflection;
 import java.lang.reflect.Method;
 
 public interface TargetInvoked {
-	Object getTarget();
+    Object getTarget();
 
-	Method getMethod();
+    Method getMethod();
 
-	Object[] getArguments();
+    Object[] getArguments();
 
-	InvocationOutcome getResult();
+    InvocationOutcome getResult();
 }

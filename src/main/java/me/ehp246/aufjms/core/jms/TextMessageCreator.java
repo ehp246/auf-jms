@@ -17,25 +17,25 @@ import me.ehp246.aufjms.api.jms.ToBody;
  * @param <T>
  */
 public class TextMessageCreator implements MessageCreator<TextMessage> {
-	private final Logger LOGGER = LogManager.getLogger(TextMessageCreator.class);
+    private final Logger LOGGER = LogManager.getLogger(TextMessageCreator.class);
 
-	private final ToBody<String> bodyWriter;
+    private final ToBody<String> bodyWriter;
 
-	public TextMessageCreator(final ToBody<String> bodyWriter) {
-		super();
-		this.bodyWriter = bodyWriter;
-	}
+    public TextMessageCreator(final ToBody<String> bodyWriter) {
+        super();
+        this.bodyWriter = bodyWriter;
+    }
 
-	@Override
-	public TextMessage create(final MsgPortContext context) {
-		try {
-			return context.getSession().createTextMessage(this.bodyWriter.to(context.getMsgSupplier().getBodyValues()));
-		} catch (final JMSException e) {
-			LOGGER.debug("Failed to create message: " + e.getMessage());
+    @Override
+    public TextMessage create(final MsgPortContext context) {
+        try {
+            return context.getSession().createTextMessage(this.bodyWriter.to(context.getMsgSupplier().getBodyValues()));
+        } catch (final JMSException e) {
+            LOGGER.debug("Failed to create message: " + e.getMessage());
 
-			throw new RuntimeException(e);
-		}
+            throw new RuntimeException(e);
+        }
 
-	}
+    }
 
 }

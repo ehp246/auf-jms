@@ -5,7 +5,7 @@ package me.ehp246.aufjms.core.util;
  *
  */
 public interface Strings {
-	static String ifBlank(String str, String def) {
-		return str == null || str.isBlank() ? def : str;
-	}
+    static String ifBlank(String str, String def) {
+        return str == null || str.isBlank() ? def : str;
+    }
 }

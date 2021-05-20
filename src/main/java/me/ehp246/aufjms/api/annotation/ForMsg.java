@@ -17,19 +17,19 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE })
 public @interface ForMsg {
-	/**
-	 * Regular expression to match Type.
-	 * 
-	 * @return
-	 */
-	String value() default "";
+    /**
+     * Regular expression to match Type.
+     * 
+     * @return
+     */
+    String value() default "";
 
-	/**
-	 * Invocation instance resolution instruction.
-	 * 
-	 * @return
-	 */
-	InstanceScope scope() default InstanceScope.MESSAGE;
+    /**
+     * Invocation instance resolution instruction.
+     * 
+     * @return
+     */
+    InstanceScope scope() default InstanceScope.MESSAGE;
 
-	InvocationModel invocation() default InvocationModel.DEFAULT;
+    InvocationModel invocation() default InvocationModel.DEFAULT;
 }

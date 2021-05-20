@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.Msg;
+import me.ehp246.aufjms.api.jms.Received;
 
 /**
  * 
@@ -9,5 +9,5 @@ import me.ehp246.aufjms.api.jms.Msg;
  */
 @FunctionalInterface
 public interface MsgDispatcher {
-	void dispatch(final Msg msg);
+    void dispatch(final Received msg);
 }

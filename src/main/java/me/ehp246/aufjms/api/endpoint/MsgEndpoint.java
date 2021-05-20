@@ -6,7 +6,7 @@ package me.ehp246.aufjms.api.endpoint;
  *
  */
 public interface MsgEndpoint {
-	String getDestinationName();
+    String getDestinationName();
 
-	ExecutableResolver getResolver();
+    ExecutableResolver getResolver();
 }

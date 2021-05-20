@@ -27,21 +27,21 @@ import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ ConnectionConfiguration.class, EnableForMsgRegistrar.class, AtEndpointFactory.class,
-		MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JsonMessageConfiguration.class,
-		JsonProviderSelector.class })
+        MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JsonMessageConfiguration.class,
+        JsonProviderSelector.class })
 public @interface EnableForMsg {
-	At[] value() default @At;
+    At[] value() default @At;
 
-	@Retention(RUNTIME)
-	@Target(ElementType.ANNOTATION_TYPE)
-	public @interface At {
-		/**
-		 * Destination name of the incoming message.
-		 *
-		 * @return
-		 */
-		String value() default "";
+    @Retention(RUNTIME)
+    @Target(ElementType.ANNOTATION_TYPE)
+    public @interface At {
+        /**
+         * Destination name of the incoming message.
+         *
+         * @return
+         */
+        String value() default "";
 
-		Class<?>[] scan() default {};
-	}
+        Class<?>[] scan() default {};
+    }
 }

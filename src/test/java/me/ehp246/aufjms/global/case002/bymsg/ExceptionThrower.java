@@ -9,12 +9,12 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  */
 @ByMsg("queue://me.ehp246.aufjms.request")
 public interface ExceptionThrower {
-	@Invoking("throw001")
-	Void throw001();
+    @Invoking("throw001")
+    Void throw001();
 
-	@Invoking("throw002")
-	Void throw002() throws Exception;
+    @Invoking("throw002")
+    Void throw002() throws Exception;
 
-	@Invoking("throw003")
-	Void throw003();
+    @Invoking("throw003")
+    Void throw003();
 }

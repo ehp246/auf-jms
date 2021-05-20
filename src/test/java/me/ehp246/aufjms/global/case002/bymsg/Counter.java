@@ -11,12 +11,12 @@ import me.ehp246.aufjms.api.annotation.OfType;
 @ByMsg("queue://me.ehp246.aufjms.request")
 @OfType("Calculator")
 public interface Counter {
-	@Invoking("setMem")
-	public Void set(int i);
+    @Invoking("setMem")
+    public Void set(int i);
 
-	@Invoking("addMem")
-	public int add(int i);
+    @Invoking("addMem")
+    public int add(int i);
 
-	@Invoking("getMem")
-	public int get();
+    @Invoking("getMem")
+    public int get();
 }

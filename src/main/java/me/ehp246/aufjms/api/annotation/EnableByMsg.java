@@ -27,10 +27,10 @@ import me.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ ConnectionConfiguration.class, ReplyEndpointConfiguration.class, ByMsgRegistrar.class, ByMsgFactory.class,
-		ReplyToNameSupplierFactory.class, MsgEndpointConfigurer.class, PooledExecutorConfiguration.class,
-		JsonMessageConfiguration.class, JsonProviderSelector.class })
+        ReplyToNameSupplierFactory.class, MsgEndpointConfigurer.class, PooledExecutorConfiguration.class,
+        JsonMessageConfiguration.class, JsonProviderSelector.class })
 public @interface EnableByMsg {
-	Class<?>[] scan() default {};
+    Class<?>[] scan() default {};
 
-	String replyTo() default "";
+    String replyTo() default "";
 }

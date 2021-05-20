@@ -9,15 +9,15 @@ import java.util.function.Consumer;
  *
  */
 public interface ResolvedExecutable {
-	Object getInstance();
+    Object getInstance();
 
-	Method getMethod();
+    Method getMethod();
 
-	default InvocationModel getInvocationModel() {
-		return InvocationModel.DEFAULT;
-	}
+    default InvocationModel getInvocationModel() {
+        return InvocationModel.DEFAULT;
+    }
 
-	default Consumer<ExecutedInstance> postExecution() {
-		return null;
-	}
+    default Consumer<ExecutedInstance> postExecution() {
+        return null;
+    }
 }

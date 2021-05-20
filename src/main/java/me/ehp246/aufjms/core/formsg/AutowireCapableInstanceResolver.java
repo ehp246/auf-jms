@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.Msg;
+import me.ehp246.aufjms.api.jms.Received;
 
 /**
  * Resolves an Action by the given registry to a bean/object created by the
@@ -22,59 +22,59 @@ import me.ehp246.aufjms.api.jms.Msg;
  *
  */
 public class AutowireCapableInstanceResolver implements ExecutableResolver {
-	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-	private final ExecutableTypeResolver typeResolver;
-	private Consumer<ExecutedInstance> executedConsumer;
+    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
+    private final ExecutableTypeResolver typeResolver;
+    private Consumer<ExecutedInstance> executedConsumer;
 
-	public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-			final ExecutableTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
-		super();
-		this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-		this.typeResolver = resolver;
-		this.executedConsumer = executedConsumer;
-	}
+    public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+            final ExecutableTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
+        super();
+        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
+        this.typeResolver = resolver;
+        this.executedConsumer = executedConsumer;
+    }
 
-	public AutowireCapableInstanceResolver withPostExecutionConsumer(final Consumer<ExecutedInstance> consumer) {
-		this.executedConsumer = consumer;
-		return this;
-	}
+    public AutowireCapableInstanceResolver withPostExecutionConsumer(final Consumer<ExecutedInstance> consumer) {
+        this.executedConsumer = consumer;
+        return this;
+    }
 
-	@Override
-	public ResolvedExecutable resolve(final Msg msg) {
-		Objects.requireNonNull(msg);
+    @Override
+    public ResolvedExecutable resolve(final Received msg) {
+        Objects.requireNonNull(msg);
 
-		final var registered = this.typeResolver.resolve(msg);
-		if (registered == null) {
-			return null;
-		}
+        final var registered = this.typeResolver.resolve(msg);
+        if (registered == null) {
+            return null;
+        }
 
-		final Object executableInstance = registered.getScope().equals(InstanceScope.BEAN)
-				? autowireCapableBeanFactory.getBean(registered.getInstanceType())
-				: autowireCapableBeanFactory.createBean(registered.getInstanceType());
+        final Object executableInstance = registered.getScope().equals(InstanceScope.BEAN)
+                ? autowireCapableBeanFactory.getBean(registered.getInstanceType())
+                : autowireCapableBeanFactory.createBean(registered.getInstanceType());
 
-		return new ResolvedExecutable() {
+        return new ResolvedExecutable() {
 
-			@Override
-			public Method getMethod() {
-				return registered.getMethod();
-			}
+            @Override
+            public Method getMethod() {
+                return registered.getMethod();
+            }
 
-			@Override
-			public Object getInstance() {
-				return executableInstance;
-			}
+            @Override
+            public Object getInstance() {
+                return executableInstance;
+            }
 
-			@Override
-			public InvocationModel getInvocationModel() {
-				return registered.getInvocationModel();
-			}
+            @Override
+            public InvocationModel getInvocationModel() {
+                return registered.getInvocationModel();
+            }
 
-			@Override
-			public Consumer<ExecutedInstance> postExecution() {
-				return executedConsumer;
-			}
+            @Override
+            public Consumer<ExecutedInstance> postExecution() {
+                return executedConsumer;
+            }
 
-		};
+        };
 
-	}
+    }
 }

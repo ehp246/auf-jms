@@ -18,14 +18,14 @@ import java.lang.annotation.Target;
  *
  */
 public @interface ByMsg {
-	/**
-	 * To name for the outgoing message.
-	 * 
-	 * @return
-	 */
-	String value();
+    /**
+     * To name for the outgoing message.
+     * 
+     * @return
+     */
+    String value();
 
-	long timeout() default 0;
+    long timeout() default 0;
 
-	long ttl() default 0;
+    long ttl() default 0;
 }

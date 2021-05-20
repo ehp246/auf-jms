@@ -16,17 +16,17 @@ import me.ehp246.aufjms.api.annotation.OfType;
 @ByMsg("me.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
-	@Invoking("setCollection")
-	void set(Set<Instant> instants);
+    @Invoking("setCollection")
+    void set(Set<Instant> instants);
 
-	@Invoking("setArray")
-	void set(Instant... instants);
+    @Invoking("setArray")
+    void set(Instant... instants);
 
-	@Invoking("get")
-	@CollectionOf(Instant.class)
-	Set<Instant> get();
+    @Invoking("get")
+    @CollectionOf(Instant.class)
+    Set<Instant> get();
 
-	@Invoking("flatSet")
-	@CollectionOf({ Set.class, List.class, Instant.class })
-	List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
+    @Invoking("flatSet")
+    @CollectionOf({ Set.class, List.class, Instant.class })
+    List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
 }

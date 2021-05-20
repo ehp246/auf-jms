@@ -4,5 +4,5 @@ import java.lang.reflect.Method;
 
 @FunctionalInterface
 public interface ArgumentsProvider {
-	Object[] provideFor(Method method);
+    Object[] provideFor(Method method);
 }

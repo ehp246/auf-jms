@@ -27,81 +27,81 @@ import me.ehp246.aufjms.core.util.ToMsg;
  *
  */
 public class ConnectionPortProvider implements MsgPortProvider {
-	private final static Logger LOGGER = LogManager.getLogger(ConnectionPortProvider.class);
+    private final static Logger LOGGER = LogManager.getLogger(ConnectionPortProvider.class);
 
-	private final Connection connection;
-	private final MessageCreator<?> msgBuilder;
+    private final Connection connection;
+    private final MessageCreator<?> msgBuilder;
 
-	public ConnectionPortProvider(final Connection connection, final MessageCreator<?> msgBuilder) {
-		super();
-		this.connection = Objects.requireNonNull(connection);
-		this.msgBuilder = Objects.requireNonNull(msgBuilder);
-	}
+    public ConnectionPortProvider(final Connection connection, final MessageCreator<?> msgBuilder) {
+        super();
+        this.connection = Objects.requireNonNull(connection);
+        this.msgBuilder = Objects.requireNonNull(msgBuilder);
+    }
 
-	@Override
-	public MsgPort get(final MsgPortDestinationSupplier supplier) {
-		Objects.requireNonNull(supplier);
+    @Override
+    public MsgPort get(final MsgPortDestinationSupplier supplier) {
+        Objects.requireNonNull(supplier);
 
-		return msgSupplier -> {
-			final var destination = supplier.getTo();
+        return msgSupplier -> {
+            final var destination = supplier.getTo();
 
-			LOGGER.trace("Sending {}:{} to {} ", msgSupplier.getCorrelationId(), msgSupplier.getType(),
-					destination.toString());
+            LOGGER.trace("Sending {}:{} to {} ", msgSupplier.getCorrelationId(), msgSupplier.getType(),
+                    destination.toString());
 
-			try (final Session session = connection.createSession(true, Session.SESSION_TRANSACTED)) {
-				final var context = new MsgPortContext() {
+            try (final Session session = connection.createSession(true, Session.SESSION_TRANSACTED)) {
+                final var context = new MsgPortContext() {
 
-					@Override
-					public Session getSession() {
-						return session;
-					}
+                    @Override
+                    public Session getSession() {
+                        return session;
+                    }
 
-					@Override
-					public MsgSupplier getMsgSupplier() {
-						return msgSupplier;
-					}
-				};
+                    @Override
+                    public MsgSupplier getMsgSupplier() {
+                        return msgSupplier;
+                    }
+                };
 
-				final var message = msgBuilder.create(context);
+                final var message = msgBuilder.create(context);
 
-				// Fill the customs first so the framework ones won't get over-written.
-				final var map = Optional.ofNullable(msgSupplier.getPropertyMap())
-						.orElseGet(HashMap<String, String>::new);
-				for (final String key : map.keySet()) {
-					message.setStringProperty(key, map.get(key));
-				}
+                // Fill the customs first so the framework ones won't get over-written.
+                final var map = Optional.ofNullable(msgSupplier.getPropertyMap())
+                        .orElseGet(HashMap<String, String>::new);
+                for (final String key : map.keySet()) {
+                    message.setStringProperty(key, map.get(key));
+                }
 
-				message.setJMSDestination(supplier.getTo());
-				message.setJMSReplyTo(supplier.getReplyTo());
+                message.setJMSDestination(supplier.getTo());
+                message.setJMSReplyTo(supplier.getReplyTo());
 
-				/*
-				 * JMS headers
-				 */
-				message.setJMSType(msgSupplier.getType());
-				message.setJMSCorrelationID(msgSupplier.getCorrelationId());
-				message.setStringProperty(MsgPropertyName.GroupId, msgSupplier.getGroupId());
+                /*
+                 * JMS headers
+                 */
+                message.setJMSType(msgSupplier.getType());
+                message.setJMSCorrelationID(msgSupplier.getCorrelationId());
+                message.setStringProperty(MsgPropertyName.GroupId, msgSupplier.getGroupId());
 
-				/*
-				 * Framework headers
-				 */
-				message.setStringProperty(MsgPropertyName.Invoking, msgSupplier.getInvoking());
-				message.setBooleanProperty(MsgPropertyName.ServerThrown, msgSupplier.isException());
+                /*
+                 * Framework headers
+                 */
+                message.setStringProperty(MsgPropertyName.Invoking, msgSupplier.getInvoking());
+                message.setBooleanProperty(MsgPropertyName.ServerThrown, msgSupplier.isException());
 
-				try (final MessageProducer producer = session.createProducer(destination)) {
+                try (final MessageProducer producer = session.createProducer(destination)) {
 
-					producer.send(message);
+                    producer.send(message);
 
-					session.commit();
+                    session.commit();
 
-					LOGGER.trace("Sent {} ", msgSupplier.getCorrelationId());
+                    LOGGER.trace("Sent {} ", msgSupplier.getCorrelationId());
 
-					return ToMsg.from(message);
-				}
-			} catch (final JMSException e) {
-				LOGGER.error("Failed to take: to {}, type {}, correclation id {}", destination.toString(),
-						msgSupplier.getType(), msgSupplier.getCorrelationId(), e);
-				throw new RuntimeException(e);
-			}
-		};
-	}
+                    return ToMsg.from(message);
+                }
+            } catch (final JMSException e) {
+                LOGGER.error("Failed to take: to {}, type {}, correclation id {}", destination.toString(),
+                        msgSupplier.getType(), msgSupplier.getCorrelationId(), e);
+                throw new RuntimeException(e);
+            }
+        };
+    }
 }

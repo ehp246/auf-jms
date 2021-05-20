@@ -9,5 +9,5 @@ import javax.jms.Destination;
  */
 @FunctionalInterface
 public interface DestinationNameResolver {
-	Destination resolve(String name);
+    Destination resolve(String name);
 }
