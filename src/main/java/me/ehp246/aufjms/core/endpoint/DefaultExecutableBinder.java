@@ -19,7 +19,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.FromBody;
+import me.ehp246.aufjms.api.jms.FromMsgBody;
 import me.ehp246.aufjms.api.jms.Received;
 import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
 
@@ -37,9 +37,9 @@ public class DefaultExecutableBinder implements ExecutableBinder {
     protected static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
             .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
 
-    private final FromBody<String> fromBody;
+    private final FromMsgBody<String> fromBody;
 
-    public DefaultExecutableBinder(final FromBody<String> fromBody) {
+    public DefaultExecutableBinder(final FromMsgBody<String> fromBody) {
         super();
         this.fromBody = fromBody;
     }
@@ -56,14 +56,14 @@ public class DefaultExecutableBinder implements ExecutableBinder {
 
         final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
 
-        final var receivers = new ArrayList<FromBody.Receiver<?>>();
+        final var receivers = new ArrayList<FromMsgBody.Receiver<?>>();
         for (int i = 0; i < boundMarkers.length; i++) {
             if (boundMarkers[i]) {
                 continue;
             }
 
             final var ref = Integer.valueOf(i);
-            receivers.add(new FromBody.Receiver<>() {
+            receivers.add(new FromMsgBody.Receiver<>() {
 
                 @Override
                 public void receive(final Object value) {

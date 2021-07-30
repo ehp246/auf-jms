@@ -18,7 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 
 import me.ehp246.aufjms.api.annotation.CollectionOf;
-import me.ehp246.aufjms.api.jms.FromBody;
+import me.ehp246.aufjms.api.jms.FromMsgBody;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -37,7 +37,7 @@ class JsonByJacksonTest {
 
         final var json = jackson.to(List.of(expected));
 
-        final var from = jackson.from(json, new FromBody.Receiver<>() {
+        final var from = jackson.from(json, new FromMsgBody.Receiver<>() {
 
             @Override
             public List<? extends Annotation> getAnnotations() {
@@ -82,7 +82,7 @@ class JsonByJacksonTest {
 
         final var json = jackson.to(List.of(expected));
 
-        final var from = jackson.from(json, new FromBody.Receiver<Set>() {
+        final var from = jackson.from(json, new FromMsgBody.Receiver<Set>() {
 
             @Override
             public List<? extends Annotation> getAnnotations() {

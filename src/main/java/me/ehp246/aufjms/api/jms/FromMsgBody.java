@@ -8,7 +8,7 @@ import java.util.List;
  *
  */
 @FunctionalInterface
-public interface FromBody<B> {
+public interface FromMsgBody<B> {
     List<?> from(B body, List<Receiver<?>> receivers);
 
     @SuppressWarnings("unchecked")

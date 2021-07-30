@@ -7,6 +7,6 @@ import java.util.List;
  *
  */
 @FunctionalInterface
-public interface ToBody<T> {
-    T to(List<?> values);
+public interface ToJsonMsgBody {
+    String to(List<?> values);
 }

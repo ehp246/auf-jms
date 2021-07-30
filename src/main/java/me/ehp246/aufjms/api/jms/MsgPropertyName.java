@@ -15,8 +15,8 @@ public class MsgPropertyName {
     public static final String Invoking = "AufJmsInvoking";
     public static final String ServerThrown = "AufJmsServerThrown";
     public static final String TTL = "AufJmsTtl";
-    public static final String GroupId = "JMSXGroupID";
-    public static final String GroupSeq = "JMSXGroupSeq";
+    public static final String GROUP_ID = "JMSXGroupID";
+    public static final String GROUP_SEQ = "JMSXGroupSeq";
     public static final String TraceId = "spanTraceId";
     public static final String SpanId = "spanId";
 }

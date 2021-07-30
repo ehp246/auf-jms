@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.util;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import javax.jms.Destination;
@@ -51,12 +52,12 @@ final public class ToMsg {
 
         @Override
         public String groupId() {
-            return invoke(() -> message.getStringProperty(MsgPropertyName.GroupId));
+            return invoke(() -> message.getStringProperty(MsgPropertyName.GROUP_ID));
         }
 
         @Override
-        public Integer groupSeq() {
-            return invoke(() -> message.getIntProperty(MsgPropertyName.GroupSeq));
+        public int groupSeq() {
+            return invoke(() -> message.getIntProperty(MsgPropertyName.GROUP_SEQ));
         }
 
         @Override
@@ -107,6 +108,13 @@ final public class ToMsg {
         public Message message() {
             return message;
         }
+
+        @Override
+        public List<?> bodyValues() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
     private ToMsg() {

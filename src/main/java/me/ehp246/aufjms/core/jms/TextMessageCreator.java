@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.jms.MessageCreator;
 import me.ehp246.aufjms.api.jms.MsgPortContext;
-import me.ehp246.aufjms.api.jms.ToBody;
+import me.ehp246.aufjms.api.jms.ToJsonMsgBody;
 
 /**
  *
@@ -19,9 +19,9 @@ import me.ehp246.aufjms.api.jms.ToBody;
 public class TextMessageCreator implements MessageCreator<TextMessage> {
     private final Logger LOGGER = LogManager.getLogger(TextMessageCreator.class);
 
-    private final ToBody<String> bodyWriter;
+    private final ToJsonMsgBody<String> bodyWriter;
 
-    public TextMessageCreator(final ToBody<String> bodyWriter) {
+    public TextMessageCreator(final ToJsonMsgBody<String> bodyWriter) {
         super();
         this.bodyWriter = bodyWriter;
     }

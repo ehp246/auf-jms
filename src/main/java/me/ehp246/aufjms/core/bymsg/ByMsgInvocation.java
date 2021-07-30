@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.FromBody;
+import me.ehp246.aufjms.api.jms.FromMsgBody;
 import me.ehp246.aufjms.api.jms.MsgSupplier;
 import me.ehp246.aufjms.api.jms.Received;
 import me.ehp246.aufjms.core.reflection.ProxyInvoked;
@@ -45,11 +45,11 @@ class ByMsgInvocation implements MsgSupplier, ResolvedExecutable {
     private final CompletableFuture<Object> future = new CompletableFuture<>();
     private final ProxyInvoked<Object> invoked;
     private final String correlationId = UUID.randomUUID().toString();
-    private final FromBody<String> fromBody;
+    private final FromMsgBody<String> fromBody;
     private final long timeout;
     private final long ttl;
 
-    public ByMsgInvocation(final ProxyInvoked<Object> invoked, final FromBody<String> fromBody, final Long timeout,
+    public ByMsgInvocation(final ProxyInvoked<Object> invoked, final FromMsgBody<String> fromBody, final Long timeout,
             final Long ttl) {
         super();
 

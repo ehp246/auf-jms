@@ -13,8 +13,6 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.EnableForMsg;
 import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import me.ehp246.aufjms.core.util.Strings;
-import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 
 /**
  * 
@@ -46,8 +44,12 @@ public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
                         scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
                     }
 
-                    final var destinationName = Strings.ifBlank(endpoint.get("value").toString(),
-                            PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() + ".request");
+                    final var destinationName = "";
+                            /*
+                             * Strings.ifBlank(endpoint.get("value").toString(),
+                             * PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() +
+                             * ".request");
+                             */
                     beanDefinition.setConstructorArgumentValues(getParameters(destinationName, scanThese));
 
                     registry.registerBeanDefinition(destinationName + "@" + importingClassMetadata.getClassName(),

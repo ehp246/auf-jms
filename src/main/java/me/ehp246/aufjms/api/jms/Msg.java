@@ -6,6 +6,8 @@ import java.util.List;
 import javax.jms.Destination;
 
 /**
+ * The abstraction of an out-going JMS message.
+ * 
  * @author Lei Yang
  *
  */
@@ -22,15 +24,15 @@ public interface Msg {
 
     Destination replyTo();
 
-    String groupId();
-
-    Integer groupSeq();
-
     long expiration();
-
-    <T> T property(String name, Class<T> type);
 
     long ttl();
 
     Instant timestamp();
+
+    <T> T property(String name, Class<T> type);
+
+    String groupId();
+
+    int groupSeq();
 }

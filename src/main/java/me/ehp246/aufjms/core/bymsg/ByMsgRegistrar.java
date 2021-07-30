@@ -12,7 +12,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import me.ehp246.aufjms.api.annotation.ByMsg;
 import me.ehp246.aufjms.api.annotation.EnableByMsg;
 import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
-import me.ehp246.aufjms.provider.activemq.PrefixedNameResolver;
 
 public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
     private final static Logger LOGGER = LogManager.getLogger(ByMsgRegistrar.class);
@@ -21,9 +20,6 @@ public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
         final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
                 .toString();
-
-        registry.registerBeanDefinition(ReplyToNameSupplier.class.getCanonicalName(), getReplyToSupplier(
-                replyTo.isBlank() ? PrefixedNameResolver.TOPIC_PREFIX + metadata.getClassName() + ".reply" : replyTo));
 
         LOGGER.debug("Scanning for {}", ByMsg.class.getCanonicalName());
 

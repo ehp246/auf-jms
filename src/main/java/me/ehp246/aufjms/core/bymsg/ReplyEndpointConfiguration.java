@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Bean;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.FromBody;
+import me.ehp246.aufjms.api.jms.FromMsgBody;
 import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 
@@ -20,9 +20,9 @@ public class ReplyEndpointConfiguration {
     private final long timeout;
     private final long ttl;
     private final ReplyToNameSupplier replyToNameSupplier;
-    private final FromBody<String> fromBody;
+    private final FromMsgBody<String> fromBody;
 
-    public ReplyEndpointConfiguration(final ReplyToNameSupplier replyTo, final FromBody<String> fromBody,
+    public ReplyEndpointConfiguration(final ReplyToNameSupplier replyTo, final FromMsgBody<String> fromBody,
             @Value("${" + AufJmsProperties.TIMEOUT + ":" + AufJmsProperties.TIMEOUT_DEFAULT + "}") final long timeout,
             @Value("${" + AufJmsProperties.TTL + ":0}") final long ttl) {
         super();
@@ -67,7 +67,7 @@ public class ReplyEndpointConfiguration {
         return replyToNameSupplier.get();
     }
 
-    public FromBody<String> getFromBody() {
+    public FromMsgBody<String> getFromBody() {
         return fromBody;
     }
 }

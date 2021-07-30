@@ -36,16 +36,15 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<junit-jupiter.version>5.5.2</junit-jupiter.version>
 		<log4j.version>2.13.3</log4j.version>
 		<mockito.version>3.1.0</mockito.version>
 		<jackson.version>2.12.3</jackson.version>
 
-		<spring-framework.version>5.2.3.RELEASE</spring-framework.version>
-		<spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+		<spring-framework.version>5.3.9</spring-framework.version>
+		<spring-boot.version>2.5.3</spring-boot.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
@@ -53,7 +52,6 @@
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
 		<jms-api.version>2.0.1</jms-api.version>
-		<org.apache.activemq.version>5.15.8</org.apache.activemq.version>
 	</properties>
 
 	<dependencies>
@@ -95,13 +93,6 @@
 			<artifactId>spring-jms</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.7.0</version>
-		</dependency>
-
 
 		<!-- Test -->
 		<dependency>
@@ -179,6 +170,11 @@
 			<version>${spring-boot.version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j2.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
@@ -220,7 +216,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>11</release>
+					<release>15</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-parameters</arg>
