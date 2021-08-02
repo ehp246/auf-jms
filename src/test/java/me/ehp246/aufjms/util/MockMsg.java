@@ -1,6 +1,5 @@
 package me.ehp246.aufjms.util;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,22 +7,17 @@ import javax.jms.Destination;
 
 import org.apache.activemq.command.ActiveMQQueue;
 
-import me.ehp246.aufjms.api.jms.Msg;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockMsg implements Msg {
-    private final String id = UUID.randomUUID().toString();
+public class MockMsg implements JmsDispatch {
     private final String type = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(AppConfig.TEST_QUEUE);
     private final String correlId = UUID.randomUUID().toString();
-
-    @Override
-    public String id() {
-        return id;
-    }
+    private final String groupId = UUID.randomUUID().toString();
 
     @Override
     public String type() {
@@ -50,19 +44,10 @@ public class MockMsg implements Msg {
         return null;
     }
 
-    @Override
-    public long expiration() {
-        return 0;
-    }
 
     @Override
-    public long ttl() {
-        return 0;
-    }
-
-    @Override
-    public Instant timestamp() {
-        return null;
+    public Long ttl() {
+        return Long.valueOf(0);
     }
 
     @Override
@@ -72,12 +57,12 @@ public class MockMsg implements Msg {
 
     @Override
     public String groupId() {
-        return null;
+        return groupId;
     }
 
     @Override
-    public int groupSeq() {
-        return 0;
+    public Integer groupSeq() {
+        return Integer.valueOf(110);
     }
 
 }

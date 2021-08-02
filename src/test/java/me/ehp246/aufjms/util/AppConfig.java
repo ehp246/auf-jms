@@ -4,15 +4,12 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
-import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
-import org.springframework.jms.support.converter.MessageConverter;
-import org.springframework.jms.support.converter.MessageType;
-import org.springframework.jms.support.destination.DynamicDestinationResolver;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -44,24 +41,18 @@ public class AppConfig {
     }
 
     @Bean
-    public DynamicDestinationResolver dynamicDestinationResolver() {
-        return new DynamicDestinationResolver();
+    public ConnectionFactory connectionFactory() {
+        ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
+        activeMQConnectionFactory
+                .setBrokerURL("vm://embedded?broker.persistent=false,useShutdownHook=false");
+        return activeMQConnectionFactory;
     }
 
     @Bean
-    public JmsListenerContainerFactory<?> defaultJmsListenerContainerFactory(final ConnectionFactory connFactory) {
+    public JmsListenerContainerFactory<?> jmsListenerContainerFactory(final ConnectionFactory connFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connFactory);
-        factory.setMessageConverter(messageConverter());
         return factory;
-    }
-
-    @Bean
-    public MessageConverter messageConverter() {
-        MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-        converter.setTargetType(MessageType.TEXT);
-        converter.setTypeIdPropertyName("_type");
-        return converter;
     }
 
     @Bean

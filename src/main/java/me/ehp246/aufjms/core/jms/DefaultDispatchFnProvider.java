@@ -12,26 +12,26 @@ import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.ToJson;
 import me.ehp246.aufjms.api.exception.MsgFnException;
-import me.ehp246.aufjms.api.jms.MsgFn;
+import me.ehp246.aufjms.api.jms.DispatchFn;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 
 /**
  * @author Lei Yang
  *
  */
-public final class DefaultMsgFnProvider {
-    private final static Logger LOGGER = LogManager.getLogger(MsgFn.class);
+public final class DefaultDispatchFnProvider {
+    private final static Logger LOGGER = LogManager.getLogger(DispatchFn.class);
 
     private final Connection connection;
     private final ToJson toJson;
 
-    public DefaultMsgFnProvider(final Connection connection, final ToJson jsonFn) {
+    public DefaultDispatchFnProvider(final Connection connection, final ToJson jsonFn) {
         super();
         this.connection = Objects.requireNonNull(connection);
         this.toJson = jsonFn;
     }
 
-    public MsgFn get() {
+    public DispatchFn get() {
         return msg -> {
             LOGGER.trace("Sending {}:{} to {} ", msg.correlationId(), msg.type(), msg.destination().toString());
 

@@ -10,7 +10,7 @@ import javax.jms.TextMessage;
  * @author Lei Yang
  *
  */
-public interface Received extends Msg {
+public interface Received extends JmsDispatch {
     Message message();
 
     boolean isException();
