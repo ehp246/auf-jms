@@ -10,22 +10,28 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import javax.jms.Connection;
+
 @Documented
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public @interface ByMsg {
+public @interface ByJms {
     /**
-     * To name for the outgoing message.
-     * 
-     * @return
+     * Defines the destination name for the interface proxy. The element supports
+     * Spring property placeholder, e.g. <code>"${queue.name}"</code>.
      */
     String value();
 
     long timeout() default 0;
 
     long ttl() default 0;
+
+    /**
+     * The bean name of the JMS {@link Connection} to use for this proxy.
+     */
+    String connection() default "";
 }

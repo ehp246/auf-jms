@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.bymsg;
+package me.ehp246.aufjms.core.byjms;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -127,13 +127,13 @@ class ByMsgInvocation implements MsgSupplier, ResolvedExecutable {
     public String getType() {
         final var onArgs = invoked.findOnArguments(OfType.class);
         if (onArgs.isPresent()) {
-            final var value = onArgs.get().getAnnotation().value();
+            final var value = onArgs.get().annotation().value();
             if (!value.isEmpty()) {
                 // Annotated value takes precedence.
                 return value;
             }
             // If there is no annotated value, return argument value even if null.
-            return Optional.ofNullable(onArgs.get().getArgument()).map(Object::toString).orElse(null);
+            return Optional.ofNullable(onArgs.get().argument()).map(Object::toString).orElse(null);
         }
 
         final var onMethod = invoked.findOnMethod(OfType.class);

@@ -1,10 +1,10 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.OfType;
 
 class TypeTestCase {
-    @ByMsg("")
+    @ByJms("")
     interface TypeCase001 {
         void m001();
 

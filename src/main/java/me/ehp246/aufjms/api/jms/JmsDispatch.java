@@ -33,10 +33,6 @@ public interface JmsDispatch {
         return null;
     }
 
-    default <T> T property(String name, Class<T> type) {
-        return null;
-    }
-
     default String groupId() {
         return null;
     }

@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.core.bymsg.ByMsgFactory;
-import me.ehp246.aufjms.core.bymsg.ByMsgRegistrar;
-import me.ehp246.aufjms.core.bymsg.ReplyEndpointConfiguration;
-import me.ehp246.aufjms.core.bymsg.ReplyToNameSupplierFactory;
+import me.ehp246.aufjms.core.byjms.ByJmsFactory;
+import me.ehp246.aufjms.core.byjms.ByMsgRegistrar;
+import me.ehp246.aufjms.core.byjms.ReplyEndpointConfiguration;
+import me.ehp246.aufjms.core.byjms.ReplyToNameSupplierFactory;
 import me.ehp246.aufjms.core.configuration.ConnectionConfiguration;
 import me.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
 import me.ehp246.aufjms.core.configuration.JsonProviderSelector;
@@ -26,7 +26,7 @@ import me.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ ConnectionConfiguration.class, ReplyEndpointConfiguration.class, ByMsgRegistrar.class, ByMsgFactory.class,
+@Import({ ConnectionConfiguration.class, ReplyEndpointConfiguration.class, ByMsgRegistrar.class, ByJmsFactory.class,
         ReplyToNameSupplierFactory.class, MsgEndpointConfigurer.class, PooledExecutorConfiguration.class,
         JsonMessageConfiguration.class, JsonProviderSelector.class })
 public @interface EnableByMsg {

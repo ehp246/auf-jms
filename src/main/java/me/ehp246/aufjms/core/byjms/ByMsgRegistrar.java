@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.bymsg;
+package me.ehp246.aufjms.core.byjms;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
-import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByMsg;
 import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 
@@ -21,9 +21,9 @@ public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
         final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
                 .toString();
 
-        LOGGER.debug("Scanning for {}", ByMsg.class.getCanonicalName());
+        LOGGER.debug("Scanning for {}", ByJms.class.getCanonicalName());
 
-        new ByMsgScanner(EnableByMsg.class, ByMsg.class, metadata).perform().forEach(beanDefinition -> {
+        new ByMsgScanner(EnableByMsg.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
             registry.registerBeanDefinition(beanDefinition.getBeanClassName(),
                     this.getProxyBeanDefinition(beanDefinition));
         });
@@ -62,7 +62,7 @@ public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
 
         proxyBeanDefinition.setConstructorArgumentValues(args);
 
-        proxyBeanDefinition.setFactoryBeanName(ByMsgFactory.class.getName());
+        proxyBeanDefinition.setFactoryBeanName(ByJmsFactory.class.getName());
 
         proxyBeanDefinition.setFactoryMethodName("newInstance");
 

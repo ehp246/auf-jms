@@ -1,20 +1,20 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByJms;
 
 public interface DestinationTestCase {
 
-    @ByMsg(value = "test.inbox")
+    @ByJms(value = "test.inbox")
     interface Case001 {
         void m001();
     }
 
-    @ByMsg("")
+    @ByJms("")
     interface Case002 {
         void m001();
     }
 
-    @ByMsg(value = "test.inbox")
+    @ByJms(value = "test.inbox")
     interface Case003 {
         void m001();
     }

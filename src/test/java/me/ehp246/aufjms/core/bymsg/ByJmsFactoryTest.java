@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 import me.ehp246.aufjms.api.jms.MsgPortProvider;
 import me.ehp246.aufjms.api.jms.MsgSupplier;
+import me.ehp246.aufjms.core.byjms.ByJmsFactory;
+import me.ehp246.aufjms.core.byjms.ReplyEndpointConfiguration;
 
-public class ByMsgFactoryTest {
+class ByJmsFactoryTest {
     private final AtomicReference<MsgSupplier> ref = new AtomicReference<MsgSupplier>(null);
     private final AtomicReference<String> refDestination = new AtomicReference<>(null);
     private final MsgPortProvider portProvider = supplier -> msgSupplier -> {
@@ -28,7 +30,7 @@ public class ByMsgFactoryTest {
 
     private final ReplyEndpointConfiguration replyConfig = new ReplyEndpointConfiguration(() -> null, null, 1, 1);
 
-    private final ByMsgFactory factory = new ByMsgFactory(portProvider, nameResolver, replyConfig);
+    private final ByJmsFactory factory = new ByJmsFactory(portProvider, nameResolver, replyConfig);
 
     @BeforeEach
     public void beforeEach() {
@@ -36,17 +38,15 @@ public class ByMsgFactoryTest {
         refDestination.set(null);
     }
 
-    /**
-     * General interface
-     */
     @Test
     public void general001() {
-        Assertions.assertTrue(factory.newInstance(GeneralTestCase.Case001.class) instanceof GeneralTestCase.Case001);
+
+        Assertions.assertTrue(factory.newInstance(TestCases.Case01.class) instanceof TestCases.Case01);
     }
 
     @Test
     public void general002() {
-        Assertions.assertEquals(2, factory.newInstance(GeneralTestCase.Case001.class).inc(1),
+        Assertions.assertEquals(2, factory.newInstance(TestCases.Case01.class).inc(1),
                 "Should call default implementation");
 
         Assertions.assertNull(ref.get(), "Should not send message");

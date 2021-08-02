@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 class InvokingTestCase {
-    @ByMsg("")
+    @ByJms("")
     interface Case001 {
         // Invoking by method name
         void m001();

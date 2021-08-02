@@ -51,11 +51,6 @@ public class MockMsg implements JmsDispatch {
     }
 
     @Override
-    public <T> T property(String name, Class<T> type) {
-        return null;
-    }
-
-    @Override
     public String groupId() {
         return groupId;
     }

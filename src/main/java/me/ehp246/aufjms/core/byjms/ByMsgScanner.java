@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.bymsg;
+package me.ehp246.aufjms.core.byjms;
 
 import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
