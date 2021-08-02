@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.MsgPortProvider;
 import me.ehp246.aufjms.api.jms.MsgSupplier;
 import me.ehp246.aufjms.core.byjms.ByJmsFactory;
@@ -23,7 +23,7 @@ class ByJmsFactoryTest {
         ref.set(msgSupplier);
         return null;
     };
-    private final DestinationNameResolver nameResolver = name -> {
+    private final DestinationResolver nameResolver = name -> {
         refDestination.set(name);
         return null;
     };

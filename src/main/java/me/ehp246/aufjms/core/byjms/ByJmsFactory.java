@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.MsgPortDestinationSupplier;
 import me.ehp246.aufjms.api.jms.MsgPortProvider;
 import me.ehp246.aufjms.core.reflection.ProxyInvoked;
@@ -29,9 +29,9 @@ public final class ByJmsFactory {
 
     private final ReplyEndpointConfiguration replyConfig;
     private final MsgPortProvider portProvider;
-    private final DestinationNameResolver nameResolver;
+    private final DestinationResolver nameResolver;
 
-    public ByJmsFactory(final MsgPortProvider portProvider, final DestinationNameResolver nameResolver,
+    public ByJmsFactory(final MsgPortProvider portProvider, final DestinationResolver nameResolver,
             final ReplyEndpointConfiguration replyConfig) {
         super();
         this.portProvider = Objects.requireNonNull(portProvider);

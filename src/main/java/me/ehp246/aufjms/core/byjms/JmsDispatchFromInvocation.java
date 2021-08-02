@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.jms.Destination;
 
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;
 
@@ -16,13 +17,18 @@ import me.ehp246.aufjms.core.reflection.ProxyInvocation;
  */
 final class JmsDispatchFromInvocation {
     private final ByJmsProxyConfig proxyConfig;
+    private final DestinationResolver destinationResolver;
 
-    public JmsDispatchFromInvocation(final ByJmsProxyConfig proxyConfig) {
+    public JmsDispatchFromInvocation(final ByJmsProxyConfig proxyConfig,
+            final DestinationResolver destinationResolver) {
         super();
         this.proxyConfig = proxyConfig;
+        this.destinationResolver = destinationResolver;
     }
 
     JmsDispatch from(ProxyInvocation invocation) {
+        final var destination = this.destinationResolver.resolve(this.proxyConfig.connection(),
+                this.proxyConfig.destination());
         final var type = invocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
                 + invocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
@@ -32,8 +38,7 @@ final class JmsDispatchFromInvocation {
 
             @Override
             public Destination destination() {
-                // TODO Auto-generated method stub
-                return null;
+                return destination;
             }
 
             @Override

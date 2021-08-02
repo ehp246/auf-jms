@@ -6,7 +6,7 @@ import javax.jms.JMSException;
 
 import org.springframework.context.annotation.Bean;
 
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.MessageCreator;
 import me.ehp246.aufjms.core.jms.DefaultDispatchFnProvider;
 
@@ -23,7 +23,7 @@ public class ConnectionConfiguration {
     }
 
     @Bean
-    public DefaultDispatchFnProvider portProvider(final Connection connection, final DestinationNameResolver toResolver,
+    public DefaultDispatchFnProvider portProvider(final Connection connection, final DestinationResolver toResolver,
             final MessageCreator<?> msgCreator) {
         return new DefaultDispatchFnProvider(connection, null);
     }
