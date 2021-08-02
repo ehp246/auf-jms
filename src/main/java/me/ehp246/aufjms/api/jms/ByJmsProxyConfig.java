@@ -10,4 +10,6 @@ public interface ByJmsProxyConfig {
     long ttl();
 
     String connection();
+
+    String replyTo();
 }

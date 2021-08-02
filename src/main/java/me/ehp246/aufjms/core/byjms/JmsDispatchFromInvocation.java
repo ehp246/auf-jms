@@ -1,7 +1,11 @@
 package me.ehp246.aufjms.core.byjms;
 
+import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.Destination;
@@ -10,12 +14,15 @@ import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * @author Lei Yang
  *
  */
 final class JmsDispatchFromInvocation {
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
+
     private final ByJmsProxyConfig proxyConfig;
     private final DestinationResolver destinationResolver;
 
@@ -29,10 +36,13 @@ final class JmsDispatchFromInvocation {
     JmsDispatch from(ProxyInvocation invocation) {
         final var destination = this.destinationResolver.resolve(this.proxyConfig.connection(),
                 this.proxyConfig.destination());
+        final var replyTo = Optional.ofNullable(this.proxyConfig.replyTo()).filter(OneUtil::hasValue)
+                .map(name -> this.destinationResolver.resolve(this.proxyConfig.connection(), name)).orElse(null);
         final var type = invocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
                 + invocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
         final var ttl = proxyConfig.ttl();
+        final var bodyValues = Collections.unmodifiableList(invocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
 
@@ -53,12 +63,12 @@ final class JmsDispatchFromInvocation {
 
             @Override
             public List<?> bodyValues() {
-                return List.of();
+                return bodyValues;
             }
 
             @Override
             public Destination replyTo() {
-                return null;
+                return replyTo;
             }
 
             @Override

@@ -11,6 +11,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import javax.jms.Connection;
+import javax.jms.Destination;
+import javax.jms.Message;
 
 @Documented
 @Target(TYPE)
@@ -34,4 +36,12 @@ public @interface ByJms {
      * The bean name of the JMS {@link Connection} to use for this proxy.
      */
     String connection() default "";
+
+    /**
+     * Defines the name of the {@link Destination} for
+     * {@link Message#setJMSReplyTo(javax.jms.Destination)}.
+     * <p>
+     * The default defines no replyTo destination.
+     */
+    String replyTo() default "";
 }
