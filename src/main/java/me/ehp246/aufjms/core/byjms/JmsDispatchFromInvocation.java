@@ -10,8 +10,10 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 
+import me.ehp246.aufjms.api.Invocation;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -20,7 +22,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class JmsDispatchFromInvocation {
+final class JmsDispatchFromInvocation implements InvocationDispatchProvider {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
 
     private final ByJmsProxyConfig proxyConfig;
@@ -33,16 +35,20 @@ final class JmsDispatchFromInvocation {
         this.destinationResolver = destinationResolver;
     }
 
-    JmsDispatch from(ProxyInvocation invocation) {
+    @Override
+    public JmsDispatch get(final Invocation invocation) {
+        final var proxyInvocation = new ProxyInvocation(invocation.method().getDeclaringClass(), invocation.target(),
+                invocation.method(),
+                invocation.args());
         final var destination = this.destinationResolver.resolve(this.proxyConfig.connection(),
                 this.proxyConfig.destination());
         final var replyTo = Optional.ofNullable(this.proxyConfig.replyTo()).filter(OneUtil::hasValue)
                 .map(name -> this.destinationResolver.resolve(this.proxyConfig.connection(), name)).orElse(null);
-        final var type = invocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
-                + invocation.getMethodName().substring(1);
+        final var type = proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
+                + proxyInvocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
         final var ttl = proxyConfig.ttl();
-        final var bodyValues = Collections.unmodifiableList(invocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
+        final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
 

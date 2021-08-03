@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.core.byjms;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.jms.Destination;
@@ -10,7 +12,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
-import me.ehp246.aufjms.core.reflection.ProxyInvocation;
 
 /**
  * @author Lei Yang
@@ -51,9 +52,8 @@ class JmsDispatchFromInvocationTest {
     });
 
     @Test
-    void test_01() throws NoSuchMethodException, SecurityException {
-        final var dispatch = fromInvocation.from(new ProxyInvocation(JmsDispatchFromInvocationTestCase.class,
-                new JmsDispatchFromInvocationTestCase(), new JmsDispatchFromInvocationTestCase().getM01(), null));
+    void test_01() {
+        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(destination, dispatch.destination());
         Assertions.assertEquals("M01", dispatch.type());
@@ -66,9 +66,8 @@ class JmsDispatchFromInvocationTest {
     }
 
     @Test
-    void destintationResolver_01() throws NoSuchMethodException, SecurityException {
-        fromInvocation.from(new ProxyInvocation(JmsDispatchFromInvocationTestCase.class,
-                new JmsDispatchFromInvocationTestCase(), new JmsDispatchFromInvocationTestCase().getM01(), null));
+    void destintationResolver_01() {
+        fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(connectionName, NAMES[0]);
         Assertions.assertEquals(replyToName, NAMES[1]);
@@ -102,8 +101,7 @@ class JmsDispatchFromInvocationTest {
             names[0] = con;
             names[1] = dest;
             return destination;
-        }).from(new ProxyInvocation(JmsDispatchFromInvocationTestCase.class, new JmsDispatchFromInvocationTestCase(),
-                new JmsDispatchFromInvocationTestCase().getM01(), null));
+        }).get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(connectionName, names[0]);
         Assertions.assertEquals(destinationName, names[1]);
@@ -111,9 +109,9 @@ class JmsDispatchFromInvocationTest {
 
     @Test
     void body_01() throws NoSuchMethodException, SecurityException {
-        final var dispatch = fromInvocation.from(
-                new ProxyInvocation(JmsDispatchFromInvocationTestCase.class, new JmsDispatchFromInvocationTestCase(),
-                        new JmsDispatchFromInvocationTestCase().getM02(), new Object[] { null }));
+        final var args = new ArrayList<>();
+        args.add(null);
+        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM02Invocation(args));
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(null, dispatch.bodyValues().get(0));
@@ -123,9 +121,7 @@ class JmsDispatchFromInvocationTest {
     @Test
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
-        final var dispatch = fromInvocation.from(
-                new ProxyInvocation(JmsDispatchFromInvocationTestCase.class, new JmsDispatchFromInvocationTestCase(),
-                        new JmsDispatchFromInvocationTestCase().getM02(), new Object[] { now }));
+        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM02Invocation(List.of(now)));
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(now, dispatch.bodyValues().get(0));

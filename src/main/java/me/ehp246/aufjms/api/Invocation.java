@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.reflection;
+package me.ehp246.aufjms.api;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -7,8 +7,7 @@ import java.util.List;
  * The abstraction of an invocation of a method.
  * 
  * @author Lei Yang
- * @since 2.2
- *
+ * @since 1.0
  */
 public interface Invocation {
     /**

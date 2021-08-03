@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +15,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import me.ehp246.aufjms.api.Invocation;
 
 /**
  * 
@@ -31,11 +32,11 @@ public final class ProxyInvocation implements Invocation {
     private final List<Class<?>> threws;
 
     public ProxyInvocation(final Class<?> declaringType, final Object target, final Method method,
-            final Object[] args) {
+            final List<?> args) {
         this.declaringType = declaringType;
         this.target = target;
         this.method = Objects.requireNonNull(method);
-        this.args = Collections.unmodifiableList(args == null ? new ArrayList<Object>() : Arrays.asList(args));
+        this.args = Collections.unmodifiableList(args == null ? new ArrayList<Object>() : args);
         this.parameterAnnotations = this.method.getParameterAnnotations();
         this.threws = List.of(this.method.getExceptionTypes());
     }
