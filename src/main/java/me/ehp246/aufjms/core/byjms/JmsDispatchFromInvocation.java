@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 
-import me.ehp246.aufjms.api.Invocation;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;

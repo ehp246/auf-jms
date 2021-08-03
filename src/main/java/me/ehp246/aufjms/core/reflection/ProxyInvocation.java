@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import me.ehp246.aufjms.api.Invocation;
+import me.ehp246.aufjms.api.jms.Invocation;
 
 /**
  * 

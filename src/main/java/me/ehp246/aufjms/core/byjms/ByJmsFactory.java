@@ -3,79 +3,56 @@ package me.ehp246.aufjms.core.byjms;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Objects;
-
-import javax.jms.Destination;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.jms.DestinationResolver;
-import me.ehp246.aufjms.api.jms.MsgPortDestinationSupplier;
-import me.ehp246.aufjms.api.jms.MsgPortProvider;
-import me.ehp246.aufjms.core.reflection.ProxyInvoked;
-import me.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.api.jms.DispatchFn;
+import me.ehp246.aufjms.api.jms.DispatchFnProvider;
+import me.ehp246.aufjms.api.jms.Invocation;
+import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public final class ByJmsFactory {
     private final static Logger LOGGER = LogManager.getLogger(ByJmsFactory.class);
 
-    private final ReplyEndpointConfiguration replyConfig;
-    private final MsgPortProvider portProvider;
-    private final DestinationResolver nameResolver;
+    private final InvocationDispatchProvider dispatchProvider;
+    private final DispatchFnProvider dispatchFnProvider;
 
-    public ByJmsFactory(final MsgPortProvider portProvider, final DestinationResolver nameResolver,
-            final ReplyEndpointConfiguration replyConfig) {
+    public ByJmsFactory(final InvocationDispatchProvider dispatchProvider,
+            final DispatchFnProvider dispatchFnProvider) {
         super();
-        this.portProvider = Objects.requireNonNull(portProvider);
-        this.nameResolver = Objects.requireNonNull(nameResolver);
-        this.replyConfig = replyConfig;
+        this.dispatchProvider = dispatchProvider;
+        this.dispatchFnProvider = dispatchFnProvider;
     }
 
     @SuppressWarnings("unchecked")
     public <T> T newInstance(final Class<T> byJmsInterface, final ByJmsProxyConfig jmsProxyConfig) {
+        LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 
-        final var destinatinName = byJmsInterface.getAnnotation(ByJms.class).value();
-        final var port = portProvider.get(new MsgPortDestinationSupplier() {
-            private final String replyTo = replyConfig.getReplyToName();
-
-            @Override
-            public Destination getTo() {
-                return nameResolver.resolve(destinatinName);
-            }
-
-            @Override
-            public Destination getReplyTo() {
-                return replyTo == null ? null : nameResolver.resolve(replyTo);
-            }
-
-        });
-
-        final var reflectedInterface = new ReflectingType<>(byJmsInterface);
-        final var timeout = reflectedInterface.findOnType(ByJms.class).map(ByJms::timeout).filter(i -> i > 0)
-                .orElseGet(replyConfig::getTimeout);
-        final var ttl = reflectedInterface.findOnType(ByJms.class).map(ByJms::ttl).filter(i -> i > 0)
-                .orElseGet(replyConfig::getTtl);
-
-        LOGGER.debug("Proxying {}@{}", destinatinName, byJmsInterface.getCanonicalName());
-
+        final DispatchFn dispatchFn = this.dispatchFnProvider.get(jmsProxyConfig.connection());
+        final var hashCode = new Object().hashCode();
         return (T) Proxy.newProxyInstance(byJmsInterface.getClassLoader(), new Class[] { byJmsInterface },
                 (InvocationHandler) (proxy, method, args) -> {
                     if (method.getName().equals("toString")) {
                         return this.toString();
                     }
                     if (method.getName().equals("hashCode")) {
-                        return this.hashCode();
+                        return hashCode;
                     }
                     if (method.getName().equals("equals")) {
-                        return this.equals(args[0]);
+                        return proxy == args[0];
                     }
                     if (method.isDefault()) {
                         return MethodHandles.privateLookupIn(byJmsInterface, MethodHandles.lookup())
@@ -85,28 +62,28 @@ public final class ByJmsFactory {
                                 .bindTo(proxy).invokeWithArguments(args);
                     }
 
-                    final var invocation = new ByMsgInvocation(new ProxyInvoked<Object>(proxy, method, args),
-                            replyConfig.getFromBody(), timeout, ttl);
-                    final var correlMap = replyConfig.getCorrelMap();
+                    final var jmsDispatch = dispatchProvider.get(new Invocation() {
+                        private final List<?> asList = Collections.unmodifiableList(Arrays.asList(args));
 
-                    if (invocation.isReplyExpected()) {
-                        correlMap.put(invocation.getCorrelationId(), invocation);
-                    }
+                        @Override
+                        public Object target() {
+                            return proxy;
+                        }
 
-                    try {
-                        port.accept(invocation);
-                    } catch (final Exception e) {
-                        correlMap.remove(invocation.getCorrelationId());
-                        throw e;
-                    }
+                        @Override
+                        public Method method() {
+                            return method;
+                        }
 
-                    try {
-                        return invocation.returnInvocation();
-                    } catch (final Exception e) {
-                        throw e;
-                    } finally {
-                        correlMap.remove(invocation.getCorrelationId());
-                    }
+                        @Override
+                        public List<?> args() {
+                            return asList;
+                        }
+                    });
+
+                    dispatchFn.dispatch(jmsDispatch);
+
+                    return null;
                 });
 
     }
@@ -129,6 +106,11 @@ public final class ByJmsFactory {
             @Override
             public String connection() {
                 return byJms.connection();
+            }
+
+            @Override
+            public String replyTo() {
+                return byJms.replyTo();
             }
         });
     }

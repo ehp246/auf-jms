@@ -30,7 +30,7 @@ class DefaultDispatchFnProviderTest {
         final var fn = dispatcherFnProvider.get();
         final var msg = new MockMsg();
 
-        fn.apply(msg);
+        fn.dispatch(msg);
 
         final var received = listener.getReceived();
 

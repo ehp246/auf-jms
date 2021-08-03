@@ -15,5 +15,5 @@ import javax.jms.Message;
  */
 @FunctionalInterface
 public interface DispatchFn {
-    Message apply(JmsDispatch msg);
+    Message dispatch(JmsDispatch dispatch);
 }

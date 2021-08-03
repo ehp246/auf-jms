@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import me.ehp246.aufjms.api.Invocation;
+import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
