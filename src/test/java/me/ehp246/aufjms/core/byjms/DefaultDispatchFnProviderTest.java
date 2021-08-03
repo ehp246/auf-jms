@@ -1,7 +1,6 @@
 package me.ehp246.aufjms.core.byjms;
 
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 import javax.jms.JMSException;
 
@@ -10,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.jms.DispatchFn;
+import me.ehp246.aufjms.api.jms.DispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.util.AppConfig;
 import me.ehp246.aufjms.util.MockMsg;
@@ -25,11 +24,11 @@ class DefaultDispatchFnProviderTest {
     @Autowired
     private TestQueueListener listener;
     @Autowired
-    private Function<String, DispatchFn> dispatcherFnProvider;
+    private DispatchFnProvider dispatcherFnProvider;
 
     @Test
     void test() throws InterruptedException, ExecutionException, JMSException {
-        final var fn = dispatcherFnProvider.apply("");
+        final var fn = dispatcherFnProvider.get("");
         final var msg = new MockMsg();
 
         fn.dispatch(msg);
