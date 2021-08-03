@@ -41,7 +41,7 @@ public @interface ByJms {
      * Defines the name of the {@link Destination} for
      * {@link Message#setJMSReplyTo(javax.jms.Destination)}.
      * <p>
-     * The default defines no replyTo destination.
+     * The default value follows {@link EnableByJms#replyTo()}.
      */
     String replyTo() default "";
 }

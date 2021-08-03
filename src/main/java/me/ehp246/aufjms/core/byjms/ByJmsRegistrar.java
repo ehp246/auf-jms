@@ -10,20 +10,20 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.EnableByMsg;
+import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 
-public class ByMsgRegistrar implements ImportBeanDefinitionRegistrar {
-    private final static Logger LOGGER = LogManager.getLogger(ByMsgRegistrar.class);
+public class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
+    private final static Logger LOGGER = LogManager.getLogger(ByJmsRegistrar.class);
 
     @Override
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
-        final var replyTo = metadata.getAnnotationAttributes(EnableByMsg.class.getCanonicalName()).get("replyTo")
+        final var replyTo = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName()).get("replyTo")
                 .toString();
 
         LOGGER.debug("Scanning for {}", ByJms.class.getCanonicalName());
 
-        new ByMsgScanner(EnableByMsg.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
+        new ByMsgScanner(EnableByJms.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
             registry.registerBeanDefinition(beanDefinition.getBeanClassName(),
                     this.getProxyBeanDefinition(beanDefinition));
         });

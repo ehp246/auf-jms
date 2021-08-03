@@ -14,14 +14,13 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.ToJson;
 import me.ehp246.aufjms.api.exception.MsgFnException;
 import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.DispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 
 /**
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultDispatchFnProvider implements DispatchFnProvider {
+public final class DefaultDispatchFnProvider implements Function<String, DispatchFn> {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
     private final Function<String, Connection> connProvider;
@@ -34,7 +33,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     }
 
     @Override
-    public DispatchFn get(final String connectionName) {
+    public DispatchFn apply(final String connectionName) {
         return msg -> {
             LOGGER.trace("Sending {}:{} to {} ", msg.correlationId(), msg.type(), msg.destination().toString());
 

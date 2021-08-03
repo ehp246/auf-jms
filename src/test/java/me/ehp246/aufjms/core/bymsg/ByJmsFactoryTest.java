@@ -1,12 +1,13 @@
 package me.ehp246.aufjms.core.bymsg;
 
+import java.util.function.Function;
+
 import javax.jms.Message;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.DispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
@@ -15,7 +16,7 @@ import me.ehp246.aufjms.core.byjms.ByJmsFactory;
 class ByJmsFactoryTest {
     private final DispatchFn dispatchFn = dispatch -> null;
     private final InvocationDispatchProvider dispatchProvider = inovcation -> null;
-    private final DispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
+    private final Function<String, DispatchFn> dispatchFnProvider = connection -> dispatchFn;
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
