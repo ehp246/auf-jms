@@ -17,14 +17,14 @@ import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
  * @author Lei Yang
  *
  */
-class JmsDispatchFromInvocationTest {
+class DefaultInvocationDispatchProviderTest {
     private final static String[] NAMES = new String[2];
     private final static Destination destination = new ActiveMQTopic();
     private final static String replyToName = UUID.randomUUID().toString();
     private final static String destinationName = UUID.randomUUID().toString();
     private final static String connectionName = UUID.randomUUID().toString();
 
-    private JmsDispatchFromInvocation fromInvocation = new JmsDispatchFromInvocation(new ByJmsProxyConfig() {
+    private DefaultInvocationDispatchProvider fromInvocation = new DefaultInvocationDispatchProvider(new ByJmsProxyConfig() {
 
         @Override
         public long ttl() {
@@ -76,7 +76,7 @@ class JmsDispatchFromInvocationTest {
     @Test
     void destintationResolver_02() throws NoSuchMethodException, SecurityException {
         final String[] names = new String[2];
-        new JmsDispatchFromInvocation(new ByJmsProxyConfig() {
+        new DefaultInvocationDispatchProvider(new ByJmsProxyConfig() {
 
             @Override
             public long ttl() {

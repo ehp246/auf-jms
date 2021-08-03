@@ -66,7 +66,7 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
                     final AbstractMessageListenerContainer container = (AbstractMessageListenerContainer) listenerContainer;
                     container.setDestinationName(endpoint.getDestinationName());
                     container.setDestinationResolver((session, destinationName,
-                            pubSubDomain) -> destintationNameResolver.resolve(destinationName));
+                            pubSubDomain) -> destintationNameResolver.resolve("", destinationName));
                     container.setupMessageListener((MessageListener) message -> {
                         final var msg = ToMsg.from(message);
 

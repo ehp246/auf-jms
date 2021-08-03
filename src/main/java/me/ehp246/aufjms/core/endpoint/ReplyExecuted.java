@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.exception.ExecutionThrown;
 import me.ehp246.aufjms.api.jms.MsgPortProvider;
 import me.ehp246.aufjms.api.jms.MsgSupplier;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -24,7 +24,7 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 
     @Override
     public void accept(final ExecutedInstance instance) {
-        final Received msg = instance.getMsg();
+        final JmsMsg msg = instance.getMsg();
         if (msg.replyTo() == null) {
             return;
         }

@@ -20,15 +20,15 @@ import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
-final class JmsDispatchFromInvocation implements InvocationDispatchProvider {
+final class DefaultInvocationDispatchProvider implements InvocationDispatchProvider {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
 
     private final ByJmsProxyConfig proxyConfig;
     private final DestinationResolver destinationResolver;
 
-    public JmsDispatchFromInvocation(final ByJmsProxyConfig proxyConfig,
+    public DefaultInvocationDispatchProvider(final ByJmsProxyConfig proxyConfig,
             final DestinationResolver destinationResolver) {
         super();
         this.proxyConfig = proxyConfig;

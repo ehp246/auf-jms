@@ -3,6 +3,7 @@ package me.ehp246.aufjms.core.formsg;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
@@ -19,6 +20,7 @@ import me.ehp246.aufjms.core.reflection.ReflectingType;
  * @author Lei Yang
  *
  */
+@Disabled
 class ForMsgScannerTest {
 
     @Test

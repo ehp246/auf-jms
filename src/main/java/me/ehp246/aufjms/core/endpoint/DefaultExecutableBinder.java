@@ -20,7 +20,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
 import me.ehp246.aufjms.api.jms.FromMsgBody;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
 
 /**
@@ -31,8 +31,8 @@ import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
 public class DefaultExecutableBinder implements ExecutableBinder {
     private final static Logger LOGGER = LogManager.getLogger(DefaultExecutableBinder.class);
 
-    protected static final Map<Class<? extends Annotation>, Function<Received, String>> HEADER_VALUE_SUPPLIERS = Map
-            .of(OfType.class, Received::type);
+    protected static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> HEADER_VALUE_SUPPLIERS = Map
+            .of(OfType.class, JmsMsg::type);
 
     protected static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
             .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
@@ -108,7 +108,7 @@ public class DefaultExecutableBinder implements ExecutableBinder {
 
             // Bind by type
             final var type = parameter.getType();
-            if (type.isAssignableFrom(Received.class)) {
+            if (type.isAssignableFrom(JmsMsg.class)) {
                 arguments[i] = msg;
                 markers[i] = true;
             } else if (type.isAssignableFrom(Message.class)) {
@@ -129,7 +129,8 @@ public class DefaultExecutableBinder implements ExecutableBinder {
             found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
                     .findAny();
             if (found.isPresent()) {
-                arguments[i] = msg.property(((OfProperty) found.get()).value(), parameter.getType());
+                // arguments[i] = msg.property(((OfProperty) found.get()).value(),
+                // parameter.getType());
                 markers[i] = true;
             }
         }

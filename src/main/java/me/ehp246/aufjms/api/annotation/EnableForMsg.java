@@ -10,8 +10,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.core.configuration.ConnectionConfiguration;
-import me.ehp246.aufjms.core.configuration.JsonMessageConfiguration;
 import me.ehp246.aufjms.core.configuration.JsonProviderSelector;
 import me.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
 import me.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
@@ -26,8 +24,8 @@ import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ ConnectionConfiguration.class, EnableForMsgRegistrar.class, AtEndpointFactory.class,
-        MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, JsonMessageConfiguration.class,
+@Import({ EnableForMsgRegistrar.class, AtEndpointFactory.class,
+        MsgEndpointConfigurer.class, PooledExecutorConfiguration.class, 
         JsonProviderSelector.class })
 public @interface EnableForMsg {
     At[] value() default @At;

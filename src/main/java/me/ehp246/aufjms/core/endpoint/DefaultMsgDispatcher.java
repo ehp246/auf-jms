@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.MsgDispatcher;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.slf4j.MdcKeys;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.CatchingInvocation;
@@ -41,7 +41,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
     }
 
     @Override
-    public void dispatch(final Received msg) {
+    public void dispatch(final JmsMsg msg) {
         LOGGER.trace("Dispatching");
 
         final var resolveOutcome = CatchingInvocation.invoke(() -> this.actionResolver.resolve(msg));
@@ -81,7 +81,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
         }
     };
 
-    private static Runnable newRunnable(final Received msg, final ResolvedExecutable resolved,
+    private static Runnable newRunnable(final JmsMsg msg, final ResolvedExecutable resolved,
             final ExecutableBinder binder) {
         return () -> {
             final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(resolved, () -> msg));
@@ -104,7 +104,7 @@ public class DefaultMsgDispatcher implements MsgDispatcher {
                     }
 
                     @Override
-                    public Received getMsg() {
+                    public JmsMsg getMsg() {
                         return msg;
                     }
 

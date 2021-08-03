@@ -17,7 +17,7 @@ class ByJmsFactoryTest {
     private final InvocationDispatchProvider dispatchProvider = inovcation -> null;
     private final DispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
 
-    private final ByJmsFactory factory = new ByJmsFactory(dispatchProvider, dispatchFnProvider);
+    private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
     @Test
     void object_01() {
@@ -50,12 +50,12 @@ class ByJmsFactoryTest {
         };
         final var con = new String[1];
         final var inv = new Invocation[1];
-        final var newInstance = new ByJmsFactory(invocation -> {
-            inv[0] = invocation;
-            return jmsDispatch;
-        }, conection -> {
+        final var newInstance = new ByJmsFactory(conection -> {
             con[0] = conection;
             return dispatchFn;
+        }, invocation -> {
+            inv[0] = invocation;
+            return jmsDispatch;
         }).newInstance(TestCases.Case01.class);
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");

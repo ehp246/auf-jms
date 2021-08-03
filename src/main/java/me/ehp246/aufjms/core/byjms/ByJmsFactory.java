@@ -30,8 +30,8 @@ public final class ByJmsFactory {
     private final InvocationDispatchProvider dispatchProvider;
     private final DispatchFnProvider dispatchFnProvider;
 
-    public ByJmsFactory(final InvocationDispatchProvider dispatchProvider,
-            final DispatchFnProvider dispatchFnProvider) {
+    public ByJmsFactory(final DispatchFnProvider dispatchFnProvider,
+            final InvocationDispatchProvider dispatchProvider) {
         super();
         this.dispatchProvider = dispatchProvider;
         this.dispatchFnProvider = dispatchFnProvider;

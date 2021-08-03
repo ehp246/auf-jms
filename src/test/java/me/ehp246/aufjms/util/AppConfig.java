@@ -1,10 +1,13 @@
 package me.ehp246.aufjms.util;
 
+import java.util.function.Function;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
@@ -58,5 +61,10 @@ public class AppConfig {
     @Bean
     public Connection connection(final ConnectionFactory connFactory) throws JMSException {
         return connFactory.createConnection();
+    }
+
+    @Bean
+    public Function<String, Connection> connProvider(final ListableBeanFactory beanFactory) {
+        return name -> beanFactory.getBean(Connection.class);
     }
 }

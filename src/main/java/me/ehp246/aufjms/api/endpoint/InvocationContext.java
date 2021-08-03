@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * 
@@ -9,5 +9,5 @@ import me.ehp246.aufjms.api.jms.Received;
  */
 @FunctionalInterface
 public interface InvocationContext {
-    Received getMsg();
+    JmsMsg getMsg();
 }

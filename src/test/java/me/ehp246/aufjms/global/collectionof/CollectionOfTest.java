@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Disabled
 @SpringBootTest(classes = CollectionOfConfiguration.class, properties = {
         "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false" })
 public class CollectionOfTest {

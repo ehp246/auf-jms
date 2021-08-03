@@ -17,7 +17,7 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokingDefinition;
 import me.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  *
@@ -50,7 +50,7 @@ public class DefaultExecutableTypeResolver implements ForMsgRegistry, Executable
     }
 
     @Override
-    public ResolvedInstanceType resolve(final Received msg) {
+    public ResolvedInstanceType resolve(final JmsMsg msg) {
         final var msgType = Objects.requireNonNull(Objects.requireNonNull(msg).type()).strip();
 
         final var definition = registeredActions.get(msgType);

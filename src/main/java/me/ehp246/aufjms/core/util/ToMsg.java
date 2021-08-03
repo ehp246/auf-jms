@@ -8,8 +8,8 @@ import javax.jms.Destination;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
-import me.ehp246.aufjms.api.jms.Received;
 
 /**
  * Utility to un-pack a JMS message.
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.jms.Received;
  *
  */
 final public class ToMsg {
-    private static final class MsgImplementation implements Received {
+    private static final class MsgImplementation implements JmsMsg {
         private final Message message;
 
         private MsgImplementation(Message message) {
@@ -56,11 +56,6 @@ final public class ToMsg {
         }
 
         @Override
-        public int groupSeq() {
-            return invoke(() -> message.getIntProperty(MsgPropertyName.GROUP_SEQ));
-        }
-
-        @Override
         public boolean isException() {
             return invoke(() -> message.getBooleanProperty(MsgPropertyName.ServerThrown));
         }
@@ -95,11 +90,6 @@ final public class ToMsg {
         }
 
         @Override
-        public long ttl() {
-            return invoke(() -> message.getIntProperty(MsgPropertyName.TTL));
-        }
-
-        @Override
         public Instant timestamp() {
             return Instant.ofEpochMilli(invoke(message::getJMSTimestamp));
         }
@@ -121,7 +111,7 @@ final public class ToMsg {
         super();
     }
 
-    public static Received from(final Message message) {
+    public static JmsMsg from(final Message message) {
         if (!(message instanceof TextMessage)) {
             throw new RuntimeException("Un-supported message type: " + message.getClass().getName());
         }

@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.global.case002;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -16,6 +17,7 @@ import me.ehp246.aufjms.global.case002.bymsg.ExceptionThrower;
  * @author Lei Yang
  *
  */
+@Disabled
 @SpringBootTest(classes = AppConfiguration.class, properties = {
         "spring.activemq.broker-url=vm://activemq?broker.persistent=false&broker.useShutdownHook=false" })
 public class AppConfigurationTest {

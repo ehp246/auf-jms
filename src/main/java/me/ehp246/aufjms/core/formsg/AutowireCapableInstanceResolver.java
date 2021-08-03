@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * Resolves an Action by the given registry to a bean/object created by the
@@ -40,7 +40,7 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
     }
 
     @Override
-    public ResolvedExecutable resolve(final Received msg) {
+    public ResolvedExecutable resolve(final JmsMsg msg) {
         Objects.requireNonNull(msg);
 
         final var registered = this.typeResolver.resolve(msg);

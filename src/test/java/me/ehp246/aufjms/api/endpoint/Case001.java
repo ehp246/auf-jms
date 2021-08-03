@@ -6,18 +6,18 @@ import java.util.List;
 import javax.jms.Message;
 
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.jms.Received;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 
 class Case001 {
     public void m001() {
 
     }
 
-    public Received m001(final Received msg) {
+    public JmsMsg m001(final JmsMsg msg) {
         return msg;
     }
 
-    public Object[] m001(final Received msg, final Message message) {
+    public Object[] m001(final JmsMsg msg, final Message message) {
         return new Object[] { msg, message };
     }
 
@@ -27,7 +27,7 @@ class Case001 {
         return new Object[] { integers, instant, message };
     }
 
-    public void m001(final Received msg, @OfType final String type, final String str) {
+    public void m001(final JmsMsg msg, @OfType final String type, final String str) {
 
     }
 
