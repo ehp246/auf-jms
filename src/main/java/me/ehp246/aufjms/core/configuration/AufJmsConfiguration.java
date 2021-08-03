@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.core.configuration;
 
-import java.util.function.Function;
-
 import javax.jms.Connection;
 
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -10,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.ToJson;
+import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -23,7 +22,7 @@ public final class AufJmsConfiguration {
     }
 
     @Bean
-    public Function<String, Connection> connectionMap(final ListableBeanFactory beanFactory) {
+    public NamedConnectionProvider connectionMap(final ListableBeanFactory beanFactory) {
         return name -> beanFactory.getBean(Connection.class);
     }
 }

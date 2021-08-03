@@ -1,9 +1,7 @@
 package me.ehp246.aufjms.core.byjms;
 
 import java.util.Objects;
-import java.util.function.Function;
 
-import javax.jms.Connection;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -16,6 +14,7 @@ import me.ehp246.aufjms.api.exception.MsgFnException;
 import me.ehp246.aufjms.api.jms.DispatchFn;
 import me.ehp246.aufjms.api.jms.DispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
+import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 
 /**
  * @author Lei Yang
@@ -24,10 +23,10 @@ import me.ehp246.aufjms.api.jms.MsgPropertyName;
 public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
-    private final Function<String, Connection> connProvider;
+    private final NamedConnectionProvider connProvider;
     private final ToJson toJson;
 
-    public DefaultDispatchFnProvider(final Function<String, Connection> cons, final ToJson jsonFn) {
+    public DefaultDispatchFnProvider(final NamedConnectionProvider cons, final ToJson jsonFn) {
         super();
         this.connProvider = Objects.requireNonNull(cons);
         this.toJson = jsonFn;
@@ -35,10 +34,11 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
 
     @Override
     public DispatchFn get(final String connectionName) {
+        final var connection = connProvider.get(connectionName);
         return msg -> {
             LOGGER.trace("Sending {}:{} to {} ", msg.correlationId(), msg.type(), msg.destination().toString());
 
-            try (final Session session = connProvider.apply(connectionName).createSession(true,
+            try (final Session session = connection.createSession(true,
                     Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
                 message.setText(this.toJson.toJson(msg.bodyValues()));

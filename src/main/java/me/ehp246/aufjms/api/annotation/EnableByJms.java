@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import me.ehp246.aufjms.core.byjms.ByJmsFactory;
 import me.ehp246.aufjms.core.byjms.ByJmsRegistrar;
 import me.ehp246.aufjms.core.byjms.DefaultDispatchFnProvider;
+import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -21,7 +22,8 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ ByJmsRegistrar.class, ByJmsFactory.class, DefaultDispatchFnProvider.class, JsonByJackson.class })
+@Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultDispatchFnProvider.class,
+        JsonByJackson.class })
 public @interface EnableByJms {
     Class<?>[] scan() default {};
 
