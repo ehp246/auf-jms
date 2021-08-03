@@ -63,7 +63,8 @@ public final class ByJmsFactory {
                     }
 
                     final var jmsDispatch = dispatchProvider.get(new Invocation() {
-                        private final List<?> asList = Collections.unmodifiableList(Arrays.asList(args));
+                        private final List<?> asList = Collections
+                                .unmodifiableList(args == null ? List.of() : Arrays.asList(args));
 
                         @Override
                         public Object target() {
