@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
-import me.ehp246.aufjms.util.AppConfig;
+import me.ehp246.aufjms.util.UtilConfig;
 import me.ehp246.aufjms.util.MockMsg;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -19,7 +19,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, DefaultDispatchFnProvider.class })
+@SpringBootTest(classes = { UtilConfig.class, TestQueueListener.class, DefaultDispatchFnProvider.class })
 class DefaultDispatchFnProviderTest {
     @Autowired
     private TestQueueListener listener;

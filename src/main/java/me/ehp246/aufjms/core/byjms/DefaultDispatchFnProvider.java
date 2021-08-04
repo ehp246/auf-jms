@@ -35,12 +35,11 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
 
     @Override
     public DispatchFn get(final String connectionName) {
-        final var connection = connProvider.get(connectionName);
         return dispatch -> {
             LOGGER.atTrace().log("Sending {}:{} to {} ", dispatch.correlationId(), dispatch.type(),
                     dispatch.destination().toString());
 
-            try (final Session session = connection.createSession(true, Session.SESSION_TRANSACTED)) {
+            try (final Session session = connProvider.get(connectionName).createSession(true, Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
                 message.setText(this.toJson.toJson(dispatch.bodyValues()));
 

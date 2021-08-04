@@ -30,7 +30,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  */
 @EnableJms
 @SpringBootApplication
-public class AppConfig {
+public class UtilConfig {
     public static final String TEST_QUEUE = "test.queue";
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())

@@ -22,7 +22,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultInvocationDispatchProvider implements InvocationDispatchProvider {
+public final class DefaultInvocationDispatchProvider implements InvocationDispatchProvider {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
     private final DestinationResolver destinationResolver;
 

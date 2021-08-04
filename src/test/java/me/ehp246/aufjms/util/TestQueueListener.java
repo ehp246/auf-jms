@@ -14,7 +14,7 @@ import org.springframework.jms.annotation.JmsListener;
 public class TestQueueListener {
     private final CompletableFuture<Message> received = new CompletableFuture<>();
 
-    @JmsListener(destination = AppConfig.TEST_QUEUE)
+    @JmsListener(destination = UtilConfig.TEST_QUEUE)
     public void receive(Message message) {
         received.complete(message);
     }
