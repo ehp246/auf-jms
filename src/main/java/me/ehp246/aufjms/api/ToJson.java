@@ -6,6 +6,7 @@ import java.util.List;
  * @author Lei Yang
  *
  */
+@FunctionalInterface
 public interface ToJson {
-    String toJson(final List<?> bodyValue);
+    String apply(final List<?> bodyValue);
 }

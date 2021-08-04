@@ -30,7 +30,7 @@ public final class JsonByJackson implements FromMsgBody<String>, ToJson {
     }
 
     @Override
-    public String toJson(final List<?> bodyValue) {
+    public String apply(final List<?> bodyValue) {
         try {
             String json = null;
             if (bodyValue == null) {

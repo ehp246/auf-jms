@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
  */
 public class MockMsg implements JmsDispatch {
     private final String type = UUID.randomUUID().toString();
-    private final Destination destination = new ActiveMQQueue(UtilConfig.TEST_QUEUE);
+    private final Destination destination = new ActiveMQQueue(TestQueueListener.DESTINATION_NAME);
     private final String correlId = UUID.randomUUID().toString();
     private final String groupId = UUID.randomUUID().toString();
 

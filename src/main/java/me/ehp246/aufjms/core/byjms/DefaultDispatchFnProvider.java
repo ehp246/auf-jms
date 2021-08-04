@@ -42,7 +42,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
             try (final Session session = connProvider.get(connectionName).createSession(true,
                     Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
-                message.setText(this.toJson.toJson(dispatch.bodyValues()));
+                message.setText(this.toJson.apply(dispatch.bodyValues()));
 
                 // Fill the customs first so the framework ones won't get over-written.
 //                final var map = Optional.ofNullable(msg.getPropertyMap()).orElseGet(HashMap<String, String>::new);
@@ -56,7 +56,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
                 message.setJMSType(dispatch.type());
                 message.setJMSCorrelationID(dispatch.correlationId());
                 message.setStringProperty(MsgPropertyName.GROUP_ID, dispatch.groupId());
-                message.setIntProperty(MsgPropertyName.GROUP_SEQ, dispatch.groupSeq());
+                message.setIntProperty(MsgPropertyName.GROUP_SEQ,
+                        Optional.ofNullable(dispatch.groupSeq()).map(Integer::intValue).orElse(0));
 
                 /*
                  * Framework headers
@@ -64,7 +65,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
                 // message.setStringProperty(MsgPropertyName.Invoking, msg.getInvoking());
                 // message.setBooleanProperty(MsgPropertyName.ServerThrown, msg.isException());
 
-                message.setText(toJson.toJson(dispatch.bodyValues()));
+                message.setText(toJson.apply(dispatch.bodyValues()));
 
                 try (final MessageProducer producer = session.createProducer(null)) {
 
