@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.core.byjms;
 
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -11,59 +13,69 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
+import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 
-public class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
+public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
     private final static Logger LOGGER = LogManager.getLogger(ByJmsRegistrar.class);
 
     @Override
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
+        LOGGER.atTrace().log("Scanning for {}", ByJms.class.getCanonicalName());
+
         final var replyTo = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName()).get("replyTo")
                 .toString();
 
-        LOGGER.debug("Scanning for {}", ByJms.class.getCanonicalName());
+        new ByJmsScanner(EnableByJms.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
+            final Class<?> proxyInterface;
+            try {
+                proxyInterface = Class.forName(beanDefinition.getBeanClassName());
+            } catch (final ClassNotFoundException ignored) {
+                // Class scanning started this. Should not happen.
+                throw new RuntimeException("Class scanning started this. Should not happen.");
+            }
 
-        new ByMsgScanner(EnableByJms.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
-            registry.registerBeanDefinition(beanDefinition.getBeanClassName(),
-                    this.getProxyBeanDefinition(beanDefinition));
+            LOGGER.atTrace().log("Defining {}", beanDefinition.getBeanClassName());
+            final var name = proxyInterface.getAnnotation(ByJms.class).name();
+
+            registry.registerBeanDefinition(name.equals("") ? proxyInterface.getSimpleName() : name,
+                    this.getProxyBeanDefinition(metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName()),
+                            proxyInterface));
         });
     }
 
-    private BeanDefinition getReplyToSupplier(final String name) {
-        final var beanDefinition = new GenericBeanDefinition();
-        beanDefinition.setBeanClass(ReplyToNameSupplier.class);
+    private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {
+        final var byJms = proxyInterface.getAnnotation(ByJms.class);
 
         final var args = new ConstructorArgumentValues();
-        args.addGenericArgumentValue(name);
+        args.addGenericArgumentValue(proxyInterface);
+        args.addGenericArgumentValue(new ByJmsProxyConfig() {
+            private final String replyTo = byJms.replyTo().isBlank() ? map.get("replyTo").toString() : byJms.replyTo();
 
-        beanDefinition.setConstructorArgumentValues(args);
-        beanDefinition.setFactoryBeanName(ReplyToNameSupplierFactory.class.getName());
-        beanDefinition.setFactoryMethodName("newInstance");
+            @Override
+            public long ttl() {
+                return byJms.ttl();
+            }
 
-        return beanDefinition;
-    }
+            @Override
+            public String replyTo() {
+                return replyTo;
+            }
 
-    private BeanDefinition getProxyBeanDefinition(final BeanDefinition beanDefinition) {
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName(beanDefinition.getBeanClassName());
-        } catch (final ClassNotFoundException ignored) {
-            // Class scanning started this. Should not happen.
-            throw new RuntimeException("Class scanning started this. Should not happen.");
-        }
+            @Override
+            public String destination() {
+                return byJms.value();
+            }
 
-        LOGGER.trace("Defining {}", beanDefinition.getBeanClassName());
+            @Override
+            public String connection() {
+                return byJms.connection();
+            }
+        });
 
         final var proxyBeanDefinition = new GenericBeanDefinition();
-        proxyBeanDefinition.setBeanClass(clazz);
-
-        final var args = new ConstructorArgumentValues();
-        args.addGenericArgumentValue(clazz);
-
+        proxyBeanDefinition.setBeanClass(proxyInterface);
         proxyBeanDefinition.setConstructorArgumentValues(args);
-
         proxyBeanDefinition.setFactoryBeanName(ByJmsFactory.class.getName());
-
         proxyBeanDefinition.setFactoryMethodName("newInstance");
 
         return proxyBeanDefinition;

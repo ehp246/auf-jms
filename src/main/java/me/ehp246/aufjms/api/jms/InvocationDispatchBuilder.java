@@ -10,6 +10,6 @@ import javax.jms.Message;
  * @since 1.0
  */
 @FunctionalInterface
-public interface InvocationDispatchProvider {
+public interface InvocationDispatchBuilder {
     JmsDispatch get(ByJmsProxyConfig config, Invocation invocation);
 }

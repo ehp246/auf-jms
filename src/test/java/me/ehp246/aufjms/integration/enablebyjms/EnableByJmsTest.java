@@ -39,4 +39,14 @@ class EnableByJmsTest {
 
         appCtx.getBean(Case02.class);
     }
+
+    @Test
+    void name_01() {
+        new AnnotationConfigApplicationContext(AppConfig01.class).getBean(Case01.class.getSimpleName(), Case01.class);
+    }
+
+    @Test
+    void name_02() {
+        new AnnotationConfigApplicationContext(AppConfig.class).getBean(Case02.NAME, Case02.class);
+    }
 }

@@ -17,7 +17,7 @@ import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DispatchFn;
 import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
+import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
 
 /**
  *
@@ -27,11 +27,11 @@ import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 public final class ByJmsFactory {
     private final static Logger LOGGER = LogManager.getLogger(ByJmsFactory.class);
 
-    private final InvocationDispatchProvider dispatchProvider;
+    private final InvocationDispatchBuilder dispatchProvider;
     private final JmsDispatchFnProvider dispatchFnProvider;
 
     public ByJmsFactory(final JmsDispatchFnProvider dispatchFnProvider,
-            final InvocationDispatchProvider dispatchProvider) {
+            final InvocationDispatchBuilder dispatchProvider) {
         super();
         this.dispatchProvider = dispatchProvider;
         this.dispatchFnProvider = dispatchFnProvider;

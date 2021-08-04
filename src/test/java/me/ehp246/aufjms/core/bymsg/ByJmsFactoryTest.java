@@ -8,13 +8,13 @@ import org.junit.jupiter.api.Test;
 import me.ehp246.aufjms.api.jms.DispatchFn;
 import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
+import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.byjms.ByJmsFactory;
 
 class ByJmsFactoryTest {
     private final DispatchFn dispatchFn = dispatch -> null;
-    private final InvocationDispatchProvider dispatchProvider = (config, invocation) -> null;
+    private final InvocationDispatchBuilder dispatchProvider = (config, invocation) -> null;
     private final JmsDispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);

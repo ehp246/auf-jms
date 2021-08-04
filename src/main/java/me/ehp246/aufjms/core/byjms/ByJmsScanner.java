@@ -9,12 +9,12 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-class ByMsgScanner {
+final class ByJmsScanner {
     private final Class<? extends Annotation> enabler;
     private final Class<? extends Annotation> enablee;
     private final AnnotationMetadata metadata;
 
-    public ByMsgScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
+    public ByJmsScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
             AnnotationMetadata metaData) {
         super();
         this.enabler = enabler;

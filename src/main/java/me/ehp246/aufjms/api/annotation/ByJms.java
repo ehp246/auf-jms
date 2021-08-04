@@ -28,6 +28,15 @@ public @interface ByJms {
      */
     String value();
 
+    /**
+     * Defines an optional bean name by which the proxy interface can be injected.
+     * <p>
+     * The default name is {@link Class#getSimpleName()}.
+     * 
+     * @return the bean name of the proxy interface.
+     */
+    String name() default "";
+
     long timeout() default 0;
 
     long ttl() default 0;

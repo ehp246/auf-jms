@@ -13,7 +13,7 @@ import javax.jms.Destination;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
+import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -22,7 +22,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultInvocationDispatchProvider implements InvocationDispatchProvider {
+public final class DefaultInvocationDispatchProvider implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
     private final DestinationResolver destinationResolver;
 
