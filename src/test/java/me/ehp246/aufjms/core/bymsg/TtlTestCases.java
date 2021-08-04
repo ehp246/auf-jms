@@ -12,7 +12,7 @@ interface TtlTestCases {
         void m001();
     }
 
-    @ByJms(destination = "", ttl = 500)
+    @ByJms(destination = "", ttl = "PT500S")
     interface Case002 {
         void m001();
     }

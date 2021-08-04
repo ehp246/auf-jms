@@ -5,6 +5,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,9 +16,9 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 
 /**
  *
@@ -92,11 +93,13 @@ public final class ByJmsFactory {
     public <T> T newInstance(final Class<T> byJmsInterface) {
         final var byJms = byJmsInterface.getAnnotation(ByJms.class);
 
+        final var ttl = Duration.parse(byJms.ttl());
+
         return this.newInstance(byJmsInterface, new ByJmsProxyConfig() {
 
             @Override
-            public long ttl() {
-                return byJms.ttl();
+            public Duration ttl() {
+                return ttl;
             }
 
             @Override

@@ -5,9 +5,9 @@ import java.util.function.Consumer;
 
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.exception.ExecutionThrown;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.MsgPortProvider;
 import me.ehp246.aufjms.api.jms.MsgSupplier;
-import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -72,7 +72,7 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 
             @Override
             public Long getTtl() {
-                return msg.ttl();
+                return null;// msg.ttl();
             }
 
             @Override

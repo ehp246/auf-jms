@@ -68,7 +68,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
 
                 try (final MessageProducer producer = session.createProducer(null)) {
 
-                    producer.setTimeToLive(Optional.ofNullable(dispatch.ttl()).orElse((long) 0));
+                    producer.setTimeToLive(Optional.ofNullable(dispatch.ttl().toMillis()).orElse((long) 0));
 
                     producer.send(dispatch.destination(), message);
 

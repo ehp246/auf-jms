@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.api.jms;
 
+import java.time.Duration;
+
 /**
  * @author Lei Yang
  * @since 1.0
@@ -7,7 +9,7 @@ package me.ehp246.aufjms.api.jms;
 public interface ByJmsProxyConfig {
     String destination();
 
-    long ttl();
+    Duration ttl();
 
     String connection();
 

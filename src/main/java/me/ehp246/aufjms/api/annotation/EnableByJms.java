@@ -34,4 +34,6 @@ public @interface EnableByJms {
     Class<?>[] scan() default {};
 
     String replyTo() default "";
+
+    String ttl() default "PT0S";
 }

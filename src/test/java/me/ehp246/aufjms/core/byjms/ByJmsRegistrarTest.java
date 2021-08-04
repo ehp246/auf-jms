@@ -8,6 +8,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.core.byjms.registrar.RegistrarAppConfigs;
 import me.ehp246.aufjms.core.byjms.registrar.case01.RegistrarCase01;
+import me.ehp246.aufjms.core.byjms.registrar.case02.RegistrarCase02;
 
 /**
  * @author Lei Yang
@@ -79,5 +80,28 @@ class ByJmsRegistrarTest {
                 ((ByJmsProxyConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
                                 .destination());
+    }
+
+    @Test
+    void ttl_01() {
+        final var registry = new SimpleBeanDefinitionRegistry();
+        new ByJmsRegistrar().registerBeanDefinitions(
+                AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig01.class), registry);
+
+        Assertions.assertEquals(110,
+                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                                .ttl().toMillis());
+    }
+
+    @Test
+    void ttl_02() {
+        final var registry = new SimpleBeanDefinitionRegistry();
+        new ByJmsRegistrar().registerBeanDefinitions(
+                AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig02.class), registry);
+
+        Assertions.assertEquals(1000, ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
+                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue())).ttl()
+                                .toMillis());
     }
 }

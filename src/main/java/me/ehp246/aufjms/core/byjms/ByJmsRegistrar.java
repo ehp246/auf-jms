@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.byjms;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,10 +52,13 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             private final String replyTo = byJms.replyTo().isBlank() ? map.get("replyTo").toString() : byJms.replyTo();
             private final String destination = byJms.destination().equals("") ? map.get("destination").toString()
                     : byJms.destination();
+            private final Duration ttl = byJms.ttl().equals("")
+                    ? (map.get("ttl").toString().equals("") ? Duration.ZERO : Duration.parse(map.get("ttl").toString()))
+                    : Duration.parse(byJms.ttl());
 
             @Override
-            public long ttl() {
-                return byJms.ttl();
+            public Duration ttl() {
+                return ttl;
             }
 
             @Override

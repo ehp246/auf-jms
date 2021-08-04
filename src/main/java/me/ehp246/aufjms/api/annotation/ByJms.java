@@ -35,7 +35,7 @@ public @interface ByJms {
 
     long timeout() default 0;
 
-    long ttl() default 0;
+    String ttl() default "";
 
     /**
      * The bean name of the JMS {@link Connection} to use for this proxy.

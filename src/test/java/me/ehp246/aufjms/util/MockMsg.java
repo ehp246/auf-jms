@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.util;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,8 +46,8 @@ public class MockMsg implements JmsDispatch {
     }
 
     @Override
-    public Long ttl() {
-        return Long.valueOf(0);
+    public Duration ttl() {
+        return Duration.ZERO;
     }
 
     @Override

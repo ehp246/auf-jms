@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.byjms;
 
 import java.lang.annotation.Annotation;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +44,6 @@ public final class DefaultInvocationDispatchProvider implements InvocationDispat
         final var type = proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
                 + proxyInvocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
-        final var ttl = config.ttl();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
@@ -74,8 +74,8 @@ public final class DefaultInvocationDispatchProvider implements InvocationDispat
             }
 
             @Override
-            public Long ttl() {
-                return ttl;
+            public Duration ttl() {
+                return config.ttl();
             }
 
             @Override

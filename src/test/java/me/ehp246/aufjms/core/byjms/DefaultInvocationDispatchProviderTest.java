@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.byjms;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +27,8 @@ class DefaultInvocationDispatchProviderTest {
     private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
 
         @Override
-        public long ttl() {
-            return 334;
+        public Duration ttl() {
+            return Duration.ofMillis(334);
         }
 
         @Override
@@ -60,7 +61,7 @@ class DefaultInvocationDispatchProviderTest {
         Assertions.assertEquals(destination, dispatch.destination());
         Assertions.assertEquals("M01", dispatch.type());
         Assertions.assertEquals(true, dispatch.correlationId() != null);
-        Assertions.assertEquals(334, dispatch.ttl());
+        Assertions.assertEquals(334, dispatch.ttl().toMillis());
         Assertions.assertEquals(true, dispatch.bodyValues().size() == 0);
         Assertions.assertEquals(destination, dispatch.replyTo());
         Assertions.assertEquals(null, dispatch.groupId());
@@ -85,8 +86,8 @@ class DefaultInvocationDispatchProviderTest {
         }).get(new ByJmsProxyConfig() {
 
             @Override
-            public long ttl() {
-                return 334;
+            public Duration ttl() {
+                return Duration.ofMillis(334);
             }
 
             @Override

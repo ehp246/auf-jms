@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.api.jms;
 
+import java.time.Duration;
 import java.util.List;
 
 import javax.jms.Destination;
@@ -36,7 +37,7 @@ public interface JmsDispatch {
      * <p>
      * The default, <code>null</code>, means no TTL to set.
      */
-    default Long ttl() {
+    default Duration ttl() {
         return null;
     }
 
