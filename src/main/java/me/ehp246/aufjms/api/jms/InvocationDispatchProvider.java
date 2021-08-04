@@ -11,5 +11,5 @@ import javax.jms.Message;
  */
 @FunctionalInterface
 public interface InvocationDispatchProvider {
-    JmsDispatch get(Invocation invocation);
+    JmsDispatch get(ByJmsProxyConfig config, Invocation invocation);
 }

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.DispatchFnProvider;
+import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.InvocationDispatchProvider;
 
@@ -28,9 +28,9 @@ public final class ByJmsFactory {
     private final static Logger LOGGER = LogManager.getLogger(ByJmsFactory.class);
 
     private final InvocationDispatchProvider dispatchProvider;
-    private final DispatchFnProvider dispatchFnProvider;
+    private final JmsDispatchFnProvider dispatchFnProvider;
 
-    public ByJmsFactory(final DispatchFnProvider dispatchFnProvider,
+    public ByJmsFactory(final JmsDispatchFnProvider dispatchFnProvider,
             final InvocationDispatchProvider dispatchProvider) {
         super();
         this.dispatchProvider = dispatchProvider;
@@ -62,7 +62,7 @@ public final class ByJmsFactory {
                                 .bindTo(proxy).invokeWithArguments(args);
                     }
 
-                    final var jmsDispatch = dispatchProvider.get(new Invocation() {
+                    final var jmsDispatch = dispatchProvider.get(jmsProxyConfig, new Invocation() {
                         private final List<?> asList = Collections
                                 .unmodifiableList(args == null ? List.of() : Arrays.asList(args));
 

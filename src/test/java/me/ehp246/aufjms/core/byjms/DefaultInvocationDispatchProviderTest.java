@@ -23,8 +23,7 @@ class DefaultInvocationDispatchProviderTest {
     private final static String replyToName = UUID.randomUUID().toString();
     private final static String destinationName = UUID.randomUUID().toString();
     private final static String connectionName = UUID.randomUUID().toString();
-
-    private DefaultInvocationDispatchProvider fromInvocation = new DefaultInvocationDispatchProvider(new ByJmsProxyConfig() {
+    private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
 
         @Override
         public long ttl() {
@@ -45,7 +44,9 @@ class DefaultInvocationDispatchProviderTest {
         public String replyTo() {
             return replyToName;
         }
-    }, (con, dest) -> {
+    };
+
+    private DefaultInvocationDispatchProvider fromInvocation = new DefaultInvocationDispatchProvider((con, dest) -> {
         NAMES[0] = con;
         NAMES[1] = dest;
         return destination;
@@ -53,7 +54,8 @@ class DefaultInvocationDispatchProviderTest {
 
     @Test
     void test_01() {
-        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
+        final var dispatch = fromInvocation.get(proxyConfig,
+                new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(destination, dispatch.destination());
         Assertions.assertEquals("M01", dispatch.type());
@@ -67,7 +69,7 @@ class DefaultInvocationDispatchProviderTest {
 
     @Test
     void destintationResolver_01() {
-        fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
+        fromInvocation.get(proxyConfig, new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(connectionName, NAMES[0]);
         Assertions.assertEquals(replyToName, NAMES[1]);
@@ -76,7 +78,11 @@ class DefaultInvocationDispatchProviderTest {
     @Test
     void destintationResolver_02() throws NoSuchMethodException, SecurityException {
         final String[] names = new String[2];
-        new DefaultInvocationDispatchProvider(new ByJmsProxyConfig() {
+        new DefaultInvocationDispatchProvider((con, dest) -> {
+            names[0] = con;
+            names[1] = dest;
+            return destination;
+        }).get(new ByJmsProxyConfig() {
 
             @Override
             public long ttl() {
@@ -97,11 +103,7 @@ class DefaultInvocationDispatchProviderTest {
             public String replyTo() {
                 return null;
             }
-        }, (con, dest) -> {
-            names[0] = con;
-            names[1] = dest;
-            return destination;
-        }).get(new JmsDispatchFromInvocationTestCase().getM01Invocation());
+        }, new JmsDispatchFromInvocationTestCase().getM01Invocation());
 
         Assertions.assertEquals(connectionName, names[0]);
         Assertions.assertEquals(destinationName, names[1]);
@@ -111,7 +113,8 @@ class DefaultInvocationDispatchProviderTest {
     void body_01() throws NoSuchMethodException, SecurityException {
         final var args = new ArrayList<>();
         args.add(null);
-        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM02Invocation(args));
+        final var dispatch = fromInvocation.get(proxyConfig,
+                new JmsDispatchFromInvocationTestCase().getM02Invocation(args));
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(null, dispatch.bodyValues().get(0));
@@ -121,7 +124,8 @@ class DefaultInvocationDispatchProviderTest {
     @Test
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
-        final var dispatch = fromInvocation.get(new JmsDispatchFromInvocationTestCase().getM02Invocation(List.of(now)));
+        final var dispatch = fromInvocation.get(proxyConfig,
+                new JmsDispatchFromInvocationTestCase().getM02Invocation(List.of(now)));
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(now, dispatch.bodyValues().get(0));

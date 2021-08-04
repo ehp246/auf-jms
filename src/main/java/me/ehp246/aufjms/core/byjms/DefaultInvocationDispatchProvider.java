@@ -24,30 +24,26 @@ import me.ehp246.aufjms.core.util.OneUtil;
  */
 final class DefaultInvocationDispatchProvider implements InvocationDispatchProvider {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
-
-    private final ByJmsProxyConfig proxyConfig;
     private final DestinationResolver destinationResolver;
 
-    public DefaultInvocationDispatchProvider(final ByJmsProxyConfig proxyConfig,
-            final DestinationResolver destinationResolver) {
+    public DefaultInvocationDispatchProvider(final DestinationResolver destinationResolver) {
         super();
-        this.proxyConfig = proxyConfig;
         this.destinationResolver = destinationResolver;
     }
 
     @Override
-    public JmsDispatch get(final Invocation invocation) {
+    public JmsDispatch get(final ByJmsProxyConfig config, final Invocation invocation) {
+        // Destination is required.
+        final var destination = this.destinationResolver.resolve(config.connection(), config.destination());
+        // ReplyTo is optional.
+        final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
+                .map(name -> this.destinationResolver.resolve(config.connection(), name)).orElse(null);
         final var proxyInvocation = new ProxyInvocation(invocation.method().getDeclaringClass(), invocation.target(),
-                invocation.method(),
-                invocation.args());
-        final var destination = this.destinationResolver.resolve(this.proxyConfig.connection(),
-                this.proxyConfig.destination());
-        final var replyTo = Optional.ofNullable(this.proxyConfig.replyTo()).filter(OneUtil::hasValue)
-                .map(name -> this.destinationResolver.resolve(this.proxyConfig.connection(), name)).orElse(null);
+                invocation.method(), invocation.args());
         final var type = proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
                 + proxyInvocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
-        final var ttl = proxyConfig.ttl();
+        final var ttl = config.ttl();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
@@ -84,12 +80,12 @@ final class DefaultInvocationDispatchProvider implements InvocationDispatchProvi
 
             @Override
             public String groupId() {
-                return JmsDispatch.super.groupId();
+                return null;
             }
 
             @Override
             public Integer groupSeq() {
-                return JmsDispatch.super.groupSeq();
+                return null;
             }
 
         };

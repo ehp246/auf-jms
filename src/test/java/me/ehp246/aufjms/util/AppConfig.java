@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.util;
 
-import java.util.function.Function;
-
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -23,6 +21,7 @@ import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
 import me.ehp246.aufjms.api.ToJson;
+import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -64,7 +63,7 @@ public class AppConfig {
     }
 
     @Bean
-    public Function<String, Connection> connProvider(final ListableBeanFactory beanFactory) {
+    public NamedConnectionProvider connProvider(final ListableBeanFactory beanFactory) {
         return name -> beanFactory.getBean(Connection.class);
     }
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.jms.DispatchFnProvider;
+import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.util.AppConfig;
 import me.ehp246.aufjms.util.MockMsg;
@@ -24,7 +24,7 @@ class DefaultDispatchFnProviderTest {
     @Autowired
     private TestQueueListener listener;
     @Autowired
-    private DispatchFnProvider dispatcherFnProvider;
+    private JmsDispatchFnProvider dispatcherFnProvider;
 
     @Test
     void test() throws InterruptedException, ExecutionException, JMSException {

@@ -5,7 +5,9 @@ import java.util.List;
 import javax.jms.Destination;
 
 /**
- * The abstraction of an out-going JMS message.
+ * The abstraction of a fully-realized out-bound JMS message.
+ * <p>
+ * A {@link JmsDispatch} is meant to be dispatched/sent by a {@link DispatchFn}.
  * 
  * @author Lei Yang
  *
@@ -29,6 +31,11 @@ public interface JmsDispatch {
         return null;
     }
 
+    /**
+     * Defines if the dispatch has a TTL.
+     * <p>
+     * The default, <code>null</code>, means no TTL to set.
+     */
     default Long ttl() {
         return null;
     }

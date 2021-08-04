@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.byjms;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
@@ -10,9 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.ToJson;
-import me.ehp246.aufjms.api.exception.MsgFnException;
+import me.ehp246.aufjms.api.exception.DispatchFnException;
 import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.DispatchFnProvider;
+import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 
@@ -20,7 +21,7 @@ import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultDispatchFnProvider implements DispatchFnProvider {
+public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
     private final NamedConnectionProvider connProvider;
@@ -35,30 +36,27 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     @Override
     public DispatchFn get(final String connectionName) {
         final var connection = connProvider.get(connectionName);
-        return msg -> {
-            LOGGER.trace("Sending {}:{} to {} ", msg.correlationId(), msg.type(), msg.destination().toString());
+        return dispatch -> {
+            LOGGER.atTrace().log("Sending {}:{} to {} ", dispatch.correlationId(), dispatch.type(),
+                    dispatch.destination().toString());
 
-            try (final Session session = connection.createSession(true,
-                    Session.SESSION_TRANSACTED)) {
+            try (final Session session = connection.createSession(true, Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
-                message.setText(this.toJson.toJson(msg.bodyValues()));
+                message.setText(this.toJson.toJson(dispatch.bodyValues()));
 
                 // Fill the customs first so the framework ones won't get over-written.
 //                final var map = Optional.ofNullable(msg.getPropertyMap()).orElseGet(HashMap<String, String>::new);
 //                for (final String key : map.keySet()) {
 //                    message.setStringProperty(key, map.get(key));
 //                }
-
-                message.setJMSDestination(msg.destination());
-                message.setJMSReplyTo(msg.replyTo());
-
                 /*
                  * JMS headers
                  */
-                message.setJMSType(msg.type());
-                message.setJMSCorrelationID(msg.correlationId());
-                message.setStringProperty(MsgPropertyName.GROUP_ID, msg.groupId());
-                message.setIntProperty(MsgPropertyName.GROUP_SEQ, msg.groupSeq());
+                message.setJMSReplyTo(dispatch.replyTo());
+                message.setJMSType(dispatch.type());
+                message.setJMSCorrelationID(dispatch.correlationId());
+                message.setStringProperty(MsgPropertyName.GROUP_ID, dispatch.groupId());
+                message.setIntProperty(MsgPropertyName.GROUP_SEQ, dispatch.groupSeq());
 
                 /*
                  * Framework headers
@@ -66,23 +64,24 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                 // message.setStringProperty(MsgPropertyName.Invoking, msg.getInvoking());
                 // message.setBooleanProperty(MsgPropertyName.ServerThrown, msg.isException());
 
-                message.setText(toJson.toJson(msg.bodyValues()));
+                message.setText(toJson.toJson(dispatch.bodyValues()));
 
-                try (final MessageProducer producer = session.createProducer(msg.destination())) {
+                try (final MessageProducer producer = session.createProducer(null)) {
 
-                    producer.send(message);
+                    producer.setTimeToLive(Optional.ofNullable(dispatch.ttl()).orElse((long) 0));
+
+                    producer.send(dispatch.destination(), message);
 
                     session.commit();
 
-                    LOGGER.trace("Sent {} ", msg.correlationId());
+                    LOGGER.atTrace().log("Sent {} ", dispatch.correlationId());
 
                     return message;
                 }
             } catch (final JMSException e) {
-                LOGGER.error("Failed to send: to {}, type {}, correclation id {}", msg.destination().toString(),
-                        msg.type(),
-                        msg.correlationId(), e);
-                throw new MsgFnException(e);
+                LOGGER.atError().log("Failed to send: to {}, type {}, correclation id {}",
+                        dispatch.destination().toString(), dispatch.type(), dispatch.correlationId(), e);
+                throw new DispatchFnException(e);
             }
         };
     }
