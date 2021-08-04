@@ -49,6 +49,8 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
         args.addGenericArgumentValue(proxyInterface);
         args.addGenericArgumentValue(new ByJmsProxyConfig() {
             private final String replyTo = byJms.replyTo().isBlank() ? map.get("replyTo").toString() : byJms.replyTo();
+            private final String destination = byJms.destination().equals("") ? map.get("destination").toString()
+                    : byJms.destination();
 
             @Override
             public long ttl() {
@@ -62,7 +64,7 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
             @Override
             public String destination() {
-                return byJms.value();
+                return destination;
             }
 
             @Override

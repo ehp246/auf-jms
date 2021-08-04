@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 class InvokingTestCase {
-    @ByJms("")
+    @ByJms(destination = "")
     interface Case001 {
         // Invoking by method name
         void m001();

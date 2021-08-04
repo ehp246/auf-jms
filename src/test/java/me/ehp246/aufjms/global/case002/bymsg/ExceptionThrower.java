@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-@ByJms("queue://me.ehp246.aufjms.request")
+@ByJms(destination = "queue://me.ehp246.aufjms.request")
 public interface ExceptionThrower {
     @Invoking("throw001")
     Void throw001();

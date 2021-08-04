@@ -7,12 +7,12 @@ import me.ehp246.aufjms.api.annotation.ByJms;
  *
  */
 interface TtlTestCases {
-    @ByJms("")
+    @ByJms(destination = "")
     interface Case001 {
         void m001();
     }
 
-    @ByJms(value = "", ttl = 500)
+    @ByJms(destination = "", ttl = 500)
     interface Case002 {
         void m001();
     }

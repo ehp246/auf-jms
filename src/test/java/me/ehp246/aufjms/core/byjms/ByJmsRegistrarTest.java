@@ -6,7 +6,8 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
-import me.ehp246.aufjms.integration.enablebyjms.case01.ScanCase01;
+import me.ehp246.aufjms.core.byjms.registrar.RegistrarAppConfigs;
+import me.ehp246.aufjms.core.byjms.registrar.case01.RegistrarCase01;
 
 /**
  * @author Lei Yang
@@ -17,26 +18,26 @@ class ByJmsRegistrarTest {
     @Test
     void scan_01() {
         final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(AppConfigs.Config01.class),
+        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.Config01.class),
                 registry);
 
-        Assertions.assertEquals(0, registry.getBeanDefinitionCount());
+        Assertions.assertEquals(2, registry.getBeanDefinitionCount());
     }
 
     @Test
     void scan_02() {
         final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(AppConfigs.Config02.class),
+        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.Config02.class),
                 registry);
 
         Assertions.assertEquals(1, registry.getBeanDefinitionCount());
-        Assertions.assertEquals(ScanCase01.class.getSimpleName(), registry.getBeanDefinitionNames()[0]);
+        Assertions.assertEquals(RegistrarCase01.class.getSimpleName(), registry.getBeanDefinitionNames()[0]);
     }
 
     @Test
     void scan_03() {
         final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(AppConfigs.Config03.class),
+        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.Config03.class),
                 registry);
 
         Assertions.assertEquals("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09", registry.getBeanDefinitionNames()[0]);
@@ -45,12 +46,38 @@ class ByJmsRegistrarTest {
     @Test
     void replyTo_01() {
         final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(AppConfigs.ReplyToConfig01.class),
+        new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.ReplyToConfig01.class),
                 registry);
 
         Assertions.assertEquals("From Enabled",
-                ((ByJmsProxyConfig) (registry.getBeanDefinition(ScanCase01.class.getSimpleName())
+                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
                                 .replyTo());
+    }
+
+    @Test
+    void destination_01() {
+        final var registry = new SimpleBeanDefinitionRegistry();
+        new ByJmsRegistrar().registerBeanDefinitions(
+                AnnotationMetadata.introspect(RegistrarAppConfigs.DestinationConfig01.class),
+                registry);
+
+        Assertions.assertEquals("9c4a0935-bdf6-43bc-a10c-765faf6ed771",
+                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                                .destination());
+    }
+
+    @Test
+    void destination_02() {
+        final var registry = new SimpleBeanDefinitionRegistry();
+        new ByJmsRegistrar()
+                .registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.DestinationConfig02.class),
+                        registry);
+
+        Assertions.assertEquals("2f954f8b-8162-47c1-bb6d-d405a25bba73",
+                ((ByJmsProxyConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
+                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                                .destination());
     }
 }

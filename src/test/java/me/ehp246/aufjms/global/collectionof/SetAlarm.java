@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByJms("me.ehp246.aufjms.collectionof")
+@ByJms(destination = "me.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
     @Invoking("setCollection")
