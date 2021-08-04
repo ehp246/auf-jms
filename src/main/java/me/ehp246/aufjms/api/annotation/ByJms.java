@@ -33,8 +33,6 @@ public @interface ByJms {
      */
     String name() default "";
 
-    long timeout() default 0;
-
     String ttl() default "";
 
     /**
