@@ -39,7 +39,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
             LOGGER.atTrace().log("Sending {}:{} to {} ", dispatch.correlationId(), dispatch.type(),
                     dispatch.destination().toString());
 
-            try (final Session session = connProvider.get(connectionName).createSession(true, Session.SESSION_TRANSACTED)) {
+            try (final Session session = connProvider.get(connectionName).createSession(true,
+                    Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
                 message.setText(this.toJson.toJson(dispatch.bodyValues()));
 

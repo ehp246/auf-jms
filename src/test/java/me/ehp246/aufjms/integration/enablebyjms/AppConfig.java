@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
-import me.ehp246.aufjms.integration.enablebyjms.case01.Case01;
+import me.ehp246.aufjms.integration.enablebyjms.case01.ScanCase01;
 import me.ehp246.aufjms.integration.enablebyjms.case02.Case02;
 import me.ehp246.aufjms.util.UtilConfig;
 
@@ -15,7 +15,7 @@ import me.ehp246.aufjms.util.UtilConfig;
  * @author Lei Yang
  *
  */
-@EnableByJms(scan = { Case01.class, Case02.class })
+@EnableByJms(scan = { ScanCase01.class, Case02.class })
 class AppConfig {
     @Bean
     ObjectMapper objectMapper() {

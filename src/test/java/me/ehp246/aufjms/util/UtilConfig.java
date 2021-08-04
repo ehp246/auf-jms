@@ -45,8 +45,7 @@ public class UtilConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         ActiveMQConnectionFactory activeMQConnectionFactory = new ActiveMQConnectionFactory();
-        activeMQConnectionFactory
-                .setBrokerURL("vm://embedded?broker.persistent=false,useShutdownHook=false");
+        activeMQConnectionFactory.setBrokerURL("vm://embedded?broker.persistent=false,useShutdownHook=false");
         return activeMQConnectionFactory;
     }
 

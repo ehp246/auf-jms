@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.reflection;
 
 import java.lang.annotation.Annotation;
 import java.util.stream.Stream;
@@ -9,12 +9,12 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-final class ByJmsScanner {
+public final class EnabledScanner {
     private final Class<? extends Annotation> enabler;
     private final Class<? extends Annotation> enablee;
     private final AnnotationMetadata metadata;
 
-    public ByJmsScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
+    public EnabledScanner(Class<? extends Annotation> enabler, Class<? extends Annotation> enablee,
             AnnotationMetadata metaData) {
         super();
         this.enabler = enabler;

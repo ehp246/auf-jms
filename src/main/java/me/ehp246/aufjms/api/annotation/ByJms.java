@@ -1,6 +1,3 @@
-/**
- * 
- */
 package me.ehp246.aufjms.api.annotation;
 
 import static java.lang.annotation.ElementType.TYPE;
@@ -23,8 +20,7 @@ import javax.jms.Message;
  */
 public @interface ByJms {
     /**
-     * Defines the destination name for the interface proxy. The element supports
-     * Spring property placeholder, e.g. <code>"${queue.name}"</code>.
+     * Defines the destination name for the interface proxy.
      */
     String value();
 

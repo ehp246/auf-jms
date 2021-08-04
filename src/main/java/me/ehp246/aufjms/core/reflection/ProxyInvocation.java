@@ -31,8 +31,7 @@ public final class ProxyInvocation implements Invocation {
     private final Annotation[][] parameterAnnotations;
     private final List<Class<?>> threws;
 
-    public ProxyInvocation(final Class<?> declaringType, final Object target, final Method method,
-            final List<?> args) {
+    public ProxyInvocation(final Class<?> declaringType, final Object target, final Method method, final List<?> args) {
         this.declaringType = declaringType;
         this.target = target;
         this.method = Objects.requireNonNull(method);

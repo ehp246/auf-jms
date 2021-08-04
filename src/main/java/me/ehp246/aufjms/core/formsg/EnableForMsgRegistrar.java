@@ -45,11 +45,11 @@ public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
                     }
 
                     final var destinationName = "";
-                            /*
-                             * Strings.ifBlank(endpoint.get("value").toString(),
-                             * PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() +
-                             * ".request");
-                             */
+                    /*
+                     * Strings.ifBlank(endpoint.get("value").toString(),
+                     * PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() +
+                     * ".request");
+                     */
                     beanDefinition.setConstructorArgumentValues(getParameters(destinationName, scanThese));
 
                     registry.registerBeanDefinition(destinationName + "@" + importingClassMetadata.getClassName(),

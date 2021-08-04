@@ -44,7 +44,6 @@ public class MockMsg implements JmsDispatch {
         return null;
     }
 
-
     @Override
     public Long ttl() {
         return Long.valueOf(0);
