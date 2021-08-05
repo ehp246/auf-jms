@@ -11,7 +11,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
-import me.ehp246.aufjms.api.annotation.EnableForMsg;
+import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
 
 /**
@@ -25,7 +25,7 @@ public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         final var enablerAttributes = importingClassMetadata
-                .getAnnotationAttributes(EnableForMsg.class.getCanonicalName());
+                .getAnnotationAttributes(EnableForJms.class.getCanonicalName());
         if (enablerAttributes == null) {
             return;
         }

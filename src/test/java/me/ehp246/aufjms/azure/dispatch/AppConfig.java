@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.NamedConnectionResolver;
 import me.ehp246.aufjms.util.UtilConfig;
 
 /**
@@ -31,7 +32,6 @@ class AppConfig {
         return UtilConfig.OBJECT_MAPPER;
     }
 
-    @Bean
     public Connection connection(final ConnectionFactory connectionFactory) throws JMSException {
         return connectionFactory.createConnection();
     }
@@ -40,6 +40,13 @@ class AppConfig {
     DestinationResolver destinationResolver() {
         final var destination = new JmsQueue("yangle-test");
         return (c, d) -> destination;
+    }
+
+    @Bean
+    public NamedConnectionResolver connectionMap(final ConnectionFactory connectionFactory) throws JMSException {
+        final var connection = connectionFactory.createConnection();
+
+        return name -> connection;
     }
 
     @ByJms

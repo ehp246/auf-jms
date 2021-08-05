@@ -17,7 +17,7 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.DispatchFnException;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
-import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
+import me.ehp246.aufjms.api.jms.NamedConnectionResolver;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -29,11 +29,11 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
-    private final NamedConnectionProvider connProvider;
+    private final NamedConnectionResolver connProvider;
     private final ToJson toJson;
     private final List<DispatchListener> listeners;
 
-    public DefaultDispatchFnProvider(final NamedConnectionProvider cons, final ToJson jsonFn,
+    public DefaultDispatchFnProvider(final NamedConnectionResolver cons, final ToJson jsonFn,
             final List<DispatchListener> dispatchListeners) {
         super();
         this.connProvider = Objects.requireNonNull(cons);

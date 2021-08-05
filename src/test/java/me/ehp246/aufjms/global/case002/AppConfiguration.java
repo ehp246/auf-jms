@@ -3,8 +3,8 @@ package me.ehp246.aufjms.global.case002;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.annotation.EnableForMsg;
-import me.ehp246.aufjms.api.annotation.EnableForMsg.At;
+import me.ehp246.aufjms.api.annotation.EnableForJms;
+import me.ehp246.aufjms.api.annotation.EnableForJms.At;
 import me.ehp246.aufjms.global.case002.request.Calculator;
 
 /**
@@ -13,6 +13,6 @@ import me.ehp246.aufjms.global.case002.request.Calculator;
  */
 @SpringBootApplication
 @EnableByJms
-@EnableForMsg(@At(value = "queue://me.ehp246.aufjms.request", scan = Calculator.class))
+@EnableForJms(@At(value = "queue://me.ehp246.aufjms.request", scan = Calculator.class))
 class AppConfiguration {
 }

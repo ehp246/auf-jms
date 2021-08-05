@@ -4,7 +4,6 @@ import javax.jms.Connection;
 import javax.jms.JMSException;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
@@ -18,8 +17,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-
-import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 
 /**
  * @author Lei Yang
@@ -53,10 +50,5 @@ public class UtilConfig {
     @Bean
     public Connection connection() throws JMSException {
         return CONNECTION_FACTORY.createConnection();
-    }
-
-    @Bean
-    public NamedConnectionProvider connProvider(final ListableBeanFactory beanFactory) {
-        return name -> beanFactory.getBean(Connection.class);
     }
 }

@@ -26,7 +26,7 @@ import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
 @Target(TYPE)
 @Import({ EnableForMsgRegistrar.class, AtEndpointFactory.class, MsgEndpointConfigurer.class,
         PooledExecutorConfiguration.class, JsonProviderSelector.class })
-public @interface EnableForMsg {
+public @interface EnableForJms {
     At[] value() default @At;
 
     @Retention(RUNTIME)
