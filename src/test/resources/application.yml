@@ -2,3 +2,10 @@ spring:
   activemq:
       broker-url: vm://embedded?broker.persistent=false,useShutdownHook=false
       in-memory: true
+      
+---
+spring:
+  profiles:    active: yangle  jms:
+    servicebus:
+      connection-string: Endpoint=sb://lei-yang-xtdforce-msdn.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=rFovrRPEgYYXx4HghU/opG7JJHGrusobm75jsnNapGA=
+      pricing-tier: basic

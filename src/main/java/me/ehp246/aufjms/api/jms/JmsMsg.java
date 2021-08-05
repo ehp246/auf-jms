@@ -15,6 +15,8 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 public interface JmsMsg extends JmsDispatch {
     String id();
 
+    String text();
+
     long expiration();
 
     Instant timestamp();

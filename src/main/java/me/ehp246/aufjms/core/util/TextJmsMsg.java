@@ -46,6 +46,11 @@ public final class TextJmsMsg implements JmsMsg {
     }
 
     @Override
+    public String text() {
+        return invoke(message::getText);
+    }
+
+    @Override
     public String groupId() {
         return invoke(() -> message.getStringProperty(MsgPropertyName.GROUP_ID));
     }

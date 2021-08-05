@@ -19,6 +19,7 @@ import me.ehp246.aufjms.api.exception.DispatchFnException;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
 import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -46,8 +47,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
             LOGGER.atTrace().log("Sending {}:{} to {} ", dispatch.correlationId(), dispatch.type(),
                     dispatch.destination().toString());
 
-            try (final Session session = connProvider.get(connectionName).createSession(true,
-                    Session.SESSION_TRANSACTED)) {
+            try (final Session session = connProvider.get(connectionName).createSession(false,
+                    Session.AUTO_ACKNOWLEDGE)) {
                 final var message = session.createTextMessage();
                 final var msg = TextJmsMsg.from(message);
 
@@ -64,7 +65,9 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
                 message.setJMSReplyTo(dispatch.replyTo());
                 message.setJMSType(dispatch.type());
                 message.setJMSCorrelationID(dispatch.correlationId());
-                message.setStringProperty(MsgPropertyName.GROUP_ID, dispatch.groupId());
+                if (OneUtil.hasValue(dispatch.groupId())) {
+                    message.setStringProperty(MsgPropertyName.GROUP_ID, dispatch.groupId());
+                }
                 message.setIntProperty(MsgPropertyName.GROUP_SEQ,
                         Optional.ofNullable(dispatch.groupSeq()).map(Integer::intValue).orElse(0));
 
@@ -85,8 +88,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
                     this.listeners.stream().forEach(listener -> listener.onDispatch(msg));
 
                     producer.send(dispatch.destination(), message);
-
-                    session.commit();
 
                     LOGGER.atTrace().log("Sent {} ", dispatch.correlationId());
 
