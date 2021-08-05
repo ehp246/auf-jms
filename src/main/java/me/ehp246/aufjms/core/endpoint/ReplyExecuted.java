@@ -82,7 +82,7 @@ public class ReplyExecuted implements Consumer<ExecutedInstance> {
 
             @Override
             public String getInvoking() {
-                return msg.getInvoking();
+                return msg.invoking();
             }
         });
     }

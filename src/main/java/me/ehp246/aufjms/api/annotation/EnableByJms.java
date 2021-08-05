@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.core.byjms.ByJmsFactory;
-import me.ehp246.aufjms.core.byjms.ByJmsRegistrar;
-import me.ehp246.aufjms.core.byjms.DefaultDispatchFnProvider;
-import me.ehp246.aufjms.core.byjms.DefaultInvocationDispatchProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
+import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
+import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
+import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
+import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchProvider;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.exception.ForMsgExecutionException;
-import me.ehp246.aufjms.core.byjms.ReplyEndpointConfiguration;
+import me.ehp246.aufjms.core.dispatch.ReplyEndpointConfiguration;
 import me.ehp246.aufjms.global.case002.bymsg.Add;
 import me.ehp246.aufjms.global.case002.bymsg.Counter;
 import me.ehp246.aufjms.global.case002.bymsg.ExceptionThrower;

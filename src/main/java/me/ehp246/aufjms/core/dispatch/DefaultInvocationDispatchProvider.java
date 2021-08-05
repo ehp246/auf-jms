@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
@@ -11,11 +11,11 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 
-import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.core.reflection.ProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 

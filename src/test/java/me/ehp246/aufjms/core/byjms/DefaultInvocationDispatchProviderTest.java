@@ -12,7 +12,8 @@ import org.apache.activemq.command.ActiveMQTopic;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchProvider;
 
 /**
  * @author Lei Yang

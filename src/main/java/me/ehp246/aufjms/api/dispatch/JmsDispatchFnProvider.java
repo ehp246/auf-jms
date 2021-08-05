@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.api.jms;
+package me.ehp246.aufjms.api.dispatch;
 
 /**
  * @author Lei Yang

@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +23,7 @@ import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import me.ehp246.aufjms.api.jms.DestinationResolver;
 import me.ehp246.aufjms.api.slf4j.MdcKeys;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
-import me.ehp246.aufjms.core.util.ToMsg;
+import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * JmsListenerConfigurer to register runtime-defined Endpoint's.
@@ -68,7 +69,7 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
                     container.setDestinationResolver((session, destinationName,
                             pubSubDomain) -> destintationNameResolver.resolve("", destinationName));
                     container.setupMessageListener((MessageListener) message -> {
-                        final var msg = ToMsg.from(message);
+                        final var msg = TextJmsMsg.from((TextMessage)message);
 
                         ThreadContext.put(MdcKeys.MSG_TYPE, msg.type());
                         ThreadContext.put(MdcKeys.CORRELATION_ID, msg.correlationId());

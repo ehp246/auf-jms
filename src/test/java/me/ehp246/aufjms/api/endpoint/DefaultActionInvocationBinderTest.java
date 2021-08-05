@@ -190,7 +190,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var msg = Mockito.mock(Message.class);
         Mockito.when(mq.correlationId()).thenReturn("1");
-        Mockito.when(mq.message()).thenReturn(msg);
+        // Mockito.when(mq.message()).thenReturn(msg);
 
 //		Mockito.when(mq.getBodyAsText())
 //				.thenReturn(objectMapper

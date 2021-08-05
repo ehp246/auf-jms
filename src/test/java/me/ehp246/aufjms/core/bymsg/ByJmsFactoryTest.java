@@ -1,16 +1,15 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import javax.jms.Message;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.DispatchFn;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.jms.JmsDispatch;
-import me.ehp246.aufjms.core.byjms.ByJmsFactory;
+import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 
 class ByJmsFactoryTest {
     private final DispatchFn dispatchFn = dispatch -> null;
@@ -43,7 +42,7 @@ class ByJmsFactoryTest {
         final var dispatchFn = new DispatchFn() {
 
             @Override
-            public Message dispatch(JmsDispatch dispatch) {
+            public JmsMsg dispatch(JmsDispatch dispatch) {
                 disp[0] = dispatch;
                 return null;
             }

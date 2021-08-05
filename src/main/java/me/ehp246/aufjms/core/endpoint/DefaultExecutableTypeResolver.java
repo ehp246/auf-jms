@@ -59,7 +59,7 @@ public class DefaultExecutableTypeResolver implements ForMsgRegistry, Executable
             return null;
         }
 
-        var invoking = msg.getInvoking();
+        var invoking = msg.invoking();
         invoking = invoking != null ? invoking.strip() : "";
 
         final var method = registereMethods.get(definition.getInstanceType()).get(invoking);

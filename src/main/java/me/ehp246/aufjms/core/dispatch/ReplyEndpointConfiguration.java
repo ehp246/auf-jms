@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

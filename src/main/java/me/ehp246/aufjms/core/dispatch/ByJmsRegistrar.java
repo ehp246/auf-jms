@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
 import java.util.Map;
@@ -14,7 +14,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
 public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {

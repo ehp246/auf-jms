@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
-import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.core.byjms.registrar.RegistrarAppConfigs;
 import me.ehp246.aufjms.core.byjms.registrar.case01.RegistrarCase01;
 import me.ehp246.aufjms.core.byjms.registrar.case02.RegistrarCase02;
+import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
 
 /**
  * @author Lei Yang

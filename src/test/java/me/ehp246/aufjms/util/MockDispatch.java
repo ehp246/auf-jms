@@ -8,13 +8,13 @@ import javax.jms.Destination;
 
 import org.apache.activemq.command.ActiveMQQueue;
 
-import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockMsg implements JmsDispatch {
+public class MockDispatch implements JmsDispatch {
     private final String type = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(TestQueueListener.DESTINATION_NAME);
     private final String correlId = UUID.randomUUID().toString();

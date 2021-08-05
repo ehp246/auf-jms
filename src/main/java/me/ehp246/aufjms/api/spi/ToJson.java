@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.api;
+package me.ehp246.aufjms.api.spi;
 
 import java.util.List;
 

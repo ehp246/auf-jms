@@ -1,5 +1,7 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -10,12 +12,14 @@ import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.ehp246.aufjms.api.ToJson;
+import me.ehp246.aufjms.api.dispatch.DispatchFn;
+import me.ehp246.aufjms.api.dispatch.DispatchListener;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.DispatchFnException;
-import me.ehp246.aufjms.api.jms.DispatchFn;
-import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.api.jms.NamedConnectionProvider;
+import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * @author Lei Yang
@@ -26,11 +30,14 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
 
     private final NamedConnectionProvider connProvider;
     private final ToJson toJson;
+    private final List<DispatchListener> listeners;
 
-    public DefaultDispatchFnProvider(final NamedConnectionProvider cons, final ToJson jsonFn) {
+    public DefaultDispatchFnProvider(final NamedConnectionProvider cons, final ToJson jsonFn,
+            final List<DispatchListener> dispatchListeners) {
         super();
         this.connProvider = Objects.requireNonNull(cons);
         this.toJson = jsonFn;
+        this.listeners = dispatchListeners == null ? List.of() : Collections.unmodifiableList(dispatchListeners);
     }
 
     @Override
@@ -42,6 +49,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
             try (final Session session = connProvider.get(connectionName).createSession(true,
                     Session.SESSION_TRANSACTED)) {
                 final var message = session.createTextMessage();
+                final var msg = TextJmsMsg.from(message);
+
                 message.setText(this.toJson.apply(dispatch.bodyValues()));
 
                 // Fill the customs first so the framework ones won't get over-written.
@@ -67,9 +76,13 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
 
                 message.setText(toJson.apply(dispatch.bodyValues()));
 
+
                 try (final MessageProducer producer = session.createProducer(null)) {
 
                     producer.setTimeToLive(Optional.ofNullable(dispatch.ttl().toMillis()).orElse((long) 0));
+
+                    // Call listeners
+                    this.listeners.stream().forEach(listener -> listener.onDispatch(msg));
 
                     producer.send(dispatch.destination(), message);
 
@@ -77,7 +90,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
 
                     LOGGER.atTrace().log("Sent {} ", dispatch.correlationId());
 
-                    return message;
+                    return msg;
                 }
             } catch (final JMSException e) {
                 LOGGER.atError().log("Failed to send: to {}, type {}, correclation id {}",

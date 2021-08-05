@@ -11,9 +11,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import me.ehp246.aufjms.api.ToJson;
 import me.ehp246.aufjms.api.annotation.CollectionOf;
 import me.ehp246.aufjms.api.jms.FromMsgBody;
+import me.ehp246.aufjms.api.spi.ToJson;
 
 /**
  * @author Lei Yang

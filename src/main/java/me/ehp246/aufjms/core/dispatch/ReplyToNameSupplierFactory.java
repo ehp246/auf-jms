@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
 import me.ehp246.aufjms.api.jms.ReplyToNameSupplier;
 

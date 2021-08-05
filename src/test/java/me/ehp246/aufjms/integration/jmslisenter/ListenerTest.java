@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.ToJson;
+import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.integration.jmslisenter.AppConfig.Case01;
 import me.ehp246.aufjms.util.TestQueueListener;
 

@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.byjms;
+package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -14,11 +14,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.jms.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.jms.DispatchFn;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchFn;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.api.jms.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.jms.JmsDispatchFnProvider;
 
 /**
  *
