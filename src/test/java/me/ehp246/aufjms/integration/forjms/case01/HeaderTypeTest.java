@@ -23,7 +23,7 @@ import me.ehp246.aufjms.util.UtilConfig;
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {
         "spring.activemq.broker-url=vm://localhost?broker.persistent=false&broker.useShutdownHook=false" })
-class MsgTypeTest {
+class HeaderTypeTest {
     @Autowired
     private AtomicReference<CompletableFuture<Integer>> ref;
 
@@ -31,7 +31,7 @@ class MsgTypeTest {
     private JmsTemplate jmsTemplate;
 
     @Test
-    void test_01() throws InterruptedException, ExecutionException {
+    void type_01() throws InterruptedException, ExecutionException {
         final var i = (int) (Math.random() * 100);
         jmsTemplate.send(UtilConfig.TEST_QUEUE, new MessageCreator() {
 
