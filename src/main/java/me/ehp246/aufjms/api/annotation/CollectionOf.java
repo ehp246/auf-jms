@@ -8,12 +8,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-@Retention(RUNTIME)
-@Target({ FIELD, METHOD, PARAMETER })
 /**
  * @author Lei Yang
  *
  */
+@Retention(RUNTIME)
+@Target({ FIELD, METHOD, PARAMETER })
 public @interface CollectionOf {
     Class<?>[] value();
 }

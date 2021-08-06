@@ -6,9 +6,9 @@ import java.util.function.Consumer;
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public interface ResolvedExecutable {
+public interface Executable {
     Object getInstance();
 
     Method getMethod();

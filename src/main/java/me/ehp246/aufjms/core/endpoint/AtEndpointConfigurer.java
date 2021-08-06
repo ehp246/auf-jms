@@ -18,47 +18,46 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 
+import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
-import me.ehp246.aufjms.api.slf4j.MdcKeys;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
- * JmsListenerConfigurer to register runtime-defined Endpoint's.
+ * JmsListenerConfigurer used to register {@link AtEndpoint}'s at run-time.
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public class MsgEndpointConfigurer implements JmsListenerConfigurer {
-    private final static Logger LOGGER = LogManager.getLogger(MsgEndpointConfigurer.class);
+public final class AtEndpointConfigurer implements JmsListenerConfigurer {
+    private final static Logger LOGGER = LogManager.getLogger(AtEndpointConfigurer.class);
 
     private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
-    private final Set<MsgEndpoint> endpoints;
+    private final Set<AtEndpoint> endpoints;
     private final DestinationNameResolver destintationNameResolver;
-    private final Executor actionExecutor;
+    private final Executor executor;
     private final ExecutableBinder binder;
 
-    public MsgEndpointConfigurer(
+    public AtEndpointConfigurer(
             final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
-            final Set<MsgEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
+            final Set<AtEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
             @Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor actionExecutor, final ExecutableBinder binder) {
         super();
         this.listenerContainerFactory = listenerContainerFactory;
         this.endpoints = endpoints;
         this.destintationNameResolver = destintationNameResolver;
-        this.actionExecutor = actionExecutor;
+        this.executor = actionExecutor;
         this.binder = binder;
     }
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.debug("Registering endpoint on destination '{}'", endpoint.getDestinationName());
+            LOGGER.atDebug().log("Registering endpoint on destination '{}'", endpoint.getDestinationName());
 
-            final var defaultMsgDispatcher = new DefaultMsgDispatcher(endpoint.getResolver(), binder, actionExecutor);
-            final var id = endpoint.getDestinationName() + "@" + MsgEndpoint.class.getCanonicalName();
+            final var defaultMsgDispatcher = new DefaultJmsMsgDispatcher(endpoint.getResolver(), binder, executor);
+            final var id = endpoint.getDestinationName() + "@" + AtEndpoint.class.getCanonicalName();
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
@@ -71,13 +70,13 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
                     container.setupMessageListener((MessageListener) message -> {
                         final var msg = TextJmsMsg.from((TextMessage)message);
 
-                        ThreadContext.put(MdcKeys.MSG_TYPE, msg.type());
-                        ThreadContext.put(MdcKeys.CORRELATION_ID, msg.correlationId());
+                        ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
+                        ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
 
                         defaultMsgDispatcher.dispatch(msg);
 
-                        ThreadContext.remove(MdcKeys.MSG_TYPE);
-                        ThreadContext.remove(MdcKeys.CORRELATION_ID);
+                        ThreadContext.remove(AufJmsProperties.MSG_TYPE);
+                        ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
                     });
                 }
 

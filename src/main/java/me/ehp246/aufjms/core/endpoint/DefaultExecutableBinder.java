@@ -11,44 +11,39 @@ import java.util.stream.Stream;
 
 import javax.jms.Message;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
+import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
-import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
-import me.ehp246.aufjms.api.jms.FromMsgBody;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
 
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public class DefaultExecutableBinder implements ExecutableBinder {
-    private final static Logger LOGGER = LogManager.getLogger(DefaultExecutableBinder.class);
-
-    protected static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> HEADER_VALUE_SUPPLIERS = Map
+public final class DefaultExecutableBinder implements ExecutableBinder {
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> HEADER_VALUE_SUPPLIERS = Map
             .of(OfType.class, JmsMsg::type);
 
-    protected static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
+    private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
             .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
 
-    private final FromMsgBody<String> fromBody;
+    private final FromJson fromJson;
 
-    public DefaultExecutableBinder(final FromMsgBody<String> fromBody) {
+    public DefaultExecutableBinder(final FromJson fromJson) {
         super();
-        this.fromBody = fromBody;
+        this.fromJson = fromJson;
     }
 
     @Override
-    public ReflectingInvocation bind(final ResolvedExecutable resolved, final InvocationContext ctx) {
-        final var method = resolved.getMethod();
+    public ReflectingInvocation bind(final Executable target, final InvocationContext ctx) {
+        final var method = target.getMethod();
         if (method.getParameterCount() == 0) {
-            return new ReflectingInvocation(resolved.getInstance(), method, null);
+            return new ReflectingInvocation(target.getInstance(), method, null);
         }
 
         final var parameters = method.getParameters();
@@ -56,14 +51,14 @@ public class DefaultExecutableBinder implements ExecutableBinder {
 
         final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
 
-        final var receivers = new ArrayList<FromMsgBody.Receiver<?>>();
+        final var receivers = new ArrayList<FromJson.Receiver<?>>();
         for (int i = 0; i < boundMarkers.length; i++) {
             if (boundMarkers[i]) {
                 continue;
             }
 
             final var ref = Integer.valueOf(i);
-            receivers.add(new FromMsgBody.Receiver<>() {
+            receivers.add(new FromJson.Receiver<>() {
 
                 @Override
                 public void receive(final Object value) {
@@ -83,10 +78,10 @@ public class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         if (receivers.size() > 0) {
-            fromBody.from(ctx.getMsg().text(), receivers);
+            fromJson.from(ctx.getMsg().text(), receivers);
         }
 
-        return new ReflectingInvocation(resolved.getInstance(), method, arguments);
+        return new ReflectingInvocation(target.getInstance(), method, arguments);
     }
 
     /**

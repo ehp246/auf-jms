@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.formsg;
+package me.ehp246.aufjms.core.endpoint;
 
 import java.util.Map;
 import java.util.Set;
@@ -12,14 +12,14 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.EnableForJms;
-import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 
 /**
  * 
  * @author Lei Yang
  *
  */
-public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
+public final class EnableForJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
     @SuppressWarnings("unchecked")
     @Override
@@ -44,12 +44,8 @@ public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
                         scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
                     }
 
-                    final var destinationName = "";
-                    /*
-                     * Strings.ifBlank(endpoint.get("value").toString(),
-                     * PrefixedNameResolver.QUEUE_PREFIX + importingClassMetadata.getClassName() +
-                     * ".request");
-                     */
+                    final var destinationName = endpoint.get("value").toString();
+
                     beanDefinition.setConstructorArgumentValues(getParameters(destinationName, scanThese));
 
                     registry.registerBeanDefinition(destinationName + "@" + importingClassMetadata.getClassName(),
@@ -59,9 +55,9 @@ public class EnableForMsgRegistrar implements ImportBeanDefinitionRegistrar {
 
     private GenericBeanDefinition getBeanDefinition(Map<String, Object> annotationAttributes) {
         final var beanDefinition = new GenericBeanDefinition();
-        beanDefinition.setBeanClass(MsgEndpoint.class);
+        beanDefinition.setBeanClass(AtEndpoint.class);
         beanDefinition.setFactoryBeanName(AtEndpointFactory.class.getName());
-        beanDefinition.setFactoryMethodName("newMsgEndpoint");
+        beanDefinition.setFactoryMethodName("newEndpoint");
 
         return beanDefinition;
     }

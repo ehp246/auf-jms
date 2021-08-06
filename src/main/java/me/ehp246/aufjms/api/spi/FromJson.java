@@ -1,19 +1,19 @@
-package me.ehp246.aufjms.api.jms;
+package me.ehp246.aufjms.api.spi;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
 @FunctionalInterface
-public interface FromMsgBody<B> {
-    List<?> from(B body, List<Receiver<?>> receivers);
+public interface FromJson {
+    List<?> from(String json, List<Receiver<?>> receivers);
 
     @SuppressWarnings("unchecked")
-    default <T> T from(final B body, final Receiver<T> receiver) {
-        return (T) this.from(body, List.of(receiver)).get(0);
+    default <T> T from(final String json, final Receiver<T> receiver) {
+        return (T) this.from(json, List.of(receiver)).get(0);
     }
 
     interface Receiver<T> {

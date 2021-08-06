@@ -3,13 +3,16 @@ package me.ehp246.aufjms.api.endpoint;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import me.ehp246.aufjms.api.jms.JmsMsg;
+
 /**
- * Abstraction of a message executable by type to be registered in the registry.
+ * The abstraction of a Java type that is invokable by {@link JmsMsg#type()} to
+ * be registered in the registry.
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public interface InvokingDefinition {
+public interface MsgInvokableDefinition {
     String getMsgType();
 
     Class<?> getInstanceType();

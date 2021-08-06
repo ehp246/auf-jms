@@ -41,7 +41,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
@@ -70,7 +70,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
@@ -99,7 +99,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
@@ -132,7 +132,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
@@ -160,7 +160,7 @@ class DefaultActionInvocationBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
@@ -199,7 +199,7 @@ class DefaultActionInvocationBinderTest {
 
         final Case001 case001 = new Case001();
 
-        final var outcome = binder.bind(new ResolvedExecutable() {
+        final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {

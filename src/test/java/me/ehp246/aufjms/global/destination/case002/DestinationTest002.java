@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 
 /**
  * @author Lei Yang
@@ -22,11 +22,11 @@ public class DestinationTest002 {
 
     @Test
     void destination001() {
-        final var endpoints = appCtx.getBeansOfType(MsgEndpoint.class);
+        final var endpoints = appCtx.getBeansOfType(AtEndpoint.class);
 
         Assertions.assertEquals(2, endpoints.size());
 
-        final var names = endpoints.values().stream().map(MsgEndpoint::getDestinationName).collect(Collectors.toSet());
+        final var names = endpoints.values().stream().map(AtEndpoint::getDestinationName).collect(Collectors.toSet());
 
         Assertions.assertEquals(true,
                 names.contains("queue://" + DestinationConfiguration002.class.getName() + ".request"),

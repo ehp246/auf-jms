@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.formsg;
+package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.Objects;
@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.ExecutableTypeResolver;
+import me.ehp246.aufjms.api.endpoint.MsgInvokableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.ResolvedExecutable;
+import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -23,10 +23,10 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 public final class AutowireCapableInstanceResolver implements ExecutableResolver {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-    private final ExecutableTypeResolver typeResolver;
+    private final MsgInvokableResolver typeResolver;
 
     public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-            final ExecutableTypeResolver resolver) {
+            final MsgInvokableResolver resolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         this.typeResolver = resolver;
@@ -34,7 +34,7 @@ public final class AutowireCapableInstanceResolver implements ExecutableResolver
 
 
     @Override
-    public ResolvedExecutable resolve(final JmsMsg msg) {
+    public Executable resolve(final JmsMsg msg) {
         Objects.requireNonNull(msg);
 
         final var registered = this.typeResolver.resolve(msg);
@@ -46,7 +46,7 @@ public final class AutowireCapableInstanceResolver implements ExecutableResolver
                 ? autowireCapableBeanFactory.getBean(registered.getInstanceType())
                 : autowireCapableBeanFactory.createBean(registered.getInstanceType());
 
-        return new ResolvedExecutable() {
+        return new Executable() {
 
             @Override
             public Method getMethod() {

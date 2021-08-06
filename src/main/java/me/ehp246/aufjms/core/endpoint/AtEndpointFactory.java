@@ -1,17 +1,16 @@
-package me.ehp246.aufjms.core.formsg;
+package me.ehp246.aufjms.core.endpoint;
 
 import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableTypeResolver;
+import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public final class AtEndpointFactory {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
@@ -21,10 +20,10 @@ public final class AtEndpointFactory {
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
     }
 
-    public MsgEndpoint newMsgEndpoint(final String destination, final Set<String> scanPackages) {
-        return new MsgEndpoint() {
+    public AtEndpoint newEndpoint(final String destination, final Set<String> scanPackages) {
+        return new AtEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
-                    newForMsgRegistry(scanPackages));
+                    DefaultInvokableResolver.registeryFrom(scanPackages));
 
             @Override
             public String getDestinationName() {
@@ -37,9 +36,5 @@ public final class AtEndpointFactory {
             }
 
         };
-    }
-
-    private DefaultExecutableTypeResolver newForMsgRegistry(final Set<String> scanPackages) {
-        return new DefaultExecutableTypeResolver().register(new ForMsgScanner(scanPackages).perform().stream());
     }
 }

@@ -11,10 +11,10 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
+import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
-import me.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
-import me.ehp246.aufjms.core.formsg.AtEndpointFactory;
-import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
+import me.ehp246.aufjms.core.endpoint.EnableForJmsRegistrar;
+import me.ehp246.aufjms.core.endpoint.AtEndpointConfigurer;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -25,7 +25,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ EnableForMsgRegistrar.class, AtEndpointFactory.class, MsgEndpointConfigurer.class,
+@Import({ EnableForJmsRegistrar.class, AtEndpointFactory.class, AtEndpointConfigurer.class,
         PooledExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
     At[] value() default @At;

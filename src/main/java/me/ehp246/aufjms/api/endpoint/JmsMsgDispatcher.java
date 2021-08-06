@@ -5,9 +5,9 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 /**
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
 @FunctionalInterface
-public interface ExecutableTypeResolver {
-    ResolvedInstanceType resolve(JmsMsg msg);
+public interface JmsMsgDispatcher {
+    void dispatch(final JmsMsg msg);
 }

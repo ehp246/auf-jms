@@ -4,7 +4,7 @@ package me.ehp246.aufjms.api.endpoint;
  * Indication to Executor on how the action should be executed.
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public enum InvocationModel {
     /**

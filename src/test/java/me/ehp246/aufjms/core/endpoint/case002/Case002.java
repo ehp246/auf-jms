@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.formsg.case002;
+package me.ehp246.aufjms.core.endpoint.case002;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;

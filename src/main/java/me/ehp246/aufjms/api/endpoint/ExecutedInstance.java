@@ -11,7 +11,7 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 public interface ExecutedInstance {
     JmsMsg getMsg();
 
-    ResolvedExecutable getInstance();
+    Executable getInstance();
 
     InvocationOutcome<?> getOutcome();
 }

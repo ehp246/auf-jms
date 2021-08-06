@@ -3,7 +3,12 @@ package me.ehp246.aufjms.core.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class ReflectingInvocation {
+/**
+ * 
+ * @author Lei Yang
+ * @since 1.0
+ */
+public final class ReflectingInvocation {
     private final Object target;
     private final Method method;
     private final Object[] arguments;

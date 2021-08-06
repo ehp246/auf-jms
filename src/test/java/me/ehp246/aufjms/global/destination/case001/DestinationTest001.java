@@ -12,7 +12,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
+import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 @Disabled
@@ -25,11 +25,11 @@ class DestinationTest001 {
 
     @Test
     void destination001() {
-        final var endpoints = appCtx.getBeansOfType(MsgEndpoint.class);
+        final var endpoints = appCtx.getBeansOfType(AtEndpoint.class);
 
         Assertions.assertEquals(3, endpoints.size());
 
-        final var names = endpoints.values().stream().map(MsgEndpoint::getDestinationName).collect(Collectors.toSet());
+        final var names = endpoints.values().stream().map(AtEndpoint::getDestinationName).collect(Collectors.toSet());
 
         Assertions.assertEquals(true, names.contains("topic://topic.003"));
         Assertions.assertEquals(true, names.contains("queue://queue.003"));

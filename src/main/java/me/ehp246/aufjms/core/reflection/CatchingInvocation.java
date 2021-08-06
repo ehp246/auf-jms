@@ -2,6 +2,11 @@ package me.ehp246.aufjms.core.reflection;
 
 import java.util.concurrent.Callable;
 
+/**
+ * 
+ * @author Lei Yang
+ * @since 1.0
+ */
 public interface CatchingInvocation {
     static <T> InvocationOutcome<T> invoke(final Callable<T> callable) {
         try {

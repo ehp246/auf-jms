@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.formsg;
+package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.InvokingDefinition;
+import me.ehp246.aufjms.api.endpoint.MsgInvokableDefinition;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.core.util.StreamOf;
 
@@ -27,57 +27,14 @@ import me.ehp246.aufjms.core.util.StreamOf;
  * @author Lei Yang
  *
  */
-public class ForMsgScanner {
-    private static class ExecutableDefinitionImplementation implements InvokingDefinition {
-        private final ForJms annotation;
-        private final String msgType;
-        private final Class<?> instanceType;
-        private final Map<String, Method> methods;
+final class ForJmsScanner {
+    private final static Logger LOGGER = LogManager.getLogger(ForJmsScanner.class);
 
-        private ExecutableDefinitionImplementation(final HashMap<String, Method> invokings, final ForJms annotation,
-                final String msgType, final Class<?> instanceType) {
-            this.annotation = annotation;
-            this.msgType = msgType;
-            this.instanceType = instanceType;
-            this.methods = Map.copyOf(invokings);
-        }
-
-        @Override
-        public String getMsgType() {
-            return msgType;
-        }
-
-        @Override
-        public Class<?> getInstanceType() {
-            return instanceType;
-        }
-
-        @Override
-        public Map<String, Method> getMethods() {
-            return methods;
-        }
-
-        @Override
-        public InstanceScope getInstanceScope() {
-            return annotation.scope();
-        }
-
-        @Override
-        public InvocationModel getInvocationModel() {
-            return annotation.invocation();
-        }
-    }
-
-    private final static Logger LOGGER = LogManager.getLogger(ForMsgScanner.class);
-
-    private final Set<String> scanPackages;
-
-    public ForMsgScanner(final Set<String> scanPackages) {
+    private ForJmsScanner(final Set<String> scanPackages) {
         super();
-        this.scanPackages = scanPackages;
     }
 
-    public Set<InvokingDefinition> perform() {
+    static Set<MsgInvokableDefinition> perform(final Set<String> scanPackages) {
         final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
             @Override
             protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
@@ -95,10 +52,11 @@ public class ForMsgScanner {
                 LOGGER.error("This should not happen.", e);
             }
             return null;
-        }).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).map(type -> newDefinition(type)).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
-    private InvokingDefinition newDefinition(final Class<?> instanceType) {
+    static private MsgInvokableDefinition newDefinition(final Class<?> instanceType) {
         final var annotation = instanceType.getAnnotation(ForJms.class);
         if (annotation == null) {
             return null;
@@ -130,6 +88,33 @@ public class ForMsgScanner {
 
         LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
-        return new ExecutableDefinitionImplementation(invokings, annotation, msgType, instanceType);
+        return new MsgInvokableDefinition() {
+            private final Map<String, Method> methods = Map.copyOf(invokings);
+
+            @Override
+            public String getMsgType() {
+                return msgType;
+            }
+
+            @Override
+            public Class<?> getInstanceType() {
+                return instanceType;
+            }
+
+            @Override
+            public Map<String, Method> getMethods() {
+                return methods;
+            }
+
+            @Override
+            public InstanceScope getInstanceScope() {
+                return annotation.scope();
+            }
+
+            @Override
+            public InvocationModel getInvocationModel() {
+                return annotation.invocation();
+            }
+        };
     }
 }

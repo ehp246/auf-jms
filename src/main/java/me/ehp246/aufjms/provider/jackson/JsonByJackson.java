@@ -12,14 +12,14 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.CollectionOf;
-import me.ehp246.aufjms.api.jms.FromMsgBody;
+import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
 
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public final class JsonByJackson implements FromMsgBody<String>, ToJson {
+public final class JsonByJackson implements FromJson, ToJson {
     private final static Logger LOGGER = LogManager.getLogger(JsonByJackson.class);
 
     private final ObjectMapper objectMapper;
@@ -81,7 +81,7 @@ public final class JsonByJackson implements FromMsgBody<String>, ToJson {
         }
     }
 
-    private Object receiveOne(final String json, final FromMsgBody.Receiver<Object> receiver)
+    private Object receiveOne(final String json, final FromJson.Receiver<Object> receiver)
             throws JsonMappingException, JsonProcessingException {
         final var value = json != null && !json.isBlank() ? readOne(json, receiver) : null;
         receiver.receive(value);

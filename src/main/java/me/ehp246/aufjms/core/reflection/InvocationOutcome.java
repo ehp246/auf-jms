@@ -2,7 +2,12 @@ package me.ehp246.aufjms.core.reflection;
 
 import java.util.Optional;
 
-public class InvocationOutcome<T> {
+/**
+ * 
+ * @author Lei Yang
+ * @since 1.0
+ */
+public final class InvocationOutcome<T> {
     private final T returned;
     private final Throwable thrown;
     private final boolean hasReturned;

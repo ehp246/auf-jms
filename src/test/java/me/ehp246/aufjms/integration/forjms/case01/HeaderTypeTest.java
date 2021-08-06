@@ -25,7 +25,7 @@ import me.ehp246.aufjms.util.UtilConfig;
         "spring.activemq.broker-url=vm://localhost?broker.persistent=false&broker.useShutdownHook=false" })
 class MsgTypeTest {
     @Autowired
-    private AtomicReference<CompletableFuture<?>> ref;
+    private AtomicReference<CompletableFuture<Integer>> ref;
 
     @Autowired
     private JmsTemplate jmsTemplate;
