@@ -10,11 +10,12 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.core.configuration.JsonProviderSelector;
 import me.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
+import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.core.endpoint.MsgEndpointConfigurer;
 import me.ehp246.aufjms.core.formsg.AtEndpointFactory;
 import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
+import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
  *
@@ -25,19 +26,21 @@ import me.ehp246.aufjms.core.formsg.EnableForMsgRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ EnableForMsgRegistrar.class, AtEndpointFactory.class, MsgEndpointConfigurer.class,
-        PooledExecutorConfiguration.class, JsonProviderSelector.class })
+        PooledExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
     At[] value() default @At;
 
     @Retention(RUNTIME)
     @Target(ElementType.ANNOTATION_TYPE)
-    public @interface At {
+    @interface At {
         /**
          * Destination name of the incoming message.
          *
          * @return
          */
         String value() default "";
+
+        String connection() default "";
 
         Class<?>[] scan() default {};
     }

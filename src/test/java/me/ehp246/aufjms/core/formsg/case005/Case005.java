@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.formsg.case005;
 
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-@ForMsg
+@ForJms
 public abstract class Case005 {
     @Invoking
     public void m001() {

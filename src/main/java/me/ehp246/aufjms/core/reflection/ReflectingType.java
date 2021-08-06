@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ReflectingType<T> {
+public final class ReflectingType<T> {
     private final Class<T> type;
 
     public ReflectingType(Class<T> type) {

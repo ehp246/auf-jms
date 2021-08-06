@@ -21,23 +21,17 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-public class AutowireCapableInstanceResolver implements ExecutableResolver {
+public final class AutowireCapableInstanceResolver implements ExecutableResolver {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final ExecutableTypeResolver typeResolver;
-    private Consumer<ExecutedInstance> executedConsumer;
 
     public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-            final ExecutableTypeResolver resolver, final Consumer<ExecutedInstance> executedConsumer) {
+            final ExecutableTypeResolver resolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         this.typeResolver = resolver;
-        this.executedConsumer = executedConsumer;
     }
 
-    public AutowireCapableInstanceResolver withPostExecutionConsumer(final Consumer<ExecutedInstance> consumer) {
-        this.executedConsumer = consumer;
-        return this;
-    }
 
     @Override
     public ResolvedExecutable resolve(final JmsMsg msg) {
@@ -71,7 +65,7 @@ public class AutowireCapableInstanceResolver implements ExecutableResolver {
 
             @Override
             public Consumer<ExecutedInstance> postExecution() {
-                return executedConsumer;
+                return null;
             }
 
         };

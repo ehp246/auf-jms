@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.stereotype.Service;
 
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 
@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
  *
  */
 @Service
-@ForMsg(scope = InstanceScope.BEAN)
+@ForJms(scope = InstanceScope.BEAN)
 public class Calculator {
     public AtomicReference<Integer> mem = new AtomicReference<>();
 

@@ -6,6 +6,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.jms.Message;
+
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
@@ -16,11 +18,9 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  */
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface ForMsg {
+public @interface ForJms {
     /**
-     * Regular expression to match Type.
-     * 
-     * @return
+     * Regular expression to match {@link Message#getJMSType()}.
      */
     String value() default "";
 

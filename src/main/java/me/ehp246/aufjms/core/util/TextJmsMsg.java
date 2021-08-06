@@ -67,7 +67,7 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String invoking() {
-        return null;
+        return invoke(() -> message.getStringProperty(MsgPropertyName.Invoking));
     }
 
     @SuppressWarnings("unchecked")

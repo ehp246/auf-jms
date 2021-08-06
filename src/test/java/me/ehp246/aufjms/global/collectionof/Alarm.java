@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.CollectionOf;
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  *
  */
 @Service
-@ForMsg(scope = InstanceScope.BEAN, invocation = InvocationModel.SYNC)
+@ForJms(scope = InstanceScope.BEAN, invocation = InvocationModel.SYNC)
 class Alarm {
     private Instant[] instants;
 

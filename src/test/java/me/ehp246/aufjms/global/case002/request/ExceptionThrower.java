@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.global.case002.request;
 
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.exception.ForMsgExecutionException;
 
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.exception.ForMsgExecutionException;
  * @author Lei Yang
  *
  */
-@ForMsg
+@ForJms
 public class ExceptionThrower {
     @Invoking("throw001")
     public void throw001() {

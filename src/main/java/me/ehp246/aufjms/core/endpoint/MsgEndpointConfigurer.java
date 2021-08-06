@@ -20,7 +20,7 @@ import org.springframework.jms.listener.MessageListenerContainer;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 import me.ehp246.aufjms.api.slf4j.MdcKeys;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -36,13 +36,13 @@ public class MsgEndpointConfigurer implements JmsListenerConfigurer {
 
     private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
     private final Set<MsgEndpoint> endpoints;
-    private final DestinationResolver destintationNameResolver;
+    private final DestinationNameResolver destintationNameResolver;
     private final Executor actionExecutor;
     private final ExecutableBinder binder;
 
     public MsgEndpointConfigurer(
             final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
-            final Set<MsgEndpoint> endpoints, final DestinationResolver destintationNameResolver,
+            final Set<MsgEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
             @Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor actionExecutor, final ExecutableBinder binder) {
         super();
         this.listenerContainerFactory = listenerContainerFactory;

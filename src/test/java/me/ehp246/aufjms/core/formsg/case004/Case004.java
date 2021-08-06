@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.formsg.case004;
 
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 
 /**
  * The class should not be scanned because of missing Invoking.
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.ForMsg;
  * @author Lei Yang
  *
  */
-@ForMsg
+@ForJms
 public class Case004 {
 
 }

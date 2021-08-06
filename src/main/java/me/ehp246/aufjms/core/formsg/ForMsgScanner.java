@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import me.ehp246.aufjms.api.annotation.ForMsg;
+import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -30,12 +30,12 @@ import me.ehp246.aufjms.core.util.StreamOf;
  */
 public class ForMsgScanner {
     private static class ExecutableDefinitionImplementation implements InvokingDefinition {
-        private final ForMsg annotation;
+        private final ForJms annotation;
         private final String msgType;
         private final Class<?> instanceType;
         private final Map<String, Method> methods;
 
-        private ExecutableDefinitionImplementation(final HashMap<String, Method> invokings, final ForMsg annotation,
+        private ExecutableDefinitionImplementation(final HashMap<String, Method> invokings, final ForJms annotation,
                 final String msgType, final Class<?> instanceType) {
             this.annotation = annotation;
             this.msgType = msgType;
@@ -85,7 +85,7 @@ public class ForMsgScanner {
                 return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
             }
         };
-        scanner.addIncludeFilter(new AnnotationTypeFilter(ForMsg.class));
+        scanner.addIncludeFilter(new AnnotationTypeFilter(ForJms.class));
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
@@ -100,7 +100,7 @@ public class ForMsgScanner {
     }
 
     private InvokingDefinition newDefinition(final Class<?> instanceType) {
-        final var annotation = instanceType.getAnnotation(ForMsg.class);
+        final var annotation = instanceType.getAnnotation(ForJms.class);
         if (annotation == null) {
             return null;
         }

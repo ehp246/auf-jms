@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 import me.ehp246.aufjms.util.TestQueueListener;
 import me.ehp246.aufjms.util.UtilConfig;
 
@@ -35,7 +35,7 @@ class AppConfig {
     }
 
     @Bean
-    DestinationResolver destinationResolver() {
+    DestinationNameResolver destinationResolver() {
         final var destination = new ActiveMQQueue(TestQueueListener.DESTINATION_NAME);
         return (c, d) -> destination;
     }

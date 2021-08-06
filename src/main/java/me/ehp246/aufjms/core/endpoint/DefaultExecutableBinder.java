@@ -83,7 +83,7 @@ public class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         if (receivers.size() > 0) {
-            // fromBody.from(ctx.getMsg().getBodyAsText(), receivers);
+            fromBody.from(ctx.getMsg().text(), receivers);
         }
 
         return new ReflectingInvocation(resolved.getInstance(), method, arguments);
@@ -129,8 +129,7 @@ public class DefaultExecutableBinder implements ExecutableBinder {
             found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
                     .findAny();
             if (found.isPresent()) {
-                // arguments[i] = msg.property(((OfProperty) found.get()).value(),
-                // parameter.getType());
+                arguments[i] = msg.property(((OfProperty) found.get()).value(), parameter.getType());
                 markers[i] = true;
             }
         }

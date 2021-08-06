@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.endpoint.MsgEndpoint;
-import me.ehp246.aufjms.api.jms.DestinationResolver;
+import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 
 @Disabled
 @SpringBootTest(classes = DestinationConfiguration001.class, properties = {
@@ -34,7 +34,7 @@ class DestinationTest001 {
         Assertions.assertEquals(true, names.contains("topic://topic.003"));
         Assertions.assertEquals(true, names.contains("queue://queue.003"));
 
-        final var resolver = appCtx.getBean(DestinationResolver.class);
+        final var resolver = appCtx.getBean(DestinationNameResolver.class);
         Assertions.assertEquals(true, resolver.resolve("", "topic://topic.003") instanceof Topic);
         Assertions.assertEquals(true, resolver.resolve("", "queue://queue.003") instanceof Queue);
         Assertions.assertEquals(true, resolver.resolve("", "queue.003") instanceof Queue);
