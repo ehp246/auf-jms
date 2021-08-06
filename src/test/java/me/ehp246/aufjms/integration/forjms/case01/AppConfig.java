@@ -23,8 +23,8 @@ import me.ehp246.aufjms.util.UtilConfig;
 @EnableForJms
 class AppConfig {
     @Bean
-    public AtomicReference<CompletableFuture<?>> ref() {
-        return new AtomicReference<CompletableFuture<?>>(new CompletableFuture<>());
+    public AtomicReference<CompletableFuture<Integer>> ref() {
+        return new AtomicReference<CompletableFuture<Integer>>(new CompletableFuture<>());
     }
 
     @Bean

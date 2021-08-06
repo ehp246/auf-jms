@@ -12,14 +12,13 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-@ForJms("Add")
+@ForJms
 class Add {
     @Autowired
-    private AtomicReference<CompletableFuture<?>> ref;
+    private AtomicReference<CompletableFuture<Integer>> ref;
 
     @Invoking
-    public int add() {
-        ref.get().complete(null);
-        return 1;
+    public void add(final int i) {
+        ref.get().complete(i);
     }
 }

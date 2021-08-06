@@ -18,6 +18,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokingDefinition;
 import me.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  *
@@ -39,7 +40,11 @@ public class DefaultExecutableTypeResolver implements ForMsgRegistry, Executable
 
     @Override
     public void register(final InvokingDefinition invokingDefinition) {
-        registeredActions.put(invokingDefinition.getMsgType(), invokingDefinition);
+        final var registered = registeredActions.putIfAbsent(invokingDefinition.getMsgType(), invokingDefinition);
+        if (registered != null) {
+            throw new RuntimeException(
+                    "Duplicate type " + registered.getMsgType() + " from " + registered.getInstanceType());
+        }
 
         registereMethods.put(invokingDefinition.getInstanceType(), invokingDefinition.getMethods());
     }
@@ -51,7 +56,7 @@ public class DefaultExecutableTypeResolver implements ForMsgRegistry, Executable
 
     @Override
     public ResolvedInstanceType resolve(final JmsMsg msg) {
-        final var msgType = Objects.requireNonNull(Objects.requireNonNull(msg).type()).strip();
+        final var msgType = OneUtil.toString(Objects.requireNonNull(msg).type(), "");
 
         final var definition = registeredActions.get(msgType);
         if (definition == null) {

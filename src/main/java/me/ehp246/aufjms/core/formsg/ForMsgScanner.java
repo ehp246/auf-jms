@@ -5,7 +5,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -115,8 +114,7 @@ public class ForMsgScanner {
 
         // Search for the annotation first
         for (final var method : reflected.findMethods(Invoking.class)) {
-            final var invokingName = Optional.of(method.getAnnotation(Invoking.class).value().strip())
-                    .filter(name -> name.length() > 0).orElseGet(method::getName);
+            final var invokingName = method.getAnnotation(Invoking.class).value().strip();
             if (invokings.containsKey(invokingName)) {
                 throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
             }
@@ -128,10 +126,7 @@ public class ForMsgScanner {
             throw new RuntimeException("No executing method defined by " + instanceType.getName());
         }
 
-        // Annotation value takes precedence.Falls back to class name if no value is
-        // specified.
-        final var msgType = annotation.value().strip().length() == 0 ? instanceType.getSimpleName()
-                : annotation.value();
+        final var msgType = annotation.value().strip();
 
         LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
