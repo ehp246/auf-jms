@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.MsgInvokableResolver;
+import me.ehp246.aufjms.api.endpoint.InvokableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -23,10 +23,10 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 public final class AutowireCapableInstanceResolver implements ExecutableResolver {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-    private final MsgInvokableResolver typeResolver;
+    private final InvokableResolver typeResolver;
 
     public AutowireCapableInstanceResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-            final MsgInvokableResolver resolver) {
+            final InvokableResolver resolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         this.typeResolver = resolver;

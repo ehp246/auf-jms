@@ -8,6 +8,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 @FunctionalInterface
-public interface JmsMsgDispatcher {
-    void dispatch(final JmsMsg msg);
+public interface InvokableResolver {
+    ResolvedInstanceType resolve(JmsMsg msg);
 }

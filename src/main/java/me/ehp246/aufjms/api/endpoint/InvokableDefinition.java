@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public interface MsgInvokableDefinition {
+public interface InvokableDefinition {
     String getMsgType();
 
     Class<?> getInstanceType();

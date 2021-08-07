@@ -20,9 +20,9 @@ import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.MsgInvokableDefinition;
-import me.ehp246.aufjms.api.endpoint.MsgInvokableRegistry;
-import me.ehp246.aufjms.api.endpoint.MsgInvokableResolver;
+import me.ehp246.aufjms.api.endpoint.InvokableDefinition;
+import me.ehp246.aufjms.api.endpoint.InvokableRegistry;
+import me.ehp246.aufjms.api.endpoint.InvokableResolver;
 import me.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
@@ -36,19 +36,19 @@ import me.ehp246.aufjms.core.util.StreamOf;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokableResolver {
+final class DefaultInvokableResolver implements InvokableRegistry, InvokableResolver {
     private final static Logger LOGGER = LogManager.getLogger(DefaultInvokableResolver.class);
 
-    private final Map<String, MsgInvokableDefinition> registeredInvokables = new HashMap<>();
+    private final Map<String, InvokableDefinition> registeredInvokables = new HashMap<>();
     private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
 
-    public DefaultInvokableResolver register(final Stream<MsgInvokableDefinition> invokingDefinitions) {
+    public DefaultInvokableResolver register(final Stream<InvokableDefinition> invokingDefinitions) {
         invokingDefinitions.forEach(this::register);
         return this;
     }
 
     @Override
-    public void register(final MsgInvokableDefinition invokingDefinition) {
+    public void register(final InvokableDefinition invokingDefinition) {
         final var registered = registeredInvokables.putIfAbsent(invokingDefinition.getMsgType(), invokingDefinition);
         if (registered != null) {
             throw new RuntimeException(
@@ -59,7 +59,7 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
     }
 
     @Override
-    public List<MsgInvokableDefinition> getRegistered() {
+    public List<InvokableDefinition> getRegistered() {
         return this.registeredInvokables.values().stream().collect(Collectors.toList());
     }
 
@@ -69,7 +69,7 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
 
         final var definition = registeredInvokables.get(msgType);
         if (definition == null) {
-            LOGGER.debug("Type {} not found", msgType);
+            LOGGER.atDebug().log("Type {} not found", msgType);
             return null;
         }
 
@@ -79,7 +79,7 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
         final var method = registereMethods.get(definition.getInstanceType()).get(invoking);
 
         if (method == null) {
-            LOGGER.debug("Method {} not found", invoking);
+            LOGGER.atDebug().log("Method {} not found", invoking);
             return null;
         }
 
@@ -111,7 +111,7 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
         return new DefaultInvokableResolver().register(perform(scanPackages).stream());
     }
 
-    private static Set<MsgInvokableDefinition> perform(final Set<String> scanPackages) {
+    private static Set<InvokableDefinition> perform(final Set<String> scanPackages) {
         final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
             @Override
             protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
@@ -122,18 +122,18 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
-                LOGGER.debug("Scanning {}", bean.getBeanClassName());
+                LOGGER.atDebug().log("Scanning {}", bean.getBeanClassName());
 
                 return Class.forName(bean.getBeanClassName());
             } catch (final ClassNotFoundException e) {
-                LOGGER.error("This should not happen.", e);
+                LOGGER.atError().log("This should not happen.", e);
             }
             return null;
         }).filter(Objects::nonNull).map(type -> newDefinition(type)).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 
-    private static MsgInvokableDefinition newDefinition(final Class<?> instanceType) {
+    private static InvokableDefinition newDefinition(final Class<?> instanceType) {
         final var annotation = instanceType.getAnnotation(ForJms.class);
         if (annotation == null) {
             return null;
@@ -163,9 +163,9 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
 
         final var msgType = annotation.value().strip();
 
-        LOGGER.debug("Scanned {} on {}", msgType, instanceType.getCanonicalName());
+        LOGGER.atDebug().log("Scanned {} on {}", msgType, instanceType.getCanonicalName());
 
-        return new MsgInvokableDefinition() {
+        return new InvokableDefinition() {
             private final Map<String, Method> methods = Map.copyOf(invokings);
 
             @Override

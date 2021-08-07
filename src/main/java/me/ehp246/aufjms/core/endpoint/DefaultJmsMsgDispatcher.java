@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.JmsMsgDispatcher;
+import me.ehp246.aufjms.api.endpoint.EndpointDispatcher;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.CatchingInvocation;
@@ -24,7 +24,7 @@ import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultJmsMsgDispatcher implements JmsMsgDispatcher {
+public final class DefaultJmsMsgDispatcher implements EndpointDispatcher {
     private static final Logger LOGGER = LogManager.getLogger(DefaultJmsMsgDispatcher.class);
 
     private final Executor executor;
