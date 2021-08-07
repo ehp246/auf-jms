@@ -46,8 +46,10 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 .map(AnnotatedArgument::argument)
                 .map(OneUtil::toString)
                 .filter(OneUtil::hasValue)
-                .orElseGet(() -> proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
-                        + proxyInvocation.getMethodName().substring(1));
+                .orElseGet(
+                        () -> proxyInvocation.findOnMethodUp(OfType.class).map(OfType::value).filter(OneUtil::hasValue)
+                                .orElseGet(() -> proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
+                                        + proxyInvocation.getMethodName().substring(1)));
 
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)

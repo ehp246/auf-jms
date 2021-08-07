@@ -109,6 +109,45 @@ class DefaultInvocationDispatchProviderTest {
     }
 
     @Test
+    void type_02() {
+        final var argType = UUID.randomUUID().toString();
+
+        case01.type01_II(argType);
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+
+        Assertions.assertEquals(argType, dispatch.type());
+    }
+
+    @Test
+    void type_03() {
+        final var argType = UUID.randomUUID().toString();
+
+        case01.type01_III(argType);
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+
+        Assertions.assertEquals(argType, dispatch.type());
+    }
+
+    @Test
+    void type_04() {
+        case01.type02();
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+
+        Assertions.assertEquals(TypeTestCases.TYPE, dispatch.type());
+    }
+
+    @Test
+    void type_05() {
+        case01.type02_I();
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+
+        Assertions.assertEquals("Type02_I", dispatch.type());
+    }
+    @Test
     void destintationResolver_01() {
         // fromInvocation.get(proxyConfig, new
         // TypeTestCases.Case01().getM01Invocation());

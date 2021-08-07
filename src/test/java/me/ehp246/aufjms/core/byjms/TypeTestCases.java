@@ -26,6 +26,8 @@ class TypeTestCases {
         @OfType(TYPE)
         void type02();
 
+        @OfType
+        void type02_I();
     }
 
     @OfType(TYPE)
