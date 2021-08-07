@@ -11,6 +11,7 @@ import org.apache.activemq.command.ActiveMQTopic;
 import org.junit.jupiter.api.Assertions;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 
 /**
@@ -46,6 +47,7 @@ class DefaultInvocationDispatchProviderTest {
         }
     };
 
+    private InvocationDispatchBuilder dispatchBuilder = null;
 
     void destintationResolver_01() {
         // fromInvocation.get(proxyConfig, new
