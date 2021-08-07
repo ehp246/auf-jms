@@ -215,10 +215,6 @@ public final class DefaultProxyInvocation implements Invocation {
         return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
     }
 
-    /**
-     * Returns the value of the annotation on method or the provided default if the
-     * annotation does not exist on the method.
-     */
     public <A extends Annotation, V> V methodAnnotationOf(final Class<A> annotationClass, final Function<A, V> mapper,
             final Supplier<V> supplier) {
         final var found = this.findOnMethod(annotationClass);
