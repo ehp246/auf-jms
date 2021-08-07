@@ -62,6 +62,9 @@ public final class DefaultProxyInvocation implements Invocation {
         return method.getDeclaringClass();
     }
 
+    public String getDeclaringClassSimpleName() {
+        return method.getDeclaringClass().getSimpleName();
+    }
     @Override
     public List<?> args() {
         return args;
@@ -205,13 +208,27 @@ public final class DefaultProxyInvocation implements Invocation {
         return Optional.ofNullable(this.findOnMethod(annotationClass).map(mapper).orElse(null));
     }
 
+    public <A extends Annotation, V> V firstArgumentAnnotationOf(final Class<A> annotationClass,
+            final Function<AnnotatedArgument<A>, V> mapper,
+            final Supplier<V> supplier) {
+        final var found = this.streamOfAnnotatedArguments(annotationClass).findFirst();
+        return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
+    }
+
     /**
      * Returns the value of the annotation on method or the provided default if the
      * annotation does not exist on the method.
      */
-    public <A extends Annotation, V> V getMethodValueOf(final Class<A> annotationClass, final Function<A, V> mapper,
+    public <A extends Annotation, V> V methodAnnotationOf(final Class<A> annotationClass, final Function<A, V> mapper,
             final Supplier<V> supplier) {
-        return this.findOnMethod(annotationClass).map(mapper).orElseGet(supplier);
+        final var found = this.findOnMethod(annotationClass);
+        return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
+    }
+
+    public <A extends Annotation, V> V classAnnotationOf(final Class<A> annotationClass, final Function<A, V> mapper,
+            final Supplier<V> supplier) {
+        final var found = this.findOnDeclaringClass(annotationClass);
+        return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
     }
 
     public <A extends Annotation> Optional<A> findOnMethod(final Class<A> annotationClass) {

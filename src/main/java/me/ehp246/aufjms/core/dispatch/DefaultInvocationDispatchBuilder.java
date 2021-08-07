@@ -4,7 +4,6 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +16,6 @@ import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -36,20 +34,23 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
     @Override
     public JmsDispatch get(final ByJmsProxyConfig config, final Invocation invocation) {
-        final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(), invocation.target(),
-                invocation.method(), invocation.args());
+        final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(),
+                invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
         final var destination = this.destinationResolver.resolve(config.connection(), config.destination());
 
-        final var type = proxyInvocation.streamOfAnnotatedArguments(OfType.class).findFirst()
-                .map(AnnotatedArgument::argument)
-                .map(OneUtil::toString)
-                .filter(OneUtil::hasValue)
-                .orElseGet(
-                        () -> proxyInvocation.findOnMethodUp(OfType.class).map(OfType::value).filter(OneUtil::hasValue)
-                                .orElseGet(() -> proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
-                                        + proxyInvocation.getMethodName().substring(1)));
+        // In the priority of Argument, Method, Type.
+        final String type = proxyInvocation.firstArgumentAnnotationOf(OfType.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                () -> proxyInvocation.methodAnnotationOf(OfType.class,
+                        ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
+                                : ofType.value(),
+                        () -> proxyInvocation.classAnnotationOf(OfType.class,
+                                ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName()
+                                        : ofType.value(),
+                                proxyInvocation::getDeclaringClassSimpleName)));
 
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)

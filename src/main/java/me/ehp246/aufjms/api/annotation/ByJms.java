@@ -11,13 +11,13 @@ import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.Message;
 
-@Documented
-@Target(TYPE)
-@Retention(RetentionPolicy.RUNTIME)
 /**
  * @author Lei Yang
  * @since 1.0
  */
+@Documented
+@Target(TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface ByJms {
     /**
      * Defines the destination name for the interface proxy.

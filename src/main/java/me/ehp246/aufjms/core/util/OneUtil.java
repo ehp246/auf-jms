@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -20,6 +21,10 @@ public final class OneUtil {
         super();
     }
 
+    public static String firstUpper(final String value) {
+        return value == null || value.length() == 0 ? value
+                : value.substring(0, 1).toUpperCase(Locale.US) + value.substring(1);
+    }
     public static String toString(final Object value) {
         return toString(value, null);
     }
