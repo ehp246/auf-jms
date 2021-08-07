@@ -227,6 +227,17 @@ public final class DefaultProxyInvocation implements Invocation {
         return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
     }
 
+    /**
+     * Resolve the annotation value up the invocation hierarchy.
+     */
+    public <A extends Annotation, V> V resolveAnnotatedValue(final Class<A> annotationClass,
+            final Function<AnnotatedArgument<A>, V> argMapper, final Function<A, V> methodMapper,
+            final Function<A, V> classMapper, final Supplier<V> supplier) {
+        return firstArgumentAnnotationOf(annotationClass, argMapper, 
+                () -> methodAnnotationOf(annotationClass, methodMapper, 
+                        () -> classAnnotationOf(annotationClass, classMapper, supplier)));
+    }
+
     public <A extends Annotation> Optional<A> findOnMethod(final Class<A> annotationClass) {
         return Optional.ofNullable(method.getAnnotation(annotationClass));
     }

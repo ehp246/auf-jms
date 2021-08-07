@@ -41,16 +41,13 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         final var destination = this.destinationResolver.resolve(config.connection(), config.destination());
 
         // In the priority of Argument, Method, Type.
-        final String type = proxyInvocation.firstArgumentAnnotationOf(OfType.class,
+        final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
                 arg -> arg.argument() != null ? arg.argument().toString()
                         : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                () -> proxyInvocation.methodAnnotationOf(OfType.class,
-                        ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
-                                : ofType.value(),
-                        () -> proxyInvocation.classAnnotationOf(OfType.class,
-                                ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName()
-                                        : ofType.value(),
-                                proxyInvocation::getDeclaringClassSimpleName)));
+                ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
+                        : ofType.value(),
+                ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
+                proxyInvocation::getDeclaringClassSimpleName);
 
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
