@@ -17,7 +17,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoke;
+import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.MsgInvokableDefinition;
@@ -148,8 +148,8 @@ final class DefaultInvokableResolver implements MsgInvokableRegistry, MsgInvokab
         final var reflected = new ReflectingType<>(instanceType);
 
         // Search for the annotation first
-        for (final var method : reflected.findMethods(Invoke.class)) {
-            final var invokingName = method.getAnnotation(Invoke.class).value().strip();
+        for (final var method : reflected.findMethods(Invoking.class)) {
+            final var invokingName = method.getAnnotation(Invoking.class).value().strip();
             if (invokings.containsKey(invokingName)) {
                 throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
             }

@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.endpoint.case002;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoke;
+import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * This class should fail the scan because two same methods have the same
@@ -13,11 +13,11 @@ import me.ehp246.aufjms.api.annotation.Invoke;
 @ForJms
 public class Case002 {
 
-    @Invoke
+    @Invoking
     public void m001() {
     }
 
-    @Invoke
+    @Invoking
     public void m001(final int i) {
     }
 

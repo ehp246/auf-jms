@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoke;
+import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 
 /**
@@ -17,23 +17,23 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
 public class Calculator {
     public AtomicReference<Integer> mem = new AtomicReference<>();
 
-    @Invoke("setMem")
+    @Invoking("setMem")
     public void setMem(int i) {
         this.mem.set(i);
     }
 
-    @Invoke("addMem")
+    @Invoking("addMem")
     public int addMem(int i) {
         this.mem.set(this.mem.get() + i);
         return mem.get();
     }
 
-    @Invoke("getMem")
+    @Invoking("getMem")
     public int getMem() {
         return this.mem.get();
     }
 
-    @Invoke
+    @Invoking
     public int add(int i, int j) {
         return i + j;
     }

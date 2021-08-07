@@ -6,7 +6,7 @@ import java.util.Set;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.CollectionOf;
-import me.ehp246.aufjms.api.annotation.Invoke;
+import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
 
 /**
@@ -16,17 +16,17 @@ import me.ehp246.aufjms.api.annotation.OfType;
 @ByJms(destination = "me.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
-    @Invoke("setCollection")
+    @Invoking("setCollection")
     void set(Set<Instant> instants);
 
-    @Invoke("setArray")
+    @Invoking("setArray")
     void set(Instant... instants);
 
-    @Invoke("get")
+    @Invoking("get")
     @CollectionOf(Instant.class)
     Set<Instant> get();
 
-    @Invoke("flatSet")
+    @Invoking("flatSet")
     @CollectionOf({ Set.class, List.class, Instant.class })
     List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
 }

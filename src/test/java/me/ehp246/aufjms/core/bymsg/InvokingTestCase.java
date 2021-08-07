@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.bymsg;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.Invoke;
+import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
  * @author Lei Yang
@@ -17,10 +17,10 @@ class InvokingTestCase {
         void m002();
 
         // Invoking by method name
-        @Invoke
+        @Invoking
         void m003();
 
-        @Invoke("m003-1")
+        @Invoking("m003-1")
         void m003(int i);
     }
 }
