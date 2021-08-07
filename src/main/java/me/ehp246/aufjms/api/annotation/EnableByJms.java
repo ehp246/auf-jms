@@ -12,7 +12,7 @@ import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
-import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchProvider;
+import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
@@ -25,7 +25,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultDispatchFnProvider.class,
-        JsonByJackson.class, DefaultInvocationDispatchProvider.class, DispatchLogger.class })
+        JsonByJackson.class, DefaultInvocationDispatchBuilder.class, DispatchLogger.class })
 public @interface EnableByJms {
     /**
      * Defines the default destination name global to the application.

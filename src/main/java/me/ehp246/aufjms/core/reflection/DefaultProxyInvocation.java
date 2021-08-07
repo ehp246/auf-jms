@@ -21,9 +21,9 @@ import me.ehp246.aufjms.api.jms.Invocation;
 /**
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public final class ProxyInvocation implements Invocation {
+public final class DefaultProxyInvocation implements Invocation {
     private final Class<?> declaringType;
     private final Object target;
     private final Method method;
@@ -31,7 +31,7 @@ public final class ProxyInvocation implements Invocation {
     private final Annotation[][] parameterAnnotations;
     private final List<Class<?>> threws;
 
-    public ProxyInvocation(final Class<?> declaringType, final Object target, final Method method, final List<?> args) {
+    public DefaultProxyInvocation(final Class<?> declaringType, final Object target, final Method method, final List<?> args) {
         this.declaringType = declaringType;
         this.target = target;
         this.method = Objects.requireNonNull(method);

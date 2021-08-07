@@ -11,38 +11,47 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 
+import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.DestinationNameResolver;
 import me.ehp246.aufjms.api.jms.Invocation;
-import me.ehp246.aufjms.core.reflection.ProxyInvocation;
+import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
+import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultInvocationDispatchProvider implements InvocationDispatchBuilder {
+public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
     private final DestinationNameResolver destinationResolver;
 
-    public DefaultInvocationDispatchProvider(final DestinationNameResolver destinationResolver) {
+    public DefaultInvocationDispatchBuilder(final DestinationNameResolver destinationResolver) {
         super();
         this.destinationResolver = destinationResolver;
     }
 
     @Override
     public JmsDispatch get(final ByJmsProxyConfig config, final Invocation invocation) {
+        final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(), invocation.target(),
+                invocation.method(), invocation.args());
+
         // Destination is required.
         final var destination = this.destinationResolver.resolve(config.connection(), config.destination());
+
+        final var type = proxyInvocation.streamOfAnnotatedArguments(OfType.class).findFirst()
+                .map(AnnotatedArgument::argument)
+                .map(OneUtil::toString)
+                .filter(OneUtil::hasValue)
+                .orElseGet(() -> proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
+                        + proxyInvocation.getMethodName().substring(1));
+
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
                 .map(name -> this.destinationResolver.resolve(config.connection(), name)).orElse(null);
-        final var proxyInvocation = new ProxyInvocation(invocation.method().getDeclaringClass(), invocation.target(),
-                invocation.method(), invocation.args());
-        final var type = proxyInvocation.getMethodName().substring(0, 1).toUpperCase(Locale.US)
-                + proxyInvocation.getMethodName().substring(1);
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 

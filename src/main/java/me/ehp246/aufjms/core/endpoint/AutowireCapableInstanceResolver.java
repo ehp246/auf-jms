@@ -8,11 +8,11 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.InvokableResolver;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * Resolves an Action by the given registry to a bean/object created by the
