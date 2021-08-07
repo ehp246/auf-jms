@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.global.case002.bymsg;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.Invoke;
 
 /**
  * @author Lei Yang
@@ -9,12 +9,12 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  */
 @ByJms(destination = "queue://me.ehp246.aufjms.request")
 public interface ExceptionThrower {
-    @Invoking("throw001")
+    @Invoke("throw001")
     Void throw001();
 
-    @Invoking("throw002")
+    @Invoke("throw002")
     Void throw002() throws Exception;
 
-    @Invoking("throw003")
+    @Invoke("throw003")
     Void throw003();
 }

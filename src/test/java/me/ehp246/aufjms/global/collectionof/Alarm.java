@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.CollectionOf;
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.Invoke;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
@@ -22,23 +22,23 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
 class Alarm {
     private Instant[] instants;
 
-    @Invoking("setArray")
+    @Invoke("setArray")
     public void set(final Instant... instants) {
         this.instants = instants;
     }
 
-    @Invoking("setCollection")
+    @Invoke("setCollection")
     public void set(@CollectionOf(Instant.class) final Set<Instant> instants) {
         // Type checking
         this.instants = instants.toArray(new Instant[] {});
     }
 
-    @Invoking("get")
+    @Invoke("get")
     public List<Instant> get() {
         return List.of(instants);
     }
 
-    @Invoking("flatSet")
+    @Invoke("flatSet")
     public List<Set<List<Instant>>> flatSet(
             @CollectionOf({ Set.class, List.class, Instant.class }) final List<Set<List<Instant>>> instants) {
         final var list = instants.stream().flatMap(Set::stream).flatMap(List::stream)

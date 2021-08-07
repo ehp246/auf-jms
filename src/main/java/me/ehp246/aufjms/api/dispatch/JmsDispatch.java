@@ -11,7 +11,7 @@ import javax.jms.Destination;
  * A {@link JmsDispatch} is meant to be dispatched/sent by a {@link DispatchFn}.
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public interface JmsDispatch {
     Destination destination();

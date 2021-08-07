@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.Invoke;
 
 /**
  * @author Lei Yang
@@ -17,7 +17,7 @@ class Add {
     @Autowired
     private AtomicReference<CompletableFuture<Integer>> ref;
 
-    @Invoking
+    @Invoke
     public void add(final int i) {
         ref.get().complete(i);
     }

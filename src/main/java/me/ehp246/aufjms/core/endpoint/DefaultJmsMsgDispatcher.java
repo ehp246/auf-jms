@@ -60,20 +60,20 @@ public final class DefaultJmsMsgDispatcher implements JmsMsgDispatcher {
         final var runnable = newRunnable(msg, target, binder);
 
         if (target.getInvocationModel() == null || target.getInvocationModel() == InvocationModel.SYNC) {
-            LOGGER.trace("Executing");
+            LOGGER.atTrace().log("Executing");
 
             runnable.run();
 
-            LOGGER.trace("Executed");
+            LOGGER.atTrace().log("Executed");
         } else {
             executor.execute(() -> {
                 ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
                 ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
-                LOGGER.trace("Executing");
+                LOGGER.atTrace().log("Executing");
 
                 runnable.run();
 
-                LOGGER.trace("Executed");
+                LOGGER.atTrace().log("Executed");
                 ThreadContext.remove(AufJmsProperties.MSG_TYPE);
                 ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
             });

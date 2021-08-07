@@ -11,10 +11,10 @@ import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
+import me.ehp246.aufjms.core.endpoint.AtEndpointConfigurer;
 import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.core.endpoint.EnableForJmsRegistrar;
-import me.ehp246.aufjms.core.endpoint.AtEndpointConfigurer;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -40,8 +40,8 @@ public @interface EnableForJms {
          */
         String value() default "";
 
-        String connection() default "";
-
         Class<?>[] scan() default {};
+
+        String connection() default "";
     }
 }

@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.endpoint.case001;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
-import me.ehp246.aufjms.api.annotation.Invoking;
+import me.ehp246.aufjms.api.annotation.Invoke;
 
 /**
  * @author Lei Yang
@@ -10,19 +10,19 @@ import me.ehp246.aufjms.api.annotation.Invoking;
 @ForJms
 public class Case001 {
 
-    @Invoking
+    @Invoke
     public void m001() {
     }
 
-    @Invoking
+    @Invoke
     public void m003() {
     }
 
-    @Invoking("m001-1")
+    @Invoke("m001-1")
     public void m001(final int i) {
     }
 
-    @Invoking("m002")
+    @Invoke("m002")
     public void m002(final int i) {
     }
 

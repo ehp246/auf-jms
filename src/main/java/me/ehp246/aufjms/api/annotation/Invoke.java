@@ -9,10 +9,10 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
 @Retention(RUNTIME)
 @Target({ METHOD })
-public @interface Invoking {
+public @interface Invoke {
     String value() default "";
 }

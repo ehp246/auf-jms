@@ -9,9 +9,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public class PooledExecutorConfiguration {
+public final class PooledExecutorConfiguration {
     /**
      * The executor must implement CallerRunsPolicy.
      *
