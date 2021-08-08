@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 @Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OfProperty {
-	String value() default "";
+    String value() default "";
 }

@@ -16,9 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JacksonConfiguration {
 
-	@Bean
-	public JsonByJackson jacksonProvider(final Optional<ObjectMapper> optional) {
-		return new JsonByJackson(optional.orElseGet(() -> new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)));
-	}
+    @Bean
+    public JsonByJackson jacksonProvider(final Optional<ObjectMapper> optional) {
+        return new JsonByJackson(optional.orElseGet(() -> new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)));
+    }
 }

@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import me.ehp246.aufjms.api.annotation.ByMsg;
+import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.CollectionOf;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -13,20 +13,20 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByMsg("me.ehp246.aufjms.collectionof")
+@ByJms(destination = "me.ehp246.aufjms.collectionof")
 @OfType("Alarm")
 interface SetAlarm {
-	@Invoking("setCollection")
-	void set(Set<Instant> instants);
+    @Invoking("setCollection")
+    void set(Set<Instant> instants);
 
-	@Invoking("setArray")
-	void set(Instant... instants);
+    @Invoking("setArray")
+    void set(Instant... instants);
 
-	@Invoking("get")
-	@CollectionOf(Instant.class)
-	Set<Instant> get();
+    @Invoking("get")
+    @CollectionOf(Instant.class)
+    Set<Instant> get();
 
-	@Invoking("flatSet")
-	@CollectionOf({ Set.class, List.class, Instant.class })
-	List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
+    @Invoking("flatSet")
+    @CollectionOf({ Set.class, List.class, Instant.class })
+    List<Set<List<Instant>>> flatSet(List<Set<List<Instant>>> instantSet);
 }

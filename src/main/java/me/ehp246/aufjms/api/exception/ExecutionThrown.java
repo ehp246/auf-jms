@@ -5,7 +5,7 @@ package me.ehp246.aufjms.api.exception;
  *
  */
 public interface ExecutionThrown {
-	Integer getCode();
+    Integer getCode();
 
-	String getMessage();
+    String getMessage();
 }

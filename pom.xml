@@ -4,9 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>1.0.0</version>
+	<version>0.1.0</version>
 	<name>Auf JMS</name>
-	<description>An annotation-driven declarative JMS development framework</description>
+	<description>An annotation-driven declarative JMS development framework
+	</description>
 
 
 	<url>https://github.com/ehp246/auf-jms</url>
@@ -20,7 +21,8 @@
 	</licenses>
 	<scm>
 		<connection>scm:git:git://github.com/ehp246/auf-jms.git</connection>
-		<developerConnection>scm:git:git@github.com:ehp246/auf-jms.git</developerConnection>
+		<developerConnection>scm:git:git@github.com:ehp246/auf-jms.git
+		</developerConnection>
 		<url>https://github.com/ehp246/auf-jms.git</url>
 		<tag>HEAD</tag>
 	</scm>
@@ -36,21 +38,20 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<jms-api.version>2.0.1</jms-api.version>
 		<junit-jupiter.version>5.5.2</junit-jupiter.version>
-		<log4j2.version>2.13.3</log4j2.version>
+		<log4j.version>2.14.1</log4j.version>
 		<mockito.version>3.1.0</mockito.version>
-		<jackson.version>2.10.2</jackson.version>
+		<jackson.version>2.12.3</jackson.version>
 
-		<spring-framework.version>5.2.3.RELEASE</spring-framework.version>
-		<spring-boot.version>2.2.4.RELEASE</spring-boot.version>
+		<spring-framework.version>5.3.9</spring-framework.version>
+		<spring-boot.version>2.5.3</spring-boot.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
 		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.2.0</maven-source-plugin.version>
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
 
-		<org.apache.activemq.version>5.15.8</org.apache.activemq.version>
+		<jms-api.version>2.0.1</jms-api.version>
 	</properties>
 
 	<dependencies>
@@ -63,7 +64,7 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>${log4j2.version}</version>
+			<version>${log4j.version}</version>
 		</dependency>
 
 		<dependency>
@@ -93,19 +94,18 @@
 			<version>${spring-framework.version}</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.7.0</version>
-		</dependency>
-
-
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-activemq</artifactId>
 			<version>${spring-boot.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -157,7 +157,12 @@
 			</exclusions>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-log4j2</artifactId>
+			<version>${spring-boot.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -171,6 +176,11 @@
 			<version>${spring-boot.version}</version>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
@@ -179,10 +189,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-parameter-names</artifactId>
 			<version>${jackson.version}</version>
-			<scope>provided</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
@@ -195,11 +205,13 @@
 
 	<distributionManagement>
 		<snapshotRepository>
-			<id>ossrh</id>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 		<repository>
-			<id>ossrh</id>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Release Repository</name>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
@@ -209,9 +221,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.version}</version>
+				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>11</release>
+					<release>15</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-parameters</arg>
@@ -269,7 +281,25 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.6</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-
 </project>

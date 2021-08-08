@@ -9,5 +9,5 @@ import javax.jms.Message;
  */
 @FunctionalInterface
 public interface MessageCreator<T extends Message> {
-	T create(MsgPortContext portContext);
+    T create(MsgPortContext portContext);
 }

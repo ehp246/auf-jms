@@ -11,23 +11,23 @@ import java.util.concurrent.Callable;
  */
 public class InvocationUtil {
 
-	private InvocationUtil() {
-		super();
-	}
+    private InvocationUtil() {
+        super();
+    }
 
-	public static <V> V invoke(final Callable<V> callable) {
-		try {
-			return callable.call();
-		} catch (final Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    public static <V> V invoke(final Callable<V> callable) {
+        try {
+            return callable.call();
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static <V> V invoke(final Callable<V> callable, final V def) {
-		try {
-			return callable.call();
-		} catch (final Exception e) {
-			return def;
-		}
-	}
+    public static <V> V invoke(final Callable<V> callable, final V def) {
+        try {
+            return callable.call();
+        } catch (final Exception e) {
+            return def;
+        }
+    }
 }

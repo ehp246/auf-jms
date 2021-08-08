@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.Msg;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -9,9 +9,9 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  *
  */
 public interface ExecutedInstance {
-	Msg getMsg();
+    JmsMsg getMsg();
 
-	ResolvedExecutable getInstance();
+    Executable getInstance();
 
-	InvocationOutcome<?> getOutcome();
+    InvocationOutcome<?> getOutcome();
 }

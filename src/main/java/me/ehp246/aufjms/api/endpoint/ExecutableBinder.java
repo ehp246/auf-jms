@@ -9,5 +9,5 @@ import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
  */
 @FunctionalInterface
 public interface ExecutableBinder {
-	ReflectingInvocation bind(ResolvedExecutable resolved, InvocationContext invocationContext);
+    ReflectingInvocation bind(Executable resolved, InvocationContext invocationContext);
 }

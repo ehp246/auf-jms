@@ -5,18 +5,18 @@ package me.ehp246.aufjms.api.jms;
  * application properties. These values are exposed/published to the public.
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public class MsgPropertyName {
-	private MsgPropertyName() {
-		super();
-	}
+public final class MsgPropertyName {
+    private MsgPropertyName() {
+        super();
+    }
 
-	public static final String Invoking = "AufJmsInvoking";
-	public static final String ServerThrown = "AufJmsServerThrown";
-	public static final String TTL = "AufJmsTtl";
-	public static final String GroupId = "JMSXGroupID";
-	public static final String GroupSeq = "JMSXGroupSeq";
-	public static final String TraceId = "spanTraceId";
-	public static final String SpanId = "spanId";
+    public static final String INVOKING = "AufJmsInvoking";
+    public static final String ServerThrown = "AufJmsServerThrown";
+    public static final String TTL = "AufJmsTtl";
+    public static final String GROUP_ID = "JMSXGroupID";
+    public static final String GROUP_SEQ = "JMSXGroupSeq";
+    public static final String TraceId = "spanTraceId";
+    public static final String SpanId = "spanId";
 }

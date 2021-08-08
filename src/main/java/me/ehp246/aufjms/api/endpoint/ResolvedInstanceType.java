@@ -8,11 +8,11 @@ import java.lang.reflect.Method;
  *
  */
 public interface ResolvedInstanceType {
-	Class<?> getInstanceType();
+    Class<?> getInstanceType();
 
-	Method getMethod();
+    Method getMethod();
 
-	InstanceScope getScope();
-	
-	InvocationModel getInvocationModel();
+    InstanceScope getScope();
+
+    InvocationModel getInvocationModel();
 }
