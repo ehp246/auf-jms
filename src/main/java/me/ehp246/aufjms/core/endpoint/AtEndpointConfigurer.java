@@ -56,7 +56,7 @@ public final class AtEndpointConfigurer implements JmsListenerConfigurer {
         this.endpoints.stream().forEach(endpoint -> {
             LOGGER.atDebug().log("Registering endpoint on destination '{}'", endpoint.getDestinationName());
 
-            final var defaultMsgDispatcher = new DefaultJmsMsgDispatcher(endpoint.getResolver(), binder, executor);
+            final var defaultMsgDispatcher = new DefaultEndpointConsumer(endpoint.getResolver(), binder, executor);
             final var id = endpoint.getDestinationName() + "@" + AtEndpoint.class.getCanonicalName();
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
@@ -73,7 +73,7 @@ public final class AtEndpointConfigurer implements JmsListenerConfigurer {
                         ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
                         ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
 
-                        defaultMsgDispatcher.dispatch(msg);
+                        defaultMsgDispatcher.accept(msg);
 
                         ThreadContext.remove(AufJmsProperties.MSG_TYPE);
                         ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
