@@ -48,7 +48,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
                         : ofType.value(),
                 ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
-                proxyInvocation::getDeclaringClassSimpleName);
+                () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
         final Duration ttl = proxyInvocation.methodAnnotationOf(OfTtl.class,
                 anno -> anno.value().equals("") ? config.ttl() : Duration.parse(anno.value()),

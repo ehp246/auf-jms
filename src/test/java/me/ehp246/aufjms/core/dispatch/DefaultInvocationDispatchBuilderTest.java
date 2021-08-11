@@ -76,135 +76,148 @@ class DefaultInvocationDispatchBuilderTest {
     void type_01() {
         final var argType = UUID.randomUUID().toString();
 
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type01(argType);
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        Assertions.assertEquals(argType, dispatchBuilder.get(proxyConfig, invocation[0]).type());
+        captor.proxy().type01(argType);
+
+        Assertions.assertEquals(argType, dispatchBuilder.get(proxyConfig, captor.invocation()).type(),
+                "should take arg");
     }
 
     @Test
     void type_arg_01() {
         final var argType = UUID.randomUUID().toString();
 
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type01_II(argType);
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type01_II(argType);
 
-        Assertions.assertEquals(argType, dispatch.type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_arg_02() {
         final var argType = UUID.randomUUID().toString();
 
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type01_III(argType);
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type01_III(argType);
 
-        Assertions.assertEquals(argType, dispatch.type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_arg_03() {
-        final Invocation[] invocation = new Invocation[1];
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type01_III(null);
+        captor.proxy().type01_III(null);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
-
-        Assertions.assertEquals(null, dispatch.type());
+        Assertions.assertEquals(null, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_arg_04() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type01_II(null);
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type01_II(null);
 
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type());
+        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_04() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type02();
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type02();
 
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type());
+        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_05() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).type02_I();
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type02_I();
 
-        Assertions.assertEquals("Type02_I", dispatch.type());
+        Assertions.assertEquals("Type02_I", dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_arg_06() {
         final var argType = UUID.randomUUID().toString();
 
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case02.class, i -> invocation[0] = i).type01(argType);
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type01(argType);
 
-        Assertions.assertEquals(argType, dispatch.type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_arg_07() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case02.class, i -> invocation[0] = i).type01(null);
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type01(null);
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, captor.invocation());
 
         Assertions.assertEquals(null, dispatch.type());
     }
 
     @Test
     void type_07() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case02.class, i -> invocation[0] = i).type02();
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type02();
+
+        final var dispatch = dispatchBuilder.get(proxyConfig, captor.invocation());
 
         Assertions.assertEquals(TypeCases.TYPE_II, dispatch.type());
     }
 
     @Test
     void type_08() {
-        final Invocation[] invocation = new Invocation[1];
-        getCase(TypeCases.Case02.class, i -> invocation[0] = i).type03();
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 
-        final var dispatch = dispatchBuilder.get(proxyConfig, invocation[0]);
+        captor.proxy().type03();
 
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type());
+        final var dispatch = dispatchBuilder.get(proxyConfig, captor.invocation());
+
+        Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type(), "should find annotated first");
     }
 
     @Test
     void type_method_09() {
-        final Invocation[] invocation = new Invocation[1];
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 
-        getCase(TypeCases.Case02.class, i -> invocation[0] = i).type04();
+        captor.proxy().type04();
 
-        Assertions.assertEquals("Type04", dispatchBuilder.get(proxyConfig, invocation[0]).type());
+        Assertions.assertEquals("Type04", dispatchBuilder.get(proxyConfig, captor.invocation()).type());
     }
 
     @Test
     void type_type_09() {
-        final Invocation[] invocation = new Invocation[1];
+        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
+        captor.proxy().m01();
 
-        getCase(TypeCases.Case01.class, i -> invocation[0] = i).m01();
+        Assertions.assertEquals("M01", dispatchBuilder.get(proxyConfig, captor.invocation()).type());
+    }
 
-        Assertions.assertEquals("Case01", dispatchBuilder.get(proxyConfig, invocation[0]).type());
+    @Test
+    void type_type_10() {
+        final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
+        captor.proxy().m01();
+
+        Assertions.assertEquals("Case03", dispatchBuilder.get(proxyConfig, captor.invocation()).type());
+    }
+
+    @Test
+    void type_type_11() {
+        final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
+        captor.proxy().m02();
+
+        Assertions.assertEquals("M02", dispatchBuilder.get(proxyConfig, captor.invocation()).type(),
+                "should follow the first annotated");
     }
 
     @Test

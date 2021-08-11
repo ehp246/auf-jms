@@ -44,4 +44,12 @@ class TypeCases {
         @OfType
         void type04();
     }
+
+    @OfType
+    static interface Case03 {
+        void m01();
+
+        @OfType
+        void m02();
+    }
 }

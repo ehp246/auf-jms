@@ -48,7 +48,7 @@ class ListenerTest {
 
         final var received = listener.takeReceived();
 
-        Assertions.assertEquals("Case01", received.getJMSType());
+        Assertions.assertEquals("Ping", received.getJMSType());
     }
 
     @Test
