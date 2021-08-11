@@ -12,7 +12,7 @@ import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.EnableForJms;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
 import me.ehp246.aufjms.util.UtilConfig;
 
 /**
@@ -33,7 +33,7 @@ class AppConfig {
     }
 
     @Bean
-    public DestinationNameResolver destinationNameResolver() {
+    public DestinationProvider destinationNameResolver() {
         return UtilConfig.destinationNameResolver();
     }
 

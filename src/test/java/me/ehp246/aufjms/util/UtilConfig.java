@@ -24,7 +24,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
 
 /**
  * @author Lei Yang
@@ -61,7 +61,7 @@ public class UtilConfig {
         return CONNECTION_FACTORY.createConnection();
     }
 
-    public static DestinationNameResolver destinationNameResolver() {
+    public static DestinationProvider destinationNameResolver() {
         return (c, d) -> UtilConfig.TEST_QUEUE;
     }
 }

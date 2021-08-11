@@ -1,7 +1,6 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
@@ -9,7 +8,6 @@ import javax.jms.TextMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpoint;
@@ -20,7 +18,9 @@ import org.springframework.jms.listener.MessageListenerContainer;
 
 import me.ehp246.aufjms.api.endpoint.AtEndpoint;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
+import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -30,50 +30,54 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class AtEndpointConfigurer implements JmsListenerConfigurer {
-    private final static Logger LOGGER = LogManager.getLogger(AtEndpointConfigurer.class);
+public final class AtEndpointListenerConfigurer implements JmsListenerConfigurer {
+    private final static Logger LOGGER = LogManager.getLogger(AtEndpointListenerConfigurer.class);
 
     private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
     private final Set<AtEndpoint> endpoints;
-    private final DestinationNameResolver destintationNameResolver;
-    private final Executor executor;
+    private final DestinationProvider destintationProvider;
+    private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
+    private final PropertyResolver propertyResolver;
 
-    public AtEndpointConfigurer(
+    public AtEndpointListenerConfigurer(
             final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
-            final Set<AtEndpoint> endpoints, final DestinationNameResolver destintationNameResolver,
-            @Qualifier(AufJmsProperties.EXECUTOR_BEAN) final Executor actionExecutor, final ExecutableBinder binder) {
+            final Set<AtEndpoint> endpoints, final DestinationProvider destintationNameResolver,
+            final ExecutorProvider executorProvider, final ExecutableBinder binder,
+            final PropertyResolver propertyResolver) {
         super();
         this.listenerContainerFactory = listenerContainerFactory;
         this.endpoints = endpoints;
-        this.destintationNameResolver = destintationNameResolver;
-        this.executor = actionExecutor;
+        this.destintationProvider = destintationNameResolver;
+        this.executorProvider = executorProvider;
         this.binder = binder;
+        this.propertyResolver = propertyResolver;
     }
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.atDebug().log("Registering endpoint on destination '{}'", endpoint.getDestinationName());
+            LOGGER.atDebug().log("Registering endpoint on destination '{}'", endpoint.destination());
 
-            final var defaultMsgDispatcher = new DefaultEndpointConsumer(endpoint.getResolver(), binder, executor);
-            final var id = endpoint.getDestinationName() + "@" + AtEndpoint.class.getCanonicalName();
+            final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
+                    executorProvider.get(Integer.parseInt(this.propertyResolver.resolve(endpoint.concurrency()))));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final AbstractMessageListenerContainer container = (AbstractMessageListenerContainer) listenerContainer;
-                    container.setDestinationName(endpoint.getDestinationName());
-                    container.setDestinationResolver((session, destinationName,
-                            pubSubDomain) -> destintationNameResolver.resolve("", destinationName));
+                    container.setDestinationName(endpoint.destination());
+                    container.setDestinationResolver(
+                            (session, destinationName, pubSubDomain) -> destintationProvider.get(endpoint.connection(),
+                                    destinationName));
                     container.setupMessageListener((MessageListener) message -> {
-                        final var msg = TextJmsMsg.from((TextMessage)message);
+                        final var msg = TextJmsMsg.from((TextMessage) message);
 
                         ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
                         ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
 
-                        defaultMsgDispatcher.accept(msg);
+                        dispatcher.dispatch(msg);
 
                         ThreadContext.remove(AufJmsProperties.MSG_TYPE);
                         ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
@@ -82,7 +86,7 @@ public final class AtEndpointConfigurer implements JmsListenerConfigurer {
 
                 @Override
                 public String getId() {
-                    return id;
+                    return endpoint.name();
                 }
             }, listenerContainerFactory);
         });

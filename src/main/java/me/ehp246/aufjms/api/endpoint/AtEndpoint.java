@@ -6,7 +6,13 @@ package me.ehp246.aufjms.api.endpoint;
  * @since 1.0
  */
 public interface AtEndpoint {
-    String getDestinationName();
+    String connection();
 
-    ExecutableResolver getResolver();
+    String destination();
+
+    ExecutableResolver resolver();
+
+    String concurrency();
+
+    String name();
 }

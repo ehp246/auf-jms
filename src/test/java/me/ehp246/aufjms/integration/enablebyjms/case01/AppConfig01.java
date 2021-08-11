@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
 import me.ehp246.aufjms.util.UtilConfig;
 
 /**
@@ -21,7 +21,7 @@ public class AppConfig01 {
     }
 
     @Bean
-    DestinationNameResolver destinationResolver() {
+    DestinationProvider destinationResolver() {
         final var dest = new ActiveMQTempQueue();
         return (c, d) -> dest;
     }

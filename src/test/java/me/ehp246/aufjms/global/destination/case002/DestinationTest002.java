@@ -26,7 +26,7 @@ public class DestinationTest002 {
 
         Assertions.assertEquals(2, endpoints.size());
 
-        final var names = endpoints.values().stream().map(AtEndpoint::getDestinationName).collect(Collectors.toSet());
+        final var names = endpoints.values().stream().map(AtEndpoint::destination).collect(Collectors.toSet());
 
         Assertions.assertEquals(true,
                 names.contains("queue://" + DestinationConfiguration002.class.getName() + ".request"),
