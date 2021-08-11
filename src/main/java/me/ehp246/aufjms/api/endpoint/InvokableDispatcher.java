@@ -8,6 +8,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 @FunctionalInterface
-public interface EndpointConsumer {
-    void accept(final JmsMsg msg);
+public interface InvokableDispatcher {
+    void dispatch(final JmsMsg msg);
 }

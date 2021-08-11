@@ -33,13 +33,31 @@ public class ReplyEndpointConfiguration {
         this.msgEndpoint = new AtEndpoint() {
 
             @Override
-            public String getDestinationName() {
+            public String destination() {
                 return ReplyEndpointConfiguration.this.getReplyToName();
             }
 
             @Override
-            public ExecutableResolver getResolver() {
+            public ExecutableResolver resolver() {
                 return msg -> correlMap.get(msg.correlationId());
+            }
+
+            @Override
+            public String connection() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String concurrency() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public String name() {
+                // TODO Auto-generated method stub
+                return null;
             }
 
         };

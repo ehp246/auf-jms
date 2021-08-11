@@ -10,11 +10,12 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.core.configuration.PooledExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.AtEndpointConfigurer;
+import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
+import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
+import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.AtEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
-import me.ehp246.aufjms.core.endpoint.EnableForJmsRegistrar;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -25,14 +26,15 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ EnableForJmsRegistrar.class, AtEndpointFactory.class, AtEndpointConfigurer.class,
-        PooledExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
+@Import({ AufJmsConfiguration.class, AtEndpointRegistrar.class, AtEndpointFactory.class, AtEndpointListenerConfigurer.class,
+        ExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
     At[] value() default @At;
 
     @Retention(RUNTIME)
     @Target(ElementType.ANNOTATION_TYPE)
     @interface At {
+        String connection() default "";
         /**
          * Destination name of the incoming message.
          *
@@ -42,6 +44,8 @@ public @interface EnableForJms {
 
         Class<?>[] scan() default {};
 
-        String connection() default "";
+        String concurrency() default "1";
+
+        String name() default "";
     }
 }

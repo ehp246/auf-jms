@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -25,9 +25,9 @@ import me.ehp246.aufjms.core.util.OneUtil;
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
-    private final DestinationNameResolver destinationResolver;
+    private final DestinationProvider destinationResolver;
 
-    public DefaultInvocationDispatchBuilder(final DestinationNameResolver destinationResolver) {
+    public DefaultInvocationDispatchBuilder(final DestinationProvider destinationResolver) {
         super();
         this.destinationResolver = destinationResolver;
     }
@@ -38,7 +38,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
-        final var destination = this.destinationResolver.resolve(config.connection(), config.destination());
+        final var destination = this.destinationResolver.get(config.connection(), config.destination());
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
@@ -51,7 +51,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
-                .map(name -> this.destinationResolver.resolve(config.connection(), name)).orElse(null);
+                .map(name -> this.destinationResolver.get(config.connection(), name)).orElse(null);
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 

@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.dispatch.DispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.DispatchFnException;
-import me.ehp246.aufjms.api.jms.ConnectionNameResolver;
+import me.ehp246.aufjms.api.jms.ConnectionProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -29,11 +29,11 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
-    private final ConnectionNameResolver connProvider;
+    private final ConnectionProvider connProvider;
     private final ToJson toJson;
     private final List<DispatchListener> listeners;
 
-    public DefaultDispatchFnProvider(final ConnectionNameResolver cons, final ToJson jsonFn,
+    public DefaultDispatchFnProvider(final ConnectionProvider cons, final ToJson jsonFn,
             final List<DispatchListener> dispatchListeners) {
         super();
         this.connProvider = Objects.requireNonNull(cons);
@@ -47,7 +47,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
             LOGGER.atTrace().log("Sending {}:{} to {} ", dispatch.correlationId(), dispatch.type(),
                     dispatch.destination().toString());
 
-            try (final Session session = connProvider.resolve(connectionName).createSession(false,
+            try (final Session session = connProvider.get(connectionName).createSession(false,
                     Session.AUTO_ACKNOWLEDGE)) {
                 final var message = session.createTextMessage();
                 final var msg = TextJmsMsg.from(message);

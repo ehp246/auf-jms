@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.endpoint.AtEndpoint;
-import me.ehp246.aufjms.api.jms.DestinationNameResolver;
+import me.ehp246.aufjms.api.jms.DestinationProvider;
 
 @Disabled
 @SpringBootTest(classes = DestinationConfiguration001.class, properties = {
@@ -29,17 +29,17 @@ class DestinationTest001 {
 
         Assertions.assertEquals(3, endpoints.size());
 
-        final var names = endpoints.values().stream().map(AtEndpoint::getDestinationName).collect(Collectors.toSet());
+        final var names = endpoints.values().stream().map(AtEndpoint::destination).collect(Collectors.toSet());
 
         Assertions.assertEquals(true, names.contains("topic://topic.003"));
         Assertions.assertEquals(true, names.contains("queue://queue.003"));
 
-        final var resolver = appCtx.getBean(DestinationNameResolver.class);
-        Assertions.assertEquals(true, resolver.resolve("", "topic://topic.003") instanceof Topic);
-        Assertions.assertEquals(true, resolver.resolve("", "queue://queue.003") instanceof Queue);
-        Assertions.assertEquals(true, resolver.resolve("", "queue.003") instanceof Queue);
-        Assertions.assertEquals(resolver.resolve("", "queue.003").toString(),
-                resolver.resolve("", "queue://queue.003").toString());
+        final var resolver = appCtx.getBean(DestinationProvider.class);
+        Assertions.assertEquals(true, resolver.get("", "topic://topic.003") instanceof Topic);
+        Assertions.assertEquals(true, resolver.get("", "queue://queue.003") instanceof Queue);
+        Assertions.assertEquals(true, resolver.get("", "queue.003") instanceof Queue);
+        Assertions.assertEquals(resolver.get("", "queue.003").toString(),
+                resolver.get("", "queue://queue.003").toString());
     }
 
 }

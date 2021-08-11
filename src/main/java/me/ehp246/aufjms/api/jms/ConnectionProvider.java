@@ -7,6 +7,6 @@ import javax.jms.Connection;
  * @since 1.0
  */
 @FunctionalInterface
-public interface ConnectionNameResolver {
-    Connection resolve(String name);
+public interface ConnectionProvider {
+    Connection get(String name);
 }

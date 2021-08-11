@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.AtEndpoint;
+import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 
 /**
  *
@@ -20,19 +20,35 @@ public final class AtEndpointFactory {
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
     }
 
-    public AtEndpoint newEndpoint(final String destination, final Set<String> scanPackages) {
+    public AtEndpoint newEndpoint(final String connection, final String destination, final Set<String> scanPackages,
+            final String concurrency, final String name) {
         return new AtEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
                     DefaultInvokableResolver.registeryFrom(scanPackages));
 
             @Override
-            public String getDestinationName() {
+            public String destination() {
                 return destination;
             }
 
             @Override
-            public ExecutableResolver getResolver() {
+            public ExecutableResolver resolver() {
                 return resolver;
+            }
+
+            @Override
+            public String connection() {
+                return connection;
+            }
+
+            @Override
+            public String concurrency() {
+                return concurrency;
+            }
+
+            @Override
+            public String name() {
+                return name;
             }
 
         };

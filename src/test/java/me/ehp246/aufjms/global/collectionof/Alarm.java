@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  *
  */
 @Service
-@ForJms(scope = InstanceScope.BEAN, invocation = InvocationModel.SYNC)
+@ForJms(scope = InstanceScope.BEAN, invocation = InvocationModel.INLINE)
 class Alarm {
     private Instant[] instants;
 
