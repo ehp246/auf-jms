@@ -3,7 +3,7 @@ package me.ehp246.aufjms.core.bymsg;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.OfType;
 
-@ByJms(destination = "")
+@ByJms(value = "")
 interface BodyTestCase {
     void m001();
 

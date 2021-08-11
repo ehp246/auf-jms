@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByJms(destination = "queue://me.ehp246.aufjms.request")
+@ByJms(value = "queue://me.ehp246.aufjms.request")
 public interface Add {
     @OfType("Calculator")
     public int add(int i, int j);

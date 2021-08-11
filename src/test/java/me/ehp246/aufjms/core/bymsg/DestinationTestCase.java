@@ -4,17 +4,17 @@ import me.ehp246.aufjms.api.annotation.ByJms;
 
 public interface DestinationTestCase {
 
-    @ByJms(destination = "test.inbox")
+    @ByJms(value = "test.inbox")
     interface Case001 {
         void m001();
     }
 
-    @ByJms(destination = "")
+    @ByJms(value = "")
     interface Case002 {
         void m001();
     }
 
-    @ByJms(destination = "test.inbox")
+    @ByJms(value = "test.inbox")
     interface Case003 {
         void m001();
     }

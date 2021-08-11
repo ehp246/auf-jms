@@ -104,7 +104,7 @@ public final class ByJmsFactory {
 
             @Override
             public String destination() {
-                return byJms.destination();
+                return byJms.value();
             }
 
             @Override

@@ -2,8 +2,6 @@ package me.ehp246.aufjms.util;
 
 import java.util.UUID;
 
-import java.util.UUID;
-
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;

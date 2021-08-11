@@ -15,12 +15,6 @@ import me.ehp246.aufjms.core.util.OneUtil;
  */
 public final class AufJmsConfiguration {
     @Bean
-    public ConnectionProvider connectionMap(final ListableBeanFactory beanFactory) {
-        return name -> OneUtil.hasValue(name) ? beanFactory.getBean(name, Connection.class)
-                : beanFactory.getBean(Connection.class);
-    }
-
-    @Bean
     public PropertyResolver propertyResolver(final org.springframework.core.env.PropertyResolver springResolver) {
         return springResolver::resolveRequiredPlaceholders;
     }

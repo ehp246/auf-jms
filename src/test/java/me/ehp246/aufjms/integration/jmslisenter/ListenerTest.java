@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.integration.jmslisenter.AppConfig.Case01;
+import me.ehp246.aufjms.util.MockJmsConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
@@ -22,7 +23,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @Timeout(1)
-@SpringBootTest(classes = { AppConfig.class, TestQueueListener.class })
+@SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, MockJmsConfig.class })
 class ListenerTest {
     @Autowired
     private ToJson toJson;

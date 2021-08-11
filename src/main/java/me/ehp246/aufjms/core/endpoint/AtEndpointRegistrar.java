@@ -67,7 +67,7 @@ public final class AtEndpointRegistrar implements ImportBeanDefinitionRegistrar 
         final var beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(AtEndpoint.class);
         beanDefinition.setFactoryBeanName(AtEndpointFactory.class.getName());
-        beanDefinition.setFactoryMethodName("newEndpoint");
+        beanDefinition.setFactoryMethodName("newInstance");
 
         return beanDefinition;
     }
