@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-class TypeTestCases {
+class TypeCases {
     public static final String TYPE_I = "09bf9d41-d65a-4bf3-be39-75a318059c0d";
 
     public final static String TYPE_II = "6f7779af-8c3e-4684-8a12-537415281b89";
