@@ -209,16 +209,16 @@ class DefaultInvocationDispatchBuilderTest {
 
     @Test
     void ttl_01() {
-        final var caputor = TestUtil.newCaptor(TtlCases.Case01.class);
-        caputor.proxy().get();
+        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
+        captor.proxy().get();
 
-        Assertions.assertEquals(null, dispatchBuilder.get(proxyConfig, caputor.invocation()).ttl());
+        Assertions.assertEquals(null, dispatchBuilder.get(proxyConfig, captor.invocation()).ttl());
     }
 
     @Test
     void ttl_02() {
-        final var caputor = TestUtil.newCaptor(TtlCases.Case01.class);
-        caputor.proxy().get();
+        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
+        captor.proxy().get();
 
         Assertions.assertEquals(Duration.ofDays(1).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
@@ -227,13 +227,13 @@ class DefaultInvocationDispatchBuilderTest {
                 return Duration.ofDays(1);
             }
 
-        }, caputor.invocation()).ttl().toMillis());
+        }, captor.invocation()).ttl().toMillis());
     }
 
     @Test
     void ttl_03() {
-        final var caputor = TestUtil.newCaptor(TtlCases.Case01.class);
-        caputor.proxy().getTtl01();
+        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
+        captor.proxy().getTtl01();
 
         Assertions.assertEquals(Duration.ofDays(1).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
@@ -242,13 +242,13 @@ class DefaultInvocationDispatchBuilderTest {
                 return Duration.ofDays(1);
             }
 
-        }, caputor.invocation()).ttl().toMillis());
+        }, captor.invocation()).ttl().toMillis());
     }
 
     @Test
     void ttl_04() {
-        final var caputor = TestUtil.newCaptor(TtlCases.Case01.class);
-        caputor.proxy().getTtl02();
+        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
+        captor.proxy().getTtl02();
 
         Assertions.assertEquals(Duration.ofSeconds(10).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
@@ -257,7 +257,7 @@ class DefaultInvocationDispatchBuilderTest {
                 return Duration.ofDays(1);
             }
 
-        }, caputor.invocation()).ttl().toMillis());
+        }, captor.invocation()).ttl().toMillis());
     }
 
     @Test
