@@ -5,6 +5,6 @@ package me.ehp246.aufjms.api.dispatch;
  * @since 1.0
  */
 @FunctionalInterface
-public interface JmsDispatchFnProvider {
+public interface DispatchFnProvider {
     DispatchFn get(String connectionName);
 }

@@ -50,8 +50,8 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
         args.addGenericArgumentValue(proxyInterface);
         args.addGenericArgumentValue(new ByJmsProxyConfig() {
             private final String replyTo = byJms.replyTo().isBlank() ? map.get("replyTo").toString() : byJms.replyTo();
-            private final String destination = byJms.destination().equals("") ? map.get("destination").toString()
-                    : byJms.destination();
+            private final String destination = byJms.value().equals("") ? map.get("value").toString()
+                    : byJms.value();
             private final Duration ttl = byJms.ttl().equals("")
                     ? (map.get("ttl").toString().equals("") ? Duration.ZERO : Duration.parse(map.get("ttl").toString()))
                     : Duration.parse(byJms.ttl());

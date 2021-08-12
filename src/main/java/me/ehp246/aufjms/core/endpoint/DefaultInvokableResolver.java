@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,7 +70,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
 
         final var definition = registeredInvokables.get(msgType);
         if (definition == null) {
-            LOGGER.atDebug().log("Type {} not found", msgType);
+            LOGGER.atTrace().log("Type {} not found", msgType);
             return null;
         }
 
@@ -79,7 +80,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
         final var method = registereMethods.get(definition.getInstanceType()).get(invoking);
 
         if (method == null) {
-            LOGGER.atDebug().log("Method {} not found", invoking);
+            LOGGER.atTrace().log("Method {} not found", invoking);
             return null;
         }
 
@@ -122,7 +123,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
-                LOGGER.atDebug().log("Scanning {}", bean.getBeanClassName());
+                LOGGER.atTrace().log("Scanning {}", bean.getBeanClassName());
 
                 return Class.forName(bean.getBeanClassName());
             } catch (final ClassNotFoundException e) {
@@ -151,19 +152,21 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
         for (final var method : reflected.findMethods(Invoking.class)) {
             final var invokingName = method.getAnnotation(Invoking.class).value().strip();
             if (invokings.containsKey(invokingName)) {
-                throw new RuntimeException("Duplicate executing methods found on " + instanceType.getName());
+                throw new RuntimeException("Duplicate invocation methods: " + invokings.get(invokingName).toString()
+                        + ", " + method.toString());
             }
             invokings.put(invokingName, method);
         }
 
-        // There should be at least one executing method.
-        if (invokings.size() == 0) {
-            throw new RuntimeException("No executing method defined by " + instanceType.getName());
+        // There should be at least one default method.
+        if (invokings.get("") == null) {
+            throw new RuntimeException("No invocation method defined by " + instanceType.getName());
         }
 
-        final var msgType = annotation.value().strip();
+        final var msgType = Optional.of(annotation.value().strip()).filter(OneUtil::hasValue)
+                .orElseGet(instanceType::getSimpleName);
 
-        LOGGER.atDebug().log("Scanned {} on {}", msgType, instanceType.getCanonicalName());
+        LOGGER.atTrace().log("Registering {} on {}", msgType, instanceType.getCanonicalName());
 
         return new InvokableDefinition() {
             private final Map<String, Method> methods = Map.copyOf(invokings);

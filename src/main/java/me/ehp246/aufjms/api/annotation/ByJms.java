@@ -22,7 +22,7 @@ public @interface ByJms {
     /**
      * Defines the destination name for the interface proxy.
      */
-    String destination() default "";
+    String value() default "";
 
     /**
      * Defines an optional bean name by which the proxy interface can be injected.

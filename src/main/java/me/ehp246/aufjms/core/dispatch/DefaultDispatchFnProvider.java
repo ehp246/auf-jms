@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.dispatch.DispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
-import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
 import me.ehp246.aufjms.api.exception.DispatchFnException;
 import me.ehp246.aufjms.api.jms.ConnectionProvider;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
@@ -26,7 +26,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
+public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
     private final ConnectionProvider connProvider;

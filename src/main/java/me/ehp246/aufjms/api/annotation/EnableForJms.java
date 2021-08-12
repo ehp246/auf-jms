@@ -12,8 +12,8 @@ import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.AtEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
@@ -21,7 +21,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 /**
  *
  * @author Lei Yang
- *
+ * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)
@@ -34,7 +34,6 @@ public @interface EnableForJms {
     @Retention(RUNTIME)
     @Target(ElementType.ANNOTATION_TYPE)
     @interface At {
-        String connection() default "";
         /**
          * Destination name of the incoming message.
          *
@@ -42,9 +41,11 @@ public @interface EnableForJms {
          */
         String value() default "";
 
+        String connection() default "";
+
         Class<?>[] scan() default {};
 
-        String concurrency() default "1";
+        String concurrency() default "0";
 
         String name() default "";
     }

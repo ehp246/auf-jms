@@ -30,7 +30,7 @@ public @interface EnableByJms {
     /**
      * Defines the default destination name global to the application.
      */
-    String destination() default "";
+    String value() default "";
 
     Class<?>[] scan() default {};
 

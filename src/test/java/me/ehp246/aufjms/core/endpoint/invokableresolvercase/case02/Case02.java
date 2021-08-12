@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.endpoint.case002;
+package me.ehp246.aufjms.core.endpoint.invokableresolvercase.case02;
 
 import me.ehp246.aufjms.api.annotation.ForJms;
 import me.ehp246.aufjms.api.annotation.Invoking;
@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 @ForJms
-public class Case002 {
+public class Case02 {
 
     @Invoking
     public void m001() {

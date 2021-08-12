@@ -20,7 +20,7 @@ public final class AtEndpointFactory {
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
     }
 
-    public AtEndpoint newEndpoint(final String connection, final String destination, final Set<String> scanPackages,
+    public AtEndpoint newInstance(final String connection, final String destination, final Set<String> scanPackages,
             final String concurrency, final String name) {
         return new AtEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,

@@ -16,7 +16,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.CatchingInvocation;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
-import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
 
 /**
  *
@@ -58,10 +57,18 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
         final var runnable = newRunnable(msg, target, binder);
 
-        if (target.getInvocationModel() == null || target.getInvocationModel() == InvocationModel.INLINE) {
+        if (executor == null
+                || (target.getInvocationModel() != null && target.getInvocationModel() == InvocationModel.INLINE)) {
             LOGGER.atTrace().log("Executing");
 
-            runnable.run();
+            final var thrown = runnable.invoke().getThrown();
+
+            if (thrown != null) {
+                if (thrown instanceof RuntimeException) {
+                    throw (RuntimeException) thrown;
+                }
+                throw new RuntimeException(thrown);
+            }
 
             LOGGER.atTrace().log("Executed");
         } else {
@@ -70,7 +77,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
                 ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
                 LOGGER.atTrace().log("Executing");
 
-                runnable.run();
+                runnable.invoke();
 
                 LOGGER.atTrace().log("Executed");
                 ThreadContext.remove(AufJmsProperties.MSG_TYPE);
@@ -79,15 +86,16 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
         }
     };
 
-    private static Runnable newRunnable(final JmsMsg msg, final Executable target, final ExecutableBinder binder) {
+    private static CatchingInvocation newRunnable(final JmsMsg msg, final Executable target,
+            final ExecutableBinder binder) {
         return () -> {
             final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(target, () -> msg));
-            final var outcome = bindOutcome.ifReturnedPresent().map(ReflectingInvocation::invoke)
+            final var outcome = bindOutcome.ifReturnedPresent().map(CatchingInvocation::invoke)
                     .orElseGet(() -> InvocationOutcome.thrown(bindOutcome.getThrown()));
 
             final var postEexcution = target.postExecution();
             if (postEexcution == null) {
-                return;
+                return outcome;
             }
 
             LOGGER.atTrace().log("Executing postExecution");
@@ -111,6 +119,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
             });
 
             LOGGER.atTrace().log("Executed postExecution");
+            return outcome;
         };
     }
 }

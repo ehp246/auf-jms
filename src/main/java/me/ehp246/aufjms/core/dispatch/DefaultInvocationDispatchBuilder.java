@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 
+import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
@@ -47,8 +48,11 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
                         : ofType.value(),
                 ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
-                proxyInvocation::getDeclaringClassSimpleName);
+                () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
+        final Duration ttl = proxyInvocation.methodAnnotationOf(OfTtl.class,
+                anno -> anno.value().equals("") ? config.ttl() : Duration.parse(anno.value()),
+                config::ttl);
         // ReplyTo is optional.
         final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
                 .map(name -> this.destinationResolver.get(config.connection(), name)).orElse(null);
@@ -84,7 +88,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
             @Override
             public Duration ttl() {
-                return config.ttl();
+                return ttl;
             }
 
             @Override
