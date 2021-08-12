@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
  * Custom version of JMS Message which does not throw.
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public interface JmsMsg extends JmsDispatch {
     String id();
