@@ -8,18 +8,11 @@ import java.util.concurrent.Callable;
  * @since 1.0
  */
 public interface CatchingInvocation {
+    InvocationOutcome<Object> invoke();
+
     static <T> InvocationOutcome<T> invoke(final Callable<T> callable) {
         try {
             return InvocationOutcome.returned(callable.call());
-        } catch (final Exception e) {
-            return InvocationOutcome.thrown(e);
-        }
-    }
-
-    static InvocationOutcome<Void> invoke(final Runnable runnable) {
-        try {
-            runnable.run();
-            return InvocationOutcome.returned(null);
         } catch (final Exception e) {
             return InvocationOutcome.thrown(e);
         }

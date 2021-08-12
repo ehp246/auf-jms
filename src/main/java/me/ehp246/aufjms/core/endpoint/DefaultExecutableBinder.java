@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,8 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.core.reflection.ReflectingInvocation;
+import me.ehp246.aufjms.core.reflection.CatchingInvocation;
+import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  *
@@ -40,10 +42,19 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
     }
 
     @Override
-    public ReflectingInvocation bind(final Executable target, final InvocationContext ctx) {
+    public CatchingInvocation bind(final Executable target, final InvocationContext ctx) {
         final var method = target.getMethod();
         if (method.getParameterCount() == 0) {
-            return new ReflectingInvocation(target.getInstance(), method, null);
+            return () -> {
+                try {
+                    method.setAccessible(true);
+                    return InvocationOutcome.returned(method.invoke(target.getInstance(), (Object[]) null));
+                } catch (InvocationTargetException e1) {
+                    return InvocationOutcome.thrown(e1.getCause());
+                } catch (Exception e2) {
+                    return InvocationOutcome.thrown(e2);
+                }
+            };
         }
 
         final var parameters = method.getParameters();
@@ -81,7 +92,16 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             fromJson.from(ctx.getMsg().text(), receivers);
         }
 
-        return new ReflectingInvocation(target.getInstance(), method, arguments);
+        return () -> {
+            try {
+                method.setAccessible(true);
+                return InvocationOutcome.returned(method.invoke(target.getInstance(), arguments));
+            } catch (InvocationTargetException e1) {
+                return InvocationOutcome.thrown(e1.getCause());
+            } catch (Exception e2) {
+                return InvocationOutcome.thrown(e2);
+            }
+        };
     }
 
     /**

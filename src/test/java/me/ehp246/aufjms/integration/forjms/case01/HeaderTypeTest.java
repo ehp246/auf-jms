@@ -38,6 +38,7 @@ class HeaderTypeTest {
             @Override
             public Message createMessage(Session session) throws JMSException {
                 final var msg = session.createTextMessage();
+                msg.setJMSType("Add");
                 msg.setText("" + i);
                 return msg;
             }

@@ -20,6 +20,10 @@ public final class ExecutorConfiguration {
      * @return
      */
     private ThreadPoolTaskExecutor newPooledExecutor(final int poolSize) {
+        if (poolSize <= 0) {
+            return null;
+        }
+
         final var threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
         threadPoolTaskExecutor.setCorePoolSize(1);
         threadPoolTaskExecutor.setMaxPoolSize(poolSize);

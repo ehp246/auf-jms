@@ -45,7 +45,7 @@ public @interface EnableForJms {
 
         Class<?>[] scan() default {};
 
-        String concurrency() default "1";
+        String concurrency() default "0";
 
         String name() default "";
     }
