@@ -27,9 +27,9 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
     private final PropertyResolver propertyResolver;
 
-    public DefaultInvocationDispatchBuilder(final PropertyResolver destinationResolver) {
+    public DefaultInvocationDispatchBuilder(final PropertyResolver propertyResolver) {
         super();
-        this.propertyResolver = destinationResolver;
+        this.propertyResolver = propertyResolver;
     }
 
     @Override

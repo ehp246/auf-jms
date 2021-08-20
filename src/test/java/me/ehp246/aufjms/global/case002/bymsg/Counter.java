@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.global.case002.bymsg;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.annotation.ByJms.At;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
 
@@ -8,7 +9,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByJms(value = "queue://me.ehp246.aufjms.request")
+@ByJms(value = @At("queue://me.ehp246.aufjms.request"))
 @OfType("Calculator")
 public interface Counter {
     @Invoking("setMem")

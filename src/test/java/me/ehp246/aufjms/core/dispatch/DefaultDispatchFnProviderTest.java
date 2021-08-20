@@ -6,8 +6,8 @@ import static org.mockito.Mockito.verify;
 import java.time.Duration;
 import java.util.List;
 
-import javax.jms.Connection;
 import javax.jms.Destination;
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -23,6 +23,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.util.MockDispatch;
 import me.ehp246.aufjms.util.MockTextMessage;
@@ -36,7 +37,7 @@ class DefaultDispatchFnProviderTest {
     @Mock
     private Destination destination;
     @Mock
-    private Connection connection;
+    private JMSContext connection;
     @Mock
     private Session session;
     @Mock
@@ -61,7 +62,7 @@ class DefaultDispatchFnProviderTest {
         final var listener = new DispatchListener() {
 
             @Override
-            public void onDispatch(JmsMsg msg) {
+            public void onDispatch(JmsMsg msg, JmsDispatch dispatch) {
                 count[0]++;
             }
         };

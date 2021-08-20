@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.annotation.ByJms.At;
 import me.ehp246.aufjms.api.annotation.CollectionOf;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -13,7 +14,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
  * @author Lei Yang
  *
  */
-@ByJms(value = "me.ehp246.aufjms.collectionof")
+@ByJms(value = @At("me.ehp246.aufjms.collectionof"))
 @OfType("Alarm")
 interface SetAlarm {
     @Invoking("setCollection")

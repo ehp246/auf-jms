@@ -21,7 +21,7 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ByJms {
-    At value() default @At;
+    At value();
 
     /**
      * The name of the {@linkplain JMSContext} used to send {@linkplain JmsDispatch}

@@ -5,13 +5,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import javax.jms.Destination;
-
-import org.apache.activemq.command.ActiveMQTopic;
 import org.junit.jupiter.api.Assertions;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 
 /**
@@ -20,30 +18,37 @@ import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
  */
 class DefaultInvocationDispatchProviderTest {
     private final static String[] NAMES = new String[2];
-    private final static Destination destination = new ActiveMQTopic();
     private final static String replyToName = UUID.randomUUID().toString();
     private final static String destinationName = UUID.randomUUID().toString();
     private final static String connectionName = UUID.randomUUID().toString();
+    private final static AtDestination destination = new AtDestination() {
+
+        @Override
+        public String name() {
+            return destinationName;
+        }
+    };
+
     private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
 
         @Override
-        public Duration ttl() {
-            return Duration.ofMillis(334);
+        public String ttl() {
+            return Duration.ofMillis(334).toString();
         }
 
         @Override
-        public String destination() {
-            return destinationName;
+        public AtDestination destination() {
+            return destination;
         }
 
         @Override
-        public String connection() {
+        public String context() {
             return connectionName;
         }
 
         @Override
-        public String replyTo() {
-            return replyToName;
+        public AtDestination replyTo() {
+            return null;
         }
     };
 
@@ -57,32 +62,30 @@ class DefaultInvocationDispatchProviderTest {
         Assertions.assertEquals(replyToName, NAMES[1]);
     }
 
-
-    void destintationResolver_02() throws NoSuchMethodException, SecurityException {
+    void propertyResolver_02() throws NoSuchMethodException, SecurityException {
         final String[] names = new String[2];
-        new DefaultInvocationDispatchBuilder((con, dest) -> {
-            names[0] = con;
+        new DefaultInvocationDispatchBuilder((dest) -> {
             names[1] = dest;
-            return destination;
+            return destinationName;
         }).get(new ByJmsProxyConfig() {
 
             @Override
-            public Duration ttl() {
-                return Duration.ofMillis(334);
+            public String ttl() {
+                return Duration.ofMillis(334).toString();
             }
 
             @Override
-            public String destination() {
-                return destinationName;
+            public AtDestination destination() {
+                return null;
             }
 
             @Override
-            public String connection() {
+            public String context() {
                 return connectionName;
             }
 
             @Override
-            public String replyTo() {
+            public AtDestination replyTo() {
                 return null;
             }
         }, null);
@@ -90,7 +93,6 @@ class DefaultInvocationDispatchProviderTest {
         Assertions.assertEquals(connectionName, names[0]);
         Assertions.assertEquals(destinationName, names[1]);
     }
-
 
     void body_01() throws NoSuchMethodException, SecurityException {
         final var args = new ArrayList<>();
@@ -101,7 +103,6 @@ class DefaultInvocationDispatchProviderTest {
         Assertions.assertEquals(null, dispatch.bodyValues().get(0));
         Assertions.assertThrows(Exception.class, () -> dispatch.bodyValues().clear());
     }
-
 
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
