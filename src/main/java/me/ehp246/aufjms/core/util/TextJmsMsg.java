@@ -1,18 +1,17 @@
 package me.ehp246.aufjms.core.util;
 
 import java.time.Instant;
-import java.util.concurrent.Callable;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.TextMessage;
 
-import me.ehp246.aufjms.api.exception.JmsException;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.MsgPropertyName;
 
 /**
- * Utility to un-pack a JMS message.
+ * Utility to un-pack a JMS message. All read calls are delayed and on-demand.
  * 
  * @author Lei Yang
  * @since 1.0
@@ -27,63 +26,68 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String id() {
-        return invoke(message::getJMSMessageID);
+        return JMSSupplier.invoke(message::getJMSMessageID);
     }
 
     @Override
     public String type() {
-        return invoke(message::getJMSType);
+        return JMSSupplier.invoke(message::getJMSType);
     }
 
     @Override
     public String correlationId() {
-        return invoke(message::getJMSCorrelationID);
+        return JMSSupplier.invoke(message::getJMSCorrelationID);
     }
 
     @Override
     public Destination replyTo() {
-        return invoke(message::getJMSReplyTo);
+        return JMSSupplier.invoke(message::getJMSReplyTo);
     }
 
     @Override
     public String text() {
-        return invoke(message::getText);
+        return JMSSupplier.invoke(message::getText);
     }
 
     @Override
     public String groupId() {
-        return invoke(() -> message.getStringProperty(MsgPropertyName.GROUP_ID));
+        return JMSSupplier.invoke(() -> message.getStringProperty(MsgPropertyName.GROUP_ID));
+    }
+
+    @Override
+    public Integer groupSeq() {
+        return JMSSupplier.invoke(() -> message.getIntProperty(MsgPropertyName.GROUP_SEQ));
     }
 
     @Override
     public long expiration() {
-        return invoke(message::getJMSExpiration);
+        return JMSSupplier.invoke(message::getJMSExpiration);
     }
 
     @Override
     public Destination destination() {
-        return invoke(message::getJMSDestination);
+        return JMSSupplier.invoke(message::getJMSDestination);
     }
 
     @Override
     public String invoking() {
-        return invoke(() -> message.getStringProperty(MsgPropertyName.INVOKING));
+        return JMSSupplier.invoke(() -> message.getStringProperty(MsgPropertyName.INVOKING));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T property(String name, Class<T> type) {
         if (type == String.class) {
-            return (T) invoke(() -> message.getStringProperty(name));
+            return (T) JMSSupplier.invoke(() -> message.getStringProperty(name));
         }
         if (type == int.class) {
-            return (T) invoke(() -> message.getIntProperty(name));
+            return (T) JMSSupplier.invoke(() -> message.getIntProperty(name));
         }
         if (type == long.class) {
-            return (T) invoke(() -> message.getLongProperty(name));
+            return (T) JMSSupplier.invoke(() -> message.getLongProperty(name));
         }
         if (type == boolean.class) {
-            return (T) invoke(() -> message.getBooleanProperty(name));
+            return (T) JMSSupplier.invoke(() -> message.getBooleanProperty(name));
         }
 
         throw new RuntimeException("Un-supported property type " + type.getTypeName());
@@ -91,11 +95,11 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public Instant timestamp() {
-        return Instant.ofEpochMilli(invoke(message::getJMSTimestamp));
+        return Instant.ofEpochMilli(JMSSupplier.invoke(message::getJMSTimestamp));
     }
 
     @Override
-    public TextMessage message() {
+    public TextMessage msg() {
         return message;
     }
 
@@ -103,14 +107,15 @@ public final class TextJmsMsg implements JmsMsg {
         return new TextJmsMsg(message);
     }
 
-    private static <V> V invoke(Callable<V> callable) {
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            if (e instanceof JMSException) {
-                throw new JmsException((JMSException) e);
+    private interface JMSSupplier<V> {
+        V get() throws JMSException;
+
+        static <V> V invoke(JMSSupplier<V> callable) {
+            try {
+                return callable.get();
+            } catch (JMSException e) {
+                throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
             }
-            throw new RuntimeException(e);
         }
     }
 }

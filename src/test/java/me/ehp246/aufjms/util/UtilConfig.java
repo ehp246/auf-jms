@@ -6,8 +6,8 @@ import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.activemq.command.ActiveMQQueue;
+import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
+import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
@@ -39,7 +39,12 @@ public class UtilConfig {
     public static final Destination TEST_QUEUE = new ActiveMQQueue(UUID.randomUUID().toString());
 
     static {
-        CONNECTION_FACTORY.setBrokerURL("vm://embedded?broker.persistent=false,useShutdownHook=false");
+        try {
+            CONNECTION_FACTORY.setBrokerURL("vm://embedded?broker.persistent=false,useShutdownHook=false");
+        } catch (JMSException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Bean

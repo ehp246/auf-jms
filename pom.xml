@@ -4,11 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>0.3.0</version>
+	<version>0.4.0</version>
 	<name>Auf JMS</name>
-	<description>An annotation-driven declarative JMS development framework
-	</description>
-
+	<description>An annotation-driven declarative JMS development framework</description>
 
 	<url>https://github.com/ehp246/auf-jms</url>
 
@@ -97,8 +95,32 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-activemq</artifactId>
+			<artifactId>spring-boot-starter-artemis</artifactId>
 			<version>${spring-boot.version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>artemis-jms-server</artifactId>
+			<version>2.18.0</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.azure.spring</groupId>
+			<artifactId>azure-spring-boot-starter-servicebus-jms</artifactId>
+			<version>3.7.0</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>
@@ -143,7 +165,8 @@
 			<artifactId>junit-platform-commons</artifactId>
 			<version>1.7.0</version>
 			<scope>test</scope>
-		</dependency>		<dependency>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
 			<version>${spring-framework.version}</version>

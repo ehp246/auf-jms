@@ -4,19 +4,18 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.jms.Destination;
 
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.DestinationProvider;
+import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.Invocation;
+import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -26,11 +25,11 @@ import me.ehp246.aufjms.core.util.OneUtil;
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
-    private final DestinationProvider destinationResolver;
+    private final PropertyResolver propertyResolver;
 
-    public DefaultInvocationDispatchBuilder(final DestinationProvider destinationResolver) {
+    public DefaultInvocationDispatchBuilder(final PropertyResolver destinationResolver) {
         super();
-        this.destinationResolver = destinationResolver;
+        this.propertyResolver = destinationResolver;
     }
 
     @Override
@@ -39,7 +38,33 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
-        final var destination = this.destinationResolver.get(config.connection(), config.destination());
+        final var destination = new AtDestination() {
+            private final String name = propertyResolver.resolve(config.destination().name());
+
+            @Override
+            public DestinationType type() {
+                return config.destination().type();
+            }
+
+            @Override
+            public String name() {
+                return name;
+            }
+        };
+
+        final var replyTo = new AtDestination() {
+            private final String name = propertyResolver.resolve(config.replytTo().name());
+
+            @Override
+            public DestinationType type() {
+                return config.replytTo().type();
+            }
+
+            @Override
+            public String name() {
+                return name;
+            }
+        };
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
@@ -50,19 +75,17 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
                 () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
-        final Duration ttl = proxyInvocation.methodAnnotationOf(OfTtl.class,
-                anno -> anno.value().equals("") ? config.ttl() : Duration.parse(anno.value()),
-                config::ttl);
-        // ReplyTo is optional.
-        final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
-                .map(name -> this.destinationResolver.get(config.connection(), name)).orElse(null);
+        final Duration ttl = Duration.parse(propertyResolver.resolve(proxyInvocation.methodAnnotationOf(OfTtl.class,
+                anno -> anno.value().equals("") ? config.ttl() : anno.value(),
+                config::ttl)));
+
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
 
             @Override
-            public Destination destination() {
+            public AtDestination destination() {
                 return destination;
             }
 
@@ -82,7 +105,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public Destination replyTo() {
+            public AtDestination replyTo() {
                 return replyTo;
             }
 

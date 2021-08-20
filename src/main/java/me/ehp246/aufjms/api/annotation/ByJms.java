@@ -7,9 +7,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.Message;
+import javax.jms.JMSContext;
+
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.jms.ContextProvider;
+import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
  * @author Lei Yang
@@ -19,10 +21,13 @@ import javax.jms.Message;
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ByJms {
+    At value() default @At;
+
     /**
-     * Defines the destination name for the interface proxy.
+     * The name of the {@linkplain JMSContext} used to send {@linkplain JmsDispatch}
+     * messages. Provided by the {@linkplain ContextProvider} bean.
      */
-    String value() default "";
+    String context() default "";
 
     /**
      * Defines an optional bean name by which the proxy interface can be injected.
@@ -33,18 +38,19 @@ public @interface ByJms {
      */
     String name() default "";
 
+    /**
+     * Spring Property supported.
+     */
     String ttl() default "";
 
-    /**
-     * The bean name of the JMS {@link Connection} to use for this proxy.
-     */
-    String connection() default "";
+    At replyTo() default @At;
 
-    /**
-     * Defines the name of the {@link Destination} for
-     * {@link Message#setJMSReplyTo(javax.jms.Destination)}.
-     * <p>
-     * The default value follows {@link EnableByJms#replyTo()}.
-     */
-    String replyTo() default "";
+    @interface At {
+        /**
+         * Defines the destination name for the proxy interface.
+         */
+        String value() default "";
+
+        DestinationType type() default DestinationType.QUEUE;
+    }
 }

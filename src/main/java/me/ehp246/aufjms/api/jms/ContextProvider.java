@@ -1,12 +1,12 @@
 package me.ehp246.aufjms.api.jms;
 
-import javax.jms.Connection;
+import javax.jms.JMSContext;
 
 /**
  * @author Lei Yang
  * @since 1.0
  */
 @FunctionalInterface
-public interface ConnectionProvider {
-    Connection get(String name);
+public interface ContextProvider {
+    JMSContext get(String name);
 }

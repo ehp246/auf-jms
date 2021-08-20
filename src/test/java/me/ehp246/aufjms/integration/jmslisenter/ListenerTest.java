@@ -15,15 +15,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.integration.jmslisenter.AppConfig.Case01;
-import me.ehp246.aufjms.util.MockJmsConfig;
+import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
  * @author Lei Yang
  *
  */
-@Timeout(1)
-@SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, MockJmsConfig.class })
+@Timeout(5)
+@SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
 class ListenerTest {
     @Autowired
     private ToJson toJson;

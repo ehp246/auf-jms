@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.jms.ConnectionProvider;
+import me.ehp246.aufjms.api.jms.ContextProvider;
 import me.ehp246.aufjms.api.jms.DestinationProvider;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.util.UtilConfig;
@@ -32,7 +32,7 @@ public class AppConfig01 {
     }
 
     @Bean
-    public ConnectionProvider connectionMap(final ListableBeanFactory beanFactory) {
+    public ContextProvider connectionMap(final ListableBeanFactory beanFactory) {
         return name -> OneUtil.hasValue(name) ? beanFactory.getBean(name, Connection.class)
                 : beanFactory.getBean(Connection.class);
     }

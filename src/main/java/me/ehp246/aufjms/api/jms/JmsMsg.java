@@ -2,9 +2,8 @@ package me.ehp246.aufjms.api.jms;
 
 import java.time.Instant;
 
+import javax.jms.Destination;
 import javax.jms.TextMessage;
-
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 
 /**
  * Custom version of JMS Message which does not throw.
@@ -12,10 +11,22 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
  * @author Lei Yang
  * @since 1.0
  */
-public interface JmsMsg extends JmsDispatch {
+public interface JmsMsg {
     String id();
 
+    Destination destination();
+
+    String type();
+
+    String correlationId();
+
     String text();
+
+    Destination replyTo();
+
+    String groupId();
+
+    Integer groupSeq();
 
     long expiration();
 
@@ -25,5 +36,5 @@ public interface JmsMsg extends JmsDispatch {
 
     <T> T property(String name, Class<T> type);
 
-    TextMessage message();
+    TextMessage msg();
 }
