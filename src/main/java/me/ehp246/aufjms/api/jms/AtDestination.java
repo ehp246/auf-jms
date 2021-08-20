@@ -11,5 +11,7 @@ import javax.jms.Destination;
 public interface AtDestination {
     String name();
 
-    DestinationType type();
+    default DestinationType type() {
+        return DestinationType.QUEUE;
+    }
 }
