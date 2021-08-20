@@ -13,5 +13,5 @@ public interface ByJmsProxyConfig {
 
     String context();
 
-    AtDestination replytTo();
+    AtDestination replyTo();
 }

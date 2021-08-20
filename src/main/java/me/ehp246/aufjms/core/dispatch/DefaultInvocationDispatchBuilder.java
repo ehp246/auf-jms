@@ -53,11 +53,11 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         };
 
         final var replyTo = new AtDestination() {
-            private final String name = propertyResolver.resolve(config.replytTo().name());
+            private final String name = propertyResolver.resolve(config.replyTo().name());
 
             @Override
             public DestinationType type() {
-                return config.replytTo().type();
+                return config.replyTo().type();
             }
 
             @Override

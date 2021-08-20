@@ -51,10 +51,10 @@ class ByJmsRegistrarTest {
         new ByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.ReplyToConfig01.class),
                 registry);
 
-        Assertions.assertEquals("From Enabled",
+        Assertions.assertEquals("",
                 ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
-                                .replyTo());
+                                .replyTo().name());
     }
 
     @Test
@@ -67,7 +67,7 @@ class ByJmsRegistrarTest {
         Assertions.assertEquals("9c4a0935-bdf6-43bc-a10c-765faf6ed771",
                 ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
-                                .destination());
+                                .destination().name());
     }
 
     @Test
@@ -80,7 +80,7 @@ class ByJmsRegistrarTest {
         Assertions.assertEquals("2f954f8b-8162-47c1-bb6d-d405a25bba73",
                 ((ByJmsProxyConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
-                                .destination());
+                                .destination().name());
     }
 
     @Test
@@ -89,10 +89,10 @@ class ByJmsRegistrarTest {
         new ByJmsRegistrar().registerBeanDefinitions(
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig01.class), registry);
 
-        Assertions.assertEquals(110,
+        Assertions.assertEquals("PT0.11S",
                 ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
                         .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
-                                .ttl().toMillis());
+                                .ttl());
     }
 
     @Test
@@ -101,8 +101,7 @@ class ByJmsRegistrarTest {
         new ByJmsRegistrar().registerBeanDefinitions(
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig02.class), registry);
 
-        Assertions.assertEquals(1000, ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
-                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue())).ttl()
-                                .toMillis());
+        Assertions.assertEquals("PT1S", ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
+                .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue())).ttl());
     }
 }

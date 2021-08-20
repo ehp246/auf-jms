@@ -25,30 +25,30 @@ public class RegistrarAppConfigs {
     }
 
     @EnableByJms(scan = {
-            RegistrarCase01.class }, replyTo = "From Enabled")
+            RegistrarCase01.class })
     public static class ReplyToConfig01 {
 
     }
 
     @EnableByJms(scan = {
-            RegistrarCase01.class }, value = "2f954f8b-8162-47c1-bb6d-d405a25bba73")
+            RegistrarCase01.class })
     public static class DestinationConfig01 {
 
     }
 
-    @EnableByJms(scan = { RegistrarCase02.class }, value = "2f954f8b-8162-47c1-bb6d-d405a25bba73")
+    @EnableByJms(scan = { RegistrarCase02.class })
     public static class DestinationConfig02 {
 
     }
 
     @EnableByJms(scan = {
-            RegistrarCase01.class }, value = "2f954f8b-8162-47c1-bb6d-d405a25bba73", ttl = "PT0.11S")
+            RegistrarCase01.class }, ttl = "PT0.11S")
     public static class TtlConfig01 {
 
     }
 
     @EnableByJms(scan = {
-            RegistrarCase02.class }, value = "2f954f8b-8162-47c1-bb6d-d405a25bba73", ttl = "PT0.112S")
+            RegistrarCase02.class }, ttl = "PT0.112S")
     public static class TtlConfig02 {
 
     }

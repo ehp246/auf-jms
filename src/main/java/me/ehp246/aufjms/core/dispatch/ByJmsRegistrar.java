@@ -96,7 +96,7 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             }
 
             @Override
-            public AtDestination replytTo() {
+            public AtDestination replyTo() {
                 return replyTo;
             }
         });

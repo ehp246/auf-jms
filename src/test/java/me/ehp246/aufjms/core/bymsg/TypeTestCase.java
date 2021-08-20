@@ -4,7 +4,7 @@ import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.OfType;
 
 class TypeTestCase {
-    @ByJms(value = "")
+    @ByJms(@ByJms.At(""))
     interface TypeCase001 {
         void m001();
 
