@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.annotation.EnableForJms.At;
  *
  */
 @SpringBootApplication
-@EnableByJms(replyTo = "topic://${aufjms.reply.topic}")
+@EnableByJms()
 @EnableForJms({ @At("queue://${aufjms.request.queue}"), @At("${aufjms.request.queue02}") })
 public class DestinationConfiguration001 {
 }

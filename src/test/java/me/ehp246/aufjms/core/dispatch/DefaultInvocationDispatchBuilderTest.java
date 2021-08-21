@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
@@ -21,31 +22,38 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
+    private final static AtDestination at = new AtDestination() {
+
+        @Override
+        public String name() {
+            return "";
+        }
+    };
     private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
 
         @Override
-        public Duration ttl() {
+        public String ttl() {
             return null;
         }
 
         @Override
-        public String destination() {
+        public AtDestination destination() {
+            return at;
+        }
+
+        @Override
+        public String context() {
             return null;
         }
 
         @Override
-        public String connection() {
-            return null;
-        }
-
-        @Override
-        public String replyTo() {
-            return null;
+        public AtDestination replyTo() {
+            return at;
         }
     };
 
     private DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
-            (con, dest) -> null);
+            (dest) -> null);
 
     @SuppressWarnings("unchecked")
     private <T> T getCase(final Class<T> t, final Consumer<Invocation> consumer) {
@@ -236,8 +244,8 @@ class DefaultInvocationDispatchBuilderTest {
         Assertions.assertEquals(Duration.ofDays(1).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
             @Override
-            public Duration ttl() {
-                return Duration.ofDays(1);
+            public String ttl() {
+                return Duration.ofDays(1).toString();
             }
 
         }, captor.invocation()).ttl().toMillis());
@@ -251,8 +259,8 @@ class DefaultInvocationDispatchBuilderTest {
         Assertions.assertEquals(Duration.ofDays(1).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
             @Override
-            public Duration ttl() {
-                return Duration.ofDays(1);
+            public String ttl() {
+                return Duration.ofDays(1).toString();
             }
 
         }, captor.invocation()).ttl().toMillis());
@@ -266,8 +274,8 @@ class DefaultInvocationDispatchBuilderTest {
         Assertions.assertEquals(Duration.ofSeconds(10).toMillis(), dispatchBuilder.get(new MockProxyConfig() {
 
             @Override
-            public Duration ttl() {
-                return Duration.ofDays(1);
+            public String ttl() {
+                return Duration.ofDays(1).toString();
             }
 
         }, captor.invocation()).ttl().toMillis());

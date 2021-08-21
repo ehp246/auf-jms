@@ -4,11 +4,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-import javax.jms.Destination;
-
-import org.apache.activemq.command.ActiveMQQueue;
-
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.jms.AtDestination;
 
 /**
  * @author Lei Yang
@@ -16,7 +13,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
  */
 public class MockDispatch implements JmsDispatch {
     private final String type = UUID.randomUUID().toString();
-    private final Destination destination = new ActiveMQQueue(TestQueueListener.DESTINATION_NAME);
     private final String correlId = UUID.randomUUID().toString();
     private final String groupId = UUID.randomUUID().toString();
 
@@ -26,8 +22,14 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public Destination destination() {
-        return destination;
+    public AtDestination destination() {
+        return new AtDestination() {
+
+            @Override
+            public String name() {
+                return TestQueueListener.DESTINATION_NAME;
+            }
+        };
     }
 
     @Override
@@ -41,7 +43,7 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public Destination replyTo() {
+    public AtDestination replyTo() {
         return null;
     }
 

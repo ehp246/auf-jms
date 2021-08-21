@@ -1,8 +1,7 @@
 package me.ehp246.aufjms.util;
 
-import java.time.Duration;
-
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.jms.AtDestination;
 
 /**
  * @author Lei Yang
@@ -11,25 +10,25 @@ import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 public class MockProxyConfig implements ByJmsProxyConfig {
 
     @Override
-    public String destination() {
+    public AtDestination destination() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Duration ttl() {
+    public String ttl() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String connection() {
+    public String context() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String replyTo() {
+    public AtDestination replyTo() {
         // TODO Auto-generated method stub
         return null;
     }

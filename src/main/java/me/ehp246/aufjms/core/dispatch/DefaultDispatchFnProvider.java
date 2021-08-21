@@ -104,7 +104,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
             }
 
             private Destination toJMSDestintation(AtDestination at) {
-                if (!OneUtil.hasValue(at.name())) {
+                if (at == null || !OneUtil.hasValue(at.name())) {
                     return null;
                 }
 
