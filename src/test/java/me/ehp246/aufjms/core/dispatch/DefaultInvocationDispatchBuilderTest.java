@@ -1,19 +1,13 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 
-import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.AtDestination;
-import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -32,18 +26,13 @@ class DefaultInvocationDispatchBuilderTest {
     private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
 
         @Override
-        public String ttl() {
-            return null;
-        }
-
-        @Override
         public AtDestination destination() {
             return at;
         }
 
         @Override
         public String context() {
-            return null;
+            return "";
         }
 
         @Override
@@ -53,32 +42,7 @@ class DefaultInvocationDispatchBuilderTest {
     };
 
     private DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
-            (dest) -> null);
-
-    @SuppressWarnings("unchecked")
-    private <T> T getCase(final Class<T> t, final Consumer<Invocation> consumer) {
-        return (T) (Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] { t },
-                (proxy, method, args) -> {
-                    consumer.accept(new Invocation() {
-
-                        @Override
-                        public Object target() {
-                            return proxy;
-                        }
-
-                        @Override
-                        public Method method() {
-                            return method;
-                        }
-
-                        @Override
-                        public List<?> args() {
-                            return args == null ? List.of() : Arrays.asList(args);
-                        }
-                    });
-                    return null;
-                }));
-    }
+            String::toString);
 
     @Test
     void type_01() {

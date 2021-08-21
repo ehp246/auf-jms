@@ -9,9 +9,11 @@ import me.ehp246.aufjms.api.jms.AtDestination;
 public interface ByJmsProxyConfig {
     AtDestination destination();
 
-    String ttl();
-
     String context();
 
     AtDestination replyTo();
+
+    default String ttl() {
+        return null;
+    }
 }

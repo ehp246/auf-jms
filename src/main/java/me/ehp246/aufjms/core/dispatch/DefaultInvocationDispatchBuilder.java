@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,6 +17,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -52,19 +54,9 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
         };
 
-        final var replyTo = new AtDestination() {
-            private final String name = propertyResolver.resolve(config.replyTo().name());
-
-            @Override
-            public DestinationType type() {
-                return config.replyTo().type();
-            }
-
-            @Override
-            public String name() {
-                return name;
-            }
-        };
+        // Optional.
+        final var replyTo = Optional.ofNullable(config.replyTo()).map(
+                at -> new AtDestinationRecord(propertyResolver.resolve(at.name()), at.type())).orElse(null);
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
@@ -75,9 +67,11 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
                 () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
-        final Duration ttl = Duration.parse(propertyResolver.resolve(proxyInvocation.methodAnnotationOf(OfTtl.class,
-                anno -> anno.value().equals("") ? config.ttl() : anno.value(),
-                config::ttl)));
+        // Accepts null.
+        final Duration ttl = Optional
+                .ofNullable(proxyInvocation.methodAnnotationOf(OfTtl.class,
+                        anno -> anno.value().equals("") ? config.ttl() : anno.value(), config::ttl))
+                .map(propertyResolver::resolve).filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
 
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
