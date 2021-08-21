@@ -20,9 +20,9 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
 @Target({ ElementType.TYPE })
 public @interface ForJms {
     /**
-     * Regular expression to match {@link Message#getJMSType()}.
+     * Case-sensitive matching of {@link Message#getJMSType()}.
      */
-    String value() default "";
+    String value();
 
     /**
      * Invocation instance resolution instruction.

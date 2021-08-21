@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
  *
  */
 @Service
-@ForJms(scope = InstanceScope.BEAN)
+@ForJms(value = "Calculator", scope = InstanceScope.BEAN)
 public class Calculator {
     public AtomicReference<Integer> mem = new AtomicReference<>();
 

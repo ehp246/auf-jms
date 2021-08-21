@@ -16,6 +16,6 @@ public class EmbeddedArtemisConfig {
 
     @Bean
     ObjectMapper objectMapper() {
-        return UtilConfig.OBJECT_MAPPER;
+        return TestUtil.OBJECT_MAPPER;
     }
 }

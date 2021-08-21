@@ -45,6 +45,6 @@ public class SimpleServiceBusConfig {
 
     @Bean
     ObjectMapper objectMapper() {
-        return UtilConfig.OBJECT_MAPPER;
+        return TestUtil.OBJECT_MAPPER;
     }
 }

@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.exception.ForMsgExecutionException;
  * @author Lei Yang
  *
  */
-@ForJms
+@ForJms("ExceptionThrower")
 public class ExceptionThrower {
     @Invoking("throw001")
     public void throw001() {

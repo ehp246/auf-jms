@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.ForJms;
  * @author Lei Yang
  *
  */
-@ForJms
+@ForJms("Case04")
 public class Case04 {
 
 }

@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
  * @author Lei Yang
  *
  */
-@ForJms(scope = InstanceScope.BEAN)
+@ForJms(value = "Case06", scope = InstanceScope.BEAN)
 public interface Case06 {
     @Invoking
     void m001();

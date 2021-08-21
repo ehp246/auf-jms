@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-@ForJms
+@ForJms("Case01")
 public class Case01 {
 
     @Invoking
