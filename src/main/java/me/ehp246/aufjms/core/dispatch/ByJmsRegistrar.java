@@ -14,7 +14,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
@@ -79,7 +79,7 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
         final var args = new ConstructorArgumentValues();
         args.addGenericArgumentValue(proxyInterface);
-        args.addGenericArgumentValue(new ByJmsProxyConfig() {
+        args.addGenericArgumentValue(new DispatchConfig() {
             @Override
             public String ttl() {
                 return ttl;

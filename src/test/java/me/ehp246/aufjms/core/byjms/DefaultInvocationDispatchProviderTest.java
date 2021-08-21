@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
@@ -29,7 +29,7 @@ class DefaultInvocationDispatchProviderTest {
         }
     };
 
-    private final static ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig() {
+    private final static DispatchConfig proxyConfig = new DispatchConfig() {
 
         @Override
         public String ttl() {
@@ -67,7 +67,7 @@ class DefaultInvocationDispatchProviderTest {
         new DefaultInvocationDispatchBuilder((dest) -> {
             names[1] = dest;
             return destinationName;
-        }).get(new ByJmsProxyConfig() {
+        }).get(null, new DispatchConfig() {
 
             @Override
             public String ttl() {
@@ -88,7 +88,7 @@ class DefaultInvocationDispatchProviderTest {
             public AtDestination replyTo() {
                 return null;
             }
-        }, null);
+        });
 
         Assertions.assertEquals(connectionName, names[0]);
         Assertions.assertEquals(destinationName, names[1]);
@@ -97,7 +97,7 @@ class DefaultInvocationDispatchProviderTest {
     void body_01() throws NoSuchMethodException, SecurityException {
         final var args = new ArrayList<>();
         args.add(null);
-        final var dispatch = dispatchBuilder.get(proxyConfig, null);
+        final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(null, dispatch.bodyValues().get(0));
@@ -106,7 +106,7 @@ class DefaultInvocationDispatchProviderTest {
 
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
-        final var dispatch = dispatchBuilder.get(proxyConfig, null);
+        final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
         Assertions.assertEquals(1, dispatch.bodyValues().size());
         Assertions.assertEquals(now, dispatch.bodyValues().get(0));

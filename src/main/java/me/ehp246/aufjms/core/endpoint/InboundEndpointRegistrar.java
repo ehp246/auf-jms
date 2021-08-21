@@ -14,15 +14,17 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.EnableForJms;
-import me.ehp246.aufjms.api.endpoint.AtEndpoint;
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public final class AtEndpointRegistrar implements ImportBeanDefinitionRegistrar {
+public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegistrar {
 
     @SuppressWarnings("unchecked")
     @Override
@@ -45,13 +47,15 @@ public final class AtEndpointRegistrar implements ImportBeanDefinitionRegistrar 
                 final var baseName = importingClassMetadata.getClassName();
                 scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
             }
-            final var connection = endpoint.get("connection").toString();
-            final var destination = endpoint.get("value").toString();
+            final var at = (Map<String, Object>) endpoint.get("value");
+            final var context = endpoint.get("context").toString();
+            final var destination = new AtDestinationRecord(at.get("value").toString(),
+                    (DestinationType) at.get("type"));
             final var name = Optional.of(endpoint.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(destination + "@" + connection);
+                    .orElse(destination.type().name() + "://" + destination.name() + "@" + context);
 
             final var constructorArgumentValues = new ConstructorArgumentValues();
-            constructorArgumentValues.addGenericArgumentValue(connection);
+            constructorArgumentValues.addGenericArgumentValue(context);
             constructorArgumentValues.addGenericArgumentValue(destination);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
             constructorArgumentValues.addGenericArgumentValue(endpoint.get("concurrency"));
@@ -65,8 +69,8 @@ public final class AtEndpointRegistrar implements ImportBeanDefinitionRegistrar 
 
     private GenericBeanDefinition newBeanDefinition(Map<String, Object> annotationAttributes) {
         final var beanDefinition = new GenericBeanDefinition();
-        beanDefinition.setBeanClass(AtEndpoint.class);
-        beanDefinition.setFactoryBeanName(AtEndpointFactory.class.getName());
+        beanDefinition.setBeanClass(InboundEndpoint.class);
+        beanDefinition.setFactoryBeanName(InboundEndpointFactory.class.getName());
         beanDefinition.setFactoryMethodName("newInstance");
 
         return beanDefinition;

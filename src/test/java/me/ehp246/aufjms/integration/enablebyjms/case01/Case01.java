@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.integration.enablebyjms.case01;
 
+import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.ByJms.At;
 
 /**
  * @author Lei Yang

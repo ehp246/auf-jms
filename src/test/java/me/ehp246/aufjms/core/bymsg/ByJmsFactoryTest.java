@@ -3,7 +3,7 @@ package me.ehp246.aufjms.core.bymsg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.DispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
@@ -16,7 +16,7 @@ import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 
 class ByJmsFactoryTest {
     private final DispatchFn dispatchFn = dispatch -> null;
-    private final InvocationDispatchBuilder dispatchProvider = (config, invocation) -> null;
+    private final InvocationDispatchBuilder dispatchProvider = (invocation, config) -> null;
     private final DispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
@@ -34,8 +34,8 @@ class ByJmsFactoryTest {
         }
     };
 
-    private ByJmsProxyConfig case01() {
-        return new ByJmsProxyConfig() {
+    private DispatchConfig case01() {
+        return new DispatchConfig() {
 
             @Override
             public String ttl() {
@@ -104,7 +104,7 @@ class ByJmsFactoryTest {
         final var newInstance = new ByJmsFactory(conection -> {
             con[0] = conection;
             return dispatchFn;
-        }, (config, invocation) -> {
+        }, (invocation, config) -> {
             inv[0] = invocation;
             return jmsDispatch;
         }).newInstance(TestCases.Case01.class, case01());

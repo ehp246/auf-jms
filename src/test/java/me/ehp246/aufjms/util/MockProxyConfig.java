@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.util;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.core.jms.AtQueueRecord;
 
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.core.jms.AtQueueRecord;
  * @author Lei Yang
  *
  */
-public class MockProxyConfig implements ByJmsProxyConfig {
+public class MockProxyConfig implements DispatchConfig {
     private final AtDestination dest = new AtQueueRecord("");
 
     @Override

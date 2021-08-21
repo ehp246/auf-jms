@@ -6,7 +6,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @author Lei Yang
  * @since 1.0
  */
-public interface ByJmsProxyConfig {
+public interface DispatchConfig {
     AtDestination destination();
 
     String context();

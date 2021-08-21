@@ -16,7 +16,7 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 
-import me.ehp246.aufjms.api.endpoint.AtEndpoint;
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.jms.DestinationProvider;
@@ -25,7 +25,7 @@ import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
- * JmsListenerConfigurer used to register {@link AtEndpoint}'s at run-time.
+ * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
  *
  * @author Lei Yang
  * @since 1.0
@@ -34,7 +34,7 @@ public final class AtEndpointListenerConfigurer implements JmsListenerConfigurer
     private final static Logger LOGGER = LogManager.getLogger(AtEndpointListenerConfigurer.class);
 
     private final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory;
-    private final Set<AtEndpoint> endpoints;
+    private final Set<InboundEndpoint> endpoints;
     private final DestinationProvider destintationProvider;
     private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
@@ -42,7 +42,7 @@ public final class AtEndpointListenerConfigurer implements JmsListenerConfigurer
 
     public AtEndpointListenerConfigurer(
             final JmsListenerContainerFactory<DefaultMessageListenerContainer> listenerContainerFactory,
-            final Set<AtEndpoint> endpoints, final DestinationProvider destintationNameResolver,
+            final Set<InboundEndpoint> endpoints, final DestinationProvider destintationNameResolver,
             final ExecutorProvider executorProvider, final ExecutableBinder binder,
             final PropertyResolver propertyResolver) {
         super();
@@ -69,7 +69,7 @@ public final class AtEndpointListenerConfigurer implements JmsListenerConfigurer
                     final AbstractMessageListenerContainer container = (AbstractMessageListenerContainer) listenerContainer;
                     container.setDestinationName(endpoint.destination());
                     container.setDestinationResolver(
-                            (session, destinationName, pubSubDomain) -> destintationProvider.get(endpoint.connection(),
+                            (session, destinationName, pubSubDomain) -> destintationProvider.get(endpoint.context(),
                                     destinationName));
                     container.setupMessageListener((MessageListener) message -> {
                         final var msg = TextJmsMsg.from((TextMessage) message);

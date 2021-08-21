@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.bymsg;
 
+import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.ByJms.At;
 import me.ehp246.aufjms.api.annotation.OfType;
 
 @ByJms(value = @At(""))

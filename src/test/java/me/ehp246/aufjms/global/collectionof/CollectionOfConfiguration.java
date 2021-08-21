@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
-import me.ehp246.aufjms.api.annotation.EnableForJms.At;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 
 /**
  * @author Lei Yang
@@ -12,6 +12,6 @@ import me.ehp246.aufjms.api.annotation.EnableForJms.At;
  */
 @SpringBootApplication
 @EnableByJms
-@EnableForJms(@At("me.ehp246.aufjms.collectionof"))
+@EnableForJms(@Inbound("me.ehp246.aufjms.collectionof"))
 public class CollectionOfConfiguration {
 }

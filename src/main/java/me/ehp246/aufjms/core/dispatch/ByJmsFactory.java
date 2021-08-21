@@ -12,7 +12,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.DispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
@@ -37,7 +37,7 @@ public final class ByJmsFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(final Class<T> byJmsInterface, final ByJmsProxyConfig jmsProxyConfig) {
+    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsProxyConfig) {
         LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 
         final DispatchFn dispatchFn = this.dispatchFnProvider.get(jmsProxyConfig.context());
@@ -61,7 +61,7 @@ public final class ByJmsFactory {
                                 .bindTo(proxy).invokeWithArguments(args);
                     }
 
-                    final var jmsDispatch = dispatchProvider.get(jmsProxyConfig, new Invocation() {
+                    final var jmsDispatch = dispatchProvider.get(new Invocation() {
                         private final List<?> asList = Collections
                                 .unmodifiableList(args == null ? List.of() : Arrays.asList(args));
 
@@ -79,7 +79,7 @@ public final class ByJmsFactory {
                         public List<?> args() {
                             return asList;
                         }
-                    });
+                    }, jmsProxyConfig);
 
                     dispatchFn.dispatch(jmsDispatch);
 

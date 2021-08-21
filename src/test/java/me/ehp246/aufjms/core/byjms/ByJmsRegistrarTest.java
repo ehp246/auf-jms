@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.core.byjms.registrar.RegistrarAppConfigs;
 import me.ehp246.aufjms.core.byjms.registrar.case01.RegistrarCase01;
 import me.ehp246.aufjms.core.byjms.registrar.case02.RegistrarCase02;
@@ -52,8 +52,8 @@ class ByJmsRegistrarTest {
                 registry);
 
         Assertions.assertEquals("",
-                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                ((DispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(1, DispatchConfig.class).getValue()))
                                 .replyTo().name());
     }
 
@@ -65,8 +65,8 @@ class ByJmsRegistrarTest {
                 registry);
 
         Assertions.assertEquals("9c4a0935-bdf6-43bc-a10c-765faf6ed771",
-                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                ((DispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(1, DispatchConfig.class).getValue()))
                                 .destination().name());
     }
 
@@ -78,8 +78,8 @@ class ByJmsRegistrarTest {
                         registry);
 
         Assertions.assertEquals("2f954f8b-8162-47c1-bb6d-d405a25bba73",
-                ((ByJmsProxyConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
-                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                ((DispatchConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
+                        .getConstructorArgumentValues().getArgumentValue(1, DispatchConfig.class).getValue()))
                                 .destination().name());
     }
 
@@ -90,8 +90,8 @@ class ByJmsRegistrarTest {
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig01.class), registry);
 
         Assertions.assertEquals("PT0.11S",
-                ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue()))
+                ((DispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(1, DispatchConfig.class).getValue()))
                                 .ttl());
     }
 
@@ -101,7 +101,7 @@ class ByJmsRegistrarTest {
         new ByJmsRegistrar().registerBeanDefinitions(
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig02.class), registry);
 
-        Assertions.assertEquals("PT1S", ((ByJmsProxyConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
-                .getConstructorArgumentValues().getArgumentValue(1, ByJmsProxyConfig.class).getValue())).ttl());
+        Assertions.assertEquals("PT1S", ((DispatchConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
+                .getConstructorArgumentValues().getArgumentValue(1, DispatchConfig.class).getValue())).ttl());
     }
 }

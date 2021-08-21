@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.AtDestination;
@@ -35,7 +35,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
     }
 
     @Override
-    public JmsDispatch get(final ByJmsProxyConfig config, final Invocation invocation) {
+    public JmsDispatch get(final Invocation invocation, final DispatchConfig config) {
         final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(),
                 invocation.target(), invocation.method(), invocation.args());
 

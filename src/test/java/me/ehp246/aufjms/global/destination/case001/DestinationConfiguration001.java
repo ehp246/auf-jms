@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
-import me.ehp246.aufjms.api.annotation.EnableForJms.At;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 
 /**
  * @author Lei Yang
@@ -12,6 +12,6 @@ import me.ehp246.aufjms.api.annotation.EnableForJms.At;
  */
 @SpringBootApplication
 @EnableByJms()
-@EnableForJms({ @At("queue://${aufjms.request.queue}"), @At("${aufjms.request.queue02}") })
+@EnableForJms({ @Inbound("queue://${aufjms.request.queue}"), @Inbound("${aufjms.request.queue02}") })
 public class DestinationConfiguration001 {
 }

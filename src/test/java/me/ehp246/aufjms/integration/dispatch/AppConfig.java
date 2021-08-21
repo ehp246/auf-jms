@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.springframework.jms.annotation.EnableJms;
 
+import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.annotation.ByJms.At;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.util.TestQueueListener;
 

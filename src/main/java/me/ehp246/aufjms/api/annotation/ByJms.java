@@ -11,7 +11,6 @@ import javax.jms.JMSContext;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.ContextProvider;
-import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
  * @author Lei Yang
@@ -44,13 +43,4 @@ public @interface ByJms {
     String ttl() default "";
 
     At replyTo() default @At;
-
-    @interface At {
-        /**
-         * Defines the destination name for the proxy interface.
-         */
-        String value() default "";
-
-        DestinationType type() default DestinationType.QUEUE;
-    }
 }

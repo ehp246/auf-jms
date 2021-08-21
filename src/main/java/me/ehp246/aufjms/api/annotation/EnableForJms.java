@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.endpoint.AtEndpointRegistrar;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
@@ -25,26 +25,27 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, AtEndpointRegistrar.class, AtEndpointFactory.class, AtEndpointListenerConfigurer.class,
+@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class, AtEndpointListenerConfigurer.class,
         ExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
-    At[] value() default @At;
+    Inbound[] value();
 
     @Retention(RUNTIME)
-    @interface At {
+    @interface Inbound {
         /**
-         * Destination name of the incoming message.
-         *
-         * @return
+         * Destination of the incoming messages.
          */
-        String value() default "";
+        At value();
 
-        String connection() default "";
+        String context() default "";
 
         Class<?>[] scan() default {};
 
         String concurrency() default "0";
 
+        /**
+         * The bean name of the endpoint.
+         */
         String name() default "";
     }
 }
