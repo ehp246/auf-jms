@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.jmslisenter;
+package me.ehp246.aufjms.integration.dispatch;
 
 import java.util.Map;
 

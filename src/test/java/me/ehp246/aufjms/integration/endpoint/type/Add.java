@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.forjms.case01;
+package me.ehp246.aufjms.integration.endpoint.type;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;

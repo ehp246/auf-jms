@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.jmslisenter;
+package me.ehp246.aufjms.integration.dispatch;
 
 import java.time.Instant;
 import java.util.List;
@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.integration.jmslisenter.AppConfig.Case01;
+import me.ehp246.aufjms.integration.dispatch.AppConfig.Case01;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 

@@ -8,9 +8,7 @@ import javax.jms.JMSException;
 
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 
@@ -28,8 +26,6 @@ import me.ehp246.aufjms.api.jms.DestinationProvider;
  * @author Lei Yang
  *
  */
-@EnableJms
-@SpringBootApplication
 public class UtilConfig {
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
