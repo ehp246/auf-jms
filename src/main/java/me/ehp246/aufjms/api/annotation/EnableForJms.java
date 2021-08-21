@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
-import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
+import me.ehp246.aufjms.core.endpoint.InboundListenerConfigurer;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -25,7 +25,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class, AtEndpointListenerConfigurer.class,
+@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class, InboundListenerConfigurer.class,
         ExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
     Inbound[] value();
@@ -36,8 +36,6 @@ public @interface EnableForJms {
          * Destination of the incoming messages.
          */
         At value();
-
-        String context() default "";
 
         Class<?>[] scan() default {};
 

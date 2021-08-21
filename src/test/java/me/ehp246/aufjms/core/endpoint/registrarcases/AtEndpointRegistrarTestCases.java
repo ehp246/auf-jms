@@ -18,7 +18,7 @@ public class AtEndpointRegistrarTestCases {
     }
 
     @EnableForJms({ @Inbound(@At(value = "queue.1")),
-            @Inbound(value = @At("queue.2"), context = "connection.2", concurrency = "executor.2", name = "atEndpoint.2") })
+            @Inbound(value = @At("queue.2"), concurrency = "executor.2", name = "atEndpoint.2") })
     public static class InboundConfig03 {
     }
 }

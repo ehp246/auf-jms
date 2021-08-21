@@ -48,14 +48,12 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
                 scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
             }
             final var at = (Map<String, Object>) endpoint.get("value");
-            final var context = endpoint.get("context").toString();
             final var destination = new AtDestinationRecord(at.get("value").toString(),
                     (DestinationType) at.get("type"));
             final var name = Optional.of(endpoint.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(destination.type().name() + "://" + destination.name() + "@" + context);
+                    .orElse(destination.type().name() + "://" + destination.name());
 
             final var constructorArgumentValues = new ConstructorArgumentValues();
-            constructorArgumentValues.addGenericArgumentValue(context);
             constructorArgumentValues.addGenericArgumentValue(destination);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
             constructorArgumentValues.addGenericArgumentValue(endpoint.get("concurrency"));

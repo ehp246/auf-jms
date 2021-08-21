@@ -9,11 +9,14 @@ import me.ehp246.aufjms.api.jms.AtDestination;
 public interface DispatchConfig {
     AtDestination destination();
 
-    String context();
-
     AtDestination replyTo();
 
     default String ttl() {
         return null;
     }
+
+    default String context() {
+        return null;
+    }
+
 }

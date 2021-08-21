@@ -9,22 +9,19 @@ import javax.jms.Message;
 import javax.jms.Session;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
-import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
  * @author Lei Yang
  *
  */
-@Disabled
-@SpringBootTest(classes = { AppConfig.class, EmbeddedArtemisConfig.class }, properties = {})
+@SpringBootTest(classes = { AppConfig.class }, properties = {})
 class TypeTest {
     @Autowired
     private AtomicReference<CompletableFuture<Integer>> ref;
