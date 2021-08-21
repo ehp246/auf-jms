@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import me.ehp246.aufjms.api.annotation.ForJms;
+import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -119,7 +119,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
                 return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
             }
         };
-        scanner.addIncludeFilter(new AnnotationTypeFilter(ForJms.class));
+        scanner.addIncludeFilter(new AnnotationTypeFilter(ForJmsType.class));
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
@@ -135,7 +135,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
     }
 
     private static InvokableDefinition newDefinition(final Class<?> instanceType) {
-        final var annotation = instanceType.getAnnotation(ForJms.class);
+        final var annotation = instanceType.getAnnotation(ForJmsType.class);
         if (annotation == null) {
             return null;
         }

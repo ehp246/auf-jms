@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  */
 @Retention(RUNTIME)
 @Target({ ElementType.TYPE })
-public @interface ForJms {
+public @interface ForJmsType {
     /**
      * Case-sensitive matching of {@link Message#getJMSType()}.
      */

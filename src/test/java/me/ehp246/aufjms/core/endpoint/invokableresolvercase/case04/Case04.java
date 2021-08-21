@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.endpoint.invokableresolvercase.case04;
 
-import me.ehp246.aufjms.api.annotation.ForJms;
+import me.ehp246.aufjms.api.annotation.ForJmsType;
 
 /**
  * The class should not be scanned because of missing Invoking.
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.ForJms;
  * @author Lei Yang
  *
  */
-@ForJms("Case04")
+@ForJmsType("Case04")
 public class Case04 {
 
 }
