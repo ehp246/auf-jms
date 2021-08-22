@@ -19,6 +19,7 @@ import me.ehp246.aufjms.util.MockJmsMsg;
  *
  */
 class DefaultInvokableResolverTest {
+    private final static String PATH = "me.ehp246.aufjms.core.endpoint.invokableresolvercase.";
 
     @Test
     void type_01() {
@@ -33,7 +34,7 @@ class DefaultInvokableResolverTest {
 
         Assertions.assertEquals(Case01.class, registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
     }
-    
+
     @Test
     void error_03() {
         Assertions.assertThrows(Exception.class,

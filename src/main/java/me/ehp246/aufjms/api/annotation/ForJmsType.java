@@ -22,7 +22,7 @@ public @interface ForJmsType {
     /**
      * Case-sensitive matching of {@link Message#getJMSType()}.
      */
-    String value();
+    String[] value();
 
     /**
      * Invocation instance resolution instruction.
