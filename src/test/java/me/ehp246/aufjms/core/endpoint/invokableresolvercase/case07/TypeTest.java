@@ -17,6 +17,7 @@ class TypeTest {
     void type_03() {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case07.class.getPackageName()));
 
-        Assertions.assertEquals(Case07.class, registery.resolve(new MockJmsMsg("Case")).getInstanceType());
+        Assertions.assertEquals(Case07.class, registery.resolve(new MockJmsMsg("Case")).getInstanceType(),
+                "should allow/merge duplicate types on the same class");
     }
 }
