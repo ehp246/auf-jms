@@ -71,8 +71,12 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 final var key = annoArg.annotation().value();
                 final var value = annoArg.argument();
                 // Must have a property name for non-map values.
-                if (!OneUtil.hasValue(key) && value != null && !(value instanceof Map)) {
+                if (!OneUtil.hasValue(key) && !annoArg.parameter().getType().isAssignableFrom(Map.class)) {
                     throw new RuntimeException("Un-defined property name on parameter " + annoArg.parameter());
+                }
+                // Skip null maps.
+                if (annoArg.parameter().getType().isAssignableFrom(Map.class) && value == null) {
+                    return;
                 }
                 newValue(key, value);
             }
@@ -88,6 +92,13 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 properties.put(key.toString(), newValue);
             }
         });
+        
+        final var delay = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfDelay.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfDelay::value, anno -> null, config::delay)).filter(OneUtil::hasValue).map(propertyResolver::resolve)
+                .map(Duration::parse)
+                .orElse(null);
 
         // Accepts null.
         final var ttl = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
@@ -136,6 +147,11 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             @Override
             public Map<String, Object> properties() {
                 return properties;
+            }
+
+            @Override
+            public Duration delay() {
+                return delay;
             }
 
         };

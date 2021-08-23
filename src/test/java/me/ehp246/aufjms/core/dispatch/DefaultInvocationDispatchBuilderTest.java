@@ -224,15 +224,14 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().getTtl01();
 
-        Assertions.assertEquals(null,
-                dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
 
-                    @Override
-                    public String ttl() {
-                        return Duration.ofDays(1).toString();
-                    }
+            @Override
+            public String ttl() {
+                return Duration.ofDays(1).toString();
+            }
 
-                }).ttl(), "should surpress");
+        }).ttl(), "should surpress");
     }
 
     @Test
@@ -317,6 +316,22 @@ class DefaultInvocationDispatchBuilderTest {
     }
 
     @Test
+    void ttl_09() {
+        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
+
+        captor.proxy().getTtl05(Duration.parse("PT0.1S"));
+
+        Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
+                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis());
+
+        captor.proxy().getTtl05(null);
+
+        Assertions.assertEquals(Duration.parse("PT1S").toMillis(),
+                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis(),
+                "should use it for the default");
+    }
+
+    @Test
     void body_01() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
@@ -352,7 +367,7 @@ class DefaultInvocationDispatchBuilderTest {
     void body_m03_2() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
-        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "");
 
         Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
     }
@@ -478,5 +493,84 @@ class DefaultInvocationDispatchBuilderTest {
 
         Assertions.assertEquals("id2", properties.get("ID"), "should be overwritten by later value");
         Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
+    }
+
+    @Test
+    void delay_m01() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01();
+
+        Assertions.assertEquals(2000, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toMillis());
+    }
+
+    @Test
+    void delay_m01_1() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01();
+
+        final var property = new String[1];
+        Assertions.assertEquals(100, new DefaultInvocationDispatchBuilder(v -> {
+            property[0] = v;
+            return "PT0.1S";
+        }).get(captor.invocation(), proxyConfig).delay().toMillis());
+
+        Assertions.assertEquals("PT2S", property[0]);
+    }
+
+    @Test
+    void delay_m01_2() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01(Duration.ofDays(1));
+
+        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toDays());
+    }
+
+    @Test
+    void delay_m01_3() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01((Duration) null);
+
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).delay());
+    }
+
+    @Test
+    void delay_m01_4() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01(Duration.ofMillis(1).toString());
+
+        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toMillis());
+    }
+
+    @Test
+    void delay_m01_5() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01((String) null);
+
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).delay());
+    }
+
+    @Test
+    void delay_m02_1() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m02(null);
+
+        Assertions.assertEquals(2, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toSeconds(),
+                "should use the default");
+    }
+
+    @Test
+    void delay_m02_2() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m02("PT100S");
+
+        Assertions.assertEquals(100, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toSeconds());
     }
 }

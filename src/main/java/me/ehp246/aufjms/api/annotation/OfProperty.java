@@ -8,10 +8,10 @@ import java.lang.annotation.Target;
 /**
  * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 public @interface OfProperty {
     String value() default "";
 }

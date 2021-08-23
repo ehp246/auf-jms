@@ -45,4 +45,8 @@ public interface JmsDispatch {
     default Map<String, Object> properties() {
         return Map.of();
     }
+
+    default Duration delay() {
+        return null;
+    }
 }

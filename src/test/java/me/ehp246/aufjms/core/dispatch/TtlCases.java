@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.time.Duration;
+
 import me.ehp246.aufjms.api.annotation.OfTtl;
 
 /**
@@ -23,5 +25,7 @@ class TtlCases {
         void getTtl03(@OfTtl String ttl);
 
         void getTtl04(@OfTtl("PT1S") String ttl);
+
+        void getTtl05(@OfTtl("PT1S") Duration ttl);
     }
 }
