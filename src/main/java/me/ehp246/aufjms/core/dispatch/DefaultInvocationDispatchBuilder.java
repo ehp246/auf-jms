@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import me.ehp246.aufjms.api.annotation.OfDelay;
+import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.DispatchConfig;
@@ -26,7 +28,9 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @since 1.0
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
-    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class,
+            OfProperty.class, OfTtl.class, OfDelay.class);
+
     private final PropertyResolver propertyResolver;
 
     public DefaultInvocationDispatchBuilder(final PropertyResolver propertyResolver) {
@@ -55,6 +59,11 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                         : ofType.value(),
                 ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
                 () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
+
+        final var properties = proxyInvocation.mapAnnotatedArguments(OfProperty.class, OfProperty::value);
+        if (properties.get("") != null) {
+
+        }
 
         // Accepts null.
         final Duration ttl = Optional

@@ -19,7 +19,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  */
 @Timeout(5)
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
-class JmsPropertyTest {
+class TypeTest {
     @Autowired
     private TestQueueListener listener;
     @Autowired

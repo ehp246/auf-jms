@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.core.jms.AtQueueRecord;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -16,13 +18,8 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
-    private final static AtDestination at = new AtDestination() {
+    private final static AtDestination at = new AtQueueRecord("");
 
-        @Override
-        public String name() {
-            return "";
-        }
-    };
     private final static DispatchConfig proxyConfig = new DispatchConfig() {
 
         @Override
@@ -252,5 +249,74 @@ class DefaultInvocationDispatchBuilderTest {
 
         Assertions.assertThrows(Exception.class,
                 () -> dispatchBuilder.get(captor.invocation(), new MockProxyConfig()));
+    }
+
+    @Test
+    void body_01() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+        
+        captor.proxy().m01();
+        
+        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+    }
+
+    @Test
+    void body_02() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var body = Map.of("", "");
+
+        captor.proxy().m02(body);
+
+        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
+
+        Assertions.assertEquals(1, bodyValues.size());
+        Assertions.assertEquals(body, bodyValues.get(0));
+    }
+
+    @Test
+    void body_m03_1() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        captor.proxy().m03(UUID.randomUUID().toString());
+
+        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+    }
+
+    @Test
+    void body_m03_2() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+    }
+
+    @Test
+    void body_04() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var body = Map.of("", "");
+
+        captor.proxy().m02(UUID.randomUUID().toString(), body);
+
+        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
+
+        Assertions.assertEquals(1, bodyValues.size());
+        Assertions.assertEquals(body, bodyValues.get(0));
+    }
+
+    @Test
+    void body_05() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var body = Map.of("", "");
+
+        captor.proxy().m02(body, UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
+
+        Assertions.assertEquals(1, bodyValues.size());
+        Assertions.assertEquals(body, bodyValues.get(0));
     }
 }
