@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -385,7 +386,7 @@ class DefaultInvocationDispatchBuilderTest {
     }
 
     @Test
-    void property_m01_1() {
+    void property_m01_11() {
         final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
 
         captor.proxy().m01(Map.of("key1", "value1"), Map.of("key2", "value2"));
@@ -396,6 +397,16 @@ class DefaultInvocationDispatchBuilderTest {
 
         Assertions.assertEquals("value1", properties.get("key1"));
         Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_12() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("");
+
+        Assertions.assertThrows(RuntimeException.class, () -> dispatchBuilder.get(captor.invocation(), proxyConfig),
+                "should require a property name");
     }
 
     @Test
@@ -422,6 +433,22 @@ class DefaultInvocationDispatchBuilderTest {
         Assertions.assertEquals(1, properties.keySet().size());
 
         Assertions.assertEquals("value2", properties.get("key2"), "should be overwritten by later value");
+    }
+
+    @Test
+    void property_m01_23() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        final var map = new HashMap<String, Object>();
+        map.put("key1", null);
+
+        captor.proxy().m01(map, Map.of("key2", ""));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+        Assertions.assertEquals(null, properties.get("key1"), "should accept null");
+        Assertions.assertEquals("", properties.get("key2"));
     }
 
     @Test

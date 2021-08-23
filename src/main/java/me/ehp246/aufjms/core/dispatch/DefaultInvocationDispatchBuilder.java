@@ -68,14 +68,17 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         proxyInvocation.streamOfAnnotatedArguments(OfProperty.class).forEach(new Consumer<AnnotatedArgument<OfProperty>>() {
             @Override
             public void accept(final AnnotatedArgument<OfProperty> annoArg) {
-                newValue(annoArg.annotation().value(), annoArg.argument());
+                final var key = annoArg.annotation().value();
+                final var value = annoArg.argument();
+                // Must have a property name for non-map values.
+                if (!OneUtil.hasValue(key) && value != null && !(value instanceof Map)) {
+                    throw new RuntimeException("Un-defined property name on parameter " + annoArg.parameter());
+                }
+                newValue(key, value);
             }
 
             @SuppressWarnings("unchecked")
-            private void newValue(final Object key, final Object newValue) {
-                if (newValue == null) {
-                    return;
-                }
+            private void newValue(final String key, final Object newValue) {
                 // Ignoring annotation value.
                 if (newValue instanceof Map) {
                     properties.putAll(((Map<String, Object>) newValue));
