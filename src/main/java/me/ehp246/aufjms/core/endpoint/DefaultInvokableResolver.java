@@ -2,12 +2,14 @@ package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,7 +19,7 @@ import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
-import me.ehp246.aufjms.api.annotation.ForJms;
+import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
@@ -37,11 +39,11 @@ import me.ehp246.aufjms.core.util.StreamOf;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultInvokableResolver implements InvokableRegistry, InvokableResolver {
+public final class DefaultInvokableResolver implements InvokableRegistry, InvokableResolver {
     private final static Logger LOGGER = LogManager.getLogger(DefaultInvokableResolver.class);
 
-    private final Map<String, InvokableDefinition> registeredInvokables = new HashMap<>();
-    private final Map<Class<?>, Map<String, Method>> registereMethods = new HashMap<>();
+    private final Map<String, InvokableDefinition> registeredInvokables = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Map<String, Method>> registeredMethods = new ConcurrentHashMap<>();
 
     public DefaultInvokableResolver register(final Stream<InvokableDefinition> invokingDefinitions) {
         invokingDefinitions.forEach(this::register);
@@ -50,13 +52,14 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
 
     @Override
     public void register(final InvokableDefinition invokingDefinition) {
-        final var registered = registeredInvokables.putIfAbsent(invokingDefinition.getMsgType(), invokingDefinition);
-        if (registered != null) {
-            throw new RuntimeException(
-                    "Duplicate type " + registered.getMsgType() + " from " + registered.getInstanceType());
-        }
+        invokingDefinition.getTypes().forEach(type -> {
+            final var registered = registeredInvokables.putIfAbsent(type, invokingDefinition);
+            if (registered != null) {
+                throw new RuntimeException("Duplicate type " + type + " from " + registered.getInstanceType());
+            }
 
-        registereMethods.put(invokingDefinition.getInstanceType(), invokingDefinition.getMethods());
+            registeredMethods.put(invokingDefinition.getInstanceType(), invokingDefinition.getMethods());
+        });
     }
 
     @Override
@@ -77,7 +80,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
         var invoking = msg.invoking();
         invoking = invoking != null ? invoking.strip() : "";
 
-        final var method = registereMethods.get(definition.getInstanceType()).get(invoking);
+        final var method = registeredMethods.get(definition.getInstanceType()).get(invoking);
 
         if (method == null) {
             LOGGER.atTrace().log("Method {} not found", invoking);
@@ -119,7 +122,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
                 return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
             }
         };
-        scanner.addIncludeFilter(new AnnotationTypeFilter(ForJms.class));
+        scanner.addIncludeFilter(new AnnotationTypeFilter(ForJmsType.class));
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
@@ -135,7 +138,7 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
     }
 
     private static InvokableDefinition newDefinition(final Class<?> instanceType) {
-        final var annotation = instanceType.getAnnotation(ForJms.class);
+        final var annotation = instanceType.getAnnotation(ForJmsType.class);
         if (annotation == null) {
             return null;
         }
@@ -144,6 +147,16 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
                 || instanceType.isEnum()) {
             throw new RuntimeException("Un-instantiable type " + instanceType.getName());
         }
+
+        final var types = Arrays.asList(annotation.value()).stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+                .map(entry -> {
+                    if (entry.getValue() > 1) {
+                        throw new RuntimeException(
+                                "Duplicate type '" + entry.getKey() + "' on " + instanceType.getCanonicalName());
+                    }
+                    return entry.getKey();
+                }).collect(Collectors.toSet());
 
         final var invokings = new HashMap<String, Method>();
         final var reflected = new ReflectingType<>(instanceType);
@@ -163,17 +176,14 @@ final class DefaultInvokableResolver implements InvokableRegistry, InvokableReso
             throw new RuntimeException("No invocation method defined by " + instanceType.getName());
         }
 
-        final var msgType = Optional.of(annotation.value().strip()).filter(OneUtil::hasValue)
-                .orElseGet(instanceType::getSimpleName);
-
-        LOGGER.atTrace().log("Registering {} on {}", msgType, instanceType.getCanonicalName());
+        LOGGER.atTrace().log("Registering {} on {}", types, instanceType.getCanonicalName());
 
         return new InvokableDefinition() {
             private final Map<String, Method> methods = Map.copyOf(invokings);
 
             @Override
-            public String getMsgType() {
-                return msgType;
+            public Set<String> getTypes() {
+                return types;
             }
 
             @Override

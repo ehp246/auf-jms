@@ -72,7 +72,31 @@ public class MockJmsMsg implements JmsMsg {
     }
 
     @Override
-    public TextMessage message() {
+    public TextMessage msg() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String correlationId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Destination replyTo() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String groupId() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Integer groupSeq() {
         // TODO Auto-generated method stub
         return null;
     }

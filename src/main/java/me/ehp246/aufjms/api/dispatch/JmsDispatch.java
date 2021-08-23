@@ -2,8 +2,9 @@ package me.ehp246.aufjms.api.dispatch;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
-import javax.jms.Destination;
+import me.ehp246.aufjms.api.jms.AtDestination;
 
 /**
  * The abstraction of a fully-realized out-bound JMS message.
@@ -14,7 +15,7 @@ import javax.jms.Destination;
  * @since 1.0
  */
 public interface JmsDispatch {
-    Destination destination();
+    AtDestination destination();
 
     default String type() {
         return null;
@@ -28,7 +29,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default Destination replyTo() {
+    default AtDestination replyTo() {
         return null;
     }
 
@@ -41,11 +42,11 @@ public interface JmsDispatch {
         return null;
     }
 
-    default String groupId() {
-        return null;
+    default Map<String, Object> properties() {
+        return Map.of();
     }
 
-    default Integer groupSeq() {
+    default Duration delay() {
         return null;
     }
 }

@@ -49,11 +49,11 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
         final var target = resolveOutcome.getReturned();
         if (target == null) {
-            LOGGER.atInfo().log("Un-matched message {} {}", msg.id(), msg.correlationId());
+            LOGGER.atInfo().log("Un-matched message {} {}", msg.type(), msg.correlationId());
             return;
         }
 
-        LOGGER.atTrace().log("Submitting");
+        LOGGER.atTrace().log("Submitting {}", target.getMethod());
 
         final var runnable = newRunnable(msg, target, binder);
 

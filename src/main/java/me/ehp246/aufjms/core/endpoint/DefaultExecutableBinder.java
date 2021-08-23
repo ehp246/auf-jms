@@ -127,7 +127,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
                 arguments[i] = msg;
                 markers[i] = true;
             } else if (type.isAssignableFrom(Message.class)) {
-                arguments[i] = msg.message();
+                arguments[i] = msg.msg();
                 markers[i] = true;
             }
 

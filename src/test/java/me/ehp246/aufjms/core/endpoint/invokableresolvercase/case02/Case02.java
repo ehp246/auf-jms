@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.endpoint.invokableresolvercase.case02;
 
-import me.ehp246.aufjms.api.annotation.ForJms;
+import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-@ForJms
+@ForJmsType("Case02")
 public class Case02 {
 
     @Invoking

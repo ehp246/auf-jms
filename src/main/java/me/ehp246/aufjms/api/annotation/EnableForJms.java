@@ -4,7 +4,6 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -12,10 +11,10 @@ import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.AtEndpointFactory;
-import me.ehp246.aufjms.core.endpoint.AtEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.endpoint.AtEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
+import me.ehp246.aufjms.core.endpoint.InboundListenerConfigurer;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -26,27 +25,25 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, AtEndpointRegistrar.class, AtEndpointFactory.class, AtEndpointListenerConfigurer.class,
+@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class, InboundListenerConfigurer.class,
         ExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
 public @interface EnableForJms {
-    At[] value() default @At;
+    Inbound[] value();
 
     @Retention(RUNTIME)
-    @Target(ElementType.ANNOTATION_TYPE)
-    @interface At {
+    @interface Inbound {
         /**
-         * Destination name of the incoming message.
-         *
-         * @return
+         * Destination of the incoming messages.
          */
-        String value() default "";
-
-        String connection() default "";
+        At value();
 
         Class<?>[] scan() default {};
 
         String concurrency() default "0";
 
+        /**
+         * The bean name of the endpoint.
+         */
         String name() default "";
     }
 }

@@ -27,14 +27,10 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultDispatchFnProvider.class,
         JsonByJackson.class, DefaultInvocationDispatchBuilder.class, DispatchLogger.class })
 public @interface EnableByJms {
-    /**
-     * Defines the default destination name global to the application.
-     */
-    String value() default "";
-
     Class<?>[] scan() default {};
 
-    String replyTo() default "";
-
+    /**
+     * Spring property is supported.
+     */
     String ttl() default "PT0S";
 }

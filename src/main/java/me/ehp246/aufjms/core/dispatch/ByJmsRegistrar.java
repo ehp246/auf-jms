@@ -14,7 +14,9 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
+import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
 public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
@@ -45,35 +47,52 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
     private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
+        final var replyTo = new AtDestination() {
+
+            @Override
+            public DestinationType type() {
+                return byJms.replyTo().type();
+            }
+
+            @Override
+            public String name() {
+
+                return byJms.replyTo().value();
+            }
+        };
+        final var destination = new AtDestination() {
+
+            @Override
+            public DestinationType type() {
+                return byJms.value().type();
+            }
+
+            @Override
+            public String name() {
+                return byJms.value().value();
+            }
+        };
+
+        final var ttl = byJms.ttl().equals("")
+                ? (map.get("ttl").toString().equals("") ? Duration.ZERO.toString() : map.get("ttl").toString())
+                : byJms.ttl();
 
         final var args = new ConstructorArgumentValues();
         args.addGenericArgumentValue(proxyInterface);
-        args.addGenericArgumentValue(new ByJmsProxyConfig() {
-            private final String replyTo = byJms.replyTo().isBlank() ? map.get("replyTo").toString() : byJms.replyTo();
-            private final String destination = byJms.value().equals("") ? map.get("value").toString()
-                    : byJms.value();
-            private final Duration ttl = byJms.ttl().equals("")
-                    ? (map.get("ttl").toString().equals("") ? Duration.ZERO : Duration.parse(map.get("ttl").toString()))
-                    : Duration.parse(byJms.ttl());
-
+        args.addGenericArgumentValue(new DispatchConfig() {
             @Override
-            public Duration ttl() {
+            public String ttl() {
                 return ttl;
             }
 
             @Override
-            public String replyTo() {
-                return replyTo;
-            }
-
-            @Override
-            public String destination() {
+            public AtDestination destination() {
                 return destination;
             }
 
             @Override
-            public String connection() {
-                return byJms.connection();
+            public AtDestination replyTo() {
+                return replyTo;
             }
         });
 

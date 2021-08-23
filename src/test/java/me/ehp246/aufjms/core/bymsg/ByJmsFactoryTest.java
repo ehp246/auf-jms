@@ -3,24 +3,76 @@ package me.ehp246.aufjms.core.bymsg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.DispatchFn;
+import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
+import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 
 class ByJmsFactoryTest {
     private final DispatchFn dispatchFn = dispatch -> null;
-    private final InvocationDispatchBuilder dispatchProvider = (config, invocation) -> null;
+    private final InvocationDispatchBuilder dispatchProvider = (invocation, config) -> null;
     private final DispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
+    private final static AtDestination defaultAt = new AtDestination() {
+
+        @Override
+        public DestinationType type() {
+            return DestinationType.QUEUE;
+        }
+
+        @Override
+        public String name() {
+            return "";
+        }
+    };
+
+    private DispatchConfig case01() {
+        return new DispatchConfig() {
+
+            @Override
+            public String ttl() {
+                return "PT10S";
+            }
+
+            @Override
+            public AtDestination replyTo() {
+                return defaultAt;
+            }
+
+            @Override
+            public AtDestination destination() {
+                return new AtDestination() {
+
+                    @Override
+                    public DestinationType type() {
+                        return DestinationType.QUEUE;
+                    }
+
+                    @Override
+                    public String name() {
+                        return "queue1";
+                    }
+                };
+            }
+
+            @Override
+            public String context() {
+                return "SB1";
+            }
+        };
+    }
+
     @Test
     void object_01() {
-        final var newInstance = factory.newInstance(TestCases.Case01.class);
+        final var newInstance = factory.newInstance(TestCases.Case01.class, case01());
 
         Assertions.assertTrue(newInstance instanceof TestCases.Case01);
         Assertions.assertTrue(newInstance.toString() instanceof String);
@@ -31,7 +83,7 @@ class ByJmsFactoryTest {
 
     @Test
     void default_01() {
-        Assertions.assertEquals(124, factory.newInstance(TestCases.Case01.class).inc(123));
+        Assertions.assertEquals(124, factory.newInstance(TestCases.Case01.class, case01()).inc(123));
     }
 
     @Test
@@ -52,10 +104,10 @@ class ByJmsFactoryTest {
         final var newInstance = new ByJmsFactory(conection -> {
             con[0] = conection;
             return dispatchFn;
-        }, (config, invocation) -> {
+        }, (invocation, config) -> {
             inv[0] = invocation;
             return jmsDispatch;
-        }).newInstance(TestCases.Case01.class);
+        }).newInstance(TestCases.Case01.class, case01());
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");
 

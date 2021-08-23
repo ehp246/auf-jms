@@ -3,20 +3,26 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-import javax.jms.Destination;
-
+import me.ehp246.aufjms.api.annotation.OfDelay;
+import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.DestinationProvider;
+import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.Invocation;
+import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
+import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -25,44 +31,91 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @since 1.0
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
-    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of();
-    private final DestinationProvider destinationResolver;
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
+            OfTtl.class, OfDelay.class);
 
-    public DefaultInvocationDispatchBuilder(final DestinationProvider destinationResolver) {
+    private final PropertyResolver propertyResolver;
+
+    public DefaultInvocationDispatchBuilder(final PropertyResolver propertyResolver) {
         super();
-        this.destinationResolver = destinationResolver;
+        this.propertyResolver = propertyResolver;
     }
 
     @Override
-    public JmsDispatch get(final ByJmsProxyConfig config, final Invocation invocation) {
+    public JmsDispatch get(final Invocation invocation, final DispatchConfig config) {
         final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(),
                 invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
-        final var destination = this.destinationResolver.get(config.connection(), config.destination());
+        final var destination = new AtDestinationRecord(propertyResolver.resolve(config.destination().name()),
+                config.destination().type());
+
+        // Optional.
+        final var replyTo = Optional.ofNullable(config.replyTo())
+                .map(at -> new AtDestinationRecord(propertyResolver.resolve(at.name()), at.type())).orElse(null);
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
                 arg -> arg.argument() != null ? arg.argument().toString()
                         : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
-                        : ofType.value(),
-                ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
+                ofMethod -> ofMethod.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
+                        : ofMethod.value(),
+                ofClass -> ofClass.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofClass.value(),
                 () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
-        final Duration ttl = proxyInvocation.methodAnnotationOf(OfTtl.class,
-                anno -> anno.value().equals("") ? config.ttl() : Duration.parse(anno.value()),
-                config::ttl);
-        // ReplyTo is optional.
-        final var replyTo = Optional.ofNullable(config.replyTo()).filter(OneUtil::hasValue)
-                .map(name -> this.destinationResolver.get(config.connection(), name)).orElse(null);
+        final var properties = new HashMap<String, Object>();
+        
+        proxyInvocation.streamOfAnnotatedArguments(OfProperty.class).forEach(new Consumer<AnnotatedArgument<OfProperty>>() {
+            @Override
+            public void accept(final AnnotatedArgument<OfProperty> annoArg) {
+                final var key = annoArg.annotation().value();
+                final var value = annoArg.argument();
+                // Must have a property name for non-map values.
+                if (!OneUtil.hasValue(key) && !annoArg.parameter().getType().isAssignableFrom(Map.class)) {
+                    throw new RuntimeException("Un-defined property name on parameter " + annoArg.parameter());
+                }
+                // Skip null maps.
+                if (annoArg.parameter().getType().isAssignableFrom(Map.class) && value == null) {
+                    return;
+                }
+                newValue(key, value);
+            }
+
+            @SuppressWarnings("unchecked")
+            private void newValue(final String key, final Object newValue) {
+                // Ignoring annotation value.
+                if (newValue instanceof Map) {
+                    properties.putAll(((Map<String, Object>) newValue));
+                    return;
+                }
+
+                properties.put(key.toString(), newValue);
+            }
+        });
+        
+        final var delay = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfDelay.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfDelay::value, anno -> null, config::delay)).filter(OneUtil::hasValue).map(propertyResolver::resolve)
+                .map(Duration::parse)
+                .orElse(null);
+
+        // Accepts null.
+        final var ttl = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfTtl::value,
+                OfTtl::value, config::ttl)).filter(OneUtil::hasValue).map(propertyResolver::resolve)
+                .map(Duration::parse)
+                .orElse(null);
+
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
 
             @Override
-            public Destination destination() {
+            public AtDestination destination() {
                 return destination;
             }
 
@@ -82,7 +135,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public Destination replyTo() {
+            public AtDestination replyTo() {
                 return replyTo;
             }
 
@@ -92,13 +145,13 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public String groupId() {
-                return null;
+            public Map<String, Object> properties() {
+                return properties;
             }
 
             @Override
-            public Integer groupSeq() {
-                return null;
+            public Duration delay() {
+                return delay;
             }
 
         };

@@ -7,6 +7,14 @@ import java.util.function.Consumer;
 
 import org.assertj.core.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.mrbean.MrBeanModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+
 import me.ehp246.aufjms.api.jms.Invocation;
 
 /**
@@ -84,4 +92,9 @@ public class TestUtil {
 
         Invocation invocation();
     }
+
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
+    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule())
+    .registerModule(new ParameterNamesModule());
 }
