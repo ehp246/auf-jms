@@ -42,7 +42,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
             final List<DispatchListener> dispatchListeners) {
         super();
         this.ctxProvider = Objects.requireNonNull(ctxProvider);
-        this.toJson = jsonFn;
+        this.toJson = Objects.requireNonNull(jsonFn);
         this.listeners = dispatchListeners == null ? List.of() : Collections.unmodifiableList(dispatchListeners);
     }
 
@@ -89,6 +89,8 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                 }
 
                 jmsCtx.createProducer()
+                        .setDeliveryDelay(
+                                Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
                         .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
                         .send(toJMSDestintation(dispatch.destination()), message);
 
