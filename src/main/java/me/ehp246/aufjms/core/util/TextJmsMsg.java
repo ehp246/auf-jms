@@ -8,7 +8,7 @@ import javax.jms.JMSRuntimeException;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.jms.MsgPropertyName;
+import me.ehp246.aufjms.api.jms.PropertyName;
 
 /**
  * Utility to un-pack a JMS message. All read calls are delayed and on-demand.
@@ -51,12 +51,12 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String groupId() {
-        return JMSSupplier.invoke(() -> message.getStringProperty(MsgPropertyName.GROUP_ID));
+        return JMSSupplier.invoke(() -> message.getStringProperty(PropertyName.GROUP_ID));
     }
 
     @Override
     public Integer groupSeq() {
-        return JMSSupplier.invoke(() -> message.getIntProperty(MsgPropertyName.GROUP_SEQ));
+        return JMSSupplier.invoke(() -> message.getIntProperty(PropertyName.GROUP_SEQ));
     }
 
     @Override
@@ -71,7 +71,7 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String invoking() {
-        return JMSSupplier.invoke(() -> message.getStringProperty(MsgPropertyName.INVOKING));
+        return JMSSupplier.invoke(() -> message.getStringProperty(PropertyName.INVOKING));
     }
 
     @SuppressWarnings("unchecked")

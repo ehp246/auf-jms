@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.integration.dispatch.AppConfig.Case01;
+import me.ehp246.aufjms.integration.dispatch.AppConfig.BodyCase01;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -24,13 +24,13 @@ import me.ehp246.aufjms.util.TestQueueListener;
  */
 @Timeout(5)
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
-class ListenerTest {
+class BodyTest {
     @Autowired
     private ToJson toJson;
     @Autowired
     private TestQueueListener listener;
     @Autowired
-    private Case01 case01;
+    private BodyCase01 case01;
 
     @Test
     void destination_01() {
@@ -40,15 +40,6 @@ class ListenerTest {
         
         Assertions.assertEquals(true, received != null);
         Assertions.assertEquals(true, received instanceof TextMessage);
-    }
-
-    @Test
-    void type_01() throws JMSException {
-        case01.ping();
-
-        final var received = listener.takeReceived();
-
-        Assertions.assertEquals("Ping", received.getJMSType());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,7 +22,6 @@ import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.ContextProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.jms.MsgPropertyName;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -60,22 +60,19 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                 try {
                     message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
 
-                    // Fill the customs first so the framework ones won't get over-written.
-//                    final var map = Optional.ofNullable(msg.getPropertyMap()).orElseGet(HashMap<String, String>::new);
-//                    for (final String key : map.keySet()) {
-//                        message.setStringProperty(key, map.get(key));
-//                    }
+                    // Fill the custom properties first so the framework ones won't get
+                    // overwritten.
+                    for (final var entry : Optional.ofNullable(dispatch.properties())
+                            .orElseGet(HashMap<String, Object>::new).entrySet()) {
+                        message.setObjectProperty(entry.getKey(), entry.getValue());
+                    }
+
                     /*
                      * JMS headers
                      */
                     message.setJMSReplyTo(toJMSDestintation(dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
-                    if (OneUtil.hasValue(dispatch.groupId())) {
-                        message.setStringProperty(MsgPropertyName.GROUP_ID, dispatch.groupId());
-                    }
-                    message.setIntProperty(MsgPropertyName.GROUP_SEQ,
-                            Optional.ofNullable(dispatch.groupSeq()).map(Integer::intValue).orElse(0));
 
                     /*
                      * Framework headers

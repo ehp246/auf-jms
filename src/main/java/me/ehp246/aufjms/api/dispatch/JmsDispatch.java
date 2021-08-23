@@ -2,6 +2,7 @@ package me.ehp246.aufjms.api.dispatch;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import me.ehp246.aufjms.api.jms.AtDestination;
 
@@ -41,11 +42,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default String groupId() {
-        return null;
-    }
-
-    default Integer groupSeq() {
-        return null;
+    default Map<String, Object> properties() {
+        return Map.of();
     }
 }

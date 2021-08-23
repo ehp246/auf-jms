@@ -7,8 +7,8 @@ package me.ehp246.aufjms.api.jms;
  * @author Lei Yang
  * @since 1.0
  */
-public final class MsgPropertyName {
-    private MsgPropertyName() {
+public final class PropertyName {
+    private PropertyName() {
         super();
     }
 

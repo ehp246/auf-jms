@@ -52,14 +52,4 @@ public class MockDispatch implements JmsDispatch {
         return Duration.ZERO;
     }
 
-    @Override
-    public String groupId() {
-        return groupId;
-    }
-
-    @Override
-    public Integer groupSeq() {
-        return Integer.valueOf(110);
-    }
-
 }
