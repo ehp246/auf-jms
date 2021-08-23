@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +88,8 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                     throw new DispatchFnException(e);
                 }
 
-                jmsCtx.createProducer().setTimeToLive(Optional.ofNullable(dispatch.ttl().toMillis()).orElse((long) 0))
+                jmsCtx.createProducer()
+                        .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
                         .send(toJMSDestintation(dispatch.destination()), message);
 
                 LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());

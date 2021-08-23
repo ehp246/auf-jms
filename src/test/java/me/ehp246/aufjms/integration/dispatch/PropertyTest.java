@@ -30,7 +30,9 @@ class PropertyTest {
         final var id = UUID.randomUUID().toString();
         case01.ping(id, 10);
 
-        Assertions.assertEquals(id, listener.takeReceived().getStringProperty("JMSXGroupID"));
-        Assertions.assertEquals(10, listener.takeReceived().getIntProperty("JMSXGroupSeq"));
+        final var received = listener.takeReceived();
+
+        Assertions.assertEquals(id, received.getStringProperty("JMSXGroupID"));
+        Assertions.assertEquals(10, received.getIntProperty("JMSXGroupSeq"));
     }
 }

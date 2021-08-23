@@ -223,7 +223,7 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().getTtl01();
 
-        Assertions.assertEquals(Duration.ofDays(1).toMillis(),
+        Assertions.assertEquals(null,
                 dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
 
                     @Override
@@ -231,7 +231,7 @@ class DefaultInvocationDispatchBuilderTest {
                         return Duration.ofDays(1).toString();
                     }
 
-                }).ttl().toMillis());
+                }).ttl(), "should surpress");
     }
 
     @Test
@@ -376,11 +376,80 @@ class DefaultInvocationDispatchBuilderTest {
 
         final var body = Map.of("", "");
 
-        captor.proxy().m02(body, UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        captor.proxy().m02(body, UUID.randomUUID().toString(), null);
 
         final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
 
         Assertions.assertEquals(1, bodyValues.size());
         Assertions.assertEquals(body, bodyValues.get(0));
+    }
+
+    @Test
+    void property_m01_1() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(Map.of("key1", "value1"), Map.of("key2", "value2"));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+
+        Assertions.assertEquals("value1", properties.get("key1"));
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_21() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(null, Map.of("key2", "value2"));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(1, properties.keySet().size());
+
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_22() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(Map.of("key2", "value1"), Map.of("key2", "value2"));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(1, properties.keySet().size());
+
+        Assertions.assertEquals("value2", properties.get("key2"), "should be overwritten by later value");
+    }
+
+    @Test
+    void property_m01_31() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("id1", 123, Map.of("key2", "value2"));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(3, properties.keySet().size());
+
+        Assertions.assertEquals("id1", properties.get("ID"));
+        Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_32() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("id1", 123, Map.of("ID", "id2"));
+
+        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+
+        Assertions.assertEquals("id2", properties.get("ID"), "should be overwritten by later value");
+        Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
     }
 }
