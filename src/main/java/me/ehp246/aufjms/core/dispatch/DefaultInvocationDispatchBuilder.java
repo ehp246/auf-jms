@@ -28,8 +28,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @since 1.0
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
-    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class,
-            OfProperty.class, OfTtl.class, OfDelay.class);
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
+            OfTtl.class, OfDelay.class);
 
     private final PropertyResolver propertyResolver;
 
@@ -55,9 +55,9 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
                 arg -> arg.argument() != null ? arg.argument().toString()
                         : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                ofType -> ofType.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
-                        : ofType.value(),
-                ofType -> ofType.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofType.value(),
+                ofMethod -> ofMethod.value().isBlank() ? OneUtil.firstUpper(proxyInvocation.getMethodName())
+                        : ofMethod.value(),
+                ofClass -> ofClass.value().isBlank() ? proxyInvocation.getDeclaringClassSimpleName() : ofClass.value(),
                 () -> OneUtil.firstUpper(proxyInvocation.getMethodName()));
 
         final var properties = proxyInvocation.mapAnnotatedArguments(OfProperty.class, OfProperty::value);
@@ -66,10 +66,12 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         }
 
         // Accepts null.
-        final Duration ttl = Optional
-                .ofNullable(proxyInvocation.methodAnnotationOf(OfTtl.class,
-                        anno -> anno.value().equals("") ? config.ttl() : anno.value(), config::ttl))
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
+        final var ttl = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfTtl::value,
+                OfTtl::value, () -> null)).filter(OneUtil::hasValue).map(propertyResolver::resolve).map(Duration::parse)
+                .orElse(null);
 
         final var correlId = UUID.randomUUID().toString();
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));

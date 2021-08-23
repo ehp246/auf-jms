@@ -19,5 +19,9 @@ class TtlCases {
         @OfTtl("SSS")
         void getTtl03();
 
+        @OfTtl("PT10S")
+        void getTtl03(@OfTtl String ttl);
+
+        void getTtl04(@OfTtl("PT1S") String ttl);
     }
 }
