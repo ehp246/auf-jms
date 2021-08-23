@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  *
  */
-// Duplications on the same class should be accepted.
+// Duplications on the same class should be NOT accepted.
 @ForJmsType({ "Case", "Case" })
 class Case07 {
     @Invoking

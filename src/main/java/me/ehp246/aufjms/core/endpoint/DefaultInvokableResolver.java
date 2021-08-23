@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -147,6 +148,16 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
             throw new RuntimeException("Un-instantiable type " + instanceType.getName());
         }
 
+        final var types = Arrays.asList(annotation.value()).stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+                .map(entry -> {
+                    if (entry.getValue() > 1) {
+                        throw new RuntimeException(
+                                "Duplicate type '" + entry.getKey() + "' on " + instanceType.getCanonicalName());
+                    }
+                    return entry.getKey();
+                }).collect(Collectors.toSet());
+
         final var invokings = new HashMap<String, Method>();
         final var reflected = new ReflectingType<>(instanceType);
 
@@ -164,9 +175,6 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
         if (invokings.get("") == null) {
             throw new RuntimeException("No invocation method defined by " + instanceType.getName());
         }
-
-        final var types = Arrays.asList(annotation.value()).stream().map(String::strip)
-                .collect(Collectors.toSet());
 
         LOGGER.atTrace().log("Registering {} on {}", types, instanceType.getCanonicalName());
 
