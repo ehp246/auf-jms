@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @since 1.0
  */
 public interface JmsDispatch {
-    AtDestination destination();
+    AtDestination at();
 
     default String type() {
         return null;

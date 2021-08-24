@@ -115,7 +115,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         return new JmsDispatch() {
 
             @Override
-            public AtDestination destination() {
+            public AtDestination at() {
                 return destination;
             }
 
