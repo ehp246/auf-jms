@@ -7,6 +7,7 @@ import org.springframework.jms.annotation.EnableJms;
 import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.util.TestQueueListener;
@@ -39,5 +40,12 @@ class AppConfig {
         void ping(@OfProperty("JMSXGroupID") String groupId, @OfProperty("JMSXGroupSeq") int groupSeq);
 
         void ping(@OfProperty Map<String, Object> map);
+    }
+
+    @ByJms(@At(TestQueueListener.DESTINATION_NAME))
+    interface OfCorrelationIdCase01 {
+        void ping();
+
+        void ping(@OfCorrelationId String id);
     }
 }

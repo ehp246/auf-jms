@@ -22,6 +22,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
 class DispatchTypeTest {
     @Autowired
     private TestQueueListener listener;
+
     @Autowired
     private OfTypeCase01 case01;
 

@@ -16,6 +16,7 @@ import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -163,5 +164,34 @@ class DefaultDispatchFnProviderTest {
 
         verify(textMessage, times(1)).setObjectProperty("key1", "value1");
         verify(textMessage, times(1)).setObjectProperty("key2", i);
+    }
+
+    @Test
+    void correlationId_01() throws JMSException {
+        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+
+            @Override
+            public String correlationId() {
+                return null;
+            }
+
+        });
+
+        verify(textMessage, times(1)).setJMSCorrelationID(null);
+    }
+
+    @Test
+    void correlationId_02() throws JMSException {
+        final var id = UUID.randomUUID().toString();
+        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+
+            @Override
+            public String correlationId() {
+                return id;
+            }
+
+        });
+
+        verify(textMessage, times(1)).setJMSCorrelationID(id);
     }
 }
