@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;
@@ -144,5 +145,23 @@ class DefaultDispatchFnProviderTest {
         });
 
         verify(producer, times(1)).setDeliveryDelay(0);
+    }
+
+    @Test
+    void property_01() throws JMSException {
+        final var i = Integer.valueOf(2);
+        final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
+
+        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+
+            @Override
+            public Map<String, Object> properties() {
+                return properties;
+            }
+
+        });
+
+        verify(textMessage, times(1)).setObjectProperty("key1", "value1");
+        verify(textMessage, times(1)).setObjectProperty("key2", i);
     }
 }
