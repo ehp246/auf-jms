@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
@@ -32,7 +33,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  */
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
-            OfTtl.class, OfDelay.class);
+            OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
     private final PropertyResolver propertyResolver;
 
@@ -109,7 +110,9 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 .map(Duration::parse)
                 .orElse(null);
 
-        final var correlId = UUID.randomUUID().toString();
+        final var correlId = proxyInvocation.firstArgumentAnnotationOf(OfCorrelationId.class,
+                annoArg -> Optional.ofNullable(annoArg.argument()).map(Object::toString).orElse(null),
+                () -> UUID.randomUUID().toString());
         final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
 
         return new JmsDispatch() {
