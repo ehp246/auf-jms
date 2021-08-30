@@ -22,7 +22,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {})
-class TypeTest {
+class EndpointTypeTest {
     @Autowired
     private AtomicReference<CompletableFuture<Integer>> ref;
 

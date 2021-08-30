@@ -22,6 +22,8 @@ import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
+import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -40,8 +42,8 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final ConnectionFactory connectionFactory;
 
     public InboundListenerConfigurer(final ConnectionFactory connectionFactory, final Set<InboundEndpoint> endpoints,
-            final ExecutorProvider executorProvider,
-            final ExecutableBinder binder, final PropertyResolver propertyResolver) {
+            final ExecutorProvider executorProvider, final ExecutableBinder binder,
+            final PropertyResolver propertyResolver) {
         super();
         this.connectionFactory = Objects.requireNonNull(connectionFactory);
         this.endpoints = endpoints;
@@ -55,7 +57,10 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
         final var listenerContainerFactory = jmsListenerContainerFactory();
 
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.atDebug().log("Registering endpoint on destination '{}'", endpoint.destination());
+            final AtDestinationRecord resolvedAt = new AtDestinationRecord(
+                    propertyResolver.resolve(endpoint.at().name()), endpoint.at().type());
+
+            LOGGER.atDebug().log("Registering '{}' endpoint at {}", endpoint.name(), resolvedAt.toString());
 
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(Integer.parseInt(this.propertyResolver.resolve(endpoint.concurrency()))));
@@ -65,7 +70,11 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
-                    container.setDestination(endpoint.destination());
+                    container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : resolvedAt.toString());
+                    container.setDestinationName(resolvedAt.toString());
+                    container.setDestinationResolver((session, name, topic) -> {
+                        return resolvedAt.jmsDestination(session);
+                    });
                     container.setupMessageListener((MessageListener) message -> {
                         final var msg = TextJmsMsg.from((TextMessage) message);
 

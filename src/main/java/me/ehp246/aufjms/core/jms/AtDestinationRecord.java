@@ -1,5 +1,10 @@
 package me.ehp246.aufjms.core.jms;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.JMSSecurityRuntimeException;
+import javax.jms.Session;
+
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
@@ -31,5 +36,18 @@ public class AtDestinationRecord implements AtDestination {
     @Override
     public DestinationType type() {
         return this.type;
+    }
+
+    @Override
+    public String toString() {
+        return (this.type() == DestinationType.QUEUE ? "queue://" : "topic://") + this.name;
+    }
+
+    public Destination jmsDestination(Session session) {
+        try {
+            return type == DestinationType.QUEUE ? session.createQueue(name) : session.createTopic(name);
+        } catch (JMSException e) {
+            throw new JMSSecurityRuntimeException(e.getMessage(), e.getErrorCode(), e);
+        }
     }
 }

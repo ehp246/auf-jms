@@ -54,7 +54,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
             @Override
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
-                        dispatch.destination().name().toString());
+                        dispatch.at().name().toString());
 
                 final var message = jmsCtx.createTextMessage();
 
@@ -84,7 +84,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                     message.setText(toJson.apply(dispatch.bodyValues()));
                 } catch (final JMSException e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
-                            dispatch.destination().toString(), dispatch.type(), dispatch.correlationId(), e);
+                            dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
                     throw new DispatchFnException(e);
                 }
 
@@ -92,7 +92,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                         .setDeliveryDelay(
                                 Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
                         .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
-                        .send(toJMSDestintation(dispatch.destination()), message);
+                        .send(toJMSDestintation(dispatch.at()), message);
 
                 LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 

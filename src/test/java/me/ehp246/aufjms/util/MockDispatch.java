@@ -22,7 +22,7 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public AtDestination destination() {
+    public AtDestination at() {
         return new AtDestination() {
 
             @Override

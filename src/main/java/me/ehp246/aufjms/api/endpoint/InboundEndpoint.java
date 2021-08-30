@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import javax.jms.Destination;
+import me.ehp246.aufjms.api.jms.AtDestination;
 
 /**
  *
@@ -8,7 +8,7 @@ import javax.jms.Destination;
  * @since 1.0
  */
 public interface InboundEndpoint {
-    Destination destination();
+    AtDestination at();
 
     ExecutableResolver resolver();
 
