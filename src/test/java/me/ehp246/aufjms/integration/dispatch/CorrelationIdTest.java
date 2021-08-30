@@ -18,7 +18,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  */
 @Timeout(5)
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
-class DispatchCorrelationIdTest {
+class CorrelationIdTest {
     @Autowired
     private TestQueueListener listener;
 

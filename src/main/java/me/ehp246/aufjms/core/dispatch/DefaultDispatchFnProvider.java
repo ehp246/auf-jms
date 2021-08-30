@@ -65,7 +65,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                     // overwritten.
                     for (final var entry : Optional.ofNullable(dispatch.properties())
                             .orElseGet(HashMap<String, Object>::new).entrySet()) {
-                        message.setObjectProperty(entry.getKey(), entry.getValue());
+                        message.setObjectProperty(entry.getKey().toString(), entry.getValue());
                     }
 
                     /*
