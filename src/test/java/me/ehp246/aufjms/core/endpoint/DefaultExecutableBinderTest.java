@@ -1,13 +1,12 @@
-package me.ehp246.aufjms.api.endpoint;
+package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
-import java.time.Instant;
 import java.util.List;
 
 import javax.jms.Message;
+import javax.jms.TextMessage;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -18,8 +17,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import me.ehp246.aufjms.api.endpoint.Executable;
+import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
@@ -27,30 +27,32 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  * @author Lei Yang
  *
  */
-@Disabled
-class DefaultActionInvocationBinderTest {
+class DefaultExecutableBinderTest {
     private final ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private final ReflectingType<Case001> case001Type = new ReflectingType<Case001>(Case001.class);
+    private final ReflectingType<DefaultExecutableBinderTestCases> case001Type = new ReflectingType<DefaultExecutableBinderTestCases>(
+            DefaultExecutableBinderTestCases.class);
     private final DefaultExecutableBinder binder = new DefaultExecutableBinder(new JsonByJackson(objectMapper));
 
     @Test
-    public void binder001() throws Exception {
+    public void method_01() throws Exception {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final Case001 case001 = new Case001();
+        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m001");
+                return reflectingType.findMethod("m01");
             }
 
             @Override
             public Object getInstance() {
-                return case001;
+                return case01;
             }
         }, new InvocationContext() {
 
@@ -66,15 +68,17 @@ class DefaultActionInvocationBinderTest {
     }
 
     @Test
-    public void binder002() throws Exception {
+    public void method_02() throws Exception {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final Case001 case001 = new Case001();
+        final var case001 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m001", JmsMsg.class);
+                return reflectingType.findMethod("m01", JmsMsg.class);
             }
 
             @Override
@@ -95,20 +99,22 @@ class DefaultActionInvocationBinderTest {
     }
 
     @Test
-    public void binder003() throws Exception {
+    public void method_03() throws Exception {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final Case001 case001 = new Case001();
+        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m001", JmsMsg.class, Message.class);
+                return reflectingType.findMethod("m01", JmsMsg.class, Message.class);
             }
 
             @Override
             public Object getInstance() {
-                return case001;
+                return case01;
             }
         }, new InvocationContext() {
 
@@ -128,20 +134,22 @@ class DefaultActionInvocationBinderTest {
     }
 
     @Test
-    public void binder005() throws Exception {
+    public void method_05() throws Exception {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final Case001 case001 = new Case001();
+        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m002");
+                return reflectingType.findMethod("m02");
             }
 
             @Override
             public Object getInstance() {
-                return case001;
+                return case01;
             }
         }, new InvocationContext() {
 
@@ -156,20 +164,22 @@ class DefaultActionInvocationBinderTest {
     }
 
     @Test
-    public void binder006() throws Exception {
+    public void method_06() throws Exception {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final Case001 case001 = new Case001();
+        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m003");
+                return reflectingType.findMethod("m03");
             }
 
             @Override
             public Object getInstance() {
-                return case001;
+                return case01;
             }
         }, new InvocationContext() {
 
@@ -181,34 +191,34 @@ class DefaultActionInvocationBinderTest {
 
         Assertions.assertEquals(false, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.getReturned());
-        Assertions.assertEquals(RuntimeException.class, outcome.getThrown().getClass());
+        Assertions.assertEquals(IllegalArgumentException.class, outcome.getThrown().getClass());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void binder008() throws JsonProcessingException {
+    public void method_08() throws JsonProcessingException {
+        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final var msg = Mockito.mock(Message.class);
-        Mockito.when(mq.correlationId()).thenReturn("1");
-        // Mockito.when(mq.message()).thenReturn(msg);
+        final var msg = Mockito.mock(TextMessage.class);
 
-//		Mockito.when(mq.getBodyAsText())
-//				.thenReturn(objectMapper
-//						.writeValueAsString(new String[] { objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }),
-//								objectMapper.writeValueAsString(new Instant[] { Instant.now(), Instant.now() }) }));
+        Mockito.when(mq.msg()).thenReturn(msg);
 
-        final Case001 case001 = new Case001();
+        Mockito.when(mq.text())
+                .thenReturn(objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }));
+
+        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder.bind(new Executable() {
 
             @Override
             public Method getMethod() {
-                return case001Type.findMethod("m001", List.class, Instant[].class, Message.class);
+                return reflectingType.findMethod("m01", List.class, Message.class);
             }
 
             @Override
             public Object getInstance() {
-                return case001;
+                return case01;
             }
         }, new InvocationContext() {
 
@@ -219,9 +229,14 @@ class DefaultActionInvocationBinderTest {
         }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
+
         final var returned = (Object[]) outcome.getReturned();
+
         Assertions.assertEquals(3, ((List<Integer>) (returned[0])).get(0));
-        Assertions.assertEquals(msg, returned[2]);
+        Assertions.assertEquals(2, ((List<Integer>) (returned[0])).get(1));
+        Assertions.assertEquals(3, ((List<Integer>) (returned[0])).get(2));
+
+        Assertions.assertEquals(msg, returned[1]);
         Assertions.assertEquals(null, outcome.getThrown());
     }
 
