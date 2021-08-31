@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.jms.Message;
@@ -19,7 +20,6 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.core.reflection.CatchingInvocation;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -42,7 +42,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
     }
 
     @Override
-    public CatchingInvocation bind(final Executable target, final InvocationContext ctx) {
+    public Supplier<InvocationOutcome<?>> bind(final Executable target, final InvocationContext ctx) {
         final var method = target.getMethod();
         if (method.getParameterCount() == 0) {
             return () -> {

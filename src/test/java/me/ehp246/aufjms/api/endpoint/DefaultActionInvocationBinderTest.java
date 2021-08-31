@@ -58,7 +58,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.getReturned());
@@ -87,7 +87,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(mq, outcome.getReturned());
@@ -116,7 +116,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         final var returned = outcome.getReturned();
 
@@ -149,7 +149,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.getReturned());
@@ -177,7 +177,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         Assertions.assertEquals(false, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.getReturned());
@@ -216,7 +216,7 @@ class DefaultActionInvocationBinderTest {
             public JmsMsg getMsg() {
                 return mq;
             }
-        }).invoke();
+        }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         final var returned = (Object[]) outcome.getReturned();
