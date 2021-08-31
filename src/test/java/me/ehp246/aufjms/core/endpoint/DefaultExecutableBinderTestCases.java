@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.jms.Message;
 
-import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -59,9 +58,8 @@ class DefaultExecutableBinderTestCases {
             setter = id;
         }
 
-        @Invoking
-        public void m004(@OfCorrelationId final String value) {
-            method = value;
+        public String m01(@OfCorrelationId final String value) {
+            return value;
         }
     }
 

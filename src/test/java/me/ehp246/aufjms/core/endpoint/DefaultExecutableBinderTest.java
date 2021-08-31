@@ -22,6 +22,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
+import me.ehp246.aufjms.util.MockJmsMsg;
 
 /**
  * @author Lei Yang
@@ -196,16 +197,14 @@ class DefaultExecutableBinderTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void method_08() throws JsonProcessingException {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
+    void method_08() throws JsonProcessingException {
+        final var reflectingType = new ReflectingType<>(DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
         final var msg = Mockito.mock(TextMessage.class);
 
         Mockito.when(mq.msg()).thenReturn(msg);
 
-        Mockito.when(mq.text())
-                .thenReturn(objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }));
+        Mockito.when(mq.text()).thenReturn(objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }));
 
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
@@ -240,4 +239,30 @@ class DefaultExecutableBinderTest {
         Assertions.assertEquals(null, outcome.getThrown());
     }
 
+    @Test
+    void correlId_01() {
+        final var mq = new MockJmsMsg();
+        final var case01 = new DefaultExecutableBinderTestCases.CorrelationIdCase01();
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.CorrelationIdCase01.class).findMethod("m01", String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return case01;
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        Assertions.assertEquals(mq.correlationId(), outcome.getReturned());
+    }
 }

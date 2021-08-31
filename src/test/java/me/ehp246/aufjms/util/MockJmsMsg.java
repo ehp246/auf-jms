@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.util;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import javax.jms.Destination;
 import javax.jms.TextMessage;
@@ -13,6 +14,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 public class MockJmsMsg implements JmsMsg {
     private final String type;
+    private final String correlId = UUID.randomUUID().toString();
 
     public MockJmsMsg() {
         super();
@@ -79,8 +81,7 @@ public class MockJmsMsg implements JmsMsg {
 
     @Override
     public String correlationId() {
-        // TODO Auto-generated method stub
-        return null;
+        return correlId;
     }
 
     @Override

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import javax.jms.Message;
 
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.Executable;
@@ -28,11 +29,11 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  * @since 1.0
  */
 public final class DefaultExecutableBinder implements ExecutableBinder {
-    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> HEADER_VALUE_SUPPLIERS = Map
-            .of(OfType.class, JmsMsg::type);
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> PROPERTY_VALUE_SUPPLIERS = Map
+            .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId);
 
     private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
-            .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
+            .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());
 
     private final FromJson fromJson;
 
@@ -136,7 +137,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             var found = Stream.of(annotations)
                     .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
             if (found.isPresent()) {
-                arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
+                arguments[i] = PROPERTY_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
                 markers[i] = true;
             }
 
