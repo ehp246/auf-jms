@@ -75,12 +75,6 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
 
-                    /*
-                     * Framework headers
-                     */
-                    // message.setStringProperty(MsgPropertyName.Invoking, msg.getInvoking());
-                    // message.setBooleanProperty(MsgPropertyName.ServerThrown, msg.isException());
-
                     message.setText(toJson.apply(dispatch.bodyValues()));
                 } catch (final JMSException e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",

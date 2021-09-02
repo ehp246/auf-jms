@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.jms.Message;
@@ -309,5 +310,113 @@ class DefaultExecutableBinderTest {
         Assertions.assertEquals(true, returned[0] == mq);
         Assertions.assertEquals(true, returned[1].equals(type));
         Assertions.assertEquals(true, returned[2].equals(type));
+    }
+
+    @Test
+    void property_01() {
+        final var mq = new MockJmsMsg();
+        final var case01 = new DefaultExecutableBinderTestCases.PropertyCase01();
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return case01;
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (String) outcome.getReturned();
+
+        Assertions.assertEquals(true, returned == null);
+    }
+
+    @Test
+    void property_02() {
+        final var map = Map.of("prop1", UUID.randomUUID().toString());
+        final var mq = new MockJmsMsg() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T property(String name, Class<T> type) {
+                return (T) map.get(name);
+            }
+
+        };
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        String.class, String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.PropertyCase01();
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (String[]) outcome.getReturned();
+
+        Assertions.assertEquals(map.get("prop1"), returned[0]);
+        Assertions.assertEquals(null, returned[1]);
+    }
+
+    @Test
+    void property_03() {
+        final var map = Map.of("prop1", UUID.randomUUID().toString(), "prop2", UUID.randomUUID().toString());
+        final var mq = new MockJmsMsg() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T property(String name, Class<T> type) {
+                return (T) map.get(name);
+            }
+
+        };
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        String.class, String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.PropertyCase01();
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (String[]) outcome.getReturned();
+
+        Assertions.assertEquals(map.get("prop1"), returned[0]);
+        Assertions.assertEquals(map.get("prop2"), returned[1]);
     }
 }

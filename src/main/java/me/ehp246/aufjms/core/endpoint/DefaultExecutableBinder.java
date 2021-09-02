@@ -32,7 +32,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
     private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> PROPERTY_VALUE_SUPPLIERS = Map
             .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId);
 
-    private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
+    private static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set
             .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());
 
     private final FromJson fromJson;
@@ -135,7 +135,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             // Bind Headers
             final var annotations = parameter.getAnnotations();
             var found = Stream.of(annotations)
-                    .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
+                    .filter(annotation -> PROPERTY_ANNOTATIONS.contains(annotation.annotationType())).findAny();
             if (found.isPresent()) {
                 arguments[i] = PROPERTY_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
                 markers[i] = true;

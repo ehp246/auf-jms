@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.Message;
 
@@ -65,8 +66,12 @@ class DefaultExecutableBinderTestCases {
     }
 
     static class PropertyCase01 {
-        public void m004(@OfProperty("") final String value) {
+        public String[] m01(@OfProperty("prop1") final String value1, @OfProperty("prop2") final String value2) {
+            return new String[] { value1, value2 };
+        }
 
+        public Map<String, String> m01(@OfProperty final Map<String, String> value) {
+            return value;
         }
     }
 }
