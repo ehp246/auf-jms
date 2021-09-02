@@ -37,10 +37,11 @@ class DefaultExecutableBinderTestCases {
         }
     }
 
+    static class TypeCase01 {
 
-
-    public void m001(final JmsMsg msg, @OfType final String type, final String str) {
-
+        public Object[] m01(final JmsMsg msg, @OfType final String type, final String payload) {
+            return new Object[] { msg, type, payload };
+        }
     }
 
     static class CorrelationIdCase01 {
@@ -58,8 +59,8 @@ class DefaultExecutableBinderTestCases {
             setter = id;
         }
 
-        public String m01(@OfCorrelationId final String value) {
-            return value;
+        public String[] m01(@OfCorrelationId final String id1, @OfCorrelationId final String id2) {
+            return new String[] { id1, id2 };
         }
     }
 

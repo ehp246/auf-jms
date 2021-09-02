@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.UUID;
 
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -21,6 +22,7 @@ import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.InvocationContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 import me.ehp246.aufjms.util.MockJmsMsg;
 
@@ -248,7 +250,8 @@ class DefaultExecutableBinderTest {
 
             @Override
             public Method getMethod() {
-                return new ReflectingType<>(DefaultExecutableBinderTestCases.CorrelationIdCase01.class).findMethod("m01", String.class);
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.CorrelationIdCase01.class)
+                        .findMethod("m01", String.class, String.class);
             }
 
             @Override
@@ -263,6 +266,48 @@ class DefaultExecutableBinderTest {
             }
         }).get();
 
-        Assertions.assertEquals(mq.correlationId(), outcome.getReturned());
+        final var returned = (String[]) outcome.getReturned();
+        Assertions.assertEquals(mq.correlationId(), returned[0]);
+        Assertions.assertEquals(mq.correlationId(), returned[1]);
+    }
+
+    @Test
+    void type_01() {
+        final var type = UUID.randomUUID().toString();
+        final var mq = new MockJmsMsg(type) {
+
+            @Override
+            public String text() {
+                return OneUtil.orThrow(() -> objectMapper.writeValueAsString(type));
+            }
+
+        };
+        final var case01 = new DefaultExecutableBinderTestCases.TypeCase01();
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.TypeCase01.class).findMethod("m01",
+                        JmsMsg.class, String.class, String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return case01;
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (Object[]) outcome.getReturned();
+
+        Assertions.assertEquals(true, returned[0] == mq);
+        Assertions.assertEquals(true, returned[1].equals(type));
+        Assertions.assertEquals(true, returned[2].equals(type));
     }
 }
