@@ -429,7 +429,6 @@ class DefaultExecutableBinderTest {
 
         final var mq = new MockJmsMsg() {
 
-            @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
                 return (T) map.get(name);
@@ -472,5 +471,40 @@ class DefaultExecutableBinderTest {
         Assertions.assertEquals(true, returned[0] instanceof Map);
         Assertions.assertEquals(map.get("prop2"), ((Map<String, Object>) returned[0]).get("prop2"));
         Assertions.assertEquals(map.get("prop1"), returned[1]);
+    }
+
+    @Test
+    void property_05() {
+        final var mq = new MockJmsMsg() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T property(String name, Class<T> type) {
+                return (T) Boolean.TRUE;
+            }
+
+        };
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        Boolean.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.PropertyCase01();
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (Boolean) outcome.getReturned();
+
+        Assertions.assertEquals(true, returned);
     }
 }
