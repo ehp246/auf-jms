@@ -5,15 +5,17 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.Destination;
+import javax.jms.JMSContext;
 import javax.jms.TextMessage;
 
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockJmsMsg implements JmsMsg {
+public class MockJmsMsg implements JmsMsg, MsgContext {
     private final String type;
     private final String correlId = UUID.randomUUID().toString();
 
@@ -109,4 +111,13 @@ public class MockJmsMsg implements JmsMsg {
         return null;
     }
 
+    @Override
+    public JmsMsg msg() {
+        return this;
+    }
+
+    @Override
+    public JMSContext jmsContext() {
+        return null;
+    }
 }

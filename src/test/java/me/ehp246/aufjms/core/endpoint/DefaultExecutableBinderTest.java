@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -22,8 +23,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.InvocationContext;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
@@ -37,8 +39,8 @@ class DefaultExecutableBinderTest {
     private final ObjectMapper objectMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-    private final DefaultExecutableBinder binder = new DefaultExecutableBinder(new JsonByJackson(objectMapper));
+    private final FromJson fromJson = new JsonByJackson(objectMapper);
+    private final DefaultExecutableBinder binder = new DefaultExecutableBinder(fromJson);
 
     @Test
     public void method_01() throws Exception {
@@ -58,11 +60,16 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
+            }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
             }
         }).get();
 
@@ -89,12 +96,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case001;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
@@ -120,12 +133,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = outcome.getReturned();
@@ -135,6 +154,26 @@ class DefaultExecutableBinderTest {
         Assertions.assertEquals(mq, ((Object[]) returned)[0]);
         Assertions.assertEquals(null, ((Object[]) returned)[1]);
         Assertions.assertEquals(null, outcome.getThrown());
+    }
+
+    @Test
+    public void method_04() throws Exception {
+        final var mq = Mockito.mock(MsgContext.class);
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
+                        MsgContext.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.MethodCase01();
+            }
+        }, mq).get();
+
+        Assertions.assertEquals(mq, outcome.getReturned());
     }
 
     @Test
@@ -155,47 +194,22 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.getReturned());
-    }
-
-    @Test
-    public void method_06() throws Exception {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
-        final var mq = Mockito.mock(JmsMsg.class);
-        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
-
-        final var outcome = binder.bind(new Executable() {
-
-            @Override
-            public Method getMethod() {
-                return reflectingType.findMethod("m03");
-            }
-
-            @Override
-            public Object getInstance() {
-                return case01;
-            }
-        }, new InvocationContext() {
-
-            @Override
-            public JmsMsg getMsg() {
-                return mq;
-            }
-        }).get();
-
-        Assertions.assertEquals(false, outcome.hasReturned());
-        Assertions.assertEquals(null, outcome.getReturned());
-        Assertions.assertEquals(IllegalArgumentException.class, outcome.getThrown().getClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -222,12 +236,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
@@ -240,6 +260,53 @@ class DefaultExecutableBinderTest {
 
         Assertions.assertEquals(msg, returned[1]);
         Assertions.assertEquals(null, outcome.getThrown());
+    }
+
+    @Test
+    public void method_09() throws Exception {
+        final var mq = Mockito.mock(MsgContext.class);
+        final var session = Mockito.mock(JMSContext.class);
+        Mockito.when(mq.jmsContext()).then(i -> session);
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
+                        JMSContext.class, FromJson.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.MethodCase01();
+            }
+        }, mq).get();
+
+        final var returned = (Object[]) outcome.getReturned();
+        Assertions.assertEquals(session, returned[0]);
+        Assertions.assertEquals(fromJson, returned[1]);
+    }
+
+    @Test
+    public void ex_01() throws Exception {
+        final var mq = Mockito.mock(MsgContext.class);
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return ReflectingType.reflect(DefaultExecutableBinderTestCases.ExceptionCase01.class).findMethod("m01");
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.ExceptionCase01();
+            }
+        }, mq).get();
+
+        Assertions.assertEquals(false, outcome.hasReturned());
+        Assertions.assertEquals(null, outcome.getReturned());
+        Assertions.assertEquals(IllegalArgumentException.class, outcome.getThrown().getClass());
     }
 
     @Test
@@ -259,12 +326,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (String[]) outcome.getReturned();
@@ -297,12 +370,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return case01;
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (Object[]) outcome.getReturned();
@@ -315,27 +394,18 @@ class DefaultExecutableBinderTest {
     @Test
     void property_01() {
         final var mq = new MockJmsMsg();
-        final var case01 = new DefaultExecutableBinderTestCases.PropertyCase01();
-
         final var outcome = binder.bind(new Executable() {
-
             @Override
             public Method getMethod() {
-                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                return ReflectingType.reflect(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class);
             }
 
             @Override
             public Object getInstance() {
-                return case01;
+                return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new InvocationContext() {
-
-            @Override
-            public JmsMsg getMsg() {
-                return mq;
-            }
-        }).get();
+        }, mq).get();
 
         final var returned = (String) outcome.getReturned();
 
@@ -367,12 +437,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (String[]) outcome.getReturned();
@@ -406,12 +482,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (String[]) outcome.getReturned();
@@ -458,12 +540,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (Object[]) outcome.getReturned();
@@ -495,12 +583,18 @@ class DefaultExecutableBinderTest {
             public Object getInstance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new InvocationContext() {
+        }, new MsgContext() {
 
             @Override
-            public JmsMsg getMsg() {
+            public JmsMsg msg() {
                 return mq;
             }
+
+            @Override
+            public JMSContext jmsContext() {
+                return null;
+            }
+
         }).get();
 
         final var returned = (Boolean) outcome.getReturned();

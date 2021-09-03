@@ -11,14 +11,15 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.jms.Message;
+import javax.jms.JMSContext;
+import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocationContext;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
@@ -43,7 +44,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
     }
 
     @Override
-    public Supplier<InvocationOutcome<?>> bind(final Executable target, final InvocationContext ctx) {
+    public Supplier<InvocationOutcome<?>> bind(final Executable target, final MsgContext ctx) {
         final var method = target.getMethod();
         if (method.getParameterCount() == 0) {
             return () -> {
@@ -90,7 +91,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         if (receivers.size() > 0) {
-            fromJson.from(ctx.getMsg().text(), receivers);
+            fromJson.from(ctx.msg().text(), receivers);
         }
 
         return () -> {
@@ -114,21 +115,30 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
      * @param arguments
      * @return
      */
-    private boolean[] bindContextArgs(final Parameter[] parameters, final InvocationContext ctx,
+    private boolean[] bindContextArgs(final Parameter[] parameters, final MsgContext ctx,
             final Object[] arguments) {
         final boolean[] markers = new boolean[parameters.length];
 
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
-            final var msg = ctx.getMsg();
+            final var msg = ctx.msg();
 
             // Bind by type
             final var type = parameter.getType();
             if (type.isAssignableFrom(JmsMsg.class)) {
                 arguments[i] = msg;
                 markers[i] = true;
-            } else if (type.isAssignableFrom(Message.class)) {
+            } else if (type.isAssignableFrom(TextMessage.class)) {
                 arguments[i] = msg.message();
+                markers[i] = true;
+            } else if (type.isAssignableFrom(MsgContext.class)) {
+                arguments[i] = ctx;
+                markers[i] = true;
+            } else if (type.isAssignableFrom(FromJson.class)) {
+                arguments[i] = fromJson;
+                markers[i] = true;
+            } else if (type.isAssignableFrom(JMSContext.class)) {
+                arguments[i] = ctx.jmsContext();
                 markers[i] = true;
             }
 

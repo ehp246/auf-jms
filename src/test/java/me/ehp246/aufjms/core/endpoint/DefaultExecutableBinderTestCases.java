@@ -3,12 +3,15 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.List;
 import java.util.Map;
 
+import javax.jms.JMSContext;
 import javax.jms.Message;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.spi.FromJson;
 
 class DefaultExecutableBinderTestCases {
 
@@ -25,16 +28,27 @@ class DefaultExecutableBinderTestCases {
             return new Object[] { msg, message };
         }
 
-        public Void m02() {
-            return null;
+        public MsgContext m01(final MsgContext msgCtx) {
+            return msgCtx;
         }
 
-        public void m03() {
-            throw new IllegalArgumentException();
+        public Object[] m01(final JMSContext session, final FromJson fromJson) {
+            return new Object[] { session, fromJson };
         }
 
         public Object[] m01(final List<Integer> integers, final Message message) {
             return new Object[] { integers, message };
+        }
+
+        public Void m02() {
+            return null;
+        }
+
+    }
+
+    static class ExceptionCase01 {
+        public void m01() {
+            throw new IllegalArgumentException();
         }
     }
 
@@ -66,6 +80,10 @@ class DefaultExecutableBinderTestCases {
     }
 
     static class PropertyCase01 {
+        public String m01(@OfProperty("prop1") final String value) {
+            return value;
+        }
+
         public String[] m01(@OfProperty("prop1") final String value1, @OfProperty("prop2") final String value2) {
             return new String[] { value1, value2 };
         }

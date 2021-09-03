@@ -13,6 +13,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokableDispatcher;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
@@ -38,7 +39,9 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
     }
 
     @Override
-    public void dispatch(final JmsMsg msg) {
+    public void dispatch(final MsgContext msgCtx) {
+        final var msg = msgCtx.msg();
+
         LOGGER.atTrace().log("Dispatching");
 
         final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
@@ -60,7 +63,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
         LOGGER.atTrace().log("Submitting {}", target.getMethod());
 
-        final var runnable = newInvocation(msg, target, binder);
+        final var runnable = newInvocation(msgCtx, target, binder);
 
         if (executor == null
                 || (target.getInvocationModel() != null && target.getInvocationModel() == InvocationModel.INLINE)) {
@@ -91,10 +94,10 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
         }
     };
 
-    private static Supplier<InvocationOutcome<?>> newInvocation(final JmsMsg msg, final Executable target,
+    private static Supplier<InvocationOutcome<?>> newInvocation(final MsgContext msgCtx, final Executable target,
             final ExecutableBinder binder) {
         return () -> {
-            final var bindingOutcome = InvocationOutcome.invoke(() -> binder.bind(target, () -> msg));
+            final var bindingOutcome = InvocationOutcome.invoke(() -> binder.bind(target, msgCtx));
 
             final var executionOutcome = bindingOutcome.optionalReturned().map(Supplier::get)
                     .orElseGet(() -> InvocationOutcome.thrown(bindingOutcome.getThrown()));
@@ -115,7 +118,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
                 @Override
                 public JmsMsg getMsg() {
-                    return msg;
+                    return msgCtx.msg();
                 }
 
                 @Override

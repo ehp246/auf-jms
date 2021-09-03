@@ -11,5 +11,5 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  */
 @FunctionalInterface
 public interface ExecutableBinder {
-    Supplier<InvocationOutcome<?>> bind(Executable resolved, InvocationContext invocationContext);
+    Supplier<InvocationOutcome<?>> bind(Executable resolved, MsgContext invocationContext);
 }
