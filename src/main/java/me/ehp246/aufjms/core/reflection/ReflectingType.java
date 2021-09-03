@@ -7,12 +7,21 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * 
+ * @author Lei Yang
+ * @since 1.0
+ */
 public final class ReflectingType<T> {
     private final Class<T> type;
 
-    public ReflectingType(Class<T> type) {
+    public ReflectingType(final Class<T> type) {
         super();
         this.type = type;
+    }
+
+    public static <T> ReflectingType<T> reflect(final Class<T> type) {
+        return new ReflectingType<T>(type);
     }
 
     /**
@@ -39,7 +48,7 @@ public final class ReflectingType<T> {
     }
 
     /**
-     * Returns all methods that have the given name.
+     * Returns all methods that have the given name ignoring the parameters.
      * 
      * @param name
      * @return
