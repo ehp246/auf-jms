@@ -128,7 +128,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
                 arguments[i] = msg;
                 markers[i] = true;
             } else if (type.isAssignableFrom(Message.class)) {
-                arguments[i] = msg.msg();
+                arguments[i] = msg.message();
                 markers[i] = true;
             }
 
@@ -145,7 +145,11 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
                     .findAny();
             if (found.isPresent()) {
-                arguments[i] = msg.property(((OfProperty) found.get()).value(), parameter.getType());
+                if (Map.class.isAssignableFrom(type)) {
+                    arguments[i] = msg.propertyMap();
+                } else {
+                    arguments[i] = msg.property(((OfProperty) found.get()).value(), type);
+                }
                 markers[i] = true;
             }
         }

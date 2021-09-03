@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.util;
 
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.Destination;
@@ -74,7 +75,7 @@ public class MockJmsMsg implements JmsMsg {
     }
 
     @Override
-    public TextMessage msg() {
+    public TextMessage message() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -98,6 +99,12 @@ public class MockJmsMsg implements JmsMsg {
 
     @Override
     public Integer groupSeq() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set<String> propertyNames() {
         // TODO Auto-generated method stub
         return null;
     }

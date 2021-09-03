@@ -3,8 +3,10 @@ package me.ehp246.aufjms.core.endpoint;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
 
@@ -36,8 +38,6 @@ class DefaultExecutableBinderTest {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    private final ReflectingType<DefaultExecutableBinderTestCases> case001Type = new ReflectingType<DefaultExecutableBinderTestCases>(
-            DefaultExecutableBinderTestCases.class);
     private final DefaultExecutableBinder binder = new DefaultExecutableBinder(new JsonByJackson(objectMapper));
 
     @Test
@@ -205,7 +205,7 @@ class DefaultExecutableBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var msg = Mockito.mock(TextMessage.class);
 
-        Mockito.when(mq.msg()).thenReturn(msg);
+        Mockito.when(mq.message()).thenReturn(msg);
 
         Mockito.when(mq.text()).thenReturn(objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }));
 
@@ -418,5 +418,59 @@ class DefaultExecutableBinderTest {
 
         Assertions.assertEquals(map.get("prop1"), returned[0]);
         Assertions.assertEquals(map.get("prop2"), returned[1]);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void property_04() throws JMSException {
+        final var map = Map.of("prop1", UUID.randomUUID().toString(), "prop2", UUID.randomUUID().toString());
+        final var msg = Mockito.mock(TextMessage.class);
+        Mockito.when(msg.getObjectProperty(Mockito.anyString())).then(i -> map.get(i.getArgument(0).toString()));
+
+        final var mq = new MockJmsMsg() {
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T property(String name, Class<T> type) {
+                return (T) map.get(name);
+            }
+
+            @Override
+            public Set<String> propertyNames() {
+                return map.keySet();
+            }
+
+            @Override
+            public TextMessage message() {
+                return msg;
+            }
+
+        };
+
+        final var outcome = binder.bind(new Executable() {
+
+            @Override
+            public Method getMethod() {
+                return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        Map.class, String.class);
+            }
+
+            @Override
+            public Object getInstance() {
+                return new DefaultExecutableBinderTestCases.PropertyCase01();
+            }
+        }, new InvocationContext() {
+
+            @Override
+            public JmsMsg getMsg() {
+                return mq;
+            }
+        }).get();
+
+        final var returned = (Object[]) outcome.getReturned();
+
+        Assertions.assertEquals(true, returned[0] instanceof Map);
+        Assertions.assertEquals(map.get("prop2"), ((Map<String, Object>) returned[0]).get("prop2"));
+        Assertions.assertEquals(map.get("prop1"), returned[1]);
     }
 }

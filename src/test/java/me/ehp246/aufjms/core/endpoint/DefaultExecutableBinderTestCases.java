@@ -70,8 +70,8 @@ class DefaultExecutableBinderTestCases {
             return new String[] { value1, value2 };
         }
 
-        public Map<String, String> m01(@OfProperty final Map<String, String> value) {
-            return value;
+        public Object[] m01(@OfProperty final Map<String, String> value1, @OfProperty("prop1") final String value2) {
+            return new Object[] { value1, value2 };
         }
     }
 }

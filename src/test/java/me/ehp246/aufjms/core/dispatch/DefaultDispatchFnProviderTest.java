@@ -89,7 +89,7 @@ class DefaultDispatchFnProviderTest {
 
         var jmsMsg = dispatchFn.dispatch(new MockDispatch());
 
-        verify(producer, times(1)).send(ArgumentMatchers.any(), ArgumentMatchers.eq(jmsMsg.msg()));
+        verify(producer, times(1)).send(ArgumentMatchers.any(), ArgumentMatchers.eq(jmsMsg.message()));
     }
 
     @Test
