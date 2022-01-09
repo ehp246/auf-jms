@@ -49,18 +49,13 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     @Override
     public DispatchFn get(final String contextName) {
         return new DispatchFn() {
-            private final JMSContext jmsCtx = ctxProvider.get(contextName);
-
             @Override
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
                         dispatch.at().name().toString());
-
+                final var jmsCtx = ctxProvider.get(contextName);
                 final var message = jmsCtx.createTextMessage();
-
                 try {
-                    message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
-
                     // Fill the custom properties first so the framework ones won't get
                     // overwritten.
                     for (final var entry : Optional.ofNullable(dispatch.properties())
@@ -71,11 +66,11 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                     /*
                      * JMS headers
                      */
-                    message.setJMSReplyTo(toJMSDestintation(dispatch.replyTo()));
+                    message.setJMSReplyTo(toJMSDestintation(jmsCtx, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
 
-                    message.setText(toJson.apply(dispatch.bodyValues()));
+                    message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
                 } catch (final JMSException e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
                             dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
@@ -86,9 +81,11 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
                         .setDeliveryDelay(
                                 Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
                         .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
-                        .send(toJMSDestintation(dispatch.at()), message);
+                        .send(toJMSDestintation(jmsCtx, dispatch.at()), message);
 
                 LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
+
+                ctxProvider.release(jmsCtx);
 
                 final var msg = TextJmsMsg.from(message);
                 // Call listeners
@@ -97,15 +94,14 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
 
                 return msg;
             }
-
-            private Destination toJMSDestintation(AtDestination at) {
-                if (at == null || !OneUtil.hasValue(at.name())) {
-                    return null;
-                }
-
-                return at.type() == DestinationType.QUEUE ? jmsCtx.createQueue(at.name())
-                        : jmsCtx.createTopic(at.name());
-            }
         };
+    }
+
+    private static Destination toJMSDestintation(JMSContext jmsCtx, AtDestination at) {
+        if (at == null || !OneUtil.hasValue(at.name())) {
+            return null;
+        }
+
+        return at.type() == DestinationType.QUEUE ? jmsCtx.createQueue(at.name()) : jmsCtx.createTopic(at.name());
     }
 }

@@ -9,4 +9,7 @@ import javax.jms.JMSContext;
 @FunctionalInterface
 public interface ContextProvider {
     JMSContext get(String name);
+
+    default void release(JMSContext jmsCtx) {
+    }
 }
