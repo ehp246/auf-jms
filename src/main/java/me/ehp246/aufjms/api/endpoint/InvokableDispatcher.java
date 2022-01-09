@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.JmsMsg;
-
 /**
  * 
  * @author Lei Yang
@@ -9,5 +7,5 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @FunctionalInterface
 public interface InvokableDispatcher {
-    void dispatch(final JmsMsg msg);
+    void dispatch(final MsgContext msgCtx);
 }

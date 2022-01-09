@@ -15,7 +15,6 @@ import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 import me.ehp246.aufjms.core.endpoint.InboundListenerConfigurer;
-import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
  *
@@ -25,8 +24,8 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class, InboundListenerConfigurer.class,
-        ExecutorConfiguration.class, DefaultExecutableBinder.class, JsonByJackson.class })
+@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
+        InboundListenerConfigurer.class, ExecutorConfiguration.class, DefaultExecutableBinder.class })
 public @interface EnableForJms {
     Inbound[] value();
 

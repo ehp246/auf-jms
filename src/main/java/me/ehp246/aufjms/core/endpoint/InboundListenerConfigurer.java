@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.jms.ConnectionFactory;
-import javax.jms.MessageListener;
+import javax.jms.JMSContext;
 import javax.jms.TextMessage;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,10 +16,13 @@ import org.springframework.jms.config.JmsListenerEndpoint;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.jms.AtDestinationRecord;
@@ -32,7 +35,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class InboundListenerConfigurer implements JmsListenerConfigurer {
+public final class InboundListenerConfigurer implements JmsListenerConfigurer, AutoCloseable {
     private final static Logger LOGGER = LogManager.getLogger(InboundListenerConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
@@ -40,6 +43,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final ExecutableBinder binder;
     private final PropertyResolver propertyResolver;
     private final ConnectionFactory connectionFactory;
+    private JMSContext jmsCtx;
 
     public InboundListenerConfigurer(final ConnectionFactory connectionFactory, final Set<InboundEndpoint> endpoints,
             final ExecutorProvider executorProvider, final ExecutableBinder binder,
@@ -53,8 +57,16 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     }
 
     @Override
+    public void close() {
+        if (jmsCtx != null) {
+            jmsCtx.close();
+        }
+    }
+
+    @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
         final var listenerContainerFactory = jmsListenerContainerFactory();
+        jmsCtx = connectionFactory.createContext();
 
         this.endpoints.stream().forEach(endpoint -> {
             final AtDestinationRecord resolvedAt = new AtDestinationRecord(
@@ -75,13 +87,26 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                     container.setDestinationResolver((session, name, topic) -> {
                         return resolvedAt.jmsDestination(session);
                     });
-                    container.setupMessageListener((MessageListener) message -> {
-                        final var msg = TextJmsMsg.from((TextMessage) message);
+                    container.setupMessageListener((SessionAwareMessageListener<TextMessage>) (message, session) -> {
+                        final var msg = TextJmsMsg.from(message);
+                        final var msgCtx = new MsgContext() {
+
+                            @Override
+                            public JmsMsg msg() {
+                                return msg;
+                            }
+
+                            @Override
+                            public JMSContext jmsContext() {
+                                return jmsCtx;
+                            }
+
+                        };
 
                         ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
                         ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
 
-                        dispatcher.dispatch(msg);
+                        dispatcher.dispatch(msgCtx);
 
                         ThreadContext.remove(AufJmsProperties.MSG_TYPE);
                         ThreadContext.remove(AufJmsProperties.CORRELATION_ID);

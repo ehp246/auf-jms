@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.api.endpoint;
 
+import javax.jms.JMSContext;
+
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -7,7 +9,8 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-@FunctionalInterface
-public interface InvocationContext {
-    JmsMsg getMsg();
+public interface MsgContext {
+    JmsMsg msg();
+
+    JMSContext jmsContext();
 }

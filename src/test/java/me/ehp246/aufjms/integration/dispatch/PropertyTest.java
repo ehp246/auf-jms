@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.integration.dispatch;
 
+import java.util.Map;
+
 import javax.jms.JMSException;
 
 import org.jgroups.util.UUID;
@@ -34,5 +36,15 @@ class PropertyTest {
 
         Assertions.assertEquals(id, received.getStringProperty("JMSXGroupID"));
         Assertions.assertEquals(10, received.getIntProperty("JMSXGroupSeq"));
+    }
+
+    @Test
+    void property_02() throws JMSException {
+        case01.ping(Map.<String, Object>of("K1", "1", "K2", Integer.valueOf(3)));
+
+        final var received = listener.takeReceived();
+
+        Assertions.assertEquals("1", received.getStringProperty("K1"));
+        Assertions.assertEquals(3, received.getIntProperty("K2"));
     }
 }

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>0.4.1</version>
+	<version>0.5.0</version>
 	<name>Auf JMS</name>
 	<description>An annotation-driven declarative JMS development framework</description>
 
@@ -262,7 +262,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>15</release>
+					<release>11</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-parameters</arg>

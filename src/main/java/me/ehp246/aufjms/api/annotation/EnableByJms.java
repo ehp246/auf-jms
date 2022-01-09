@@ -11,10 +11,7 @@ import org.springframework.context.annotation.Import;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
-import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
-import me.ehp246.aufjms.core.dispatch.DispatchLogger;
-import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
  * Enables {@link ByJms}-annotated proxy interfaces scanning.
@@ -24,8 +21,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultDispatchFnProvider.class,
-        JsonByJackson.class, DefaultInvocationDispatchBuilder.class, DispatchLogger.class })
+@Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultInvocationDispatchBuilder.class })
 public @interface EnableByJms {
     Class<?>[] scan() default {};
 

@@ -1,12 +1,14 @@
 package me.ehp246.aufjms.core.util;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
 import javax.jms.TextMessage;
 
+import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.PropertyName;
 
@@ -76,6 +78,12 @@ public final class TextJmsMsg implements JmsMsg {
 
     @SuppressWarnings("unchecked")
     @Override
+    public Set<String> propertyNames() {
+        return new HashSet<>(Collections.<String>list(JMSSupplier.invoke(message::getPropertyNames)));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
     public <T> T property(String name, Class<T> type) {
         if (type == String.class) {
             return (T) JMSSupplier.invoke(() -> message.getStringProperty(name));
@@ -99,23 +107,11 @@ public final class TextJmsMsg implements JmsMsg {
     }
 
     @Override
-    public TextMessage msg() {
+    public TextMessage message() {
         return message;
     }
 
     public static JmsMsg from(final TextMessage message) {
         return new TextJmsMsg(message);
-    }
-
-    private interface JMSSupplier<V> {
-        V get() throws JMSException;
-
-        static <V> V invoke(JMSSupplier<V> callable) {
-            try {
-                return callable.get();
-            } catch (JMSException e) {
-                throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
-            }
-        }
     }
 }

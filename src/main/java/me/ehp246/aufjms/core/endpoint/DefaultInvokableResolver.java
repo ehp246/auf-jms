@@ -171,7 +171,15 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
             invokings.put(invokingName, method);
         }
 
-        // There should be at least one default method.
+        // Use name convention. There should be one and only.
+        if (invokings.get("") == null) {
+            final var invokes = reflected.findMethods("invoke");
+            if (invokes.size() == 1) {
+                invokings.put("", invokes.get(0));
+            }
+        }
+
+        // There should be at least one method.
         if (invokings.get("") == null) {
             throw new RuntimeException("No invocation method defined by " + instanceType.getName());
         }

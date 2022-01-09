@@ -358,7 +358,7 @@ class DefaultInvocationDispatchBuilderTest {
     void body_m03_1() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
-        captor.proxy().m03(UUID.randomUUID().toString());
+        captor.proxy().m03(UUID.randomUUID().toString(), "");
 
         Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
     }
@@ -572,5 +572,25 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().m02("PT100S");
 
         Assertions.assertEquals(100, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toSeconds());
+    }
+
+    @Test
+    void correlationId_01() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+        final var id = Duration.parse("PT100S");
+
+        captor.proxy().m01(id);
+
+        Assertions.assertEquals(id.toString(), dispatchBuilder.get(captor.invocation(), proxyConfig).correlationId());
+    }
+
+    @Test
+    void correlationId_02() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+
+        captor.proxy().m02(null, UUID.randomUUID().toString());
+
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).correlationId(),
+                "should take the first one");
     }
 }

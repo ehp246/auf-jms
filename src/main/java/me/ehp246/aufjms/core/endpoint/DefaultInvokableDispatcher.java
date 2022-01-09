@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,9 +13,9 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokableDispatcher;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
-import me.ehp246.aufjms.core.reflection.CatchingInvocation;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -38,13 +39,20 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
     }
 
     @Override
-    public void dispatch(final JmsMsg msg) {
+    public void dispatch(final MsgContext msgCtx) {
+        final var msg = msgCtx.msg();
+
         LOGGER.atTrace().log("Dispatching");
 
-        final var resolveOutcome = CatchingInvocation.invoke(() -> this.executableResolver.resolve(msg));
+        final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
         if (resolveOutcome.hasThrown()) {
-            LOGGER.atError().log("Resolution failed", resolveOutcome.getThrown());
-            return;
+            LOGGER.atError().log("Resolution failed", resolveOutcome.getThrown().getMessage());
+            final var ex = resolveOutcome.getThrown();
+            if (ex instanceof RuntimeException) {
+                throw (RuntimeException) ex;
+            } else {
+                throw new RuntimeException(ex);
+            }
         }
 
         final var target = resolveOutcome.getReturned();
@@ -55,13 +63,13 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
         LOGGER.atTrace().log("Submitting {}", target.getMethod());
 
-        final var runnable = newRunnable(msg, target, binder);
+        final var runnable = newInvocation(msgCtx, target, binder);
 
         if (executor == null
                 || (target.getInvocationModel() != null && target.getInvocationModel() == InvocationModel.INLINE)) {
             LOGGER.atTrace().log("Executing");
 
-            final var thrown = runnable.invoke().getThrown();
+            final var thrown = runnable.get().getThrown();
 
             if (thrown != null) {
                 if (thrown instanceof RuntimeException) {
@@ -77,7 +85,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
                 ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
                 LOGGER.atTrace().log("Executing");
 
-                runnable.invoke();
+                runnable.get();
 
                 LOGGER.atTrace().log("Executed");
                 ThreadContext.remove(AufJmsProperties.MSG_TYPE);
@@ -86,16 +94,17 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
         }
     };
 
-    private static CatchingInvocation newRunnable(final JmsMsg msg, final Executable target,
+    private static Supplier<InvocationOutcome<?>> newInvocation(final MsgContext msgCtx, final Executable target,
             final ExecutableBinder binder) {
         return () -> {
-            final var bindOutcome = CatchingInvocation.invoke(() -> binder.bind(target, () -> msg));
-            final var outcome = bindOutcome.ifReturnedPresent().map(CatchingInvocation::invoke)
-                    .orElseGet(() -> InvocationOutcome.thrown(bindOutcome.getThrown()));
+            final var bindingOutcome = InvocationOutcome.invoke(() -> binder.bind(target, msgCtx));
+
+            final var executionOutcome = bindingOutcome.optionalReturned().map(Supplier::get)
+                    .orElseGet(() -> InvocationOutcome.thrown(bindingOutcome.getThrown()));
 
             final var postEexcution = target.postExecution();
             if (postEexcution == null) {
-                return outcome;
+                return executionOutcome;
             }
 
             LOGGER.atTrace().log("Executing postExecution");
@@ -104,12 +113,12 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
                 @Override
                 public InvocationOutcome<?> getOutcome() {
-                    return outcome;
+                    return executionOutcome;
                 }
 
                 @Override
                 public JmsMsg getMsg() {
-                    return msg;
+                    return msgCtx.msg();
                 }
 
                 @Override
@@ -119,7 +128,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
             });
 
             LOGGER.atTrace().log("Executed postExecution");
-            return outcome;
+            return executionOutcome;
         };
     }
 }

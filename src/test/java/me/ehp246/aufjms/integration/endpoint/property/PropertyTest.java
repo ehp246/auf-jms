@@ -1,5 +1,6 @@
-package me.ehp246.aufjms.integration.endpoint.type;
+package me.ehp246.aufjms.integration.endpoint.property;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,27 +23,26 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {})
-class EndpointTypeTest {
+class PropertyTest {
     @Autowired
-    private AtomicReference<CompletableFuture<Integer>> ref;
+    private AtomicReference<CompletableFuture<PropertyCase>> ref;
 
     @Autowired
     private JmsTemplate jmsTemplate;
 
     @Test
-    void type_01() throws InterruptedException, ExecutionException {
-        final var i = (int) (Math.random() * 100);
+    void test_01() throws InterruptedException, ExecutionException {
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
 
             @Override
             public Message createMessage(Session session) throws JMSException {
                 final var msg = session.createTextMessage();
-                msg.setJMSType("Add");
-                msg.setText("" + i);
+                msg.setBooleanProperty("b1", false);
+                msg.setJMSCorrelationID(UUID.randomUUID().toString());
                 return msg;
             }
         });
 
-        Assertions.assertEquals(i, ref.get().get());
+        Assertions.assertEquals(true, ref.get().get().map.get("b1") instanceof Boolean);
     }
 }

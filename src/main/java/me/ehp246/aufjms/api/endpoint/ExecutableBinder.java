@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.core.reflection.CatchingInvocation;
+import java.util.function.Supplier;
+
+import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  * 
@@ -9,5 +11,5 @@ import me.ehp246.aufjms.core.reflection.CatchingInvocation;
  */
 @FunctionalInterface
 public interface ExecutableBinder {
-    CatchingInvocation bind(Executable resolved, InvocationContext invocationContext);
+    Supplier<InvocationOutcome<?>> bind(Executable resolved, MsgContext invocationContext);
 }

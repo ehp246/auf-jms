@@ -16,7 +16,7 @@ import me.ehp246.aufjms.util.MockJmsMsg;
 class DefaultInvokableDispatcherTest {
 
     @Test
-    final void test() {
+    void ex_01() {
         final var ex = new RuntimeException();
         final var thrown = Assertions.assertThrows(RuntimeException.class,
                 () -> new DefaultInvokableDispatcher(jmsMsg -> {
@@ -43,4 +43,14 @@ class DefaultInvokableDispatcherTest {
         Assertions.assertEquals(true, ex == thrown);
     }
 
+    @Test
+    void resolver_ex_01() {
+        final var ex = new RuntimeException();
+        final var thrown = Assertions.assertThrows(RuntimeException.class,
+                () -> new DefaultInvokableDispatcher(jmsMsg -> {
+                    throw ex;
+                }, (e, c) -> () -> InvocationOutcome.returned(null), null).dispatch(new MockJmsMsg()));
+
+        Assertions.assertEquals(true, ex == thrown);
+    }
 }

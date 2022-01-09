@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.reflection;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 /**
  * 
@@ -27,6 +28,15 @@ public final class InvocationOutcome<T> {
         return new InvocationOutcome<T>(null, thrown, false);
     }
 
+    public static <T> InvocationOutcome<T> invoke(final Callable<T> callable) {
+        try {
+            return InvocationOutcome.returned(callable.call());
+        } catch (final Exception e) {
+            return InvocationOutcome.thrown(e);
+        }
+    }
+
+
     public T getReturned() {
         return returned;
     }
@@ -47,7 +57,7 @@ public final class InvocationOutcome<T> {
         return hasReturned() ? getReturned() : getThrown();
     }
 
-    public Optional<T> ifReturnedPresent() {
+    public Optional<T> optionalReturned() {
         return hasReturned() ? Optional.of(returned) : Optional.empty();
     }
 }

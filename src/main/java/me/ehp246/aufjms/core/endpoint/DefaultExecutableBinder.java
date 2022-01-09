@@ -8,18 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.jms.Message;
+import javax.jms.JMSContext;
+import javax.jms.TextMessage;
 
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocationContext;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.core.reflection.CatchingInvocation;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -28,11 +30,11 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  * @since 1.0
  */
 public final class DefaultExecutableBinder implements ExecutableBinder {
-    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> HEADER_VALUE_SUPPLIERS = Map
-            .of(OfType.class, JmsMsg::type);
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> PROPERTY_VALUE_SUPPLIERS = Map
+            .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId);
 
-    private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
-            .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
+    private static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set
+            .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());
 
     private final FromJson fromJson;
 
@@ -42,7 +44,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
     }
 
     @Override
-    public CatchingInvocation bind(final Executable target, final InvocationContext ctx) {
+    public Supplier<InvocationOutcome<?>> bind(final Executable target, final MsgContext ctx) {
         final var method = target.getMethod();
         if (method.getParameterCount() == 0) {
             return () -> {
@@ -89,7 +91,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         if (receivers.size() > 0) {
-            fromJson.from(ctx.getMsg().text(), receivers);
+            fromJson.from(ctx.msg().text(), receivers);
         }
 
         return () -> {
@@ -113,30 +115,39 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
      * @param arguments
      * @return
      */
-    private boolean[] bindContextArgs(final Parameter[] parameters, final InvocationContext ctx,
+    private boolean[] bindContextArgs(final Parameter[] parameters, final MsgContext ctx,
             final Object[] arguments) {
         final boolean[] markers = new boolean[parameters.length];
 
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
-            final var msg = ctx.getMsg();
+            final var msg = ctx.msg();
 
             // Bind by type
             final var type = parameter.getType();
             if (type.isAssignableFrom(JmsMsg.class)) {
                 arguments[i] = msg;
                 markers[i] = true;
-            } else if (type.isAssignableFrom(Message.class)) {
-                arguments[i] = msg.msg();
+            } else if (type.isAssignableFrom(TextMessage.class)) {
+                arguments[i] = msg.message();
+                markers[i] = true;
+            } else if (type.isAssignableFrom(MsgContext.class)) {
+                arguments[i] = ctx;
+                markers[i] = true;
+            } else if (type.isAssignableFrom(FromJson.class)) {
+                arguments[i] = fromJson;
+                markers[i] = true;
+            } else if (type.isAssignableFrom(JMSContext.class)) {
+                arguments[i] = ctx.jmsContext();
                 markers[i] = true;
             }
 
             // Bind Headers
             final var annotations = parameter.getAnnotations();
             var found = Stream.of(annotations)
-                    .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
+                    .filter(annotation -> PROPERTY_ANNOTATIONS.contains(annotation.annotationType())).findAny();
             if (found.isPresent()) {
-                arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
+                arguments[i] = PROPERTY_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
                 markers[i] = true;
             }
 
@@ -144,7 +155,11 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
                     .findAny();
             if (found.isPresent()) {
-                arguments[i] = msg.property(((OfProperty) found.get()).value(), parameter.getType());
+                if (Map.class.isAssignableFrom(type)) {
+                    arguments[i] = msg.propertyMap();
+                } else {
+                    arguments[i] = msg.property(((OfProperty) found.get()).value(), type);
+                }
                 markers[i] = true;
             }
         }
