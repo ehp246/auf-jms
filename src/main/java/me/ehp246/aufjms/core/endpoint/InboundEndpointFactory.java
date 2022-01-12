@@ -22,7 +22,7 @@ public final class InboundEndpointFactory {
     }
 
     public InboundEndpoint newInstance(final AtDestination at, final Set<String> scanPackages, final String concurrency,
-            final String name) {
+            final String name, final String autoStartup) {
         return new InboundEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
                     DefaultInvokableResolver.registeryFrom(scanPackages));
@@ -45,6 +45,11 @@ public final class InboundEndpointFactory {
             @Override
             public String name() {
                 return name;
+            }
+
+            @Override
+            public String autoStartup() {
+                return autoStartup;
             }
 
         };

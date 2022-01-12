@@ -76,6 +76,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
 
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(Integer.parseInt(this.propertyResolver.resolve(endpoint.concurrency()))));
+            final var autoStartup = Boolean.parseBoolean(this.propertyResolver.resolve(endpoint.autoStartup()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
@@ -83,6 +84,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
                     container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : resolvedAt.toString());
+                    container.setAutoStartup(autoStartup);
                     container.setDestinationName(resolvedAt.toString());
                     container.setDestinationResolver((session, name, topic) -> {
                         return resolvedAt.jmsDestination(session);

@@ -15,4 +15,6 @@ public interface InboundEndpoint {
     String concurrency();
 
     String name();
+
+    String autoStartup();
 }

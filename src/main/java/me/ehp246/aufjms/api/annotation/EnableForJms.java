@@ -44,5 +44,7 @@ public @interface EnableForJms {
          * The bean name of the endpoint.
          */
         String name() default "";
+
+        String autoStartup() default "true";
     }
 }
