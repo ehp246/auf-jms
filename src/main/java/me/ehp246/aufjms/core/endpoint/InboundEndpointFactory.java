@@ -7,6 +7,9 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 
 /**
  *
@@ -14,15 +17,24 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @since 1.0
  */
 public final class InboundEndpointFactory {
+    private final PropertyResolver propertyResolver;
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
-    public InboundEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory) {
+    public InboundEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+            final PropertyResolver propertyResolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
+        this.propertyResolver = propertyResolver;
     }
 
-    public InboundEndpoint newInstance(final AtDestination at, final Set<String> scanPackages, final String concurrency,
+    public InboundEndpoint newInstance(final String atName, final DestinationType atType,
+            final Set<String> scanPackages, final String concurrency,
             final String name, final String autoStartup) {
+
+        final var at = new AtDestinationRecord(this.propertyResolver.resolve(atName), atType);
+        final var autoStart = Boolean.parseBoolean(this.propertyResolver.resolve(autoStartup));
+        final var concur = Integer.parseInt(this.propertyResolver.resolve(concurrency));
+
         return new InboundEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
                     DefaultInvokableResolver.registeryFrom(scanPackages));
@@ -38,8 +50,8 @@ public final class InboundEndpointFactory {
             }
 
             @Override
-            public String concurrency() {
-                return concurrency;
+            public int concurrency() {
+                return concur;
             }
 
             @Override
@@ -48,8 +60,8 @@ public final class InboundEndpointFactory {
             }
 
             @Override
-            public String autoStartup() {
-                return autoStartup;
+            public boolean autoStartup() {
+                return autoStart;
             }
 
         };

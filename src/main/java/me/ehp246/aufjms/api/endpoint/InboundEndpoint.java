@@ -12,9 +12,9 @@ public interface InboundEndpoint {
 
     ExecutableResolver resolver();
 
-    String concurrency();
+    int concurrency();
 
     String name();
 
-    String autoStartup();
+    boolean autoStartup();
 }

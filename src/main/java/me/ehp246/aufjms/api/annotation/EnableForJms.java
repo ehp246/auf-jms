@@ -45,6 +45,22 @@ public @interface EnableForJms {
          */
         String name() default "";
 
+        /**
+         * Specifies whether the listener should be started automatically.
+         * <p>
+         * Supports Spring property.
+         */
         String autoStartup() default "true";
+
+        boolean shared() default true;
+
+        /**
+         * Defines the subscription name to be used with a Topic consumer.
+         * <p>
+         * Only applicable to Topic's.
+         * <p>
+         * Supports Spring property.
+         */
+        String subscriptionName() default "";
     }
 }
