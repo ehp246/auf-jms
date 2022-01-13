@@ -22,6 +22,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.jms.AtDestinationRecord;
@@ -78,6 +79,11 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
                     container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : endpoint.at().name());
                     container.setAutoStartup(endpoint.autoStartup());
                     container.setDestinationName(endpoint.at().name());
+                    if (endpoint.at().type() == DestinationType.TOPIC) {
+                        container.setSubscriptionName(endpoint.subscriptionName());
+                        container.setSubscriptionDurable(endpoint.durable());
+                        container.setSubscriptionShared(endpoint.shared());
+                    }
                     container.setDestinationResolver((session, name, topic) -> {
                         return ((AtDestinationRecord) endpoint.at()).jmsDestination(session);
                     });

@@ -54,6 +54,8 @@ public @interface EnableForJms {
 
         boolean shared() default true;
 
+        boolean durable() default true;
+
         /**
          * Defines the subscription name to be used with a Topic consumer.
          * <p>

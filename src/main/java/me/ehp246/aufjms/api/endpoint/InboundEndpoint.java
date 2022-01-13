@@ -17,4 +17,10 @@ public interface InboundEndpoint {
     String name();
 
     boolean autoStartup();
+
+    boolean shared();
+
+    boolean durable();
+
+    String subscriptionName();
 }

@@ -58,6 +58,9 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             constructorArgumentValues.addGenericArgumentValue(endpoint.get("concurrency"));
             constructorArgumentValues.addGenericArgumentValue(name);
             constructorArgumentValues.addGenericArgumentValue(endpoint.get("autoStartup"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("shared"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("durable"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("subscriptionName"));
 
             beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
 
