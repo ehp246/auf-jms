@@ -14,7 +14,7 @@ import me.ehp246.aufjms.util.TestTopicListener;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, properties = { "" })
+@SpringBootTest(classes = { AppConfig.class }, properties = { "sub-name=sub-4" })
 public class TopicTest {
     @Autowired
     private ApplicationContext appCtx;
@@ -26,6 +26,8 @@ public class TopicTest {
 
         Assertions.assertEquals(TestTopicListener.SUBSCRIPTION_NAME,
                 abstractMessageListenerContainer.getSubscriptionName());
+
+        // This is correct?
         Assertions.assertEquals(true, abstractMessageListenerContainer.isPubSubDomain());
         Assertions.assertEquals(true, abstractMessageListenerContainer.isSubscriptionDurable());
         Assertions.assertEquals(true, abstractMessageListenerContainer.isSubscriptionShared());
@@ -39,7 +41,9 @@ public class TopicTest {
         Assertions.assertEquals("",
                 abstractMessageListenerContainer.getSubscriptionName());
 
+        // This is correct?
         Assertions.assertEquals(false, abstractMessageListenerContainer.isPubSubDomain());
+
         Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionDurable());
         Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionShared());
     }
@@ -52,5 +56,14 @@ public class TopicTest {
         Assertions.assertEquals(false, abstractMessageListenerContainer.isPubSubDomain());
         Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionDurable());
         Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionShared());
+    }
+
+    @Test
+    public void sub_004() {
+        final var abstractMessageListenerContainer = (AbstractMessageListenerContainer) (appCtx
+                .getBean(JmsListenerEndpointRegistry.class).getListenerContainer("sub4"));
+
+        Assertions.assertEquals("sub-4", abstractMessageListenerContainer.getSubscriptionName(),
+                "Should be from the property.");
     }
 }

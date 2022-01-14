@@ -22,7 +22,8 @@ import me.ehp246.aufjms.util.TestTopicListener;
 @EnableForJms({
         @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), subscriptionName = TestTopicListener.SUBSCRIPTION_NAME, name = "sub1"),
         @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), name = "sub2", shared = false, durable = false),
-        @Inbound(value = @At(TestTopicListener.DESTINATION_NAME), name = "sub3") })
+        @Inbound(value = @At(TestTopicListener.DESTINATION_NAME), name = "sub3"),
+        @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), subscriptionName = "${sub-name}", name = "sub4") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     @Bean
