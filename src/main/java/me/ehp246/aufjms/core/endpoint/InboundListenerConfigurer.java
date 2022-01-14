@@ -35,14 +35,13 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class InboundListenerConfigurer implements JmsListenerConfigurer, AutoCloseable {
+public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final static Logger LOGGER = LogManager.getLogger(InboundListenerConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
     private final ConnectionFactoryProvider cfProvider;
-    private JMSContext jmsCtx;
 
     public InboundListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
             final ExecutorProvider executorProvider, final ExecutableBinder binder) {
@@ -54,20 +53,13 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
     }
 
     @Override
-    public void close() {
-        if (jmsCtx != null) {
-            jmsCtx.close();
-        }
-    }
-
-    @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
+        final var listenerContainerFactory = jmsListenerContainerFactory(null);
 
         this.endpoints.stream().forEach(endpoint -> {
             LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.at().name(),
                     endpoint.connectionFactory());
 
-            final var listenerContainerFactory = jmsListenerContainerFactory(endpoint.connectionFactory());
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(endpoint.concurrency()));
 
@@ -98,7 +90,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
 
                             @Override
                             public JMSContext jmsContext() {
-                                return jmsCtx;
+                                return null;
                             }
 
                         };
