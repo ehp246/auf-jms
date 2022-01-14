@@ -6,5 +6,5 @@ package me.ehp246.aufjms.api.dispatch;
  */
 @FunctionalInterface
 public interface DispatchFnProvider {
-    DispatchFn get(String factoryName);
+    DispatchFn get(String connectionFactoryName);
 }

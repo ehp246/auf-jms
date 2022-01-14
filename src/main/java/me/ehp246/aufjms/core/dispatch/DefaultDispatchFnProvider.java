@@ -47,8 +47,8 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     }
 
     @Override
-    public DispatchFn get(final String factoryName) {
-        final var cf = cfProvider.get(factoryName);
+    public DispatchFn get(final String connectionFactoryName) {
+        final var cf = cfProvider.get(connectionFactoryName);
 
         return new DispatchFn() {
             @Override
