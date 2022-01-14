@@ -22,8 +22,8 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -41,19 +41,16 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
-    private final PropertyResolver propertyResolver;
     private final ConnectionFactory connectionFactory;
     private JMSContext jmsCtx;
 
     public InboundListenerConfigurer(final ConnectionFactory connectionFactory, final Set<InboundEndpoint> endpoints,
-            final ExecutorProvider executorProvider, final ExecutableBinder binder,
-            final PropertyResolver propertyResolver) {
+            final ExecutorProvider executorProvider, final ExecutableBinder binder) {
         super();
         this.connectionFactory = Objects.requireNonNull(connectionFactory);
         this.endpoints = endpoints;
         this.executorProvider = executorProvider;
         this.binder = binder;
-        this.propertyResolver = propertyResolver;
     }
 
     @Override
@@ -69,23 +66,26 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
         jmsCtx = connectionFactory.createContext();
 
         this.endpoints.stream().forEach(endpoint -> {
-            final AtDestinationRecord resolvedAt = new AtDestinationRecord(
-                    propertyResolver.resolve(endpoint.at().name()), endpoint.at().type());
-
-            LOGGER.atDebug().log("Registering '{}' endpoint at {}", endpoint.name(), resolvedAt.toString());
+            LOGGER.atDebug().log("Registering '{}' endpoint at {}", endpoint.name(), endpoint.at().name());
 
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
-                    executorProvider.get(Integer.parseInt(this.propertyResolver.resolve(endpoint.concurrency()))));
+                    executorProvider.get(endpoint.concurrency()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
-                    container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : resolvedAt.toString());
-                    container.setDestinationName(resolvedAt.toString());
+                    container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : endpoint.at().name());
+                    container.setAutoStartup(endpoint.autoStartup());
+                    container.setDestinationName(endpoint.at().name());
+                    if (endpoint.at().type() == DestinationType.TOPIC) {
+                        container.setSubscriptionName(endpoint.subscriptionName());
+                        container.setSubscriptionDurable(endpoint.durable());
+                        container.setSubscriptionShared(endpoint.shared());
+                    }
                     container.setDestinationResolver((session, name, topic) -> {
-                        return resolvedAt.jmsDestination(session);
+                        return ((AtDestinationRecord) endpoint.at()).jmsDestination(session);
                     });
                     container.setupMessageListener((SessionAwareMessageListener<TextMessage>) (message, session) -> {
                         final var msg = TextJmsMsg.from(message);

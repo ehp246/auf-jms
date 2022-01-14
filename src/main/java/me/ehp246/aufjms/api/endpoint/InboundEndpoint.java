@@ -12,7 +12,15 @@ public interface InboundEndpoint {
 
     ExecutableResolver resolver();
 
-    String concurrency();
+    int concurrency();
 
     String name();
+
+    boolean autoStartup();
+
+    boolean shared();
+
+    boolean durable();
+
+    String subscriptionName();
 }

@@ -15,8 +15,6 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -48,16 +46,21 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
                 scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
             }
             final var at = (Map<String, Object>) endpoint.get("value");
-            final var destination = new AtDestinationRecord(at.get("value").toString(),
-                    (DestinationType) at.get("type"));
+            final var atName = at.get("value").toString();
+            final var atType = at.get("type");
             final var name = Optional.of(endpoint.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(destination.type().name() + "://" + destination.name());
+                    .orElse(atType + "://" + atName);
 
             final var constructorArgumentValues = new ConstructorArgumentValues();
-            constructorArgumentValues.addGenericArgumentValue(destination);
+            constructorArgumentValues.addGenericArgumentValue(atName);
+            constructorArgumentValues.addGenericArgumentValue(atType);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
             constructorArgumentValues.addGenericArgumentValue(endpoint.get("concurrency"));
             constructorArgumentValues.addGenericArgumentValue(name);
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("autoStartup"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("shared"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("durable"));
+            constructorArgumentValues.addGenericArgumentValue(endpoint.get("subscriptionName"));
 
             beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
 
