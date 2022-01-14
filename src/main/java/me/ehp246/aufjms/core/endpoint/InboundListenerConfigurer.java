@@ -3,7 +3,6 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.TextMessage;
 
@@ -22,6 +21,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
@@ -41,13 +41,13 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
-    private final ConnectionFactory connectionFactory;
+    private final ConnectionFactoryProvider cfProvider;
     private JMSContext jmsCtx;
 
-    public InboundListenerConfigurer(final ConnectionFactory connectionFactory, final Set<InboundEndpoint> endpoints,
+    public InboundListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
             final ExecutorProvider executorProvider, final ExecutableBinder binder) {
         super();
-        this.connectionFactory = Objects.requireNonNull(connectionFactory);
+        this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
         this.executorProvider = executorProvider;
         this.binder = binder;
@@ -62,12 +62,12 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
-        final var listenerContainerFactory = jmsListenerContainerFactory();
-        jmsCtx = connectionFactory.createContext();
 
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.atDebug().log("Registering '{}' endpoint at {}", endpoint.name(), endpoint.at().name());
+            LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.at().name(),
+                    endpoint.connectionFactory());
 
+            final var listenerContainerFactory = jmsListenerContainerFactory(endpoint.connectionFactory());
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(endpoint.concurrency()));
 
@@ -121,9 +121,9 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer, A
         });
     }
 
-    private DefaultJmsListenerContainerFactory jmsListenerContainerFactory() {
+    private DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final String cfName) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(this.connectionFactory);
+        factory.setConnectionFactory(this.cfProvider.get(cfName));
         return factory;
     }
 }

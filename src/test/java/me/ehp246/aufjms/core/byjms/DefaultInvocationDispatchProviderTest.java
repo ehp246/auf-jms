@@ -42,11 +42,6 @@ class DefaultInvocationDispatchProviderTest {
         }
 
         @Override
-        public String context() {
-            return connectionName;
-        }
-
-        @Override
         public AtDestination replyTo() {
             return null;
         }
@@ -77,11 +72,6 @@ class DefaultInvocationDispatchProviderTest {
             @Override
             public AtDestination destination() {
                 return null;
-            }
-
-            @Override
-            public String context() {
-                return connectionName;
             }
 
             @Override

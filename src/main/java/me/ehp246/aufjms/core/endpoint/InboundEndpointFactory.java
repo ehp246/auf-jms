@@ -30,12 +30,13 @@ public final class InboundEndpointFactory {
     public InboundEndpoint newInstance(final String atName, final DestinationType atType,
             final Set<String> scanPackages, final String concurrency,
             final String name, final String autoStartup, final boolean shared, final boolean durable,
-            final String subscriptionName) {
+            final String subscriptionName, final String connectionFactory) {
 
         final var at = new AtDestinationRecord(this.propertyResolver.resolve(atName), atType);
         final var autoStart = Boolean.parseBoolean(this.propertyResolver.resolve(autoStartup));
         final var concur = Integer.parseInt(this.propertyResolver.resolve(concurrency));
         final var subName = this.propertyResolver.resolve(subscriptionName);
+        final var cfName = this.propertyResolver.resolve(connectionFactory);
 
         return new InboundEndpoint() {
             private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
@@ -81,6 +82,10 @@ public final class InboundEndpointFactory {
                 return subName;
             }
 
+            @Override
+            public String connectionFactory() {
+                return cfName;
+            }
         };
     }
 }
