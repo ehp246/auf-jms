@@ -29,11 +29,6 @@ class DefaultInvocationDispatchBuilderTest {
         }
 
         @Override
-        public String context() {
-            return "";
-        }
-
-        @Override
         public AtDestination replyTo() {
             return at;
         }

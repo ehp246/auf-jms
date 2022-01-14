@@ -5,7 +5,7 @@ import javax.jms.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.api.jms.ContextProvider;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
@@ -23,7 +23,7 @@ public final class AufJmsConfiguration {
     }
 
     @Bean
-    public ContextProvider contextProvider(final ConnectionFactory connectionFactory) {
-        return new DefaultContextProvider(connectionFactory);
+    public ConnectionFactoryProvider connectionFactoryProvider(final ConnectionFactory connectionFactory) {
+        return new DefaultConectionFactoryProvider(connectionFactory);
     }
 }

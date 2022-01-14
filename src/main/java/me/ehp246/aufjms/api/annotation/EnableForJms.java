@@ -64,5 +64,7 @@ public @interface EnableForJms {
          * Supports Spring property.
          */
         String subscriptionName() default "";
+
+        String connectionFactory() default "";
     }
 }

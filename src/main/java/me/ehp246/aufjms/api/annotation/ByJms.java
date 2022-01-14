@@ -32,4 +32,6 @@ public @interface ByJms {
     String ttl() default "";
 
     At replyTo() default @At;
+
+    String connectionFactory() default "";
 }

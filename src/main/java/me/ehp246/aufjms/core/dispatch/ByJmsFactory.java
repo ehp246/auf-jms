@@ -37,10 +37,11 @@ public final class ByJmsFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsProxyConfig) {
+    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsProxyConfig,
+            final String connectionFactoryName) {
         LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 
-        final DispatchFn dispatchFn = this.dispatchFnProvider.get(jmsProxyConfig.context());
+        final DispatchFn dispatchFn = this.dispatchFnProvider.get(connectionFactoryName);
         final var hashCode = new Object().hashCode();
         return (T) Proxy.newProxyInstance(byJmsInterface.getClassLoader(), new Class[] { byJmsInterface },
                 (InvocationHandler) (proxy, method, args) -> {

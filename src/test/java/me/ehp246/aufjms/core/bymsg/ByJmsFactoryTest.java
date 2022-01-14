@@ -62,17 +62,12 @@ class ByJmsFactoryTest {
                     }
                 };
             }
-
-            @Override
-            public String context() {
-                return "SB1";
-            }
         };
     }
 
     @Test
     void object_01() {
-        final var newInstance = factory.newInstance(TestCases.Case01.class, case01());
+        final var newInstance = factory.newInstance(TestCases.Case01.class, case01(), null);
 
         Assertions.assertTrue(newInstance instanceof TestCases.Case01);
         Assertions.assertTrue(newInstance.toString() instanceof String);
@@ -83,7 +78,7 @@ class ByJmsFactoryTest {
 
     @Test
     void default_01() {
-        Assertions.assertEquals(124, factory.newInstance(TestCases.Case01.class, case01()).inc(123));
+        Assertions.assertEquals(124, factory.newInstance(TestCases.Case01.class, case01(), null).inc(123));
     }
 
     @Test
@@ -107,7 +102,7 @@ class ByJmsFactoryTest {
         }, (invocation, config) -> {
             inv[0] = invocation;
             return jmsDispatch;
-        }).newInstance(TestCases.Case01.class, case01());
+        }).newInstance(TestCases.Case01.class, case01(), "SB1");
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");
 

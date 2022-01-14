@@ -95,6 +95,7 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
                 return replyTo;
             }
         });
+        args.addGenericArgumentValue(byJms.connectionFactory());
 
         final var proxyBeanDefinition = new GenericBeanDefinition();
         proxyBeanDefinition.setBeanClass(proxyInterface);

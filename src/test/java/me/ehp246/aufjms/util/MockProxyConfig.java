@@ -23,12 +23,6 @@ public class MockProxyConfig implements DispatchConfig {
     }
 
     @Override
-    public String context() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public AtDestination replyTo() {
         // TODO Auto-generated method stub
         return null;

@@ -20,7 +20,7 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.exception.DispatchFnException;
 import me.ehp246.aufjms.api.jms.AtDestination;
-import me.ehp246.aufjms.api.jms.ContextProvider;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.ToJson;
@@ -34,26 +34,28 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
-    private final ContextProvider ctxProvider;
+    private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
     private final List<DispatchListener> listeners;
 
-    public DefaultDispatchFnProvider(final ContextProvider ctxProvider, final ToJson jsonFn,
+    public DefaultDispatchFnProvider(final ConnectionFactoryProvider cfProvider, final ToJson jsonFn,
             final List<DispatchListener> dispatchListeners) {
         super();
-        this.ctxProvider = Objects.requireNonNull(ctxProvider);
+        this.cfProvider = Objects.requireNonNull(cfProvider);
         this.toJson = Objects.requireNonNull(jsonFn);
         this.listeners = dispatchListeners == null ? List.of() : Collections.unmodifiableList(dispatchListeners);
     }
 
     @Override
-    public DispatchFn get(final String contextName) {
+    public DispatchFn get(final String connectionFactoryName) {
+        final var cf = cfProvider.get(connectionFactoryName);
+
         return new DispatchFn() {
             @Override
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
                         dispatch.at().name().toString());
-                final var jmsCtx = ctxProvider.get(contextName);
+                final var jmsCtx = cf.createContext();
                 final var message = jmsCtx.createTextMessage();
                 try {
                     // Fill the custom properties first so the framework ones won't get
@@ -85,7 +87,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
 
                 LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
-                ctxProvider.release(jmsCtx);
+                jmsCtx.close();
 
                 final var msg = TextJmsMsg.from(message);
                 // Call listeners

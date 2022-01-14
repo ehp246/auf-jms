@@ -23,4 +23,6 @@ public interface InboundEndpoint {
     boolean durable();
 
     String subscriptionName();
+
+    String connectionFactory();
 }

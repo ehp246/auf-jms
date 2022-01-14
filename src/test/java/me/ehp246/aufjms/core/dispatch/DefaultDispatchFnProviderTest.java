@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.util.MockDispatch;
 
@@ -37,6 +39,8 @@ import me.ehp246.aufjms.util.MockDispatch;
  */
 @ExtendWith(MockitoExtension.class)
 class DefaultDispatchFnProviderTest {
+    @Mock
+    private ConnectionFactory cf;
     @Mock
     private Destination destination;
     @Mock
@@ -50,8 +54,11 @@ class DefaultDispatchFnProviderTest {
     @Mock
     private Topic topic;
 
+    private final ConnectionFactoryProvider cfProvder = name -> cf;
+
     @BeforeEach
     public void before() throws JMSException {
+        Mockito.when(this.cf.createContext()).thenReturn(this.ctx);
         Mockito.when(this.ctx.createTextMessage()).thenReturn(this.textMessage);
         Mockito.when(this.ctx.createProducer()).thenReturn(this.producer);
 
@@ -73,7 +80,7 @@ class DefaultDispatchFnProviderTest {
             }
         };
         final var dispatch = new MockDispatch();
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, List.of(listener, listener)).get("")
+        new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
                 .dispatch(dispatch);
 
         Assertions.assertEquals(count.get(0), count.get(2));
@@ -85,7 +92,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void send_01() {
-        final var dispatchFn = new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get(null);
+        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get(null);
 
         var jmsMsg = dispatchFn.dispatch(new MockDispatch());
 
@@ -94,7 +101,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_01() throws JMSException {
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -108,7 +115,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_02() throws JMSException {
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -122,7 +129,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_01() {
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -136,7 +143,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_02() {
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -153,7 +160,7 @@ class DefaultDispatchFnProviderTest {
         final var i = Integer.valueOf(2);
         final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
 
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public Map<String, Object> properties() {
@@ -168,7 +175,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void correlationId_01() throws JMSException {
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -183,7 +190,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void correlationId_02() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(name -> ctx, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
 
             @Override
             public String correlationId() {

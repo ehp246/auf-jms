@@ -15,10 +15,6 @@ public interface DispatchConfig {
         return null;
     }
 
-    default String context() {
-        return null;
-    }
-
     default String delay() {
         return null;
     }
