@@ -48,14 +48,14 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
 
     @Override
     public DispatchFn get(final String connectionFactoryName) {
-        final var cf = cfProvider.get(connectionFactoryName);
+        final var cachedCtx = cfProvider.get(connectionFactoryName).createContext(JMSContext.AUTO_ACKNOWLEDGE);
 
         return new DispatchFn() {
             @Override
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
                         dispatch.at().name().toString());
-                try (final var jmsCtx = cf.createContext();) {
+                try (final var jmsCtx = cachedCtx.createContext(JMSContext.AUTO_ACKNOWLEDGE);) {
                     final var message = jmsCtx.createTextMessage();
                     try {
                         // Fill the custom properties first so the framework ones won't get

@@ -10,4 +10,6 @@ import me.ehp246.aufjms.api.annotation.ByJms;
 @ByJms(@At("auf-jms.inbox"))
 interface ToInbox {
     void ping();
+
+    void ping(int i);
 }
