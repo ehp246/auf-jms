@@ -55,46 +55,45 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
                         dispatch.at().name().toString());
-                final var jmsCtx = cf.createContext();
-                final var message = jmsCtx.createTextMessage();
-                try {
-                    // Fill the custom properties first so the framework ones won't get
-                    // overwritten.
-                    for (final var entry : Optional.ofNullable(dispatch.properties())
-                            .orElseGet(HashMap<String, Object>::new).entrySet()) {
-                        message.setObjectProperty(entry.getKey().toString(), entry.getValue());
+                try (final var jmsCtx = cf.createContext();) {
+                    final var message = jmsCtx.createTextMessage();
+                    try {
+                        // Fill the custom properties first so the framework ones won't get
+                        // overwritten.
+                        for (final var entry : Optional.ofNullable(dispatch.properties())
+                                .orElseGet(HashMap<String, Object>::new).entrySet()) {
+                            message.setObjectProperty(entry.getKey().toString(), entry.getValue());
+                        }
+
+                        /*
+                         * JMS headers
+                         */
+                        message.setJMSReplyTo(toJMSDestintation(jmsCtx, dispatch.replyTo()));
+                        message.setJMSType(dispatch.type());
+                        message.setJMSCorrelationID(dispatch.correlationId());
+
+                        message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
+                    } catch (final JMSException e) {
+                        LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
+                                dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
+                        throw new DispatchFnException(e);
                     }
 
-                    /*
-                     * JMS headers
-                     */
-                    message.setJMSReplyTo(toJMSDestintation(jmsCtx, dispatch.replyTo()));
-                    message.setJMSType(dispatch.type());
-                    message.setJMSCorrelationID(dispatch.correlationId());
+                    jmsCtx.createProducer()
+                            .setDeliveryDelay(
+                                    Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
+                            .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
+                            .send(toJMSDestintation(jmsCtx, dispatch.at()), message);
 
-                    message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
-                } catch (final JMSException e) {
-                    LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
-                            dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
-                    throw new DispatchFnException(e);
+                    LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
+
+                    final var msg = TextJmsMsg.from(message);
+                    // Call listeners
+                    DefaultDispatchFnProvider.this.listeners.stream()
+                            .forEach(listener -> listener.onDispatch(msg, dispatch));
+
+                    return msg;
                 }
-
-                jmsCtx.createProducer()
-                        .setDeliveryDelay(
-                                Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
-                        .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0))
-                        .send(toJMSDestintation(jmsCtx, dispatch.at()), message);
-
-                LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
-
-                jmsCtx.close();
-
-                final var msg = TextJmsMsg.from(message);
-                // Call listeners
-                DefaultDispatchFnProvider.this.listeners.stream()
-                        .forEach(listener -> listener.onDispatch(msg, dispatch));
-
-                return msg;
             }
         };
     }
