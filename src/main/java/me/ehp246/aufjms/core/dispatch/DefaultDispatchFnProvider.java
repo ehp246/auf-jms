@@ -4,8 +4,10 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jms.Destination;
 import javax.jms.JMSContext;
@@ -31,12 +33,13 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultDispatchFnProvider implements DispatchFnProvider {
+public final class DefaultDispatchFnProvider implements DispatchFnProvider, AutoCloseable {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
     private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
     private final List<DispatchListener> listeners;
+    private final Map<String, JMSContext> ctxMap = new ConcurrentHashMap<>();
 
     public DefaultDispatchFnProvider(final ConnectionFactoryProvider cfProvider, final ToJson jsonFn,
             final List<DispatchListener> dispatchListeners) {
@@ -49,6 +52,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
     @Override
     public DispatchFn get(final String connectionFactoryName) {
         final var cachedCtx = cfProvider.get(connectionFactoryName).createContext(JMSContext.AUTO_ACKNOWLEDGE);
+        ctxMap.put(connectionFactoryName, cachedCtx);
 
         return new DispatchFn() {
             @Override
@@ -104,5 +108,10 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider {
         }
 
         return at.type() == DestinationType.QUEUE ? jmsCtx.createQueue(at.name()) : jmsCtx.createTopic(at.name());
+    }
+
+    @Override
+    public void close() throws Exception {
+        ctxMap.entrySet().stream().map(Map.Entry::getValue).forEach(JMSContext::close);
     }
 }
