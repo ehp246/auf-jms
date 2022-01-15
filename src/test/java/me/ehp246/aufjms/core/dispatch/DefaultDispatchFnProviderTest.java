@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.dispatch;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import me.ehp246.aufjms.util.MockDispatch;
  *
  */
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("resource")
 class DefaultDispatchFnProviderTest {
     @Mock
     private ConnectionFactory cf;
@@ -58,9 +60,12 @@ class DefaultDispatchFnProviderTest {
 
     @BeforeEach
     public void before() throws JMSException {
-        Mockito.when(this.cf.createContext()).thenReturn(this.ctx);
+        Mockito.when(this.cf.createContext(ArgumentMatchers.anyInt())).thenReturn(this.ctx);
+        // Two-step context
+        Mockito.when(this.ctx.createContext(ArgumentMatchers.anyInt())).thenReturn(this.ctx);
         Mockito.when(this.ctx.createTextMessage()).thenReturn(this.textMessage);
         Mockito.when(this.ctx.createProducer()).thenReturn(this.producer);
+
 
         Mockito.when(this.producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(this.producer);
         Mockito.when(this.producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(this.producer);
@@ -92,7 +97,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void send_01() {
-        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get(null);
+        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
 
         var jmsMsg = dispatchFn.dispatch(new MockDispatch());
 
@@ -200,5 +205,14 @@ class DefaultDispatchFnProviderTest {
         });
 
         verify(textMessage, times(1)).setJMSCorrelationID(id);
+    }
+
+    @Test
+    void cfname_001() {
+        final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
+        when(cfpMock.get("")).thenReturn(this.cf);
+        new DefaultDispatchFnProvider(cfpMock, values -> null, null).get("");
+
+        verify(cfpMock, times(1)).get("");
     }
 }

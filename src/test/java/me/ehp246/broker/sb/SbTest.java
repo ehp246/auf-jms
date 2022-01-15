@@ -34,7 +34,7 @@ class SbTest {
         for (int i = 0; i <= 8; i++) {
             toInbox.ping(i);
             // Wait for n minutes.
-            Thread.sleep(15 * 60000);
+            Thread.sleep(1 * 60000);
         }
     }
 }

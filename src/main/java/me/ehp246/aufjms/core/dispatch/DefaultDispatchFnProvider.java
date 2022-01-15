@@ -51,15 +51,19 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
 
     @Override
     public DispatchFn get(final String connectionFactoryName) {
-        final var cachedCtx = cfProvider.get(connectionFactoryName).createContext(JMSContext.AUTO_ACKNOWLEDGE);
-        ctxMap.put(connectionFactoryName, cachedCtx);
+        Objects.requireNonNull(connectionFactoryName, "ConnectionFactory mame required");
 
         return new DispatchFn() {
+            private final Logger LOGGER = LogManager
+                    .getLogger(DispatchFn.class.getName() + "@" + connectionFactoryName);
+
             @Override
             public JmsMsg dispatch(JmsDispatch dispatch) {
                 LOGGER.atTrace().log("Sending {} {} to {} ", dispatch.type(), dispatch.correlationId(),
                         dispatch.at().name().toString());
-                try (final var jmsCtx = cachedCtx.createContext(JMSContext.AUTO_ACKNOWLEDGE);) {
+                try (final var jmsCtx = cfProvider.get(connectionFactoryName)
+                        .createContext(JMSContext.AUTO_ACKNOWLEDGE);) {
+
                     final var message = jmsCtx.createTextMessage();
                     try {
                         // Fill the custom properties first so the framework ones won't get
