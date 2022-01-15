@@ -31,7 +31,7 @@ class SbTest {
 
     @Test
     void send_003() throws InterruptedException {
-        for (int i = 0; i <= 10; i++) {
+        for (int i = 0; i <= 8; i++) {
             toInbox.ping(i);
             // Wait for n minutes.
             Thread.sleep(15 * 60000);
