@@ -40,7 +40,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
     private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
     private final List<DispatchListener> listeners;
-    private final Set<Connection> connSet = ConcurrentHashMap.newKeySet();
+    private final Set<Connection> closeable = ConcurrentHashMap.newKeySet();
 
     public DefaultDispatchFnProvider(final ConnectionFactoryProvider cfProvider, final ToJson jsonFn,
             final List<DispatchListener> dispatchListeners) {
@@ -61,7 +61,7 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
             throw new DispatchFnException(e);
         }
 
-        this.connSet.add(connection);
+        this.closeable.add(connection);
 
         return new DispatchFn() {
             private final Logger LOGGER = LogManager
@@ -126,13 +126,13 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
 
     @Override
     public void close() throws Exception {
-        connSet.stream().forEach(t -> {
+        closeable.stream().forEach(t -> {
             try {
                 t.close();
             } catch (JMSException e) {
-                LOGGER.atError().log("Failed to close connection", e);
+                LOGGER.atError().log("Failed to close connection, ignored", e);
             }
         });
-        connSet.clear();
+        closeable.clear();
     }
 }

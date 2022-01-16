@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.configuration;
 
 import javax.jms.ConnectionFactory;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -23,7 +24,12 @@ public final class AufJmsConfiguration {
     }
 
     @Bean
-    public ConnectionFactoryProvider connectionFactoryProvider(final ConnectionFactory connectionFactory) {
-        return new DefaultConectionFactoryProvider(connectionFactory);
+    public ConnectionFactoryProvider connectionFactoryProvider(final ListableBeanFactory beanFactory) {
+        return name -> {
+            if (name == null || name.isBlank()) {
+                return beanFactory.getBean(ConnectionFactory.class);
+            }
+            return beanFactory.getBean(name, ConnectionFactory.class);
+        };
     }
 }
