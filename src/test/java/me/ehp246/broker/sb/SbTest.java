@@ -26,15 +26,15 @@ class SbTest {
 
     @Test
     void send_002() {
-        IntStream.range(0, 500).forEach(toInbox::ping);
+        IntStream.range(0, 100).forEach(toInbox::ping);
     }
 
     @Test
     void send_003() throws InterruptedException {
-        for (int i = 0; i <= 8; i++) {
+        for (int i = 0; i <= 100; i++) {
             toInbox.ping(i);
             // Wait for n minutes.
-            Thread.sleep(1 * 60000);
+            Thread.sleep(120 * 60000);
         }
     }
 }

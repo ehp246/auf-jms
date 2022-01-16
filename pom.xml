@@ -119,12 +119,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.apache.qpid</groupId>
-			<artifactId>qpid-jms-client</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-
-		<dependency>
 			<groupId>com.azure.spring</groupId>
 			<artifactId>azure-spring-boot-starter-servicebus-jms</artifactId>
 			<version>3.12.0</version>

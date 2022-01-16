@@ -26,7 +26,6 @@ public class SimpleServiceBusConfig {
 
         final ServiceBusJmsConnectionFactorySettings settings = new ServiceBusJmsConnectionFactorySettings(idleTimeout,
                 false);
-        settings.setShouldReconnect(false);
         final SpringServiceBusJmsConnectionFactory springServiceBusJmsConnectionFactory = new SpringServiceBusJmsConnectionFactory(
                 connectionString, settings);
         springServiceBusJmsConnectionFactory.setClientId(clientId);
