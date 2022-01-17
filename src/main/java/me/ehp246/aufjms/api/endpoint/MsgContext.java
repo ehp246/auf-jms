@@ -12,5 +12,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface MsgContext {
     JmsMsg msg();
 
-    JMSContext jmsContext();
+    default JMSContext jmsContext() {
+        return null;
+    }
 }

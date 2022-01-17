@@ -3,7 +3,6 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.jms.JMSContext;
 import javax.jms.TextMessage;
 
 import org.apache.logging.log4j.LogManager;
@@ -79,30 +78,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                     container.setDestinationResolver((session, name, topic) -> {
                         return ((AtDestinationRecord) endpoint.at()).jmsDestination(session);
                     });
-                    container.setupMessageListener((SessionAwareMessageListener<TextMessage>) (message, session) -> {
-                        final var msg = TextJmsMsg.from(message);
-                        final var msgCtx = new MsgContext() {
-
-                            @Override
-                            public JmsMsg msg() {
-                                return msg;
-                            }
-
-                            @Override
-                            public JMSContext jmsContext() {
-                                return null;
-                            }
-
-                        };
-
-                        ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
-                        ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
-
-                        dispatcher.dispatch(msgCtx);
-
-                        ThreadContext.remove(AufJmsProperties.MSG_TYPE);
-                        ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
-                    });
+                    container.setupMessageListener(dispatcher);
                 }
 
                 @Override
