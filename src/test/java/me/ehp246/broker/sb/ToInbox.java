@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.ByJms;
  * @author Lei Yang
  *
  */
-@ByJms(@At("auf-jms.inbox"))
+@ByJms(value = @At("auf-jms.inbox"), ttl = "PT24H")
 interface ToInbox {
     void ping();
 

@@ -1,14 +1,13 @@
 package me.ehp246.broker.sb;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.Session;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -16,8 +15,6 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-
-import me.ehp246.aufjms.api.jms.AufJmsContext;
 
 /**
  * @author Lei Yang
@@ -28,26 +25,7 @@ import me.ehp246.aufjms.api.jms.AufJmsContext;
 @TestInstance(Lifecycle.PER_CLASS)
 class SbTest {
     @Autowired
-    private ConnectionFactory cf;
-    private Session session;
-
-    @Autowired
     private ToInbox toInbox;
-
-    @BeforeAll
-    void setup() throws JMSException {
-        session = cf.createConnection().createSession();
-    }
-
-    @BeforeEach
-    void reset() {
-        AufJmsContext.clearSession();
-    }
-
-    @AfterAll
-    void teardown() throws JMSException {
-        session.close();
-    }
 
     @Test
     void send_001() {
@@ -64,15 +42,37 @@ class SbTest {
         for (int i = 0; i <= 100; i++) {
             toInbox.ping(i);
             // Wait for n minutes.
-            Thread.sleep(1 * 60000);
+            Thread.sleep(120 * 60000);
         }
     }
 
     @Test
-    void send_004() throws JMSException {
-        AufJmsContext.set(session);
+    void send_004() throws JMSException, InterruptedException {
+        final var count = 10000;
+        final var exe = new ExecutorCompletionService<>(Executors.newCachedThreadPool());
+        for (int i = 0; i <= count; i++) {
+            exe.submit(() -> {
+                toInbox.ping();
+                return null;
+            });
+        }
 
-        IntStream.range(0, 300).forEach(toInbox::ping);
+        for (int i = 0; i <= count; i++) {
+            exe.take();
+        }
+    }
+
+    @Test
+    void send_005() throws JMSException, InterruptedException, ExecutionException {
+        final var run = (Runnable) () -> {
+            for (int i = 0; i <= 1000000; i++) {
+                toInbox.ping(i++);
+            }
+        };
+
+        CompletableFuture.allOf(CompletableFuture.runAsync(run), CompletableFuture.runAsync(run),
+                CompletableFuture.runAsync(run), CompletableFuture.runAsync(run), CompletableFuture.runAsync(run))
+                .get();
     }
 
 }
