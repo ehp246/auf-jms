@@ -1,5 +1,6 @@
 package me.ehp246.broker.sb;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -8,22 +9,28 @@ import java.util.stream.IntStream;
 
 import javax.jms.JMSException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import me.ehp246.broker.sb.replyto.reply.OnReplyEchoInstant;
+
 /**
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = { AppConfig.class }, webEnvironment = WebEnvironment.NONE)
 @EnabledIfSystemProperty(named = "me.ehp246.broker.sb", matches = "true")
-@TestInstance(Lifecycle.PER_CLASS)
 class SbTest {
+    @Autowired
+    private Echo echo;
+
+    @Autowired
+    private OnReplyEchoInstant onReply;
+
     @Autowired
     private ToInbox toInbox;
 
@@ -75,4 +82,19 @@ class SbTest {
                 .get();
     }
 
+    @Test
+    void reply_01() throws InterruptedException, ExecutionException {
+        final var now = Instant.now();
+
+        echo.echoInstant(now);
+
+        Assertions.assertEquals(true, onReply.take().equals(now));
+    }
+
+    @Test
+    void reply_02() throws InterruptedException, ExecutionException {
+        echo.echoInstant(null);
+
+        Assertions.assertEquals(null, onReply.take());
+    }
 }

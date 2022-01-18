@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.reply;
+package me.ehp246.broker.sb;
 
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
