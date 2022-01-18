@@ -1,48 +1,43 @@
 package me.ehp246.aufjms.api.jms;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
-import javax.jms.JMSException;
 import javax.jms.Session;
 
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public final class AufJmsContext {
     private final static AufJmsContext CONTEXT = new AufJmsContext();
 
-    private final ThreadLocal<Map<Class<?>, Object>> threadLocalMap = ThreadLocal.withInitial(HashMap::new);
+    private final ThreadLocal<Session> threadLocalSession = ThreadLocal.withInitial(() -> null);
 
     private AufJmsContext() {
         super();
     }
 
-    public static Session set(Session session) {
-        if (session == null) {
-            return AufJmsContext.clearSession();
+    public static void set(Session session) {
+        Objects.requireNonNull(session);
+
+        if (CONTEXT.threadLocalSession.get() != null) {
+            throw new RuntimeException("Context session present");
         }
-        return (Session) CONTEXT.threadLocalMap.get().put(Session.class, session);
+        CONTEXT.threadLocalSession.set(session);
     }
 
     public static Session getSession() {
-        return (Session) CONTEXT.threadLocalMap.get().get(Session.class);
+        return CONTEXT.threadLocalSession.get();
     }
 
+    /**
+     * Remove the session from the thread if one is present.
+     * 
+     * @return session that is removed. Could be <code>null</code>.
+     */
     public static Session clearSession() {
-        return (Session) CONTEXT.threadLocalMap.get().remove(Session.class);
-    }
-
-    public static void closeSession() {
-        Optional.ofNullable(AufJmsContext.clearSession()).ifPresent(session -> {
-            try {
-                session.close();
-            } catch (JMSException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        });
+        final var session = CONTEXT.threadLocalSession.get();
+        CONTEXT.threadLocalSession.remove();
+        return session;
     }
 }

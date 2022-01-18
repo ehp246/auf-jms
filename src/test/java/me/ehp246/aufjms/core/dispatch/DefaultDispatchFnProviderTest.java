@@ -101,7 +101,7 @@ class DefaultDispatchFnProviderTest {
         };
         final var dispatch = new MockDispatch();
         new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
-                .dispatch(dispatch);
+                .send(dispatch);
 
         Assertions.assertEquals(count.get(0), count.get(2));
         Assertions.assertEquals(4, count.size());
@@ -114,14 +114,14 @@ class DefaultDispatchFnProviderTest {
     void send_01() throws JMSException {
         final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
 
-        var jmsMsg = dispatchFn.dispatch(new MockDispatch());
+        var jmsMsg = dispatchFn.send(new MockDispatch());
 
         verify(producer, times(1)).send(ArgumentMatchers.any(), ArgumentMatchers.eq(jmsMsg.message()));
     }
 
     @Test
     void ttl_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -135,7 +135,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -149,7 +149,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -163,7 +163,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -180,7 +180,7 @@ class DefaultDispatchFnProviderTest {
         final var i = Integer.valueOf(2);
         final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
 
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Map<String, Object> properties() {
@@ -195,7 +195,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void correlationId_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -210,7 +210,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void correlationId_02() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {

@@ -17,7 +17,7 @@ public interface Executable {
         return InvocationModel.DEFAULT;
     }
 
-    default Consumer<ExecutedInstance> postExecution() {
+    default Consumer<ExecutedInstance> executionConsumer() {
         return null;
     }
 }

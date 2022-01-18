@@ -12,17 +12,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.ehp246.aufjms.api.dispatch.DispatchFn;
-import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.exception.DispatchFnException;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
 import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -34,7 +36,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultDispatchFnProvider implements DispatchFnProvider, AutoCloseable {
+public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, AutoCloseable {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
 
     private final ConnectionFactoryProvider cfProvider;
@@ -51,29 +53,45 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
     }
 
     @Override
-    public DispatchFn get(final String connectionFactoryName) {
-        Objects.requireNonNull(connectionFactoryName, "ConnectionFactory name required");
+    public JmsDispatchFn get(final String connectionFactoryName) {
         final Connection connection;
-        try {
-            connection = cfProvider.get(connectionFactoryName).createConnection();
-        } catch (JMSException e) {
-            LOGGER.atError().log("Failed to create connection on factory {}:{}", connectionFactoryName, e.getMessage());
-            throw new DispatchFnException(e);
+        if (connectionFactoryName != null) {
+            try {
+                connection = cfProvider.get(connectionFactoryName).createConnection();
+            } catch (JMSException e) {
+                LOGGER.atError().log("Failed to create connection on factory {}:{}", connectionFactoryName,
+                        e.getMessage());
+                throw new JmsDispatchFnException(e);
+            }
+
+            this.closeable.add(connection);
+        } else {
+            connection = null;
         }
 
-        this.closeable.add(connection);
-
-        return new DispatchFn() {
+        return new JmsDispatchFn() {
             private final Logger LOGGER = LogManager
-                    .getLogger(DispatchFn.class.getName() + "@" + connectionFactoryName);
+                    .getLogger(JmsDispatchFn.class.getName() + "@" + connectionFactoryName);
 
             @Override
-            public JmsMsg dispatch(JmsDispatch dispatch) {
-                LOGGER.atTrace().log("Sending {} {} to {} on {} ", dispatch.type(), dispatch.correlationId(),
-                        dispatch.at().name().toString(), connection.toString());
+            public JmsMsg send(JmsDispatch dispatch) {
+                LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
+                        dispatch.at().name().toString(), connectionFactoryName);
 
-                try (final var session = connection.createSession();
-                        final var producer = session.createProducer(null);) {
+                /*
+                 * If connection is not set, look for the context. It's an error, if both are
+                 * missing.
+                 */
+                if (connection == null && AufJmsContext.getSession() == null) {
+                    throw new JmsDispatchFnException("No session can be created");
+                }
+
+                Session session = null;
+                MessageProducer producer = null;
+                try {
+                    // Connection priority.
+                    session = connection != null ? connection.createSession() : AufJmsContext.getSession();
+                    producer = session.createProducer(null);
                     final var message = session.createTextMessage();
 
                     // Fill the custom properties first so the framework ones won't get
@@ -109,7 +127,29 @@ public final class DefaultDispatchFnProvider implements DispatchFnProvider, Auto
                 } catch (final JMSException e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
                             dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
-                    throw new DispatchFnException(e);
+                    throw new JmsDispatchFnException(e);
+                } finally {
+                    /*
+                     * Producer is always created.
+                     */
+                    if (producer != null) {
+                        try {
+                            producer.close();
+                        } catch (JMSException e) {
+                            LOGGER.atError().log("Failed to close producer. Ignored", e);
+                        }
+                    }
+
+                    /*
+                     * Session is created locally only when connection is null.
+                     */
+                    if (connection != null && session != null) {
+                        try {
+                            session.close();
+                        } catch (JMSException e) {
+                            LOGGER.atError().log("Failed to close session. Ignored.", e);
+                        }
+                    }
                 }
 
             }

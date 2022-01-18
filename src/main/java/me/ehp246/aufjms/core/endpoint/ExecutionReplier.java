@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import me.ehp246.aufjms.api.dispatch.DispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.jms.AtDestination;
 
@@ -10,9 +10,9 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  *
  */
 public final class ExecutionReplier {
-    private final DispatchFn dispatchFn;
+    private final JmsDispatchFn dispatchFn;
 
-    public ExecutionReplier(final DispatchFn dispatchFn) {
+    public ExecutionReplier(final JmsDispatchFn dispatchFn) {
         super();
         this.dispatchFn = dispatchFn;
     }
@@ -25,7 +25,7 @@ public final class ExecutionReplier {
             return;
         }
 
-        this.dispatchFn.dispatch(new JmsDispatch() {
+        this.dispatchFn.send(new JmsDispatch() {
             @Override
             public String type() {
                 return msg.type();

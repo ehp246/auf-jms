@@ -13,9 +13,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.dispatch.DispatchFn;
-import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.Invocation;
 
 /**
@@ -27,9 +27,9 @@ public final class ByJmsFactory {
     private final static Logger LOGGER = LogManager.getLogger(ByJmsFactory.class);
 
     private final InvocationDispatchBuilder dispatchProvider;
-    private final DispatchFnProvider dispatchFnProvider;
+    private final JmsDispatchFnProvider dispatchFnProvider;
 
-    public ByJmsFactory(final DispatchFnProvider dispatchFnProvider,
+    public ByJmsFactory(final JmsDispatchFnProvider dispatchFnProvider,
             final InvocationDispatchBuilder dispatchProvider) {
         super();
         this.dispatchProvider = dispatchProvider;
@@ -41,7 +41,7 @@ public final class ByJmsFactory {
             final String connectionFactoryName) {
         LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 
-        final DispatchFn dispatchFn = this.dispatchFnProvider.get(connectionFactoryName);
+        final JmsDispatchFn dispatchFn = this.dispatchFnProvider.get(connectionFactoryName);
         final var hashCode = new Object().hashCode();
         return (T) Proxy.newProxyInstance(byJmsInterface.getClassLoader(), new Class[] { byJmsInterface },
                 (InvocationHandler) (proxy, method, args) -> {
@@ -82,7 +82,7 @@ public final class ByJmsFactory {
                         }
                     }, jmsProxyConfig);
 
-                    dispatchFn.dispatch(jmsDispatch);
+                    dispatchFn.send(jmsDispatch);
 
                     return null;
                 });

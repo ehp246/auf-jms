@@ -3,30 +3,23 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.jms.TextMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpoint;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
-import org.springframework.jms.listener.SessionAwareMessageListener;
 
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.OneUtil;
-import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
@@ -41,14 +34,16 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final ExecutorProvider executorProvider;
     private final ExecutableBinder binder;
     private final ConnectionFactoryProvider cfProvider;
+    private final JmsDispatchFnProvider dispathFnProvider;
 
     public InboundListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
-            final ExecutorProvider executorProvider, final ExecutableBinder binder) {
+            final ExecutorProvider executorProvider, final ExecutableBinder binder, final JmsDispatchFnProvider dispathFnProvider) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
         this.executorProvider = executorProvider;
         this.binder = binder;
+        this.dispathFnProvider = dispathFnProvider;
     }
 
     @Override
@@ -60,7 +55,8 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                     endpoint.connectionFactory());
 
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
-                    executorProvider.get(endpoint.concurrency()));
+                    executorProvider.get(endpoint.concurrency()),
+                    this.dispathFnProvider.get(endpoint.connectionFactory()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
