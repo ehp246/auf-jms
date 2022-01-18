@@ -6,10 +6,8 @@ import javax.jms.JMSProducer;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
- * The abstraction
- * 
- * import me.ehp246.aufjms.api.jms.JmsMsg; of a JMS {@link JMSProducer}. The
- * producer is scoped to a {@link Connection}.
+ * The abstraction of a JMS {@link JMSProducer}. The producer is scoped to a
+ * {@link Connection}.
  * <p>
  * The interface only is concerned with sending the message.
  * 
@@ -17,6 +15,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 @FunctionalInterface
-public interface DispatchFn {
-    JmsMsg dispatch(JmsDispatch dispatch);
+public interface JmsDispatchFn {
+    JmsMsg send(JmsDispatch dispatch);
 }

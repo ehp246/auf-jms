@@ -33,6 +33,8 @@ import org.mockito.quality.Strictness;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
+import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.util.MockDispatch;
@@ -76,11 +78,12 @@ class DefaultDispatchFnProviderTest {
         Mockito.when(this.session.createProducer(null)).thenReturn(this.producer);
         Mockito.when(this.session.createTextMessage()).thenReturn(this.textMessage);
 
+        AufJmsContext.clearSession();
+
 //        Mockito.when(this.cf.createContext(ArgumentMatchers.anyInt())).thenReturn(this.ctx);
 //        Mockito.when(this.ctx.createContext(ArgumentMatchers.anyInt())).thenReturn(this.ctx);
 //        Mockito.when(this.ctx.createTextMessage()).thenReturn(this.textMessage);
 //        Mockito.when(this.ctx.createProducer()).thenReturn(this.producer);
-
 
 //        Mockito.when(this.producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(this.producer);
 //        Mockito.when(this.producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(this.producer);
@@ -100,8 +103,7 @@ class DefaultDispatchFnProviderTest {
             }
         };
         final var dispatch = new MockDispatch();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
-                .dispatch(dispatch);
+        new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("").send(dispatch);
 
         Assertions.assertEquals(count.get(0), count.get(2));
         Assertions.assertEquals(4, count.size());
@@ -114,14 +116,30 @@ class DefaultDispatchFnProviderTest {
     void send_01() throws JMSException {
         final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
 
-        var jmsMsg = dispatchFn.dispatch(new MockDispatch());
+        final var jmsMsg = dispatchFn.send(new MockDispatch());
 
-        verify(producer, times(1)).send(ArgumentMatchers.any(), ArgumentMatchers.eq(jmsMsg.message()));
+        Mockito.verify(producer).send(ArgumentMatchers.any(), ArgumentMatchers.eq(jmsMsg.message()));
+        // Should clean up everything.
+        Mockito.verify(producer).close();
+        Mockito.verify(session).close();
+    }
+
+    @Test
+    void ex_01() throws JMSException {
+        Mockito.doThrow(new JMSException("")).when(this.producer).setTimeToLive(ArgumentMatchers.anyLong());
+
+        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
+
+        Assertions.assertThrows(JmsDispatchFnException.class, () -> dispatchFn.send(new MockDispatch()));
+
+        // Should clean up everything.
+        Mockito.verify(producer).close();
+        Mockito.verify(session).close();
     }
 
     @Test
     void ttl_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -135,7 +153,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -149,7 +167,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -163,7 +181,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -180,7 +198,7 @@ class DefaultDispatchFnProviderTest {
         final var i = Integer.valueOf(2);
         final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
 
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public Map<String, Object> properties() {
@@ -195,7 +213,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void correlationId_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -210,7 +228,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void correlationId_02() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").dispatch(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -223,11 +241,88 @@ class DefaultDispatchFnProviderTest {
     }
 
     @Test
-    void cfname_001() {
+    void cfname_01() {
         final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
         when(cfpMock.get("")).thenReturn(this.cf);
+
         new DefaultDispatchFnProvider(cfpMock, values -> null, null).get("");
 
         verify(cfpMock, times(1)).get("");
+    }
+
+    @Test
+    void cfname_02() {
+        final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
+        when(cfpMock.get("")).thenReturn(null);
+
+        Assertions.assertThrows(Exception.class,
+                () -> new DefaultDispatchFnProvider(cfpMock, values -> null, null).get(""));
+    }
+
+    @Test
+    void close_01() throws JMSException {
+        final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
+        when(cfpMock.get("")).thenReturn(this.cf);
+
+        final var fnProvider = new DefaultDispatchFnProvider(cfpMock, values -> null, null);
+
+        fnProvider.get("");
+
+        // Closing the provider should close the connections.
+        fnProvider.close();
+
+        Mockito.verify(this.conn).close();
+    }
+
+    @Test
+    void conn_01() {
+        // Should allow to create.
+        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+
+        // Should throw without connection and context session.
+        Assertions.assertThrows(JmsDispatchFnException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)));
+    }
+
+    @Test
+    void context_01() throws JMSException {
+        // Should allow to create.
+        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+
+        final var mockSession = Mockito.mock(Session.class);
+        Mockito.when(mockSession.createProducer(null)).thenReturn(this.producer);
+        Mockito.when(mockSession.createTextMessage()).thenReturn(this.textMessage);
+
+        AufJmsContext.set(mockSession);
+
+        fn.send(new MockDispatch());
+
+        // Should use the context session.
+        Mockito.verify(mockSession).createProducer(null);
+        Mockito.verify(producer).close();
+        // Should not close the context session.
+        Mockito.verify(session, times(0)).close();
+    }
+
+    @Test
+    void context_02() throws JMSException {
+        final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
+        when(cfpMock.get("")).thenReturn(this.cf);
+
+        // Should create one with a connection.
+        final var fn = new DefaultDispatchFnProvider(cfpMock, values -> null, null).get("");
+
+        final var ctxSession = Mockito.mock(Session.class);
+        AufJmsContext.set(ctxSession);
+
+        fn.send(new MockDispatch());
+
+        // Should use the session from the connection.
+        Mockito.verify(this.session).createProducer(null);
+
+        // Should not use the context.
+        Mockito.verify(ctxSession, times(0)).createProducer(null);
+        // Should clean up everything.
+        Mockito.verify(producer).close();
+        Mockito.verify(session).close();
     }
 }

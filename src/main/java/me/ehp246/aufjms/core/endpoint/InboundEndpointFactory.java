@@ -39,7 +39,7 @@ public final class InboundEndpointFactory {
         final var cfName = this.propertyResolver.resolve(connectionFactory);
 
         return new InboundEndpoint() {
-            private final ExecutableResolver resolver = new AutowireCapableInstanceResolver(autowireCapableBeanFactory,
+            private final ExecutableResolver resolver = new AutowireCapableExecutableResolver(autowireCapableBeanFactory,
                     DefaultInvokableResolver.registeryFrom(scanPackages));
 
             @Override

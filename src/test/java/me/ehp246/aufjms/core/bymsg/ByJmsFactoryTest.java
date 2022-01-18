@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.dispatch.DispatchFn;
-import me.ehp246.aufjms.api.dispatch.DispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.Invocation;
@@ -15,9 +15,9 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 
 class ByJmsFactoryTest {
-    private final DispatchFn dispatchFn = dispatch -> null;
+    private final JmsDispatchFn dispatchFn = dispatch -> null;
     private final InvocationDispatchBuilder dispatchProvider = (invocation, config) -> null;
-    private final DispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
+    private final JmsDispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
@@ -86,10 +86,10 @@ class ByJmsFactoryTest {
         final var jmsDispatch = (JmsDispatch) () -> null;
 
         final var disp = new JmsDispatch[1];
-        final var dispatchFn = new DispatchFn() {
+        final var dispatchFn = new JmsDispatchFn() {
 
             @Override
-            public JmsMsg dispatch(JmsDispatch dispatch) {
+            public JmsMsg send(JmsDispatch dispatch) {
                 disp[0] = dispatch;
                 return null;
             }

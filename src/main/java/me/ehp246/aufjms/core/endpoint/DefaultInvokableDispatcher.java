@@ -1,50 +1,91 @@
 package me.ehp246.aufjms.core.endpoint;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
+
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.jms.listener.SessionAwareMessageListener;
 
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokableDispatcher;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
+import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
+import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  *
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultInvokableDispatcher implements InvokableDispatcher {
+final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(DefaultInvokableDispatcher.class);
 
     private final Executor executor;
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
+    private final JmsDispatchFn dispatchFn;
 
-    public DefaultInvokableDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor) {
+    DefaultInvokableDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
+            final Executor executor, final JmsDispatchFn dispatchFn) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
+        this.dispatchFn = dispatchFn;
     }
 
     @Override
-    public void dispatch(final MsgContext msgCtx) {
-        final var msg = msgCtx.msg();
+    public void onMessage(Message message, Session session) throws JMSException {
+        if (!(message instanceof TextMessage)) {
+            throw new RuntimeException("Un-supported Message type: " + message.getClass().getSimpleName());
+        }
 
-        LOGGER.atTrace().log("Dispatching");
+        // Make sure the thread context is cleaned up.
+        try {
+            AufJmsContext.set(session);
+
+            ThreadContext.put(AufJmsProperties.MSG_TYPE, message.getJMSType());
+            ThreadContext.put(AufJmsProperties.CORRELATION_ID, message.getJMSCorrelationID());
+
+            LOGGER.atTrace().log("Dispatching");
+
+            dispatch(TextJmsMsg.from((TextMessage) message));
+
+            // Only when no exception.
+            LOGGER.atTrace().log("Dispatched");
+        } finally {
+            ThreadContext.remove(AufJmsProperties.MSG_TYPE);
+            ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
+
+            AufJmsContext.clearSession();
+        }
+    }
+
+    @Override
+    public void dispatch(final JmsMsg msg) {
+        LOGGER.atTrace().log("Resovling {}", msg.type());
 
         final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
+
         if (resolveOutcome.hasThrown()) {
             LOGGER.atError().log("Resolution failed", resolveOutcome.getThrown().getMessage());
             final var ex = resolveOutcome.getThrown();
@@ -63,13 +104,13 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
 
         LOGGER.atTrace().log("Submitting {}", target.getMethod());
 
-        final var runnable = newInvocation(msgCtx, target, binder);
+        final var outcomeSupplier = newSupplier(msg, target);
 
         if (executor == null
                 || (target.getInvocationModel() != null && target.getInvocationModel() == InvocationModel.INLINE)) {
             LOGGER.atTrace().log("Executing");
 
-            final var thrown = runnable.get().getThrown();
+            final var thrown = outcomeSupplier.get().getThrown();
 
             if (thrown != null) {
                 if (thrown instanceof RuntimeException) {
@@ -85,7 +126,7 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
                 ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
                 LOGGER.atTrace().log("Executing");
 
-                runnable.get();
+                outcomeSupplier.get();
 
                 LOGGER.atTrace().log("Executed");
                 ThreadContext.remove(AufJmsProperties.MSG_TYPE);
@@ -94,40 +135,78 @@ public final class DefaultInvokableDispatcher implements InvokableDispatcher {
         }
     };
 
-    private static Supplier<InvocationOutcome<?>> newInvocation(final MsgContext msgCtx, final Executable target,
-            final ExecutableBinder binder) {
+    private Supplier<InvocationOutcome<?>> newSupplier(final JmsMsg msg, final Executable target) {
         return () -> {
-            final var bindingOutcome = InvocationOutcome.invoke(() -> binder.bind(target, msgCtx));
+            final var bindingOutcome = InvocationOutcome.invoke(() -> binder.bind(target, () -> msg));
 
             final var executionOutcome = bindingOutcome.optionalReturned().map(Supplier::get)
                     .orElseGet(() -> InvocationOutcome.thrown(bindingOutcome.getThrown()));
 
-            final var postEexcution = target.postExecution();
-            if (postEexcution == null) {
+            Optional.ofNullable(target.executionConsumer()).ifPresent(postExecution -> {
+                LOGGER.atTrace().log("Executing execution consumer");
+
+                postExecution.accept(new ExecutedInstance() {
+
+                    @Override
+                    public InvocationOutcome<?> getOutcome() {
+                        return executionOutcome;
+                    }
+
+                    @Override
+                    public JmsMsg getMsg() {
+                        return msg;
+                    }
+
+                    @Override
+                    public Executable getInstance() {
+                        return target;
+                    }
+                });
+
+                LOGGER.atTrace().log("Executed execution consumer");
+            });
+
+            // Reply
+            LOGGER.atTrace().log("Replying");
+            final var replyTo = msg.replyTo();
+
+            if (replyTo == null) {
+                LOGGER.atTrace().log("No replyTo on {}", msg.correlationId());
                 return executionOutcome;
             }
 
-            LOGGER.atTrace().log("Executing postExecution");
+            if (executionOutcome.hasThrown()) {
+                LOGGER.atTrace().log("Execution thrown, skipping reply on {}", msg.correlationId());
+                return executionOutcome;
+            }
 
-            postEexcution.accept(new ExecutedInstance() {
+            this.dispatchFn.send(new JmsDispatch() {
+                final List<?> bodyValues = executionOutcome.getReturned() != null
+                        ? List.of(executionOutcome.getReturned())
+                        : List.of();
+                final AtDestination at = AtDestinationRecord.from(replyTo);
 
                 @Override
-                public InvocationOutcome<?> getOutcome() {
-                    return executionOutcome;
+                public AtDestination at() {
+                    return at;
                 }
 
                 @Override
-                public JmsMsg getMsg() {
-                    return msgCtx.msg();
+                public String type() {
+                    return msg.type();
                 }
 
                 @Override
-                public Executable getInstance() {
-                    return target;
+                public String correlationId() {
+                    return msg.correlationId();
+                }
+
+                @Override
+                public List<?> bodyValues() {
+                    return bodyValues;
                 }
             });
 
-            LOGGER.atTrace().log("Executed postExecution");
             return executionOutcome;
         };
     }

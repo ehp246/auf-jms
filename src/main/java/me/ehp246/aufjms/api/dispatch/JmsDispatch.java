@@ -9,7 +9,8 @@ import me.ehp246.aufjms.api.jms.AtDestination;
 /**
  * The abstraction of a fully-realized out-bound JMS message.
  * <p>
- * A {@link JmsDispatch} is meant to be dispatched/sent by a {@link DispatchFn}.
+ * A {@link JmsDispatch} is meant to be dispatched/sent by a
+ * {@link JmsDispatchFn}.
  * 
  * @author Lei Yang
  * @since 1.0
