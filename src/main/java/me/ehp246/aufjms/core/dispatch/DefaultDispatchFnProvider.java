@@ -18,10 +18,10 @@ import javax.jms.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -58,7 +58,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         if (connectionFactoryName != null) {
             try {
                 connection = cfProvider.get(connectionFactoryName).createConnection();
-            } catch (JMSException e) {
+            } catch (Exception e) {
                 LOGGER.atError().log("Failed to create connection on factory {}:{}", connectionFactoryName,
                         e.getMessage());
                 throw new JmsDispatchFnException(e);
@@ -75,9 +75,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
             @Override
             public JmsMsg send(JmsDispatch dispatch) {
-                LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
-                        dispatch.at().name().toString(), connectionFactoryName);
-
                 /*
                  * If connection is not set, look for the context. It's an error, if both are
                  * missing.
@@ -85,6 +82,9 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 if (connection == null && AufJmsContext.getSession() == null) {
                     throw new JmsDispatchFnException("No session can be created");
                 }
+
+                LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
+                        dispatch.at().name().toString(), connectionFactoryName);
 
                 Session session = null;
                 MessageProducer producer = null;
@@ -165,12 +165,12 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         closeable.stream().forEach(t -> {
             try {
                 t.close();
             } catch (JMSException e) {
-                LOGGER.atError().log("Failed to close connection, ignored", e);
+                LOGGER.atError().log("Failed to close connection. Ignored", e);
             }
         });
         closeable.clear();
