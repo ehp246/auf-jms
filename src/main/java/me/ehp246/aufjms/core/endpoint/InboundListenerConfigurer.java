@@ -3,6 +3,8 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.jms.Session;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -88,6 +90,8 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final String cfName) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(this.cfProvider.get(cfName));
+        factory.setSessionTransacted(true);
+        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
         return factory;
     }
 }

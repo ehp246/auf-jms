@@ -34,6 +34,9 @@ class SbTest {
     @Autowired
     private ToInbox toInbox;
 
+    @Autowired
+    private ToDlq toDlq;
+
     @Test
     void send_001() {
         toInbox.ping();
@@ -96,5 +99,11 @@ class SbTest {
         echo.echoInstant(null);
 
         Assertions.assertEquals(null, onReply.take());
+    }
+
+    @Test
+    void dql_01() throws InterruptedException {
+        toDlq.throwIt();
+        Thread.sleep(1000);
     }
 }
