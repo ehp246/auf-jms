@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import me.ehp246.broker.sb.dlq.dlq.LetterCollection;
 import me.ehp246.broker.sb.replyto.reply.OnReplyEchoInstant;
 
 /**
@@ -36,6 +37,9 @@ class SbTest {
 
     @Autowired
     private ToDlq toDlq;
+
+    @Autowired
+    private LetterCollection letters;
 
     @Test
     void send_001() {
@@ -102,8 +106,13 @@ class SbTest {
     }
 
     @Test
-    void dql_01() throws InterruptedException {
-        toDlq.throwIt();
-        Thread.sleep(1000);
+    void dql_01() throws InterruptedException, ExecutionException {
+        final var instant = Instant.now();
+
+//        toDlq.throwIt(instant);
+//        toDlq.throwIt(instant);
+//        toDlq.throwIt(instant);
+        
+        Assertions.assertEquals(true, instant.equals(letters.take()));
     }
 }
