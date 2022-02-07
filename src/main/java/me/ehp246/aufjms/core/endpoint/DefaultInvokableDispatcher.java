@@ -63,7 +63,7 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
         try {
             AufJmsContext.set(session);
 
-            ThreadContext.put(AufJmsProperties.MSG_TYPE, message.getJMSType());
+            ThreadContext.put(AufJmsProperties.TYPE, message.getJMSType());
             ThreadContext.put(AufJmsProperties.CORRELATION_ID, message.getJMSCorrelationID());
 
             LOGGER.atTrace().log("Dispatching");
@@ -73,7 +73,7 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             // Only when no exception.
             LOGGER.atTrace().log("Dispatched");
         } finally {
-            ThreadContext.remove(AufJmsProperties.MSG_TYPE);
+            ThreadContext.remove(AufJmsProperties.TYPE);
             ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
 
             AufJmsContext.clearSession();
@@ -122,14 +122,14 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             LOGGER.atTrace().log("Executed");
         } else {
             executor.execute(() -> {
-                ThreadContext.put(AufJmsProperties.MSG_TYPE, msg.type());
+                ThreadContext.put(AufJmsProperties.TYPE, msg.type());
                 ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
                 LOGGER.atTrace().log("Executing");
 
                 outcomeSupplier.get();
 
                 LOGGER.atTrace().log("Executed");
-                ThreadContext.remove(AufJmsProperties.MSG_TYPE);
+                ThreadContext.remove(AufJmsProperties.TYPE);
                 ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
             });
         }

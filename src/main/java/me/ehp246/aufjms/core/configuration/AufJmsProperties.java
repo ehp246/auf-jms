@@ -12,7 +12,7 @@ public final class AufJmsProperties {
     public static final long TIMEOUT_DEFAULT = 30000;
 
     public static final String CORRELATION_ID = "AufJms-Correlation-Id";
-    public static final String MSG_TYPE = "AufJms-Msg-Type";
+    public static final String TYPE = "AufJms-Type";
 
     private AufJmsProperties() {
         super();
