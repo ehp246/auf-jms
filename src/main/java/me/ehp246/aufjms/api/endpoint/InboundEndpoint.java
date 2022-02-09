@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
  *
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @since 1.0
  */
 public interface InboundEndpoint {
-    AtDestination at();
+    From from();
 
     ExecutableResolver resolver();
 
@@ -18,11 +18,26 @@ public interface InboundEndpoint {
 
     boolean autoStartup();
 
-    boolean shared();
-
-    boolean durable();
-
-    String subscriptionName();
-
     String connectionFactory();
+
+    interface From {
+        String name();
+
+        String selector();
+
+        default DestinationType type() {
+            return DestinationType.QUEUE;
+        }
+
+        Sub sub();
+
+        interface Sub {
+            String name();
+
+            boolean shared();
+
+            boolean durable();
+
+        }
+    }
 }

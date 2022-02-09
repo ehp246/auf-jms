@@ -1,15 +1,14 @@
 package me.ehp246.aufjms.core.endpoint;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 
 /**
  *
@@ -27,24 +26,71 @@ public final class InboundEndpointFactory {
         this.propertyResolver = propertyResolver;
     }
 
-    public InboundEndpoint newInstance(final String atName, final DestinationType atType,
-            final Set<String> scanPackages, final String concurrency,
-            final String name, final String autoStartup, final boolean shared, final boolean durable,
-            final String subscriptionName, final String connectionFactory) {
-
-        final var at = new AtDestinationRecord(this.propertyResolver.resolve(atName), atType);
-        final var autoStart = Boolean.parseBoolean(this.propertyResolver.resolve(autoStartup));
-        final var concur = Integer.parseInt(this.propertyResolver.resolve(concurrency));
-        final var subName = this.propertyResolver.resolve(subscriptionName);
-        final var cfName = this.propertyResolver.resolve(connectionFactory);
+    @SuppressWarnings("unchecked")
+    public InboundEndpoint newInstance(final Map<String, Object> inboundAttributes, final Set<String> scanPackages,
+            final String beanName) {
+        final var fromAttribute = (Map<String, Object>) inboundAttributes.get("value");
 
         return new InboundEndpoint() {
-            private final ExecutableResolver resolver = new AutowireCapableExecutableResolver(autowireCapableBeanFactory,
-                    DefaultInvokableResolver.registeryFrom(scanPackages));
+            private final String atName = propertyResolver.resolve(fromAttribute.get("value").toString());
+            private final DestinationType atType = (DestinationType) (fromAttribute.get("type"));
+
+            private final InboundEndpoint.From from = new InboundEndpoint.From() {
+                private final String selector = propertyResolver.resolve(fromAttribute.get("selector").toString());
+                private final Sub sub = new InboundEndpoint.From.Sub() {
+                    private final Map<String, Object> sub = (Map<String, Object>) fromAttribute.get("sub");
+                    private final String name = propertyResolver.resolve(sub.get("value").toString());
+
+                    @Override
+                    public boolean shared() {
+                        return (Boolean) (sub.get("shared"));
+                    }
+
+                    @Override
+                    public String name() {
+                        return name;
+                    }
+
+                    @Override
+                    public boolean durable() {
+                        return (Boolean) (sub.get("durable"));
+                    }
+                };
+
+                @Override
+                public String name() {
+                    return atName;
+                }
+
+                @Override
+                public DestinationType type() {
+                    return atType;
+                }
+
+                @Override
+                public String selector() {
+                    return selector;
+                }
+
+                @Override
+                public Sub sub() {
+                    return sub;
+                }
+
+            };
+
+            private final int concurrency = Integer
+                    .parseInt(propertyResolver.resolve(inboundAttributes.get("concurrency").toString()));
+            private final boolean autoStartup = Boolean
+                    .parseBoolean(propertyResolver.resolve(inboundAttributes.get("autoStartup").toString()));
+            private final String connectionFactory = propertyResolver
+                    .resolve(inboundAttributes.get("connectionFactory").toString());
+            private final ExecutableResolver resolver = new AutowireCapableExecutableResolver(
+                    autowireCapableBeanFactory, DefaultInvokableResolver.registeryFrom(scanPackages));
 
             @Override
-            public AtDestination at() {
-                return at;
+            public From from() {
+                return from;
             }
 
             @Override
@@ -54,37 +100,22 @@ public final class InboundEndpointFactory {
 
             @Override
             public int concurrency() {
-                return concur;
+                return concurrency;
             }
 
             @Override
             public String name() {
-                return name;
+                return beanName;
             }
 
             @Override
             public boolean autoStartup() {
-                return autoStart;
-            }
-
-            @Override
-            public boolean shared() {
-                return shared;
-            }
-
-            @Override
-            public boolean durable() {
-                return durable;
-            }
-
-            @Override
-            public String subscriptionName() {
-                return subName;
+                return autoStartup;
             }
 
             @Override
             public String connectionFactory() {
-                return cfName;
+                return connectionFactory;
             }
         };
     }

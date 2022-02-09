@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.annotation.EnableJms;
 
-import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @EnableJms
-@EnableForJms(@Inbound(@At(TestQueueListener.DESTINATION_NAME)))
+@EnableForJms(@Inbound(@From(TestQueueListener.DESTINATION_NAME)))
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     @Bean
