@@ -6,9 +6,7 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.core.endpoint.registrarcases.AtEndpointRegistrarTestCases.InboundConfig01;
-import me.ehp246.aufjms.core.endpoint.registrarcases.AtEndpointRegistrarTestCases.InboundConfig02;
-import me.ehp246.aufjms.core.endpoint.registrarcases.AtEndpointRegistrarTestCases.InboundConfig03;
+import me.ehp246.aufjms.core.endpoint.AtEndpointRegistrarTestCases.InboundConfig01;
 
 /**
  * @author Lei Yang
@@ -24,29 +22,6 @@ class InboundEndpointRegistrarTest {
                 registry);
 
         Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
-                registry.getBeanDefinition("QUEUE://").getBeanClassName());
+                registry.getBeanDefinition("96df151f-e6aa-419a-ab38-8de1a28c1d2e").getBeanClassName());
     }
-
-    @Test
-    void name_02() {
-        final var registry = new SimpleBeanDefinitionRegistry();
-
-        new InboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(InboundConfig02.class),
-                registry);
-
-        Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
-                registry.getBeanDefinition("QUEUE://queue.1").getBeanClassName());
-    }
-
-    @Test
-    void name_03() {
-        final var registry = new SimpleBeanDefinitionRegistry();
-
-        new InboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(InboundConfig03.class),
-                registry);
-
-        Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
-                registry.getBeanDefinition("atEndpoint.2").getBeanClassName());
-    }
-
 }

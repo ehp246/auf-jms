@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,11 +34,11 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             return;
         }
 
-        for (final var endpoint : Arrays.asList(((Map<String, Object>[]) enablerAttributes.get("value")))) {
-            final var beanDefinition = newBeanDefinition(endpoint);
+        for (final var inbound : Arrays.asList(((Map<String, Object>[]) enablerAttributes.get("value")))) {
+            final var beanDefinition = newBeanDefinition(inbound);
 
             Set<String> scanThese = null;
-            final var base = (Class<?>[]) endpoint.get("scan");
+            final var base = (Class<?>[]) inbound.get("scan");
             if (base.length > 0) {
                 scanThese = Stream.of(base).map(baseClass -> baseClass.getPackage().getName())
                         .collect(Collectors.toSet());
@@ -45,27 +46,17 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
                 final var baseName = importingClassMetadata.getClassName();
                 scanThese = Set.of(baseName.substring(0, baseName.lastIndexOf(".")));
             }
-            final var at = (Map<String, Object>) endpoint.get("value");
-            final var atName = at.get("value").toString();
-            final var atType = at.get("type");
-            final var name = Optional.of(endpoint.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(atType + "://" + atName);
 
+            final var beanName = Optional.of(inbound.get("name").toString()).filter(OneUtil::hasValue)
+                    .orElse(InboundEndpoint.class.getSimpleName() + "." + UUID.randomUUID().toString());
             final var constructorArgumentValues = new ConstructorArgumentValues();
-            constructorArgumentValues.addGenericArgumentValue(atName);
-            constructorArgumentValues.addGenericArgumentValue(atType);
+            constructorArgumentValues.addGenericArgumentValue(inbound);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("concurrency"));
-            constructorArgumentValues.addGenericArgumentValue(name);
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("autoStartup"));
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("shared"));
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("durable"));
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("subscriptionName"));
-            constructorArgumentValues.addGenericArgumentValue(endpoint.get("connectionFactory"));
+            constructorArgumentValues.addGenericArgumentValue(beanName);
 
             beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
 
-            registry.registerBeanDefinition(name, beanDefinition);
+            registry.registerBeanDefinition(beanName, beanDefinition);
         }
     }
 

@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.annotation.EnableJms;
 
-import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From.Sub;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestTopicListener;
@@ -20,10 +21,10 @@ import me.ehp246.aufjms.util.TestTopicListener;
  */
 @EnableJms
 @EnableForJms({
-        @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), subscriptionName = TestTopicListener.SUBSCRIPTION_NAME, name = "sub1"),
-        @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), name = "sub2", shared = false, durable = false),
-        @Inbound(value = @At(TestTopicListener.DESTINATION_NAME), name = "sub3"),
-        @Inbound(value = @At(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC), subscriptionName = "${sub-name}", name = "sub4") })
+        @Inbound(value = @From(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC, sub = @Sub(TestTopicListener.SUBSCRIPTION_NAME)), name = "sub1"),
+        @Inbound(value = @From(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC, sub = @Sub(shared = false, durable = false)), name = "sub2"),
+        @Inbound(value = @From(TestTopicListener.DESTINATION_NAME), name = "sub3"),
+        @Inbound(value = @From(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC, sub = @Sub("${sub-name}")), name = "sub4") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     @Bean

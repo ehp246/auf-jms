@@ -3,6 +3,8 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +15,7 @@ import org.springframework.jms.config.JmsListenerEndpoint;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.support.destination.DestinationResolver;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
@@ -21,7 +24,6 @@ import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.jms.AtDestinationRecord;
-import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
@@ -39,7 +41,8 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final JmsDispatchFnProvider dispathFnProvider;
 
     public InboundListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
-            final ExecutorProvider executorProvider, final ExecutableBinder binder, final JmsDispatchFnProvider dispathFnProvider) {
+            final ExecutorProvider executorProvider, final ExecutableBinder binder,
+            final JmsDispatchFnProvider dispathFnProvider) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
@@ -53,7 +56,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
         final var listenerContainerFactory = jmsListenerContainerFactory(null);
 
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.at().name(),
+            LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.from().name(),
                     endpoint.connectionFactory());
 
             final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
@@ -65,17 +68,30 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
-                    container.setBeanName(OneUtil.hasValue(endpoint.name()) ? endpoint.name() : endpoint.at().name());
+                    final var from = endpoint.from();
+
+                    container.setBeanName(endpoint.name());
                     container.setAutoStartup(endpoint.autoStartup());
-                    container.setDestinationName(endpoint.at().name());
-                    if (endpoint.at().type() == DestinationType.TOPIC) {
-                        container.setSubscriptionName(endpoint.subscriptionName());
-                        container.setSubscriptionDurable(endpoint.durable());
-                        container.setSubscriptionShared(endpoint.shared());
+                    container.setMessageSelector(from.selector());
+                    container.setDestinationName(from.name());
+
+                    if (from.type() == DestinationType.TOPIC) {
+                        final var sub = from.sub();
+                        container.setSubscriptionName(sub.name());
+                        container.setSubscriptionDurable(sub.durable());
+                        container.setSubscriptionShared(sub.shared());
                     }
-                    container.setDestinationResolver((session, name, topic) -> {
-                        return ((AtDestinationRecord) endpoint.at()).jmsDestination(session);
+
+                    container.setDestinationResolver(new DestinationResolver() {
+                        private final AtDestinationRecord at = new AtDestinationRecord(from.name(), from.type());
+
+                        @Override
+                        public Destination resolveDestinationName(Session session, String name, boolean topic)
+                                throws JMSException {
+                            return at.jmsDestination(session);
+                        }
                     });
+
                     container.setupMessageListener(dispatcher);
                 }
 
@@ -83,6 +99,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
                 public String getId() {
                     return endpoint.name();
                 }
+                
             }, listenerContainerFactory);
         });
     }
