@@ -7,6 +7,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import me.ehp246.aufjms.api.jms.DestinationType;
+
 /**
  * @author Lei Yang
  * @since 1.0
@@ -15,7 +17,7 @@ import java.lang.annotation.Target;
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ByJms {
-    At value();
+    To value();
 
     /**
      * Defines an optional bean name by which the proxy interface can be injected.
@@ -31,7 +33,18 @@ public @interface ByJms {
      */
     String ttl() default "";
 
-    At replyTo() default @At;
+    To replyTo() default @To("");
 
     String connectionFactory() default "";
+
+    @interface To {
+        /**
+         * Defines the destination name for the proxy interface.
+         * <p>
+         * Supports Spring property.
+         */
+        String value();
+
+        DestinationType type() default DestinationType.QUEUE;
+    }
 }

@@ -83,14 +83,25 @@ public @interface EnableForJms {
                 /**
                  * Defines the subscription name to be used with a Topic consumer.
                  * <p>
-                 * Only applicable to Topic's.
+                 * Only applicable when {@linkplain From#type()} is
+                 * {@linkplain DestinationType#TOPIC}.
                  * <p>
                  * Supports Spring property.
                  */
                 String value() default "";
 
+                /**
+                 * Specifies whether the subscription should be shared or not.
+                 * <p>
+                 * Defaults to <code>true</code>.
+                 */
                 boolean shared() default true;
 
+                /**
+                 * Specifies whether the subscription should be durable or not.
+                 * <p>
+                 * Defaults to <code>true</code>.
+                 */
                 boolean durable() default true;
             }
         }

@@ -11,6 +11,8 @@ import javax.jms.TextMessage;
 
 /**
  * Custom version of JMS Message which does not throw.
+ * <p>
+ * The interface is also meant to enforce read-only policy.
  * 
  * @author Lei Yang
  * @since 1.0

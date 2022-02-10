@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.annotation.Invoking;
 
 /**
@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 class InvokingTestCase {
-    @ByJms(value = @At(""))
+    @ByJms(@To(""))
     interface Case001 {
         // Invoking by method name
         void m001();

@@ -14,6 +14,7 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,11 +89,15 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                 Session session = null;
                 MessageProducer producer = null;
+                TextMessage message = null;
+                JmsMsg msg = null;
                 try {
                     // Connection priority.
                     session = connection != null ? connection.createSession() : AufJmsContext.getSession();
                     producer = session.createProducer(null);
-                    final var message = session.createTextMessage();
+                    message = session.createTextMessage();
+                    msg = TextJmsMsg.from(message);
+
 
                     // Fill the custom properties first so the framework ones won't get
                     // overwritten.
@@ -114,19 +119,30 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     producer.setTimeToLive(
                             Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
+                    // Call listeners pre-send
+                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                        listener.onDispatch(msg, dispatch);
+                    }
+
                     producer.send(toJMSDestintation(session, dispatch.at()), message);
 
                     LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
-                    final var msg = TextJmsMsg.from(message);
-                    // Call listeners
-                    DefaultDispatchFnProvider.this.listeners.stream()
-                            .forEach(listener -> listener.onDispatch(msg, dispatch));
+                    // Call listeners post-send
+                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                        listener.onSent(msg, dispatch);
+                    }
 
                     return msg;
-                } catch (final JMSException e) {
+                } catch (final Exception e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
                             dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
+
+                    // Call listeners on-exception
+                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                        listener.onException(e, msg, dispatch);
+                    }
+
                     throw new JmsDispatchFnException(e);
                 } finally {
                     /*
