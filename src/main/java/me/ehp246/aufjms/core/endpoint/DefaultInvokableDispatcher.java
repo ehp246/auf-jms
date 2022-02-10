@@ -23,6 +23,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokableDispatcher;
+import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -82,12 +83,12 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
 
     @Override
     public void dispatch(final JmsMsg msg) {
-        LOGGER.atTrace().log("Resovling {}", msg.type());
+        LOGGER.atTrace().log("Resolving type");
 
         final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
 
         if (resolveOutcome.hasThrown()) {
-            LOGGER.atError().log("Resolution failed", resolveOutcome.getThrown().getMessage());
+            LOGGER.atError().log("Resolution failed {}", resolveOutcome.getThrown()::getMessage);
             final var ex = resolveOutcome.getThrown();
             if (ex instanceof RuntimeException) {
                 throw (RuntimeException) ex;
@@ -98,11 +99,11 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
 
         final var target = resolveOutcome.getReturned();
         if (target == null) {
-            LOGGER.atInfo().log("Un-matched message {} {}", msg.type(), msg.correlationId());
-            return;
+            LOGGER.atError().log("Unknown type");
+            throw new UnknownTypeException(msg);
         }
 
-        LOGGER.atTrace().log("Submitting {}", target.getMethod());
+        LOGGER.atTrace().log("Submitting {}", target.getMethod()::toString);
 
         final var outcomeSupplier = newSupplier(msg, target);
 
@@ -167,19 +168,18 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             });
 
             // Reply
-            LOGGER.atTrace().log("Replying");
             final var replyTo = msg.replyTo();
-
             if (replyTo == null) {
-                LOGGER.atTrace().log("No replyTo on {}", msg.correlationId());
+                LOGGER.atTrace().log("No replyTo");
                 return executionOutcome;
             }
 
             if (executionOutcome.hasThrown()) {
-                LOGGER.atTrace().log("Execution thrown, skipping reply on {}", msg.correlationId());
+                LOGGER.atTrace().log("Execution thrown, skipping reply");
                 return executionOutcome;
             }
 
+            LOGGER.atTrace().log("Replying");
             this.dispatchFn.send(new JmsDispatch() {
                 final List<?> bodyValues = executionOutcome.getReturned() != null
                         ? List.of(executionOutcome.getReturned())

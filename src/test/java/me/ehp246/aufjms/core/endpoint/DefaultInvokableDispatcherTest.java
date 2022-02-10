@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 import me.ehp246.aufjms.util.MockJmsMsg;
 
@@ -115,5 +116,11 @@ class DefaultInvokableDispatcherTest {
         Assertions.assertEquals(ex, thrown, "Should re-throw");
         Assertions.assertEquals(null, ref.get().getOutcome().getReturned(), "Should apply to Post Execution");
         Assertions.assertEquals(ex, ref.get().getOutcome().getThrown());
+    }
+
+    @Test
+    void unmatched_ex_01() {
+        Assertions.assertThrows(UnknownTypeException.class, () -> new DefaultInvokableDispatcher(msg -> null,
+                (e, c) -> () -> null, null, msg -> null).dispatch(new MockJmsMsg()));
     }
 }
