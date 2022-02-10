@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>0.6.3</version>
+	<version>0.7.0</version>
 	<name>Auf JMS</name>
 	<description>An annotation-driven declarative JMS development framework</description>
 
@@ -36,15 +36,16 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<junit-jupiter.version>5.5.2</junit-jupiter.version>
+		<junit-jupiter.version>5.8.2</junit-jupiter.version>
+		<junit-platform.version>1.8.2</junit-platform.version>
 		<log4j.version>2.17.1</log4j.version>
-		<mockito.version>3.1.0</mockito.version>
-		<jackson.version>2.12.3</jackson.version>
+		<mockito.version>4.3.1</mockito.version>
+		<jackson.version>2.13.1</jackson.version>
 
 		<spring-framework.version>5.3.9</spring-framework.version>
 		<spring-boot.version>2.5.3</spring-boot.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+		<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
 		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.2.0</maven-source-plugin.version>
 		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -152,19 +153,19 @@
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-engine</artifactId>
-			<version>1.7.0</version>
+			<version>${junit-platform.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-runner</artifactId>
-			<version>1.7.0</version>
+			<version>${junit-platform.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-commons</artifactId>
-			<version>1.7.0</version>
+			<version>${junit-platform.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -263,7 +264,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>11</release>
+					<release>17</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-parameters</arg>
@@ -324,7 +325,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.6</version>
+				<version>0.8.7</version>
 				<executions>
 					<execution>
 						<goals>

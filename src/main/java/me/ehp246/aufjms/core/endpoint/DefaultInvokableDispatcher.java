@@ -88,7 +88,7 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
         final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
 
         if (resolveOutcome.hasThrown()) {
-            LOGGER.atError().log("Resolution failed {}", resolveOutcome.getThrown()::getMessage);
+            LOGGER.atError().log("Resolution failed {}", () -> resolveOutcome.getThrown().getMessage());
             final var ex = resolveOutcome.getThrown();
             if (ex instanceof RuntimeException) {
                 throw (RuntimeException) ex;
@@ -103,7 +103,7 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             throw new UnknownTypeException(msg);
         }
 
-        LOGGER.atTrace().log("Submitting {}", target.getMethod()::toString);
+        LOGGER.atTrace().log("Submitting {}", () -> target.getMethod().toString());
 
         final var outcomeSupplier = newSupplier(msg, target);
 
