@@ -15,12 +15,9 @@ public final class DispatchLogger implements DispatchListener {
     private final static Logger LOGGER = LogManager.getLogger(DispatchLogger.class);
 
     @Override
-    public void onDispatch(final JmsMsg msg, final JmsDispatch dispatch) {
-        if (!LOGGER.isTraceEnabled()) {
-            return;
-        }
-
-        LOGGER.trace("{}, {}, {}", msg.type(), msg.correlationId(), msg.text());
+    public void onSent(final JmsMsg msg, final JmsDispatch dispatch) {
+        LOGGER.atDebug().log("{}, {}, {}", () -> msg.destination().toString(), msg::type, msg::correlationId);
+        LOGGER.atTrace().log("{}", msg::text);
     }
 
 }

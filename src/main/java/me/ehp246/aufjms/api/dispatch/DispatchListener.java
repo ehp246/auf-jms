@@ -13,5 +13,12 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 public interface DispatchListener {
-    void onDispatch(JmsMsg msg, JmsDispatch dispatch);
+    default void onDispatch(JmsMsg msg, JmsDispatch dispatch) {
+    }
+
+    default void onSent(JmsMsg msg, JmsDispatch dispatch) {
+    }
+
+    default void onException(Exception e, JmsMsg msg, JmsDispatch dispatch) {
+    }
 }
