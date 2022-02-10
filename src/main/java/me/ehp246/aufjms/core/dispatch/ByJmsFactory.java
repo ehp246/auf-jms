@@ -37,7 +37,7 @@ public final class ByJmsFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsProxyConfig,
+    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsDispatchConfig,
             final String connectionFactoryName) {
         LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 
@@ -80,7 +80,7 @@ public final class ByJmsFactory {
                         public List<?> args() {
                             return asList;
                         }
-                    }, jmsProxyConfig);
+                    }, jmsDispatchConfig);
 
                     dispatchFn.send(jmsDispatch);
 

@@ -1,10 +1,10 @@
 package me.ehp246.aufjms.core.bymsg;
 
-import me.ehp246.aufjms.api.annotation.At;
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.annotation.ByJms.To;
 
 class TestCases {
-    @ByJms(value = @At("queue1"), ttl = "PT10S")
+    @ByJms(value = @To("queue1"), ttl = "PT10S")
     interface Case01 {
         void m001();
 
