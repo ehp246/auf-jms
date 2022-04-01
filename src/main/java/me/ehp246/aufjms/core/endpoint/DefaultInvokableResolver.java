@@ -71,7 +71,10 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
     public ResolvedInstanceType resolve(final JmsMsg msg) {
         final var msgType = OneUtil.toString(Objects.requireNonNull(msg).type(), "");
 
-        final var definition = registeredInvokables.get(msgType);
+        final var definition = registeredInvokables.entrySet().stream().filter(e -> msgType.matches(e.getKey()))
+                .findAny()
+                .map(Map.Entry::getValue).orElse(null);
+
         if (definition == null) {
             LOGGER.atTrace().log("Type {} not found", msgType);
             return null;

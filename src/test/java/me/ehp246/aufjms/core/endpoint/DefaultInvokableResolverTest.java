@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case01.Case01;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case02.Case02;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case03.Case03;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case04.Case04;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case06.Case06;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case09.Cases09;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case01.ErrorCase01;
@@ -33,6 +36,51 @@ class DefaultInvokableResolverTest {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case01.class.getPackageName()));
 
         Assertions.assertEquals(Case01.class, registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+    }
+
+    @Test
+    void type_03() {
+        final var registery = DefaultInvokableResolver
+                .registeryFrom(Set.of(Case02.class.getPackageName()));
+
+        Assertions.assertEquals(Case02.class,
+                registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+
+        Assertions.assertEquals(Case02.class,
+                registery.resolve(new MockJmsMsg("Case01-1")).getInstanceType());
+
+        Assertions.assertEquals(Case02.class,
+                registery.resolve(new MockJmsMsg("Case01-2")).getInstanceType());
+    }
+
+    @Test
+    void type_04() {
+        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case03.class.getPackageName()));
+
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("")).getInstanceType());
+
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-1")).getInstanceType());
+
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-2")).getInstanceType());
+    }
+
+    @Test
+    void type_05() {
+        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case04.class.getPackageName()));
+
+        Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("")));
+
+        Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("Case01")));
+
+        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("127.0.0.1")).getInstanceType());
+
+        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("12:00")).getInstanceType());
+
+        Assertions.assertEquals(Case04.Case02.class, registery.resolve(new MockJmsMsg("12")).getInstanceType());
+
+        Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("-12")));
     }
 
     @Test
