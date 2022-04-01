@@ -42,7 +42,7 @@ class DefaultInvokableDispatcherTest {
                     return () -> {
                         return InvocationOutcome.thrown(ex);
                     };
-                }, null, msg -> null).dispatch(new MockJmsMsg()));
+                }, null, msg -> null, null).dispatch(new MockJmsMsg()));
 
         Assertions.assertEquals(true, ex == thrown);
     }
@@ -53,7 +53,8 @@ class DefaultInvokableDispatcherTest {
         final var thrown = Assertions.assertThrows(RuntimeException.class,
                 () -> new DefaultInvokableDispatcher(jmsMsg -> {
                     throw ex;
-                }, (e, c) -> () -> InvocationOutcome.returned(null), null, msg -> null).dispatch(new MockJmsMsg()));
+                }, (e, c) -> () -> InvocationOutcome.returned(null), null, msg -> null, null)
+                        .dispatch(new MockJmsMsg()));
 
         Assertions.assertEquals(true, ex == thrown);
     }
@@ -79,7 +80,7 @@ class DefaultInvokableDispatcherTest {
                     return ei -> ref.set(ei);
                 }
             };
-        }, (e, c) -> () -> InvocationOutcome.returned(ref), null, msg -> null).dispatch(new MockJmsMsg());
+        }, (e, c) -> () -> InvocationOutcome.returned(ref), null, msg -> null, null).dispatch(new MockJmsMsg());
 
         Assertions.assertEquals(ref, ref.get().getOutcome().getReturned());
         Assertions.assertEquals(null, ref.get().getOutcome().getThrown());
@@ -107,7 +108,7 @@ class DefaultInvokableDispatcherTest {
                     return ei -> ref.set(ei);
                 }
             };
-        }, (e, c) -> () -> InvocationOutcome.thrown(ex), null, msg -> null).dispatch(new MockJmsMsg()));
+        }, (e, c) -> () -> InvocationOutcome.thrown(ex), null, msg -> null, null).dispatch(new MockJmsMsg()));
 
         /**
          * When an executable throws, the thrown should be applied to the Post Execution
@@ -121,6 +122,6 @@ class DefaultInvokableDispatcherTest {
     @Test
     void unmatched_ex_01() {
         Assertions.assertThrows(UnknownTypeException.class, () -> new DefaultInvokableDispatcher(msg -> null,
-                (e, c) -> () -> null, null, msg -> null).dispatch(new MockJmsMsg()));
+                (e, c) -> () -> null, null, msg -> null, null).dispatch(new MockJmsMsg()));
     }
 }

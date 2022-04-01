@@ -57,6 +57,8 @@ public @interface EnableForJms {
 
         String connectionFactory() default "";
 
+        String deadMsgConsumer() default "";
+
         @interface From {
             /**
              * Defines the destination name.

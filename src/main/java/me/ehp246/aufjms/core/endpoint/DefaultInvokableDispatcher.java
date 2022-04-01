@@ -17,6 +17,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.DeadMsgConsumer;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
@@ -44,14 +45,16 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
+    private final DeadMsgConsumer deadMsgConsumer;
 
     DefaultInvokableDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor, final JmsDispatchFn dispatchFn) {
+            final Executor executor, final JmsDispatchFn dispatchFn, final DeadMsgConsumer deadMsgConsumer) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
+        this.deadMsgConsumer = deadMsgConsumer;
     }
 
     @Override
@@ -69,7 +72,17 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
 
             LOGGER.atTrace().log("Dispatching");
 
-            dispatch(TextJmsMsg.from((TextMessage) message));
+            final var msg = TextJmsMsg.from((TextMessage) message);
+
+            try {
+                dispatch(msg);
+            } catch (Exception e) {
+                if (deadMsgConsumer != null) {
+                    deadMsgConsumer.accept(msg, e);
+                } else {
+                    throw e;
+                }
+            }
 
             // Only when no exception.
             LOGGER.atTrace().log("Dispatched");

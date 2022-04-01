@@ -20,6 +20,8 @@ public interface InboundEndpoint {
 
     String connectionFactory();
 
+    DeadMsgConsumer deadMsgConsumer();
+
     interface From {
         String name();
 
