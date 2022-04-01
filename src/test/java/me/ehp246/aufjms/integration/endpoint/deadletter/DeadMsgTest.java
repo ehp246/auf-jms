@@ -14,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
  *
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {}, webEnvironment = WebEnvironment.NONE)
-class DeadLetterTest {
+class DeadMsgTest {
     @Autowired
     private SendRef1 sendRef1;
 
