@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.endpoint.deadletter;
+package me.ehp246.aufjms.integration.endpoint.failedmsg;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
  * @author Lei Yang
  *
  */
-@ByJms(@To("ref1"))
-interface SendRef1 {
+@ByJms(@To("q2"))
+interface SendQ2 {
     void send(@OfCorrelationId String id);
 }

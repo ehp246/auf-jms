@@ -153,7 +153,7 @@ class DefaultInvokableDispatcherTest {
                         (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null, m -> {
                             throw ex;
                         }).onMessage(new MockTextMessage(), session),
-                "should be from the consumer");
+                "should allow the consumer to throw");
         Assertions.assertEquals(t, ex);
     }
 
@@ -170,6 +170,6 @@ class DefaultInvokableDispatcherTest {
                         }).onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(t.getCause(), ex, "should be from the consumer");
-        Assertions.assertEquals(t.getCause(), ref[0].exception(), "should be from the consumer");
+        Assertions.assertEquals(t.getCause(), ref[0].exception(), "should allow the consumer to throw");
     }
 }

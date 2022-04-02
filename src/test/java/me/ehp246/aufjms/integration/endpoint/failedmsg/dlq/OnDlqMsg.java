@@ -1,6 +1,6 @@
-package me.ehp246.aufjms.integration.endpoint.deadletter;
+package me.ehp246.aufjms.integration.endpoint.failedmsg.dlq;
 
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,11 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @Service
 @ForJmsType(value = ".*", scope = InstanceScope.BEAN)
-class OnMsg {
-    public final RuntimeException ex = new RuntimeException();
+public class OnDlqMsg {
+    public final CompletableFuture<JmsMsg> msgRef = new CompletableFuture<>();
 
     @Invoking
-    public void perform(JmsMsg msg) throws InterruptedException, ExecutionException {
-        throw ex;
+    public void perform(JmsMsg msg) {
+        msgRef.complete(msg);
     }
 }
