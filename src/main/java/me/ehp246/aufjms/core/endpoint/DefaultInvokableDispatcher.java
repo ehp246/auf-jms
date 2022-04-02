@@ -17,13 +17,12 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.endpoint.DeadMsgConsumer;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
+import me.ehp246.aufjms.api.endpoint.FailedMsgConsumer;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.InvokableDispatcher;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -38,23 +37,23 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAwareMessageListener<Message> {
+final class DefaultInvokableDispatcher implements SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(DefaultInvokableDispatcher.class);
 
     private final Executor executor;
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final DeadMsgConsumer deadMsgConsumer;
+    private final FailedMsgConsumer failedMsgConsumer;
 
     DefaultInvokableDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor, final JmsDispatchFn dispatchFn, final DeadMsgConsumer deadMsgConsumer) {
+            final Executor executor, final JmsDispatchFn dispatchFn, final FailedMsgConsumer failedMsgConsumer) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.deadMsgConsumer = deadMsgConsumer;
+        this.failedMsgConsumer = failedMsgConsumer;
     }
 
     @Override
@@ -77,8 +76,8 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             try {
                 dispatch(msg);
             } catch (Exception e) {
-                if (deadMsgConsumer != null) {
-                    deadMsgConsumer.accept(msg, e);
+                if (failedMsgConsumer != null) {
+                    failedMsgConsumer.accept(new FailedMsgRecord(msg, e));
                 } else {
                     throw e;
                 }
@@ -94,8 +93,7 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
         }
     }
 
-    @Override
-    public void dispatch(final JmsMsg msg) {
+    private void dispatch(final JmsMsg msg) {
         LOGGER.atTrace().log("Resolving type");
 
         final var resolveOutcome = InvocationOutcome.invoke(() -> this.executableResolver.resolve(msg));
@@ -103,8 +101,8 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
         if (resolveOutcome.hasThrown()) {
             LOGGER.atError().log("Resolution failed {}", () -> resolveOutcome.getThrown().getMessage());
             final var ex = resolveOutcome.getThrown();
-            if (ex instanceof RuntimeException) {
-                throw (RuntimeException) ex;
+            if (ex instanceof RuntimeException rtEx) {
+                throw rtEx;
             } else {
                 throw new RuntimeException(ex);
             }
@@ -116,19 +114,19 @@ final class DefaultInvokableDispatcher implements InvokableDispatcher, SessionAw
             throw new UnknownTypeException(msg);
         }
 
-        LOGGER.atTrace().log("Submitting {}", () -> target.getMethod().toString());
+        LOGGER.atTrace().log("Submitting {}", () -> target.method().toString());
 
         final var outcomeSupplier = newSupplier(msg, target);
 
         if (executor == null
-                || (target.getInvocationModel() != null && target.getInvocationModel() == InvocationModel.INLINE)) {
+                || (target.invocationModel() != null && target.invocationModel() == InvocationModel.INLINE)) {
             LOGGER.atTrace().log("Executing");
 
             final var thrown = outcomeSupplier.get().getThrown();
 
             if (thrown != null) {
-                if (thrown instanceof RuntimeException) {
-                    throw (RuntimeException) thrown;
+                if (thrown instanceof RuntimeException rtEx) {
+                    throw rtEx;
                 }
                 throw new RuntimeException(thrown);
             }

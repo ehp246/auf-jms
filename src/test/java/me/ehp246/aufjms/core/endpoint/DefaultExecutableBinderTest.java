@@ -52,12 +52,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return reflectingType.findMethod("m01");
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -88,12 +88,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return reflectingType.findMethod("m01", JmsMsg.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case001;
             }
         }, new MsgContext() {
@@ -125,12 +125,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return reflectingType.findMethod("m01", JmsMsg.class, Message.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -162,13 +162,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
                         MsgContext.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.MethodCase01();
             }
         }, mq).get();
@@ -186,12 +186,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return reflectingType.findMethod("m02");
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -228,12 +228,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return reflectingType.findMethod("m01", List.class, Message.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -271,13 +271,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
                         JMSContext.class, FromJson.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.MethodCase01();
             }
         }, mq).get();
@@ -294,12 +294,12 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return ReflectingType.reflect(DefaultExecutableBinderTestCases.ExceptionCase01.class).findMethod("m01");
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.ExceptionCase01();
             }
         }, mq).get();
@@ -317,13 +317,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.CorrelationIdCase01.class)
                         .findMethod("m01", String.class, String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -361,13 +361,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.TypeCase01.class).findMethod("m01",
                         JmsMsg.class, String.class, String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return case01;
             }
         }, new MsgContext() {
@@ -396,13 +396,13 @@ class DefaultExecutableBinderTest {
         final var mq = new MockJmsMsg();
         final var outcome = binder.bind(new Executable() {
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return ReflectingType.reflect(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
         }, mq).get();
@@ -428,13 +428,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class, String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
         }, new MsgContext() {
@@ -473,13 +473,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class, String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
         }, new MsgContext() {
@@ -531,13 +531,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         Map.class, String.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
         }, new MsgContext() {
@@ -574,13 +574,13 @@ class DefaultExecutableBinderTest {
         final var outcome = binder.bind(new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         Boolean.class);
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
         }, new MsgContext() {

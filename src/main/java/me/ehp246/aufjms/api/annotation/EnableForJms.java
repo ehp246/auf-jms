@@ -57,7 +57,7 @@ public @interface EnableForJms {
 
         String connectionFactory() default "";
 
-        String deadMsgConsumer() default "";
+        String failedMsgConsumer() default "";
 
         @interface From {
             /**
