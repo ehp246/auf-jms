@@ -1,6 +1,9 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -171,5 +174,49 @@ class DefaultInvokableDispatcherTest {
 
         Assertions.assertEquals(t.getCause(), ex, "should be from the consumer");
         Assertions.assertEquals(t.getCause(), ref[0].exception(), "should allow the consumer to throw");
+    }
+
+    @Test
+    void thread_01() throws JMSException {
+        final var ref = new Thread[3];
+
+        new DefaultInvokableDispatcher(m -> new ExecutableRecord(null, null),
+                (e, c) -> {
+                    ref[0] = Thread.currentThread();
+                    return () -> {
+                        ref[1] = Thread.currentThread();
+                        return InvocationOutcome.thrown(new RuntimeException());
+                    };
+                }, null, m -> null, m -> {
+                    ref[2] = Thread.currentThread();
+                }).onMessage(new MockTextMessage(), session);
+
+        Assertions.assertEquals(ref[0], ref[1], "should be the same thread for binding, action, failed msg consumer");
+        Assertions.assertEquals(ref[1], ref[2]);
+    }
+
+    @Test
+    void thread_02() throws JMSException, InterruptedException, ExecutionException {
+        final var ref = new Thread[4];
+
+        final var executor = Executors.newSingleThreadExecutor();
+        ref[0] = executor.submit(() -> Thread.currentThread()).get();
+
+        new DefaultInvokableDispatcher(m -> new ExecutableRecord(null, null), (e, c) -> {
+            ref[1] = Thread.currentThread();
+            return () -> {
+                ref[2] = Thread.currentThread();
+                return InvocationOutcome.thrown(new RuntimeException());
+            };
+        }, executor, m -> null, m -> {
+            ref[3] = Thread.currentThread();
+        }).onMessage(new MockTextMessage(), session);
+
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        Assertions.assertEquals(ref[0], ref[1], "should be the same thread for binding, action, failed msg consumer");
+        Assertions.assertEquals(ref[1], ref[2]);
+        Assertions.assertEquals(null, ref[3], "should be fixed");
     }
 }

@@ -36,6 +36,7 @@ public final class ExecutorConfiguration {
 
     @Bean
     public ExecutorProvider executorProvider() {
-        return this::newPooledExecutor;
+        // TODO: all in-line for now.
+        return n -> null;
     }
 }

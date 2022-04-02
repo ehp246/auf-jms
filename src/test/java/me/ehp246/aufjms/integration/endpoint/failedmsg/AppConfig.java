@@ -16,7 +16,6 @@ import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
 import me.ehp246.aufjms.api.endpoint.FailedMsgConsumer;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.integration.endpoint.failedmsg.dlq.OnDlqMsg;
 import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.OnFailedMsg;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 
@@ -28,8 +27,7 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @EnableByJms
 @EnableForJms({
         @Inbound(value = @From("q1"), scan = OnFailedMsg.class, failedMsgConsumer = "ref1"),
-        @Inbound(value = @From("q2"), scan = OnFailedMsg.class, failedMsgConsumer = "consumer2"),
-        @Inbound(value = @From("DLQ.DLA"), scan = OnDlqMsg.class) })
+        @Inbound(value = @From("q2"), scan = OnFailedMsg.class, failedMsgConsumer = "consumer2") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     public CompletableFuture<DeadMsg> ref1 = new CompletableFuture<>();
