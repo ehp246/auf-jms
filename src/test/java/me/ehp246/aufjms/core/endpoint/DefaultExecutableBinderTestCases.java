@@ -7,6 +7,7 @@ import javax.jms.JMSContext;
 import javax.jms.Message;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
+import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
@@ -44,6 +45,20 @@ class DefaultExecutableBinderTestCases {
             return null;
         }
 
+    }
+
+    static class DeliveryCountCase01 {
+        public long m01(@OfDeliveryCount Long count) {
+            return count;
+        }
+
+        public int m01(@OfDeliveryCount Integer count) {
+            return count;
+        }
+
+        public Integer m02(@OfDeliveryCount Integer count) {
+            return count;
+        }
     }
 
     static class ExceptionCase01 {

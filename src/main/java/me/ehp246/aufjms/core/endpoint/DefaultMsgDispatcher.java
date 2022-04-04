@@ -129,7 +129,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
         return () -> {
             final var executionOutcome = binder.bind(target, () -> msg).get();
 
-            final var thrown = executionOutcome.getThrown();
+            final var thrown = executionOutcome.thrown();
 
             if (thrown != null) {
                 if (failedMsgConsumer != null) {
@@ -159,8 +159,8 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             LOGGER.atTrace().log("Replying");
 
             this.dispatchFn.send(new JmsDispatch() {
-                final List<?> bodyValues = executionOutcome.getReturned() != null
-                        ? List.of(executionOutcome.getReturned())
+                final List<?> bodyValues = executionOutcome.returned() != null
+                        ? List.of(executionOutcome.returned())
                         : List.of();
                 final AtDestination at = AtDestinationRecord.from(replyTo);
 
