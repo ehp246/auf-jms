@@ -17,7 +17,7 @@ import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.FailMsg;
  *
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {}, webEnvironment = WebEnvironment.NONE)
-class FailedMsgTest {
+class FailedInvocationTest {
     @Autowired
     private SendQ1 sendQ1;
 
@@ -39,10 +39,10 @@ class FailedMsgTest {
 
         sendQ1.send(id);
 
-        final var dead = appConfig.conRef1.get();
+        final var failed = appConfig.conRef1.get();
 
-        Assertions.assertEquals(onMsg.ex, dead.thrown());
-        Assertions.assertEquals(id, dead.msg().correlationId());
+        Assertions.assertEquals(onMsg.ex, failed.thrown());
+        Assertions.assertEquals(id, failed.msg().correlationId());
     }
 
     void dltopic_01() throws InterruptedException, ExecutionException {

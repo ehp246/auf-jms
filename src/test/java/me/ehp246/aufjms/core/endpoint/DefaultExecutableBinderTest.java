@@ -45,24 +45,15 @@ class DefaultExecutableBinderTest {
 
     @Test
     public void method_01() throws Exception {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = binder
-                .bind(new ExecutableRecord(case01, reflectingType.findMethod("m01")), new MsgContext() {
-
-                    @Override
-                    public JmsMsg msg() {
-                        return mq;
-                    }
-
-                    @Override
-                    public JMSContext jmsContext() {
-                        return null;
-                    }
-                }).get();
+                .bind(new ExecutableRecord(case01,
+                        new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                                DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01")),
+                        () -> mq)
+                .get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.returned());
@@ -76,30 +67,8 @@ class DefaultExecutableBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var case001 = new DefaultExecutableBinderTestCases.MethodCase01();
 
-        final var outcome = binder.bind(new Executable() {
-
-            @Override
-            public Method method() {
-                return reflectingType.findMethod("m01", JmsMsg.class);
-            }
-
-            @Override
-            public Object instance() {
-                return case001;
-            }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        final var outcome = binder
+                .bind(new ExecutableRecord(case001, reflectingType.findMethod("m01", JmsMsg.class)), () -> mq).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(mq, outcome.returned());
@@ -113,30 +82,10 @@ class DefaultExecutableBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
-        final var outcome = binder.bind(new Executable() {
-
-            @Override
-            public Method method() {
-                return reflectingType.findMethod("m01", JmsMsg.class, Message.class);
-            }
-
-            @Override
-            public Object instance() {
-                return case01;
-            }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        final var outcome = binder
+                .bind(new ExecutableRecord(case01, reflectingType.findMethod("m01", JmsMsg.class, Message.class)),
+                        () -> mq)
+                .get();
 
         final var returned = outcome.returned();
 
@@ -150,19 +99,10 @@ class DefaultExecutableBinderTest {
     @Test
     public void method_04() throws Exception {
         final var mq = Mockito.mock(MsgContext.class);
-        final var outcome = binder.bind(new Executable() {
-
-            @Override
-            public Method method() {
-                return ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
-                        MsgContext.class);
-            }
-
-            @Override
-            public Object instance() {
-                return new DefaultExecutableBinderTestCases.MethodCase01();
-            }
-        }, mq).get();
+        final var outcome = binder.bind(new ExecutableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
+                ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
+                        MsgContext.class)),
+                mq).get();
 
         Assertions.assertEquals(mq, outcome.returned());
     }
@@ -185,19 +125,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return case01;
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, () -> mq).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
         Assertions.assertEquals(null, outcome.returned());
@@ -227,19 +155,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return case01;
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, () -> mq).get();
 
         Assertions.assertEquals(true, outcome.hasReturned());
 
@@ -317,19 +233,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return case01;
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, mq).get();
 
         final var returned = (String[]) outcome.returned();
         Assertions.assertEquals(mq.correlationId(), returned[0]);
@@ -361,19 +265,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return case01;
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, mq).get();
 
         final var returned = (Object[]) outcome.returned();
 
@@ -428,19 +320,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, mq).get();
 
         final var returned = (String[]) outcome.returned();
 
@@ -473,19 +353,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, mq).get();
 
         final var returned = (String[]) outcome.returned();
 
@@ -531,19 +399,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, () -> mq).get();
 
         final var returned = (Object[]) outcome.returned();
 
@@ -574,19 +430,7 @@ class DefaultExecutableBinderTest {
             public Object instance() {
                 return new DefaultExecutableBinderTestCases.PropertyCase01();
             }
-        }, new MsgContext() {
-
-            @Override
-            public JmsMsg msg() {
-                return mq;
-            }
-
-            @Override
-            public JMSContext jmsContext() {
-                return null;
-            }
-
-        }).get();
+        }, mq).get();
 
         final var returned = (Boolean) outcome.returned();
 

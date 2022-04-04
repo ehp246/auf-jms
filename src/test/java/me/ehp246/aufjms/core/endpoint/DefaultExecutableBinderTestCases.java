@@ -56,6 +56,10 @@ class DefaultExecutableBinderTestCases {
             return count;
         }
 
+        public int m01(@OfDeliveryCount int count) {
+            return count;
+        }
+
         public Integer m02(@OfDeliveryCount Integer count) {
             return count;
         }

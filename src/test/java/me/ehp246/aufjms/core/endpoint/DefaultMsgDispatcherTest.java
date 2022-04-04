@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import me.ehp246.aufjms.api.endpoint.FailedMsg;
+import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 import me.ehp246.aufjms.util.MockTextMessage;
@@ -54,7 +54,7 @@ class DefaultMsgDispatcherTest {
 
     @Test
     void failedMsg_02() throws JMSException {
-        final var ref = new FailedMsg[1];
+        final var ref = new FailedInvocation[1];
         final var msg = new MockTextMessage();
         final var ex = new RuntimeException();
         new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
@@ -80,7 +80,7 @@ class DefaultMsgDispatcherTest {
 
     @Test
     void failedMsg_04() throws JMSException {
-        final var ref = new FailedMsg[1];
+        final var ref = new FailedInvocation[1];
         final var ex = new RuntimeException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,

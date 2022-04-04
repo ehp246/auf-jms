@@ -14,13 +14,13 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 public interface InvokableDefinition {
-    Set<String> getTypes();
+    Set<String> types();
 
-    Class<?> getInstanceType();
+    Class<?> instanceType();
 
-    Map<String, Method> getMethods();
+    Map<String, Method> methods();
 
-    InstanceScope getInstanceScope();
+    InstanceScope instanceScope();
 
-    InvocationModel getInvocationModel();
+    InvocationModel invocationModel();
 }

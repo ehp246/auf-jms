@@ -37,10 +37,10 @@ public final class AutowireCapableExecutableResolver implements ExecutableResolv
             return null;
         }
 
-        final Object executableInstance = registered.getScope().equals(InstanceScope.BEAN)
-                ? autowireCapableBeanFactory.getBean(registered.getInstanceType())
-                : autowireCapableBeanFactory.createBean(registered.getInstanceType());
+        final Object executableInstance = registered.scope().equals(InstanceScope.BEAN)
+                ? autowireCapableBeanFactory.getBean(registered.instanceType())
+                : autowireCapableBeanFactory.createBean(registered.instanceType());
 
-        return new ExecutableRecord(executableInstance, registered.getMethod(), registered.getInvocationModel());
+        return new ExecutableRecord(executableInstance, registered.method(), registered.invocationModel());
     }
 }

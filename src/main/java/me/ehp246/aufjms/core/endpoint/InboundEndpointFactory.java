@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedMsgConsumer;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationConsumer;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
@@ -90,9 +90,9 @@ public final class InboundEndpointFactory {
                     .resolve(inboundAttributes.get("connectionFactory").toString());
             private final ExecutableResolver resolver = new AutowireCapableExecutableResolver(
                     autowireCapableBeanFactory, DefaultInvokableResolver.registeryFrom(scanPackages));
-            private final FailedMsgConsumer deadMsgConsumer = Optional
-                    .ofNullable(inboundAttributes.get("failedMsgConsumer").toString()).filter(OneUtil::hasValue)
-                    .map(name -> autowireCapableBeanFactory.getBean(name, FailedMsgConsumer.class)).orElse(null);
+            private final FailedInvocationConsumer deadMsgConsumer = Optional
+                    .ofNullable(inboundAttributes.get("failedInvocationConsumer").toString()).filter(OneUtil::hasValue)
+                    .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationConsumer.class)).orElse(null);
 
             @Override
             public From from() {
@@ -125,7 +125,7 @@ public final class InboundEndpointFactory {
             }
 
             @Override
-            public FailedMsgConsumer failedMsgConsumer() {
+            public FailedInvocationConsumer failedInvocationConsumer() {
                 return deadMsgConsumer;
             }
         };

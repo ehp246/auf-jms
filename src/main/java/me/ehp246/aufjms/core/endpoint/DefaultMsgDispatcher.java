@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedMsgConsumer;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationConsumer;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtDestination;
@@ -40,10 +40,10 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final FailedMsgConsumer failedMsgConsumer;
+    private final FailedInvocationConsumer failedMsgConsumer;
 
     DefaultMsgDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor, final JmsDispatchFn dispatchFn, final FailedMsgConsumer failedMsgConsumer) {
+            final Executor executor, final JmsDispatchFn dispatchFn, final FailedInvocationConsumer failedMsgConsumer) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
@@ -70,6 +70,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
                 LOGGER.atTrace().log("Dispatched");
             } catch (Exception e) {
                 LOGGER.atTrace().log("Dispatch failed");
+                throw e;
             } finally {
                 ThreadContext.remove(AufJmsProperties.TYPE);
                 ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
@@ -133,7 +134,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
 
             if (thrown != null) {
                 if (failedMsgConsumer != null) {
-                    failedMsgConsumer.accept(new FailedMsgRecord(msg, thrown));
+                    failedMsgConsumer.accept(new FailedInvocationRecord(msg, target, thrown));
                     return;
                 }
 
@@ -159,8 +160,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             LOGGER.atTrace().log("Replying");
 
             this.dispatchFn.send(new JmsDispatch() {
-                final List<?> bodyValues = executionOutcome.returned() != null
-                        ? List.of(executionOutcome.returned())
+                final List<?> bodyValues = executionOutcome.returned() != null ? List.of(executionOutcome.returned())
                         : List.of();
                 final AtDestination at = AtDestinationRecord.from(replyTo);
 
