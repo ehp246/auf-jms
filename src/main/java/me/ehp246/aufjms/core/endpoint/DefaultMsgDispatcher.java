@@ -68,6 +68,8 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
 
                 // Only when no exception.
                 LOGGER.atTrace().log("Dispatched");
+            } catch (Exception e) {
+                LOGGER.atTrace().log("Dispatch failed");
             } finally {
                 ThreadContext.remove(AufJmsProperties.TYPE);
                 ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
