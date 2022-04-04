@@ -9,5 +9,5 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface FailedMsg {
     JmsMsg msg();
 
-    Exception exception();
+    Throwable thrown();
 }

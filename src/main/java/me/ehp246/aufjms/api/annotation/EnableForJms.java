@@ -7,8 +7,13 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.jms.JMSException;
+import javax.jms.Message;
+
 import org.springframework.context.annotation.Import;
 
+import me.ehp246.aufjms.api.endpoint.FailedMsgConsumer;
+import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
@@ -57,6 +62,25 @@ public @interface EnableForJms {
 
         String connectionFactory() default "";
 
+        /**
+         * Specifies the bean name of the {@linkplain FailedMsgConsumer} type.
+         * <p>
+         * If the execution of a {@linkplain ForJmsType} object on this in-bound
+         * endpoint throws an exception, the consumer bean will be invoked.
+         * <p>
+         * If the invocation of the bean completes without an exception, the
+         * {@linkplain Message} will be acknowledged to the broker as a success.
+         * <p>
+         * The bean can throw exception in which case the message follows broker's
+         * dead-lettering process.
+         * <p>
+         * The consumer bean is meant to handle exceptions thrown by
+         * {@linkplain ForJmsType} objects. It applies only after a matching
+         * {@linkplain ForJmsType} class has been found. E.g., the bean will not be
+         * invoked for basic {@linkplain JMSException} prior to
+         * {@linkplain Message#getJMSType()} matching, i.e.,
+         * {@linkplain UnknownTypeException}.
+         */
         String failedMsgConsumer() default "";
 
         @interface From {

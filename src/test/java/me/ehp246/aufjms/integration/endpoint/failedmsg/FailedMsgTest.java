@@ -41,7 +41,7 @@ class FailedMsgTest {
 
         final var dead = appConfig.conRef1.get();
 
-        Assertions.assertEquals(onMsg.ex, dead.exception());
+        Assertions.assertEquals(onMsg.ex, dead.thrown());
         Assertions.assertEquals(id, dead.msg().correlationId());
     }
 

@@ -7,6 +7,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-record FailedMsgRecord(JmsMsg msg, Exception exception) implements FailedMsg {
+record FailedMsgRecord(JmsMsg msg, Throwable thrown) implements FailedMsg {
 
 }

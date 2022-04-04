@@ -1,7 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
 import java.lang.reflect.Method;
-import java.util.function.Consumer;
 
 /**
  *
@@ -15,9 +14,5 @@ public interface Executable {
 
     default InvocationModel invocationModel() {
         return InvocationModel.DEFAULT;
-    }
-
-    default Consumer<ExecutedInstance> executionConsumer() {
-        return null;
     }
 }
