@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import me.ehp246.aufjms.integration.endpoint.failedmsg.dlq.OnDlqMsg;
-import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.OnFailedMsg;
+import me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic.OnDlTopicMsg;
+import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.FailMsg;
 
 /**
  * @author Lei Yang
@@ -28,10 +28,10 @@ class FailedMsgTest {
     private AppConfig appConfig;
 
     @Autowired
-    private OnFailedMsg onMsg;
+    private FailMsg onMsg;
 
     @Autowired
-    private OnDlqMsg onDlqMsg;
+    private OnDlTopicMsg onDlqMsg;
 
     @Test
     void test_01() throws InterruptedException, ExecutionException {
@@ -45,13 +45,7 @@ class FailedMsgTest {
         Assertions.assertEquals(id, dead.msg().correlationId());
     }
 
-    /**
-     * TODO
-     * 
-     * @throws InterruptedException
-     * @throws ExecutionException
-     */
-    void dlq_01() throws InterruptedException, ExecutionException {
+    void dltopic_01() throws InterruptedException, ExecutionException {
         final var id = UUID.randomUUID().toString();
 
         sendQ2.send(id);

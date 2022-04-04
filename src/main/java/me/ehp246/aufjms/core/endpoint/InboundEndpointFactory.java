@@ -125,7 +125,7 @@ public final class InboundEndpointFactory {
             }
 
             @Override
-            public FailedMsgConsumer deadMsgConsumer() {
+            public FailedMsgConsumer failedMsgConsumer() {
                 return deadMsgConsumer;
             }
         };
