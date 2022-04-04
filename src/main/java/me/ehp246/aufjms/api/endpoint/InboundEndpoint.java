@@ -20,6 +20,8 @@ public interface InboundEndpoint {
 
     String connectionFactory();
 
+    FailedMsgConsumer failedMsgConsumer();
+
     interface From {
         String name();
 

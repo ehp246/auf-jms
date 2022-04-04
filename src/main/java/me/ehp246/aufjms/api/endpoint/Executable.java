@@ -9,11 +9,11 @@ import java.util.function.Consumer;
  * @since 1.0
  */
 public interface Executable {
-    Object getInstance();
+    Object instance();
 
-    Method getMethod();
+    Method method();
 
-    default InvocationModel getInvocationModel() {
+    default InvocationModel invocationModel() {
         return InvocationModel.DEFAULT;
     }
 

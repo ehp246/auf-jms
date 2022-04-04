@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Import({ ArtemisAutoConfiguration.class, JmsAutoConfiguration.class })
 public class EmbeddedArtemisConfig {
-
     @Bean
     ObjectMapper objectMapper() {
         return TestUtil.OBJECT_MAPPER;

@@ -45,12 +45,12 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
 
     @Override
     public Supplier<InvocationOutcome<?>> bind(final Executable target, final MsgContext ctx) {
-        final var method = target.getMethod();
+        final var method = target.method();
         if (method.getParameterCount() == 0) {
             return () -> {
                 try {
                     method.setAccessible(true);
-                    return InvocationOutcome.returned(method.invoke(target.getInstance(), (Object[]) null));
+                    return InvocationOutcome.returned(method.invoke(target.instance(), (Object[]) null));
                 } catch (InvocationTargetException e1) {
                     return InvocationOutcome.thrown(e1.getCause());
                 } catch (Exception e2) {
@@ -97,7 +97,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
         return () -> {
             try {
                 method.setAccessible(true);
-                return InvocationOutcome.returned(method.invoke(target.getInstance(), arguments));
+                return InvocationOutcome.returned(method.invoke(target.instance(), arguments));
             } catch (InvocationTargetException e1) {
                 return InvocationOutcome.thrown(e1.getCause());
             } catch (Exception e2) {

@@ -49,17 +49,17 @@ public final class AutowireCapableExecutableResolver implements ExecutableResolv
         return new Executable() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return registered.getMethod();
             }
 
             @Override
-            public Object getInstance() {
+            public Object instance() {
                 return executableInstance;
             }
 
             @Override
-            public InvocationModel getInvocationModel() {
+            public InvocationModel invocationModel() {
                 return registered.getInvocationModel();
             }
 
