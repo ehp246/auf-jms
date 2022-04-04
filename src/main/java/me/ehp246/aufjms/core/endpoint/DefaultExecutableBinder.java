@@ -15,6 +15,7 @@ import javax.jms.JMSContext;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
+import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.Executable;
@@ -22,6 +23,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
+import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
@@ -30,8 +32,9 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  * @since 1.0
  */
 public final class DefaultExecutableBinder implements ExecutableBinder {
-    private static final Map<Class<? extends Annotation>, Function<JmsMsg, String>> PROPERTY_VALUE_SUPPLIERS = Map
-            .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId);
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> PROPERTY_VALUE_SUPPLIERS = Map
+            .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId, OfDeliveryCount.class,
+                    msg -> msg.property(AufJmsProperties.DELIVERY_COUNT, Integer.class));
 
     private static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set
             .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());

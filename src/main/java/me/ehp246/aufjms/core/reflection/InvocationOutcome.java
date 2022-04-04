@@ -8,18 +8,7 @@ import java.util.concurrent.Callable;
  * @author Lei Yang
  * @since 1.0
  */
-public final class InvocationOutcome<T> {
-    private final T returned;
-    private final Throwable thrown;
-    private final boolean hasReturned;
-
-    private InvocationOutcome(final T returned, final Throwable thrown, final boolean hasReturned) {
-        super();
-        this.returned = returned;
-        this.hasReturned = hasReturned;
-        this.thrown = thrown;
-    }
-
+public final record InvocationOutcome<T> (T returned, Throwable thrown, boolean hasReturned) {
     public static <T> InvocationOutcome<T> returned(final T returned) {
         return new InvocationOutcome<T>(returned, null, true);
     }
@@ -36,25 +25,12 @@ public final class InvocationOutcome<T> {
         }
     }
 
-
-    public T getReturned() {
-        return returned;
-    }
-
-    public Throwable getThrown() {
-        return thrown;
-    }
-
-    public boolean hasReturned() {
-        return hasReturned;
-    }
-
     public boolean hasThrown() {
         return !hasReturned;
     }
 
     public Object outcomeValue() {
-        return hasReturned() ? getReturned() : getThrown();
+        return hasReturned() ? returned() : thrown();
     }
 
     public Optional<T> optionalReturned() {

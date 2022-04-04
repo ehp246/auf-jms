@@ -35,7 +35,7 @@ class DefaultInvokableResolverTest {
     void type_02() {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case01.class.getPackageName()));
 
-        Assertions.assertEquals(Case01.class, registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+        Assertions.assertEquals(Case01.class, registery.resolve(new MockJmsMsg("Case01")).instanceType());
     }
 
     @Test
@@ -44,26 +44,26 @@ class DefaultInvokableResolverTest {
                 .registeryFrom(Set.of(Case02.class.getPackageName()));
 
         Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+                registery.resolve(new MockJmsMsg("Case01")).instanceType());
 
         Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01-1")).getInstanceType());
+                registery.resolve(new MockJmsMsg("Case01-1")).instanceType());
 
         Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01-2")).getInstanceType());
+                registery.resolve(new MockJmsMsg("Case01-2")).instanceType());
     }
 
     @Test
     void type_04() {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case03.class.getPackageName()));
 
-        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("")).getInstanceType());
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("")).instanceType());
 
-        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01")).getInstanceType());
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01")).instanceType());
 
-        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-1")).getInstanceType());
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-1")).instanceType());
 
-        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-2")).getInstanceType());
+        Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("Case01-2")).instanceType());
     }
 
     @Test
@@ -74,11 +74,11 @@ class DefaultInvokableResolverTest {
 
         Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("Case01")));
 
-        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("127.0.0.1")).getInstanceType());
+        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("127.0.0.1")).instanceType());
 
-        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("12:00")).getInstanceType());
+        Assertions.assertEquals(Case04.Case01.class, registery.resolve(new MockJmsMsg("12:00")).instanceType());
 
-        Assertions.assertEquals(Case04.Case02.class, registery.resolve(new MockJmsMsg("12")).getInstanceType());
+        Assertions.assertEquals(Case04.Case02.class, registery.resolve(new MockJmsMsg("12")).instanceType());
 
         Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("-12")));
     }
@@ -105,7 +105,7 @@ class DefaultInvokableResolverTest {
     void scope_01() {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case06.class.getPackageName()));
 
-        Assertions.assertEquals(InstanceScope.BEAN, registery.resolve(new MockJmsMsg("Case06")).getScope());
+        Assertions.assertEquals(InstanceScope.BEAN, registery.resolve(new MockJmsMsg("Case06")).scope());
     }
 
     @Test
@@ -113,9 +113,9 @@ class DefaultInvokableResolverTest {
         final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Cases09.class.getPackageName()));
 
         Assertions.assertEquals(ReflectingType.reflect(Cases09.Case01.class).findMethod("invoke"),
-                registery.resolve(new MockJmsMsg("Case01")).getMethod());
+                registery.resolve(new MockJmsMsg("Case01")).method());
 
         Assertions.assertEquals(ReflectingType.reflect(Cases09.Case02.class).findMethod("perform"),
-                registery.resolve(new MockJmsMsg("Case02")).getMethod());
+                registery.resolve(new MockJmsMsg("Case02")).method());
     }
 }

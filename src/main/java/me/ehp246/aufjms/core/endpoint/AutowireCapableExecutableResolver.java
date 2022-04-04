@@ -1,16 +1,12 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
-import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.InvokableResolver;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
@@ -32,7 +28,6 @@ public final class AutowireCapableExecutableResolver implements ExecutableResolv
         this.typeResolver = resolver;
     }
 
-
     @Override
     public Executable resolve(final JmsMsg msg) {
         Objects.requireNonNull(msg);
@@ -42,33 +37,10 @@ public final class AutowireCapableExecutableResolver implements ExecutableResolv
             return null;
         }
 
-        final Object executableInstance = registered.getScope().equals(InstanceScope.BEAN)
-                ? autowireCapableBeanFactory.getBean(registered.getInstanceType())
-                : autowireCapableBeanFactory.createBean(registered.getInstanceType());
+        final Object executableInstance = registered.scope().equals(InstanceScope.BEAN)
+                ? autowireCapableBeanFactory.getBean(registered.instanceType())
+                : autowireCapableBeanFactory.createBean(registered.instanceType());
 
-        return new Executable() {
-
-            @Override
-            public Method method() {
-                return registered.getMethod();
-            }
-
-            @Override
-            public Object instance() {
-                return executableInstance;
-            }
-
-            @Override
-            public InvocationModel invocationModel() {
-                return registered.getInvocationModel();
-            }
-
-            @Override
-            public Consumer<ExecutedInstance> executionConsumer() {
-                return null;
-            }
-
-        };
-
+        return new ExecutableRecord(executableInstance, registered.method(), registered.invocationModel());
     }
 }

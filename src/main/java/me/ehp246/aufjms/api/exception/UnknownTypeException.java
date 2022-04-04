@@ -12,7 +12,7 @@ public class UnknownTypeException extends RuntimeException {
     private final JmsMsg msg;
 
     public UnknownTypeException(final JmsMsg msg) {
-        super();
+        super("Unknown type: " + msg.type() + ", " + msg.correlationId());
         this.msg = msg;
     }
 

@@ -59,9 +59,9 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
             LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.from().name(),
                     endpoint.connectionFactory());
 
-            final var dispatcher = new DefaultInvokableDispatcher(endpoint.resolver(), binder,
+            final var dispatcher = new DefaultMsgDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(endpoint.concurrency()),
-                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.failedMsgConsumer());
+                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.failedInvocationConsumer());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 

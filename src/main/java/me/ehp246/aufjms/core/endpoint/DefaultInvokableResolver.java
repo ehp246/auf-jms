@@ -52,13 +52,13 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
 
     @Override
     public void register(final InvokableDefinition invokingDefinition) {
-        invokingDefinition.getTypes().forEach(type -> {
+        invokingDefinition.types().forEach(type -> {
             final var registered = registeredInvokables.putIfAbsent(type, invokingDefinition);
             if (registered != null) {
-                throw new RuntimeException("Duplicate type " + type + " from " + registered.getInstanceType());
+                throw new RuntimeException("Duplicate type " + type + " from " + registered.instanceType());
             }
 
-            registeredMethods.put(invokingDefinition.getInstanceType(), invokingDefinition.getMethods());
+            registeredMethods.put(invokingDefinition.instanceType(), invokingDefinition.methods());
         });
     }
 
@@ -83,7 +83,7 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
         var invoking = msg.invoking();
         invoking = invoking != null ? invoking.strip() : "";
 
-        final var method = registeredMethods.get(definition.getInstanceType()).get(invoking);
+        final var method = registeredMethods.get(definition.instanceType()).get(invoking);
 
         if (method == null) {
             LOGGER.atTrace().log("Method {} not found", invoking);
@@ -93,23 +93,23 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
         return new ResolvedInstanceType() {
 
             @Override
-            public Method getMethod() {
+            public Method method() {
                 return method;
             }
 
             @Override
-            public Class<?> getInstanceType() {
-                return definition.getInstanceType();
+            public Class<?> instanceType() {
+                return definition.instanceType();
             }
 
             @Override
-            public InstanceScope getScope() {
-                return definition.getInstanceScope();
+            public InstanceScope scope() {
+                return definition.instanceScope();
             }
 
             @Override
-            public InvocationModel getInvocationModel() {
-                return definition.getInvocationModel();
+            public InvocationModel invocationModel() {
+                return definition.invocationModel();
             }
         };
     }
@@ -193,27 +193,27 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
             private final Map<String, Method> methods = Map.copyOf(invokings);
 
             @Override
-            public Set<String> getTypes() {
+            public Set<String> types() {
                 return types;
             }
 
             @Override
-            public Class<?> getInstanceType() {
+            public Class<?> instanceType() {
                 return instanceType;
             }
 
             @Override
-            public Map<String, Method> getMethods() {
+            public Map<String, Method> methods() {
                 return methods;
             }
 
             @Override
-            public InstanceScope getInstanceScope() {
+            public InstanceScope instanceScope() {
                 return annotation.scope();
             }
 
             @Override
-            public InvocationModel getInvocationModel() {
+            public InvocationModel invocationModel() {
                 return annotation.invocation();
             }
         };
