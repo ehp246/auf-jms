@@ -40,16 +40,16 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final FailedInvocationConsumer failedMsgConsumer;
+    private final FailedInvocationConsumer failedConsumer;
 
     DefaultMsgDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor, final JmsDispatchFn dispatchFn, final FailedInvocationConsumer failedMsgConsumer) {
+            final Executor executor, final JmsDispatchFn dispatchFn, final FailedInvocationConsumer failedConsumer) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.failedMsgConsumer = failedMsgConsumer;
+        this.failedConsumer = failedConsumer;
     }
 
     @Override
@@ -133,8 +133,8 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             final var thrown = executionOutcome.thrown();
 
             if (thrown != null) {
-                if (failedMsgConsumer != null) {
-                    failedMsgConsumer.accept(new FailedInvocationRecord(msg, target, thrown));
+                if (failedConsumer != null) {
+                    failedConsumer.accept(new FailedInvocationRecord(msg, target, thrown));
                     return;
                 }
 

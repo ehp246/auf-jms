@@ -5,5 +5,5 @@ package me.ehp246.aufjms.api.endpoint;
  *
  */
 public interface FailedInvocationConsumer {
-    void accept(FailedInvocation failedMsg);
+    void accept(FailedInvocation failed);
 }

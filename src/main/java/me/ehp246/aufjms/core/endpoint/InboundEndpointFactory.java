@@ -90,7 +90,7 @@ public final class InboundEndpointFactory {
                     .resolve(inboundAttributes.get("connectionFactory").toString());
             private final ExecutableResolver resolver = new AutowireCapableExecutableResolver(
                     autowireCapableBeanFactory, DefaultInvokableResolver.registeryFrom(scanPackages));
-            private final FailedInvocationConsumer deadMsgConsumer = Optional
+            private final FailedInvocationConsumer failedConsumer = Optional
                     .ofNullable(inboundAttributes.get("failedInvocationConsumer").toString()).filter(OneUtil::hasValue)
                     .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationConsumer.class)).orElse(null);
 
@@ -126,7 +126,7 @@ public final class InboundEndpointFactory {
 
             @Override
             public FailedInvocationConsumer failedInvocationConsumer() {
-                return deadMsgConsumer;
+                return failedConsumer;
             }
         };
     }
