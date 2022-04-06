@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +33,9 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             return;
         }
 
-        for (final var inbound : Arrays.asList(((Map<String, Object>[]) enablerAttributes.get("value")))) {
+        final var inbounds = Arrays.asList(((Map<String, Object>[]) enablerAttributes.get("value")));
+        for (int i = 0; i < inbounds.size(); i++) {
+            final var inbound = inbounds.get(i);
             final var beanDefinition = newBeanDefinition(inbound);
 
             Set<String> scanThese = null;
@@ -48,7 +49,7 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             }
 
             final var beanName = Optional.of(inbound.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(InboundEndpoint.class.getSimpleName() + "." + UUID.randomUUID().toString());
+                    .orElse(InboundEndpoint.class.getSimpleName() + "@" + i);
             final var constructorArgumentValues = new ConstructorArgumentValues();
             constructorArgumentValues.addGenericArgumentValue(inbound);
             constructorArgumentValues.addGenericArgumentValue(scanThese);

@@ -34,6 +34,8 @@ public interface JmsMsg {
 
     Integer groupSeq();
 
+    int deliveryCount();
+
     long expiration();
 
     Instant timestamp();

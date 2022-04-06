@@ -10,6 +10,7 @@ import org.springframework.jms.annotation.EnableJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -18,11 +19,23 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @EnableJms
-@EnableForJms(@Inbound(@From(TestQueueListener.DESTINATION_NAME)))
+@EnableForJms({ @Inbound(@From(TestQueueListener.DESTINATION_NAME)),
+        @Inbound(value = @From("q"), failedInvocationInterceptor = "failedInvocationInterceptor"),
+        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name:}"),
+        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name:failedInvocationInterceptor}"),
+        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name.null:failedInvocationInterceptor}") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
+    final FailedInvocationInterceptor inteceptor = f -> {
+    };
+
     @Bean
     public AtomicReference<CompletableFuture<PropertyCase>> ref() {
         return new AtomicReference<CompletableFuture<PropertyCase>>(new CompletableFuture<>());
+    }
+
+    @Bean
+    public FailedInvocationInterceptor failedInvocationInterceptor() {
+        return inteceptor;
     }
 }
