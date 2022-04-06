@@ -92,6 +92,7 @@ public final class InboundEndpointFactory {
                     autowireCapableBeanFactory, DefaultInvokableResolver.registeryFrom(scanPackages));
             private final FailedInvocationInterceptor failedInterceptor = Optional
                     .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())
+                    .map(propertyResolver::resolve)
                     .filter(OneUtil::hasValue)
                     .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationInterceptor.class)).orElse(null);
 

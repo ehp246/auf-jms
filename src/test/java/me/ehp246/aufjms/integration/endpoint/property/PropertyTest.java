@@ -11,24 +11,33 @@ import javax.jms.Session;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, properties = {})
+@SpringBootTest(classes = { AppConfig.class }, properties = {
+        "interceptor.name.null=" }, webEnvironment = WebEnvironment.NONE)
 class PropertyTest {
+    @Autowired
+    private AppConfig appConfig;
     @Autowired
     private AtomicReference<CompletableFuture<PropertyCase>> ref;
 
     @Autowired
     private JmsTemplate jmsTemplate;
+
+    @Autowired
+    private ListableBeanFactory beanFactory;
 
     @Test
     void test_01() throws InterruptedException, ExecutionException {
@@ -44,5 +53,22 @@ class PropertyTest {
         });
 
         Assertions.assertEquals(true, ref.get().get().map.get("b1") instanceof Boolean);
+    }
+
+    @Test
+    void failureInterceptor_01() {
+        Assertions.assertEquals(null, beanFactory.getBean("InboundEndpoint@0", InboundEndpoint.class).failedInvocationInterceptor());
+        
+        Assertions.assertEquals(appConfig.inteceptor,
+                beanFactory.getBean("InboundEndpoint@1", InboundEndpoint.class).failedInvocationInterceptor());
+
+        Assertions.assertEquals(null,
+                beanFactory.getBean("InboundEndpoint@2", InboundEndpoint.class).failedInvocationInterceptor());
+
+        Assertions.assertEquals(appConfig.inteceptor,
+                beanFactory.getBean("InboundEndpoint@3", InboundEndpoint.class).failedInvocationInterceptor());
+
+        Assertions.assertEquals(null,
+                beanFactory.getBean("InboundEndpoint@4", InboundEndpoint.class).failedInvocationInterceptor());
     }
 }
