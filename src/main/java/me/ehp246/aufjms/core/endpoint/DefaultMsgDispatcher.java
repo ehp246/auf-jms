@@ -18,7 +18,8 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationConsumer;
+import me.ehp246.aufjms.api.endpoint.FailedInvocation;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtDestination;
@@ -40,16 +41,17 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final FailedInvocationConsumer failedConsumer;
+    private final FailedInvocationInterceptor failureInterceptor;
 
     DefaultMsgDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final Executor executor, final JmsDispatchFn dispatchFn, final FailedInvocationConsumer failedConsumer) {
+            final Executor executor, final JmsDispatchFn dispatchFn,
+            final FailedInvocationInterceptor failureInterceptor) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.failedConsumer = failedConsumer;
+        this.failureInterceptor = failureInterceptor;
     }
 
     @Override
@@ -133,8 +135,14 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             final var thrown = executionOutcome.thrown();
 
             if (thrown != null) {
-                if (failedConsumer != null) {
-                    failedConsumer.accept(new FailedInvocationRecord(msg, target, thrown));
+                if (failureInterceptor != null) {
+                    try {
+                        failureInterceptor.accept(new FailedInvocation(msg, target, thrown));
+                        LOGGER.atTrace().log("Failure interceptor invoked");
+                    } catch (Exception e) {
+                        LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
+                        throw e;
+                    }
                     return;
                 }
 

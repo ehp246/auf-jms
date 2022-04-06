@@ -43,6 +43,7 @@ class FailedInvocationTest {
 
         Assertions.assertEquals(onMsg.ex, failed.thrown());
         Assertions.assertEquals(id, failed.msg().correlationId());
+        Assertions.assertEquals(1, failed.msg().deliveryCount());
     }
 
     void dltopic_01() throws InterruptedException, ExecutionException {

@@ -4,12 +4,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * @author Lei Yang
- *
+ * @since 0.7.0
  */
-public interface FailedInvocation {
-    JmsMsg msg();
-
-    Executable target();
-
-    Throwable thrown();
+public record FailedInvocation(JmsMsg msg, Executable target, Throwable thrown) {
 }

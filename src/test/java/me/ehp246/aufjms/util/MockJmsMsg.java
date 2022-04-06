@@ -120,4 +120,9 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     public JMSContext jmsContext() {
         return null;
     }
+
+    @Override
+    public int deliveryCount() {
+        return 1;
+    }
 }

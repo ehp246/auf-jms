@@ -56,12 +56,11 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
         final var listenerContainerFactory = jmsListenerContainerFactory(null);
 
         this.endpoints.stream().forEach(endpoint -> {
-            LOGGER.atDebug().log("Registering '{}' endpoint at {} on {}", endpoint.name(), endpoint.from().name(),
-                    endpoint.connectionFactory());
+            LOGGER.atTrace().log("Registering '{}' endpoint at {}", endpoint.name());
 
             final var dispatcher = new DefaultMsgDispatcher(endpoint.resolver(), binder,
                     executorProvider.get(endpoint.concurrency()),
-                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.failedInvocationConsumer());
+                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.failedInvocationInterceptor());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 

@@ -13,7 +13,7 @@ import javax.jms.Message;
 import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationConsumer;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
@@ -64,7 +64,7 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * Specifies the bean name of the {@linkplain FailedInvocationConsumer} type to
+         * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type to
          * receive {@linkplain FailedInvocation}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this in-bound
@@ -83,7 +83,7 @@ public @interface EnableForJms {
          * {@linkplain Message#getJMSType()} matching, i.e.,
          * {@linkplain UnknownTypeException}.
          */
-        String failedInvocationConsumer() default "";
+        String failedInvocationInterceptor() default "";
 
         @interface From {
             /**

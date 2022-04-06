@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationConsumer;
+import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -25,8 +25,8 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @ComponentScan
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From("q1"), scan = FailMsg.class, failedInvocationConsumer = "consumer1"),
-        @Inbound(value = @From("q2"), scan = FailMsg.class, failedInvocationConsumer = "consumer2"),
+        @Inbound(value = @From("q1"), scan = FailMsg.class, failedInvocationInterceptor = "consumer1"),
+        @Inbound(value = @From("q2"), scan = FailMsg.class, failedInvocationInterceptor = "consumer2"),
         @Inbound(value = @From(value = "dltopic", type = DestinationType.TOPIC), scan = OnDlTopicMsg.class) })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
@@ -34,7 +34,7 @@ class AppConfig {
     public CompletableFuture<JmsMsg> dlqRef = new CompletableFuture<>();
     
     @Bean("consumer1")
-    FailedInvocationConsumer consumer1() {
-        return msg -> conRef1.complete(msg);
+    FailedInvocationInterceptor consumer1() {
+        return failed -> conRef1.complete(failed);
     }
 }

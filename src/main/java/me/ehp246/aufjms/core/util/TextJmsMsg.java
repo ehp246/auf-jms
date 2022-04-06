@@ -11,6 +11,7 @@ import javax.jms.TextMessage;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.PropertyName;
+import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 
 /**
  * Utility to un-pack a JMS message. All read calls are delayed and on-demand.
@@ -64,6 +65,11 @@ public final class TextJmsMsg implements JmsMsg {
     @Override
     public long expiration() {
         return JMSSupplier.invoke(message::getJMSExpiration);
+    }
+
+    @Override
+    public int deliveryCount() {
+        return JMSSupplier.invoke(() -> message.getIntProperty(AufJmsProperties.DELIVERY_COUNT));
     }
 
     @Override
