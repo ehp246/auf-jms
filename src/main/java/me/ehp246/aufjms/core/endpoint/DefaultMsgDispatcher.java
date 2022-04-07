@@ -18,7 +18,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -137,7 +136,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             if (thrown != null) {
                 if (failureInterceptor != null) {
                     try {
-                        failureInterceptor.accept(new FailedInvocation(msg, target, thrown));
+                        failureInterceptor.accept(new FailedInvocationRecord(msg, target, thrown));
                         LOGGER.atTrace().log("Failure interceptor invoked");
                     } catch (Exception e) {
                         LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
