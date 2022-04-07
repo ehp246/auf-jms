@@ -57,13 +57,13 @@ public final class TextJmsMsg implements JmsMsg {
     }
 
     @Override
-    public Integer groupSeq() {
+    public int groupSeq() {
         return JMSSupplier.invoke(() -> message.getIntProperty(JmsNames.GROUP_SEQ));
     }
 
     @Override
-    public long expiration() {
-        return JMSSupplier.invoke(message::getJMSExpiration);
+    public Instant expiration() {
+        return Instant.ofEpochMilli(JMSSupplier.invoke(message::getJMSExpiration));
     }
 
     @Override

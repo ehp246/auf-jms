@@ -53,9 +53,9 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     }
 
     @Override
-    public long expiration() {
+    public Instant expiration() {
         // TODO Auto-generated method stub
-        return 0;
+        return null;
     }
 
     @Override
@@ -100,9 +100,9 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     }
 
     @Override
-    public Integer groupSeq() {
+    public int groupSeq() {
         // TODO Auto-generated method stub
-        return null;
+        return 0;
     }
 
     @Override
