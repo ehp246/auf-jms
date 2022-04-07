@@ -25,8 +25,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.core.configuration.AufJmsProperties;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
@@ -443,7 +443,7 @@ class DefaultExecutableBinderTest {
             @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
-                if (name.equals(AufJmsProperties.DELIVERY_COUNT)) {
+                if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Long.valueOf(123);
                 }
                 return null;
@@ -466,7 +466,7 @@ class DefaultExecutableBinderTest {
             @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
-                if (name.equals(AufJmsProperties.DELIVERY_COUNT)) {
+                if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Integer.valueOf(123);
                 }
                 return null;
@@ -489,7 +489,7 @@ class DefaultExecutableBinderTest {
             @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
-                if (name.equals(AufJmsProperties.DELIVERY_COUNT)) {
+                if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Integer.valueOf(123);
                 }
                 return null;

@@ -32,11 +32,11 @@ public interface JmsMsg {
 
     String groupId();
 
-    Integer groupSeq();
+    int groupSeq();
 
     int deliveryCount();
 
-    long expiration();
+    Instant expiration();
 
     Instant timestamp();
 

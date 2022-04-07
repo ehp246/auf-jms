@@ -5,10 +5,6 @@ package me.ehp246.aufjms.core.configuration;
  * @since 1.0
  */
 public final class AufJmsProperties {
-    public static final String DELIVERY_COUNT = "JMSXDeliveryCount";
-    public static final String GROUP_ID = "JMSXGroupID";
-    public static final String GROUP_SEQ = "JMSXGroupSeq";
-
     public static final String TIMEOUT = "me.ehp246.aufjms.timeout";
     public static final String TTL = "me.ehp246.aufjms.ttl";
     public static final String POOL_SIZE = "me.ehp246.aufjms.executor.poolSize";
