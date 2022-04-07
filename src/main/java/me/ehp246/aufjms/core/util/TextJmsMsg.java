@@ -10,8 +10,7 @@ import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.jms.PropertyName;
-import me.ehp246.aufjms.core.configuration.AufJmsProperties;
+import me.ehp246.aufjms.api.jms.JmsNames;
 
 /**
  * Utility to un-pack a JMS message. All read calls are delayed and on-demand.
@@ -54,12 +53,12 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String groupId() {
-        return JMSSupplier.invoke(() -> message.getStringProperty(PropertyName.GROUP_ID));
+        return JMSSupplier.invoke(() -> message.getStringProperty(JmsNames.GROUP_ID));
     }
 
     @Override
     public Integer groupSeq() {
-        return JMSSupplier.invoke(() -> message.getIntProperty(PropertyName.GROUP_SEQ));
+        return JMSSupplier.invoke(() -> message.getIntProperty(JmsNames.GROUP_SEQ));
     }
 
     @Override
@@ -69,7 +68,7 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public int deliveryCount() {
-        return JMSSupplier.invoke(() -> message.getIntProperty(AufJmsProperties.DELIVERY_COUNT));
+        return JMSSupplier.invoke(() -> message.getIntProperty(JmsNames.DELIVERY_COUNT));
     }
 
     @Override
@@ -79,7 +78,7 @@ public final class TextJmsMsg implements JmsMsg {
 
     @Override
     public String invoking() {
-        return JMSSupplier.invoke(() -> message.getStringProperty(PropertyName.INVOKING));
+        return JMSSupplier.invoke(() -> message.getStringProperty(JmsNames.INVOKING));
     }
 
     @SuppressWarnings("unchecked")
