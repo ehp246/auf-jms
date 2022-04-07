@@ -49,7 +49,7 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             }
 
             final var beanName = Optional.of(inbound.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(InboundEndpoint.class.getSimpleName() + "@" + i);
+                    .orElse(InboundEndpoint.class.getSimpleName() + "-" + i);
             final var constructorArgumentValues = new ConstructorArgumentValues();
             constructorArgumentValues.addGenericArgumentValue(inbound);
             constructorArgumentValues.addGenericArgumentValue(scanThese);

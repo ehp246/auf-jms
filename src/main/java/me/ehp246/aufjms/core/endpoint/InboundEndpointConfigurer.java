@@ -31,8 +31,8 @@ import me.ehp246.aufjms.core.jms.AtDestinationRecord;
  * @author Lei Yang
  * @since 1.0
  */
-public final class InboundListenerConfigurer implements JmsListenerConfigurer {
-    private final static Logger LOGGER = LogManager.getLogger(InboundListenerConfigurer.class);
+public final class InboundEndpointConfigurer implements JmsListenerConfigurer {
+    private final static Logger LOGGER = LogManager.getLogger(InboundEndpointConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
@@ -40,7 +40,7 @@ public final class InboundListenerConfigurer implements JmsListenerConfigurer {
     private final ConnectionFactoryProvider cfProvider;
     private final JmsDispatchFnProvider dispathFnProvider;
 
-    public InboundListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
+    public InboundEndpointConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
             final ExecutorProvider executorProvider, final ExecutableBinder binder,
             final JmsDispatchFnProvider dispathFnProvider) {
         super();
