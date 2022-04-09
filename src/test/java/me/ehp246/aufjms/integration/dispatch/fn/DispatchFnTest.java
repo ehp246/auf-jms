@@ -11,11 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import me.ehp246.aufjms.api.dispatch.BodySupplier;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.To;
 import me.ehp246.aufjms.api.jms.ToQueueRecord;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
-import me.ehp246.aufjms.core.util.MockJmsDispatch;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -39,12 +40,12 @@ class DispatchFnTest {
     void test_01() throws JMSException {
         final var fn = fnProvider.get("");
 
-        fn.send(new MockJmsDispatch(to));
+        fn.send(JmsDispatch.newDispatch(to, null));
 
         final var message = listener.takeReceived();
 
         Assertions.assertEquals(null, message.getJMSType());
-        Assertions.assertEquals(null, message.getJMSCorrelationID());
+        Assertions.assertEquals(true, message.getJMSCorrelationID() != null);
     }
 
     @Test
@@ -54,7 +55,7 @@ class DispatchFnTest {
         final var id = UUID.randomUUID().toString();
         final var body = UUID.randomUUID().toString();
 
-        fn.send(new MockJmsDispatch(to, type, id, body));
+        fn.send(JmsDispatch.newDispatch(to, type, id, body));
 
         final var message = listener.takeReceived();
 
@@ -65,4 +66,17 @@ class DispatchFnTest {
                 "should be encoded in JSON");
     }
 
+    @Test
+    void bodySupplier_01() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var type = UUID.randomUUID().toString();
+        final var body = UUID.randomUUID();
+
+        fn.send(JmsDispatch.newDispatch(to, type, (BodySupplier) body::toString));
+
+        final var message = listener.takeReceived();
+
+        Assertions.assertEquals(type, message.getJMSType());
+        Assertions.assertEquals(body.toString(), message.getBody(String.class), "should be as-is");
+    }
 }

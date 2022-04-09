@@ -19,16 +19,17 @@ import javax.jms.TextMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import me.ehp246.aufjms.api.dispatch.BodySupplier;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
-import me.ehp246.aufjms.api.jms.To;
-import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -98,7 +99,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message = session.createTextMessage();
                     msg = TextJmsMsg.from(message);
 
-
                     // Fill the custom properties first so the framework ones won't get
                     // overwritten.
                     for (final var entry : Optional.ofNullable(dispatch.properties())
@@ -112,7 +112,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
-                    message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
+                    message.setText(toText(dispatch));
 
                     producer.setDeliveryDelay(
                             Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0));
@@ -168,6 +168,17 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     }
                 }
 
+            }
+
+            private String toText(JmsDispatch dispatch) {
+                final var bodyValues = dispatch.bodyValues();
+                if (bodyValues == null || bodyValues.size() == 0) {
+                    return null;
+                }
+
+                return bodyValues.stream().filter(value -> value instanceof BodySupplier).findAny()
+                        .map(value -> ((BodySupplier) value).get())
+                        .orElseGet(() -> DefaultDispatchFnProvider.this.toJson.apply(bodyValues));
             }
         };
     }
