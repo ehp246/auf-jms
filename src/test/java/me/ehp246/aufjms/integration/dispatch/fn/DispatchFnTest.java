@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.integration.dispatch.fn;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.jms.JMSException;
 
@@ -78,5 +79,19 @@ class DispatchFnTest {
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(body.toString(), message.getBody(String.class), "should be as-is");
+    }
+    
+    @Test
+    void properties_01() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var type = UUID.randomUUID().toString();
+
+        fn.send(JmsDispatch.newDispatch(to, type, null, Map.of("p1", "v-1", "p2", "v-2"), null));
+
+        final var message = listener.takeReceived();
+
+        Assertions.assertEquals(type, message.getJMSType());
+        Assertions.assertEquals("v-1", message.getStringProperty("p1"));
+        Assertions.assertEquals("v-2", message.getStringProperty("p2"));
     }
 }
