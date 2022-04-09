@@ -2,13 +2,9 @@ package me.ehp246.aufjms.util;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.jms.ConnectionFactory;
 import javax.jms.Message;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.JmsListenerContainerFactory;
 
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -33,12 +29,4 @@ public class TestQueueListener {
             return message;
         });
     }
-
-    @Bean
-    public JmsListenerContainerFactory<?> jmsListenerContainerFactory(final ConnectionFactory connectionFactory) {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        return factory;
-    }
-
 }
