@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueueRecord;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -19,17 +19,17 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
-    private final static At at = new AtQueueRecord("");
+    private final static To at = new ToQueueRecord("");
 
     private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
 
         @Override
-        public At to() {
+        public To to() {
             return at;
         }
 
         @Override
-        public At replyTo() {
+        public To replyTo() {
             return at;
         }
     };

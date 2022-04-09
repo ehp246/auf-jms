@@ -1,15 +1,15 @@
 package me.ehp246.aufjms.api.dispatch;
 
-import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.To;
 
 /**
  * @author Lei Yang
  * @since 1.0
  */
 public interface InvocationDispatchConfig {
-    At to();
+    To to();
 
-    At replyTo();
+    To replyTo();
 
     default String ttl() {
         return null;

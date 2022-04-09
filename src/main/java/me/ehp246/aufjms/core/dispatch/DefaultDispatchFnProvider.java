@@ -24,8 +24,8 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -172,12 +172,12 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         };
     }
 
-    private static Destination toJMSDestintation(Session session, At at) throws JMSException {
+    private static Destination toJMSDestintation(Session session, To at) throws JMSException {
         if (at == null || !OneUtil.hasValue(at.name())) {
             return null;
         }
 
-        return at instanceof AtQueue ? session.createQueue(at.name()) : session.createTopic(at.name());
+        return at instanceof ToQueue ? session.createQueue(at.name()) : session.createTopic(at.name());
     }
 
     @Override

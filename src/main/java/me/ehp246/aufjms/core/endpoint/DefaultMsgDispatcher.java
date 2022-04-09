@@ -25,9 +25,9 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueueRecord;
-import me.ehp246.aufjms.api.jms.AtTopicRecord;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueueRecord;
+import me.ehp246.aufjms.api.jms.ToTopicRecord;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
@@ -174,10 +174,10 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             this.dispatchFn.send(new JmsDispatch() {
                 final List<?> bodyValues = executionOutcome.returned() != null ? List.of(executionOutcome.returned())
                         : List.of();
-                final At at = from(replyTo);
+                final To at = from(replyTo);
 
                 @Override
-                public At to() {
+                public To to() {
                     return at;
                 }
 
@@ -199,10 +199,10 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
         };
     }
 
-    private static At from(final Destination replyTo) {
+    private static To from(final Destination replyTo) {
         try {
-            return replyTo instanceof Queue ? new AtQueueRecord(((Queue) replyTo).getQueueName())
-                    : new AtTopicRecord(((Topic) replyTo).getTopicName());
+            return replyTo instanceof Queue ? new ToQueueRecord(((Queue) replyTo).getQueueName())
+                    : new ToTopicRecord(((Topic) replyTo).getTopicName());
         } catch (JMSException e) {
             throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
         }

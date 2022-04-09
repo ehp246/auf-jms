@@ -19,10 +19,10 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
-import me.ehp246.aufjms.api.jms.AtQueueRecord;
-import me.ehp246.aufjms.api.jms.AtTopicRecord;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
+import me.ehp246.aufjms.api.jms.ToQueueRecord;
+import me.ehp246.aufjms.api.jms.ToTopicRecord;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
@@ -50,15 +50,15 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
-        final var destination = config.to() instanceof AtQueue
-                ? new AtQueueRecord(propertyResolver.resolve(config.to().name()))
-                : new AtTopicRecord(propertyResolver.resolve(config.to().name()));
+        final var destination = config.to() instanceof ToQueue
+                ? new ToQueueRecord(propertyResolver.resolve(config.to().name()))
+                : new ToTopicRecord(propertyResolver.resolve(config.to().name()));
 
         // Optional.
         final var replyTo = Optional.ofNullable(config.replyTo())
-                .map(at -> at instanceof AtQueue
-                        ? new AtQueueRecord(propertyResolver.resolve(at.name()))
-                        : new AtTopicRecord(propertyResolver.resolve(at.name())))
+                .map(at -> at instanceof ToQueue
+                        ? new ToQueueRecord(propertyResolver.resolve(at.name()))
+                        : new ToTopicRecord(propertyResolver.resolve(at.name())))
                 .orElse(null);
 
         // In the priority of Argument, Method, Type.
@@ -124,7 +124,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         return new JmsDispatch() {
 
             @Override
-            public At to() {
+            public To to() {
                 return destination;
             }
 
@@ -144,7 +144,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public At replyTo() {
+            public To replyTo() {
                 return replyTo;
             }
 

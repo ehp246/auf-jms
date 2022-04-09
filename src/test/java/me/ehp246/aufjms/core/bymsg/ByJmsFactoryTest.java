@@ -8,8 +8,8 @@ import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
@@ -21,7 +21,7 @@ class ByJmsFactoryTest {
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
-    private final static At defaultAt = new AtQueue() {
+    private final static To defaultAt = new ToQueue() {
         @Override
         public String name() {
             return "";
@@ -37,13 +37,13 @@ class ByJmsFactoryTest {
             }
 
             @Override
-            public At replyTo() {
+            public To replyTo() {
                 return defaultAt;
             }
 
             @Override
-            public At to() {
-                return new AtQueue() {
+            public To to() {
+                return new ToQueue() {
                     @Override
                     public String name() {
                         return "queue1";

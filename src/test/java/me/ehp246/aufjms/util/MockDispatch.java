@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
 
 /**
  * @author Lei Yang
@@ -23,8 +23,8 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public At to() {
-        return new AtQueue() {
+    public To to() {
+        return new ToQueue() {
 
             @Override
             public String name() {
@@ -44,7 +44,7 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public At replyTo() {
+    public To replyTo() {
         return null;
     }
 

@@ -1,18 +1,18 @@
 package me.ehp246.aufjms.util;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueueRecord;
 
 /**
  * @author Lei Yang
  *
  */
 public class MockProxyConfig implements InvocationDispatchConfig {
-    private final At dest = new AtQueueRecord("");
+    private final To dest = new ToQueueRecord("");
 
     @Override
-    public At to() {
+    public To to() {
         return dest;
     }
 
@@ -23,7 +23,7 @@ public class MockProxyConfig implements InvocationDispatchConfig {
     }
 
     @Override
-    public At replyTo() {
+    public To replyTo() {
         // TODO Auto-generated method stub
         return null;
     }

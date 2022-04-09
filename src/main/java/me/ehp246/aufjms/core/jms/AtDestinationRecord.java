@@ -5,7 +5,7 @@ import javax.jms.JMSException;
 import javax.jms.JMSRuntimeException;
 import javax.jms.Session;
 
-import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.To;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
@@ -16,7 +16,7 @@ public class AtDestinationRecord {
     private final String name;
     private final DestinationType type;
 
-    public AtDestinationRecord(final At at) {
+    public AtDestinationRecord(final To at) {
         super();
         this.name = at.name();
         this.type = null;

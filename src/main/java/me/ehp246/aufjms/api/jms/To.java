@@ -8,6 +8,6 @@ import javax.jms.Destination;
  * @author Lei Yang
  * @since 1.0
  */
-public sealed interface At permits AtTopic, AtQueue {
+public sealed interface To permits ToTopic, ToQueue {
     String name();
 }

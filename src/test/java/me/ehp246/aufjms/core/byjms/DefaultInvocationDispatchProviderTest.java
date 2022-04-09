@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Assertions;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 
 /**
@@ -22,7 +22,7 @@ class DefaultInvocationDispatchProviderTest {
     private final static String replyToName = UUID.randomUUID().toString();
     private final static String destinationName = UUID.randomUUID().toString();
     private final static String connectionName = UUID.randomUUID().toString();
-    private final static At destination = new AtQueue() {
+    private final static To destination = new ToQueue() {
 
         @Override
         public String name() {
@@ -38,12 +38,12 @@ class DefaultInvocationDispatchProviderTest {
         }
 
         @Override
-        public At to() {
+        public To to() {
             return destination;
         }
 
         @Override
-        public At replyTo() {
+        public To replyTo() {
             return null;
         }
     };
@@ -71,12 +71,12 @@ class DefaultInvocationDispatchProviderTest {
             }
 
             @Override
-            public At to() {
+            public To to() {
                 return null;
             }
 
             @Override
-            public At replyTo() {
+            public To replyTo() {
                 return null;
             }
         });
