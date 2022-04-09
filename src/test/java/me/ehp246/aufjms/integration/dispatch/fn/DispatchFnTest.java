@@ -94,4 +94,28 @@ class DispatchFnTest {
         Assertions.assertEquals("v-1", message.getStringProperty("p1"));
         Assertions.assertEquals("v-2", message.getStringProperty("p2"));
     }
+
+    @Test
+    void properties_02() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var type = UUID.randomUUID().toString();
+
+        fn.send(JmsDispatch.newDispatch(to, type, null, null, null));
+
+        final var message = listener.takeReceived();
+
+        Assertions.assertEquals(type, message.getJMSType());
+    }
+
+    @Test
+    void properties_03() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var type = UUID.randomUUID().toString();
+
+        fn.send(JmsDispatch.newDispatch(to, type, null, Map.of(), null));
+
+        final var message = listener.takeReceived();
+
+        Assertions.assertEquals(type, message.getJMSType());
+    }
 }
