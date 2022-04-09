@@ -14,8 +14,10 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.jms.AtTopicRecord;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
@@ -47,31 +49,10 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
     private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
-        final var replyTo = new AtDestination() {
-
-            @Override
-            public DestinationType type() {
-                return byJms.replyTo().type();
-            }
-
-            @Override
-            public String name() {
-
-                return byJms.replyTo().value();
-            }
-        };
-        final var destination = new AtDestination() {
-
-            @Override
-            public DestinationType type() {
-                return byJms.value().type();
-            }
-
-            @Override
-            public String name() {
-                return byJms.value().value();
-            }
-        };
+        final var destination = byJms.value().type() == DestinationType.QUEUE ? new AtQueueRecord(byJms.value().value())
+                : new AtTopicRecord(byJms.value().value());
+        final var replyTo = byJms.replyTo().type() == DestinationType.QUEUE ? new AtQueueRecord(byJms.replyTo().value())
+                : new AtTopicRecord(byJms.replyTo().value());
 
         final var ttl = byJms.ttl().equals("")
                 ? (map.get("ttl").toString().equals("") ? Duration.ZERO.toString() : map.get("ttl").toString())
@@ -79,19 +60,19 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
         final var args = new ConstructorArgumentValues();
         args.addGenericArgumentValue(proxyInterface);
-        args.addGenericArgumentValue(new DispatchConfig() {
+        args.addGenericArgumentValue(new InvocationDispatchConfig() {
             @Override
             public String ttl() {
                 return ttl;
             }
 
             @Override
-            public AtDestination destination() {
+            public At to() {
                 return destination;
             }
 
             @Override
-            public AtDestination replyTo() {
+            public At replyTo() {
                 return replyTo;
             }
         });

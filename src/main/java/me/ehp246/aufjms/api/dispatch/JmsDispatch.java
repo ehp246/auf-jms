@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.At;
 
 /**
  * The abstraction of a fully-realized out-bound JMS message.
@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @since 1.0
  */
 public interface JmsDispatch {
-    AtDestination at();
+    At to();
 
     default String type() {
         return null;
@@ -30,7 +30,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default AtDestination replyTo() {
+    default At replyTo() {
         return null;
     }
 

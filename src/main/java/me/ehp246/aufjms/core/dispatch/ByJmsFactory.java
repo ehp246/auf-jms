@@ -12,7 +12,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
@@ -37,7 +37,7 @@ public final class ByJmsFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(final Class<T> byJmsInterface, final DispatchConfig jmsDispatchConfig,
+    public <T> T newInstance(final Class<T> byJmsInterface, final InvocationDispatchConfig jmsDispatchConfig,
             final String connectionFactoryName) {
         LOGGER.atDebug().log("Instantiating {}", byJmsInterface.getCanonicalName());
 

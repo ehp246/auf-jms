@@ -8,9 +8,9 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.jms.AtDestination;
-import me.ehp246.aufjms.core.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueueRecord;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -19,17 +19,17 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
-    private final static AtDestination at = new AtQueueRecord("");
+    private final static At at = new AtQueueRecord("");
 
-    private final static DispatchConfig proxyConfig = new DispatchConfig() {
+    private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
 
         @Override
-        public AtDestination destination() {
+        public At to() {
             return at;
         }
 
         @Override
-        public AtDestination replyTo() {
+        public At replyTo() {
             return at;
         }
     };

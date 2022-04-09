@@ -13,5 +13,5 @@ import me.ehp246.aufjms.api.jms.Invocation;
  */
 @FunctionalInterface
 public interface InvocationDispatchBuilder {
-    JmsDispatch get(Invocation invocation, DispatchConfig config);
+    JmsDispatch get(Invocation invocation, InvocationDispatchConfig config);
 }

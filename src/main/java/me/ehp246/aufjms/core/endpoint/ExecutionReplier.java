@@ -3,7 +3,8 @@ package me.ehp246.aufjms.core.endpoint;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.ExecutedInstance;
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 
 /**
  * @author Lei Yang
@@ -37,8 +38,8 @@ public final class ExecutionReplier {
             }
 
             @Override
-            public AtDestination at() {
-                return new AtDestination() {
+            public At to() {
+                return new AtQueue() {
 
                     @Override
                     public String name() {

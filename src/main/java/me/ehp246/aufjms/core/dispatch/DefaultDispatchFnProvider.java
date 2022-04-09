@@ -24,10 +24,10 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -85,7 +85,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 }
 
                 LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
-                        dispatch.at().name().toString(), connectionFactoryName);
+                        dispatch.to().name().toString(), connectionFactoryName);
 
                 Session session = null;
                 MessageProducer producer = null;
@@ -124,7 +124,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         listener.onDispatch(msg, dispatch);
                     }
 
-                    producer.send(toJMSDestintation(session, dispatch.at()), message);
+                    producer.send(toJMSDestintation(session, dispatch.to()), message);
 
                     LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
@@ -136,7 +136,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     return msg;
                 } catch (final Exception e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
-                            dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
+                            dispatch.to().toString(), dispatch.type(), dispatch.correlationId(), e);
 
                     // Call listeners on-exception
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
@@ -172,12 +172,12 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         };
     }
 
-    private static Destination toJMSDestintation(Session session, AtDestination at) throws JMSException {
+    private static Destination toJMSDestintation(Session session, At at) throws JMSException {
         if (at == null || !OneUtil.hasValue(at.name())) {
             return null;
         }
 
-        return at.type() == DestinationType.QUEUE ? session.createQueue(at.name()) : session.createTopic(at.name());
+        return at instanceof AtQueue ? session.createQueue(at.name()) : session.createTopic(at.name());
     }
 
     @Override

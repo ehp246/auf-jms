@@ -3,10 +3,14 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.List;
 import java.util.concurrent.Executor;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.Message;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,11 +25,12 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.jms.AtTopicRecord;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
-import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -169,10 +174,10 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             this.dispatchFn.send(new JmsDispatch() {
                 final List<?> bodyValues = executionOutcome.returned() != null ? List.of(executionOutcome.returned())
                         : List.of();
-                final AtDestination at = AtDestinationRecord.from(replyTo);
+                final At at = from(replyTo);
 
                 @Override
-                public AtDestination at() {
+                public At to() {
                     return at;
                 }
 
@@ -192,5 +197,14 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
                 }
             });
         };
+    }
+
+    private static At from(final Destination replyTo) {
+        try {
+            return replyTo instanceof Queue ? new AtQueueRecord(((Queue) replyTo).getQueueName())
+                    : new AtTopicRecord(((Topic) replyTo).getTopicName());
+        } catch (JMSException e) {
+            throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
+        }
     }
 }

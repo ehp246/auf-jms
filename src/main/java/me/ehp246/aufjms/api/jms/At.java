@@ -8,10 +8,6 @@ import javax.jms.Destination;
  * @author Lei Yang
  * @since 1.0
  */
-public interface AtDestination {
+public sealed interface At permits AtTopic, AtQueue {
     String name();
-
-    default DestinationType type() {
-        return DestinationType.QUEUE;
-    }
 }
