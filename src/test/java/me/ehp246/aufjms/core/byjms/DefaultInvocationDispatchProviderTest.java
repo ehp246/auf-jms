@@ -7,8 +7,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.jms.To;
 import me.ehp246.aufjms.api.jms.ToQueue;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
@@ -90,16 +90,13 @@ class DefaultInvocationDispatchProviderTest {
         args.add(null);
         final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
-        Assertions.assertEquals(1, dispatch.bodyValues().size());
-        Assertions.assertEquals(null, dispatch.bodyValues().get(0));
-        Assertions.assertThrows(Exception.class, () -> dispatch.bodyValues().clear());
+        Assertions.assertEquals(null, dispatch.body());
     }
 
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
         final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
-        Assertions.assertEquals(1, dispatch.bodyValues().size());
-        Assertions.assertEquals(now, dispatch.bodyValues().get(0));
+        Assertions.assertEquals(now, dispatch.body());
     }
 }

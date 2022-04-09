@@ -2,9 +2,7 @@ package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -16,14 +14,12 @@ import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.To;
 import me.ehp246.aufjms.api.jms.ToQueue;
-import me.ehp246.aufjms.api.jms.ToQueueRecord;
-import me.ehp246.aufjms.api.jms.ToTopicRecord;
-import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
@@ -51,14 +47,14 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
         // Destination is required.
         final var destination = config.to() instanceof ToQueue
-                ? new ToQueueRecord(propertyResolver.resolve(config.to().name()))
-                : new ToTopicRecord(propertyResolver.resolve(config.to().name()));
+                ? To.toQueue(propertyResolver.resolve(config.to().name()))
+                : To.toTopic(propertyResolver.resolve(config.to().name()));
 
         // Optional.
         final var replyTo = Optional.ofNullable(config.replyTo())
                 .map(at -> at instanceof ToQueue
-                        ? new ToQueueRecord(propertyResolver.resolve(at.name()))
-                        : new ToTopicRecord(propertyResolver.resolve(at.name())))
+                        ? To.toQueue(propertyResolver.resolve(at.name()))
+                        : To.toTopic(propertyResolver.resolve(at.name())))
                 .orElse(null);
 
         // In the priority of Argument, Method, Type.
@@ -119,7 +115,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         final var correlId = proxyInvocation.firstArgumentAnnotationOf(OfCorrelationId.class,
                 annoArg -> Optional.ofNullable(annoArg.argument()).map(Object::toString).orElse(null),
                 () -> UUID.randomUUID().toString());
-        final var bodyValues = Collections.unmodifiableList(proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS));
+        final var body = proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS).stream().findFirst().orElse(null);
 
         return new JmsDispatch() {
 
@@ -139,8 +135,8 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public List<?> bodyValues() {
-                return bodyValues;
+            public Object body() {
+                return body;
             }
 
             @Override

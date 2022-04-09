@@ -34,7 +34,7 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public List<?> bodyValues() {
+    public List<?> body() {
         return List.of();
     }
 

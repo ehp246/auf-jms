@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import me.ehp246.aufjms.api.dispatch.BodySupplier;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.To;
-import me.ehp246.aufjms.api.jms.ToQueueRecord;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
@@ -28,7 +27,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class,
         EmbeddedArtemisConfig.class }, webEnvironment = WebEnvironment.NONE)
 class DispatchFnTest {
-    private static final To to = new ToQueueRecord(TestQueueListener.DESTINATION_NAME);
+    private static final To to = To.toQueue(TestQueueListener.DESTINATION_NAME);
 
     @Autowired
     private TestQueueListener listener;

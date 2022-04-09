@@ -171,14 +171,16 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             }
 
             private String toText(JmsDispatch dispatch) {
-                final var bodyValues = dispatch.bodyValues();
-                if (bodyValues == null || bodyValues.size() == 0) {
+                final var body = dispatch.body();
+                if (body == null) {
                     return null;
                 }
 
-                return bodyValues.stream().filter(value -> value instanceof BodySupplier).findAny()
-                        .map(value -> ((BodySupplier) value).get())
-                        .orElseGet(() -> DefaultDispatchFnProvider.this.toJson.apply(bodyValues));
+                if (body instanceof BodySupplier supplier) {
+                    return supplier.get();
+                }
+
+                return toJson.apply(List.of(body));
             }
         };
     }

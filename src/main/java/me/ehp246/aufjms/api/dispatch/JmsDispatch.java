@@ -1,8 +1,6 @@
 package me.ehp246.aufjms.api.dispatch;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,7 +26,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default List<?> bodyValues() {
+    default Object body() {
         return null;
     }
 
@@ -101,8 +99,6 @@ public interface JmsDispatch {
      */
     static JmsDispatch newDispatch(To to, String type, String id, Map<String, Object> properties, Object body) {
         return new JmsDispatch() {
-            private final List<?> bodyValues = Arrays.asList(new Object[] { body });
-
             @Override
             public To to() {
                 return to;
@@ -119,8 +115,8 @@ public interface JmsDispatch {
             }
 
             @Override
-            public List<?> bodyValues() {
-                return bodyValues;
+            public Object body() {
+                return body;
             }
 
             @Override

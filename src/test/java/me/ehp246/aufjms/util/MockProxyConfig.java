@@ -2,14 +2,13 @@ package me.ehp246.aufjms.util;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.jms.To;
-import me.ehp246.aufjms.api.jms.ToQueueRecord;
 
 /**
  * @author Lei Yang
  *
  */
 public class MockProxyConfig implements InvocationDispatchConfig {
-    private final To dest = new ToQueueRecord("");
+    private final To dest = To.toQueue("");
 
     @Override
     public To to() {
