@@ -40,7 +40,7 @@ class DispatchFnTest {
     void test_01() throws JMSException {
         final var fn = fnProvider.get("");
 
-        fn.send(JmsDispatch.newDispatch(to, null));
+        fn.send(JmsDispatch.toDispatch(to, null));
 
         final var message = listener.takeReceived();
 
@@ -55,7 +55,7 @@ class DispatchFnTest {
         final var id = UUID.randomUUID().toString();
         final var body = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.newDispatch(to, type, id, body));
+        fn.send(JmsDispatch.toDispatch(to, type, id, body));
 
         final var message = listener.takeReceived();
 
@@ -72,7 +72,7 @@ class DispatchFnTest {
         final var type = UUID.randomUUID().toString();
         final var body = UUID.randomUUID();
 
-        fn.send(JmsDispatch.newDispatch(to, type, (BodySupplier) body::toString));
+        fn.send(JmsDispatch.toDispatch(to, type, (BodySupplier) body::toString));
 
         final var message = listener.takeReceived();
 
@@ -85,7 +85,7 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.newDispatch(to, type, null, Map.of("p1", "v-1", "p2", "v-2"), null));
+        fn.send(JmsDispatch.toDispatch(to, type, null, Map.of("p1", "v-1", "p2", "v-2"), null));
 
         final var message = listener.takeReceived();
 
@@ -99,7 +99,7 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.newDispatch(to, type, null, null, null));
+        fn.send(JmsDispatch.toDispatch(to, type, null, null, null));
 
         final var message = listener.takeReceived();
 
@@ -111,7 +111,7 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.newDispatch(to, type, null, Map.of(), null));
+        fn.send(JmsDispatch.toDispatch(to, type, null, Map.of(), null));
 
         final var message = listener.takeReceived();
 

@@ -58,8 +58,8 @@ public interface JmsDispatch {
      * @param type
      * @return
      */
-    static JmsDispatch newDispatch(To to, String type) {
-        return newDispatch(to, type, UUID.randomUUID().toString(), null);
+    static JmsDispatch toDispatch(To to, String type) {
+        return toDispatch(to, type, UUID.randomUUID().toString(), null);
     }
 
     /**
@@ -70,8 +70,8 @@ public interface JmsDispatch {
      * @param body
      * @return
      */
-    static JmsDispatch newDispatch(To to, String type, Object body) {
-        return newDispatch(to, type, UUID.randomUUID().toString(), body);
+    static JmsDispatch toDispatch(To to, String type, Object body) {
+        return toDispatch(to, type, UUID.randomUUID().toString(), body);
     }
 
     /**
@@ -83,8 +83,8 @@ public interface JmsDispatch {
      * @param body
      * @return
      */
-    static JmsDispatch newDispatch(To to, String type, String id, Object body) {
-        return newDispatch(to, type, id, null, body);
+    static JmsDispatch toDispatch(To to, String type, String id, Object body) {
+        return toDispatch(to, type, id, null, body);
     }
 
     /**
@@ -97,7 +97,7 @@ public interface JmsDispatch {
      * @param body
      * @return
      */
-    static JmsDispatch newDispatch(To to, String type, String id, Map<String, Object> properties, Object body) {
+    static JmsDispatch toDispatch(To to, String type, String id, Map<String, Object> properties, Object body) {
         return new JmsDispatch() {
             @Override
             public To to() {
