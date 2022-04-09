@@ -11,11 +11,11 @@ import javax.jms.Destination;
 public sealed interface To permits ToTopic, ToQueue {
     String name();
 
-    static To toQueue(String name) {
+    static ToQueue toQueue(String name) {
         return new Queue(name);
     }
 
-    static To toTopic(String name) {
+    static ToTopic toTopic(String name) {
         return new Topic(name);
     }
 }
