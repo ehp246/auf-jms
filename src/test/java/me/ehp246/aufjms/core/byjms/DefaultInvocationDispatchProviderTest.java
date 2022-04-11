@@ -7,9 +7,10 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
 
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 
 /**
@@ -21,7 +22,7 @@ class DefaultInvocationDispatchProviderTest {
     private final static String replyToName = UUID.randomUUID().toString();
     private final static String destinationName = UUID.randomUUID().toString();
     private final static String connectionName = UUID.randomUUID().toString();
-    private final static AtDestination destination = new AtDestination() {
+    private final static At destination = new AtQueue() {
 
         @Override
         public String name() {
@@ -29,7 +30,7 @@ class DefaultInvocationDispatchProviderTest {
         }
     };
 
-    private final static DispatchConfig proxyConfig = new DispatchConfig() {
+    private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
 
         @Override
         public String ttl() {
@@ -37,12 +38,12 @@ class DefaultInvocationDispatchProviderTest {
         }
 
         @Override
-        public AtDestination destination() {
+        public At to() {
             return destination;
         }
 
         @Override
-        public AtDestination replyTo() {
+        public At replyTo() {
             return null;
         }
     };
@@ -62,7 +63,7 @@ class DefaultInvocationDispatchProviderTest {
         new DefaultInvocationDispatchBuilder((dest) -> {
             names[1] = dest;
             return destinationName;
-        }).get(null, new DispatchConfig() {
+        }).get(null, new InvocationDispatchConfig() {
 
             @Override
             public String ttl() {
@@ -70,12 +71,12 @@ class DefaultInvocationDispatchProviderTest {
             }
 
             @Override
-            public AtDestination destination() {
+            public At to() {
                 return null;
             }
 
             @Override
-            public AtDestination replyTo() {
+            public At replyTo() {
                 return null;
             }
         });
@@ -89,16 +90,13 @@ class DefaultInvocationDispatchProviderTest {
         args.add(null);
         final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
-        Assertions.assertEquals(1, dispatch.bodyValues().size());
-        Assertions.assertEquals(null, dispatch.bodyValues().get(0));
-        Assertions.assertThrows(Exception.class, () -> dispatch.bodyValues().clear());
+        Assertions.assertEquals(null, dispatch.body());
     }
 
     void body_02() throws NoSuchMethodException, SecurityException {
         final var now = Instant.now();
         final var dispatch = dispatchBuilder.get(null, proxyConfig);
 
-        Assertions.assertEquals(1, dispatch.bodyValues().size());
-        Assertions.assertEquals(now, dispatch.bodyValues().get(0));
+        Assertions.assertEquals(now, dispatch.body());
     }
 }

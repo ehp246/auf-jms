@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.api.jms.At;
 
 /**
  *
@@ -23,13 +23,9 @@ public interface InboundEndpoint {
     FailedInvocationInterceptor failedInvocationInterceptor();
 
     interface From {
-        String name();
+        At on();
 
         String selector();
-
-        default DestinationType type() {
-            return DestinationType.QUEUE;
-        }
 
         Sub sub();
 

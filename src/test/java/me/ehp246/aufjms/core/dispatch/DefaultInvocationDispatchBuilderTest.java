@@ -8,9 +8,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.jms.AtDestination;
-import me.ehp246.aufjms.core.jms.AtQueueRecord;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -19,17 +18,17 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
-    private final static AtDestination at = new AtQueueRecord("");
+    private final static At at = At.toQueue("");
 
-    private final static DispatchConfig proxyConfig = new DispatchConfig() {
+    private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
 
         @Override
-        public AtDestination destination() {
+        public At to() {
             return at;
         }
 
         @Override
-        public AtDestination replyTo() {
+        public At replyTo() {
             return at;
         }
     };
@@ -332,7 +331,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test
@@ -343,10 +342,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(body);
 
-        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
-
-        Assertions.assertEquals(1, bodyValues.size());
-        Assertions.assertEquals(body, bodyValues.get(0));
+        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test
@@ -355,7 +351,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), "");
 
-        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test
@@ -364,7 +360,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "");
 
-        Assertions.assertEquals(0, dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues().size());
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test
@@ -375,10 +371,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(UUID.randomUUID().toString(), body);
 
-        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
-
-        Assertions.assertEquals(1, bodyValues.size());
-        Assertions.assertEquals(body, bodyValues.get(0));
+        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test
@@ -389,10 +382,7 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(body, UUID.randomUUID().toString(), null);
 
-        final var bodyValues = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyValues();
-
-        Assertions.assertEquals(1, bodyValues.size());
-        Assertions.assertEquals(body, bodyValues.get(0));
+        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
     }
 
     @Test

@@ -97,7 +97,7 @@ class DefaultDispatchFnProviderTest {
         final var listener = new DispatchListener() {
 
             @Override
-            public void onDispatch(JmsMsg msg, JmsDispatch dispatch) {
+            public void postSend(JmsMsg msg, JmsDispatch dispatch) {
                 count.add(msg);
                 count.add(dispatch);
             }

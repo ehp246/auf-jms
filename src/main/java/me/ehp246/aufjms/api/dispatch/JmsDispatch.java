@@ -1,10 +1,10 @@
 package me.ehp246.aufjms.api.dispatch;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import me.ehp246.aufjms.api.jms.AtDestination;
+import me.ehp246.aufjms.api.jms.At;
 
 /**
  * The abstraction of a fully-realized out-bound JMS message.
@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.jms.AtDestination;
  * @since 1.0
  */
 public interface JmsDispatch {
-    AtDestination at();
+    At to();
 
     default String type() {
         return null;
@@ -26,11 +26,11 @@ public interface JmsDispatch {
         return null;
     }
 
-    default List<?> bodyValues() {
+    default Object body() {
         return null;
     }
 
-    default AtDestination replyTo() {
+    default At replyTo() {
         return null;
     }
 
@@ -44,10 +44,85 @@ public interface JmsDispatch {
     }
 
     default Map<String, Object> properties() {
-        return Map.of();
+        return null;
     }
 
     default Duration delay() {
         return null;
+    }
+
+    /**
+     * Single body value. Generated correlation id.
+     * 
+     * @param to
+     * @param type
+     * @return
+     */
+    static JmsDispatch toDispatch(At to, String type) {
+        return toDispatch(to, type, null, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Single body value. Generated correlation id.
+     * 
+     * @param to
+     * @param type
+     * @param body
+     * @return
+     */
+    static JmsDispatch toDispatch(At to, String type, Object body) {
+        return toDispatch(to, type, body, UUID.randomUUID().toString());
+    }
+
+    /**
+     * Single body value. Generated correlation id.
+     * 
+     * @param to
+     * @param type
+     * @param body
+     * @param id
+     * @return
+     */
+    static JmsDispatch toDispatch(At to, String type, Object body, String id) {
+        return toDispatch(to, type, body, id, null);
+    }
+
+    /**
+     * Single body value. Generated correlation id.
+     * 
+     * @param to
+     * @param type
+     * @param body
+     * @param id
+     * @param properties
+     * @return
+     */
+    static JmsDispatch toDispatch(At to, String type, Object body, String id, Map<String, Object> properties) {
+        return new JmsDispatch() {
+            @Override
+            public At to() {
+                return to;
+            }
+
+            @Override
+            public String type() {
+                return type;
+            }
+
+            @Override
+            public String correlationId() {
+                return id;
+            }
+
+            @Override
+            public Object body() {
+                return body;
+            }
+
+            @Override
+            public Map<String, Object> properties() {
+                return properties;
+            }
+        };
     }
 }

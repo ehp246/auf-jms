@@ -1,12 +1,15 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import java.util.List;
 import java.util.concurrent.Executor;
 
+import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.Message;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,11 +24,10 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
-import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.core.configuration.AufJmsProperties;
-import me.ehp246.aufjms.core.jms.AtDestinationRecord;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -55,33 +57,32 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
 
     @Override
     public void onMessage(Message message, Session session) throws JMSException {
-        if (message instanceof TextMessage textMessage) {
-            // Make sure the thread context is cleaned up.
-            try {
-                AufJmsContext.set(session);
-
-                ThreadContext.put(AufJmsProperties.TYPE, message.getJMSType());
-                ThreadContext.put(AufJmsProperties.CORRELATION_ID, message.getJMSCorrelationID());
-
-                LOGGER.atTrace().log("Dispatching");
-
-                dispatch(textMessage);
-
-                // Only when no exception.
-                LOGGER.atTrace().log("Dispatched");
-            } catch (Exception e) {
-                LOGGER.atTrace().log("Dispatch failed");
-                throw e;
-            } finally {
-                ThreadContext.remove(AufJmsProperties.TYPE);
-                ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
-
-                AufJmsContext.clearSession();
-            }
-            return;
+        if (!(message instanceof TextMessage textMessage)) {
+            throw new RuntimeException("Un-supported Message: " + message.getJMSCorrelationID());
         }
 
-        throw new RuntimeException("Un-supported Message: " + message.getJMSCorrelationID());
+        // Make sure the thread context is cleaned up.
+        try {
+            AufJmsContext.set(session);
+
+            ThreadContext.put(AufJmsProperties.TYPE, message.getJMSType());
+            ThreadContext.put(AufJmsProperties.CORRELATION_ID, message.getJMSCorrelationID());
+
+            LOGGER.atTrace().log("Dispatching");
+
+            dispatch(textMessage);
+
+            // Only when no exception.
+            LOGGER.atTrace().log("Dispatched");
+        } catch (Exception e) {
+            LOGGER.atTrace().log("Dispatch failed");
+            throw e;
+        } finally {
+            ThreadContext.remove(AufJmsProperties.TYPE);
+            ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
+
+            AufJmsContext.clearSession();
+        }
     }
 
     private void dispatch(final TextMessage message) {
@@ -128,69 +129,79 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
      * @return
      */
     private Runnable newRunnable(final JmsMsg msg, final Executable target) {
-        return () -> {
-            final var executionOutcome = binder.bind(target, () -> msg).get();
+        return new Runnable() {
+            @Override
+            public void run() {
+                final var executionOutcome = binder.bind(target, () -> msg).get();
 
-            final var thrown = executionOutcome.thrown();
+                final var thrown = executionOutcome.thrown();
 
-            if (thrown != null) {
-                if (failureInterceptor != null) {
-                    try {
-                        failureInterceptor.accept(new FailedInvocationRecord(msg, target, thrown));
-                        LOGGER.atTrace().log("Failure interceptor invoked");
-                    } catch (Exception e) {
-                        LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
-                        throw e;
+                if (thrown != null) {
+                    if (failureInterceptor != null) {
+                        try {
+                            failureInterceptor.accept(new FailedInvocationRecord(msg, target, thrown));
+                            LOGGER.atTrace().log("Failure interceptor invoked");
+                        } catch (Exception e) {
+                            LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
+                            throw e;
+                        }
+                        return;
                     }
+
+                    if (thrown instanceof RuntimeException rtEx) {
+                        throw rtEx;
+                    } else {
+                        throw new RuntimeException(thrown);
+                    }
+                }
+
+                // Reply
+                final var replyTo = msg.replyTo();
+                if (replyTo == null) {
+                    LOGGER.atTrace().log("No replyTo");
                     return;
                 }
 
-                if (thrown instanceof RuntimeException rtEx) {
-                    throw rtEx;
-                } else {
-                    throw new RuntimeException(thrown);
+                if (executionOutcome.hasThrown()) {
+                    LOGGER.atTrace().log("Execution thrown, skipping reply");
+                    return;
                 }
+
+                LOGGER.atTrace().log("Replying");
+
+                DefaultMsgDispatcher.this.dispatchFn.send(new JmsDispatch() {
+                    private final At to = from(replyTo);
+
+                    @Override
+                    public At to() {
+                        return to;
+                    }
+
+                    @Override
+                    public String type() {
+                        return msg.type();
+                    }
+
+                    @Override
+                    public String correlationId() {
+                        return msg.correlationId();
+                    }
+
+                    @Override
+                    public Object body() {
+                        return executionOutcome.returned();
+                    }
+                });
             }
-
-            // Reply
-            final var replyTo = msg.replyTo();
-            if (replyTo == null) {
-                LOGGER.atTrace().log("No replyTo");
-                return;
-            }
-
-            if (executionOutcome.hasThrown()) {
-                LOGGER.atTrace().log("Execution thrown, skipping reply");
-                return;
-            }
-
-            LOGGER.atTrace().log("Replying");
-
-            this.dispatchFn.send(new JmsDispatch() {
-                final List<?> bodyValues = executionOutcome.returned() != null ? List.of(executionOutcome.returned())
-                        : List.of();
-                final AtDestination at = AtDestinationRecord.from(replyTo);
-
-                @Override
-                public AtDestination at() {
-                    return at;
-                }
-
-                @Override
-                public String type() {
-                    return msg.type();
-                }
-
-                @Override
-                public String correlationId() {
-                    return msg.correlationId();
-                }
-
-                @Override
-                public List<?> bodyValues() {
-                    return bodyValues;
-                }
-            });
         };
+    }
+
+    private static At from(final Destination replyTo) {
+        try {
+            return replyTo instanceof Queue ? At.toQueue(((Queue) replyTo).getQueueName())
+                    : At.toTopic(((Topic) replyTo).getTopicName());
+        } catch (JMSException e) {
+            throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
+        }
     }
 }

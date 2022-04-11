@@ -3,13 +3,13 @@ package me.ehp246.aufjms.core.bymsg;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.dispatch.DispatchConfig;
-import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.jms.AtDestination;
-import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
@@ -21,21 +21,15 @@ class ByJmsFactoryTest {
 
     private final ByJmsFactory factory = new ByJmsFactory(dispatchFnProvider, dispatchProvider);
 
-    private final static AtDestination defaultAt = new AtDestination() {
-
-        @Override
-        public DestinationType type() {
-            return DestinationType.QUEUE;
-        }
-
+    private final static At defaultAt = new AtQueue() {
         @Override
         public String name() {
             return "";
         }
     };
 
-    private DispatchConfig case01() {
-        return new DispatchConfig() {
+    private InvocationDispatchConfig case01() {
+        return new InvocationDispatchConfig() {
 
             @Override
             public String ttl() {
@@ -43,19 +37,13 @@ class ByJmsFactoryTest {
             }
 
             @Override
-            public AtDestination replyTo() {
+            public At replyTo() {
                 return defaultAt;
             }
 
             @Override
-            public AtDestination destination() {
-                return new AtDestination() {
-
-                    @Override
-                    public DestinationType type() {
-                        return DestinationType.QUEUE;
-                    }
-
+            public At to() {
+                return new AtQueue() {
                     @Override
                     public String name() {
                         return "queue1";

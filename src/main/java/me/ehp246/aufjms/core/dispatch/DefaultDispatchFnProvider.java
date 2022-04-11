@@ -19,16 +19,17 @@ import javax.jms.TextMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
-import me.ehp246.aufjms.api.jms.AtDestination;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -85,7 +86,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 }
 
                 LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
-                        dispatch.at().name().toString(), connectionFactoryName);
+                        dispatch.to().name().toString(), connectionFactoryName);
 
                 Session session = null;
                 MessageProducer producer = null;
@@ -97,7 +98,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     producer = session.createProducer(null);
                     message = session.createTextMessage();
                     msg = TextJmsMsg.from(message);
-
 
                     // Fill the custom properties first so the framework ones won't get
                     // overwritten.
@@ -112,7 +112,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
-                    message.setText(DefaultDispatchFnProvider.this.toJson.apply(dispatch.bodyValues()));
+                    message.setText(toText(dispatch));
 
                     producer.setDeliveryDelay(
                             Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0));
@@ -121,22 +121,22 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     // Call listeners pre-send
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.onDispatch(msg, dispatch);
+                        listener.preSend(msg, dispatch);
                     }
 
-                    producer.send(toJMSDestintation(session, dispatch.at()), message);
+                    producer.send(toJMSDestintation(session, dispatch.to()), message);
 
                     LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
                     // Call listeners post-send
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.onSent(msg, dispatch);
+                        listener.postSend(msg, dispatch);
                     }
 
                     return msg;
                 } catch (final Exception e) {
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
-                            dispatch.at().toString(), dispatch.type(), dispatch.correlationId(), e);
+                            dispatch.to().toString(), dispatch.type(), dispatch.correlationId(), e);
 
                     // Call listeners on-exception
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
@@ -169,15 +169,28 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 }
 
             }
+
+            private String toText(JmsDispatch dispatch) {
+                final var body = dispatch.body();
+                if (body == null) {
+                    return null;
+                }
+
+                if (body instanceof BodyPublisher supplier) {
+                    return supplier.get();
+                }
+
+                return toJson.apply(List.of(body));
+            }
         };
     }
 
-    private static Destination toJMSDestintation(Session session, AtDestination at) throws JMSException {
-        if (at == null || !OneUtil.hasValue(at.name())) {
+    private static Destination toJMSDestintation(Session session, At to) throws JMSException {
+        if (to == null || !OneUtil.hasValue(to.name())) {
             return null;
         }
 
-        return at.type() == DestinationType.QUEUE ? session.createQueue(at.name()) : session.createTopic(at.name());
+        return to instanceof AtQueue ? session.createQueue(to.name()) : session.createTopic(to.name());
     }
 
     @Override

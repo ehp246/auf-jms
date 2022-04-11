@@ -28,7 +28,7 @@ class BeanNameTest {
         final var bean = appCtx.getBean("a778506e-a1dc-40c6-aeb3-42114f993c22");
 
         Assertions.assertEquals(true, bean instanceof InboundEndpoint);
-        Assertions.assertEquals("a903988f-89af-42ba-9777-f52831b480ff", ((InboundEndpoint) bean).from().name());
+        Assertions.assertEquals("a903988f-89af-42ba-9777-f52831b480ff", ((InboundEndpoint) bean).from().on().name());
     }
 
     @Test
