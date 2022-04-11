@@ -9,6 +9,7 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -34,9 +35,11 @@ public final class InboundEndpointFactory {
             final String beanName) {
         final var fromAttribute = (Map<String, Object>) inboundAttributes.get("value");
 
+        final var atName = propertyResolver.resolve(fromAttribute.get("value").toString());
+        final var atType = (DestinationType) (fromAttribute.get("type"));
+
         return new InboundEndpoint() {
-            private final String atName = propertyResolver.resolve(fromAttribute.get("value").toString());
-            private final DestinationType atType = (DestinationType) (fromAttribute.get("type"));
+            private final At at = atType == DestinationType.TOPIC ? At.toTopic(atName) : At.toQueue(atName);
 
             private final InboundEndpoint.From from = new InboundEndpoint.From() {
                 private final String selector = propertyResolver.resolve(fromAttribute.get("selector").toString());
@@ -61,13 +64,8 @@ public final class InboundEndpointFactory {
                 };
 
                 @Override
-                public String name() {
-                    return atName;
-                }
-
-                @Override
-                public DestinationType type() {
-                    return atType;
+                public At on() {
+                    return at;
                 }
 
                 @Override
@@ -92,9 +90,9 @@ public final class InboundEndpointFactory {
                     autowireCapableBeanFactory, DefaultInvokableResolver.registeryFrom(scanPackages));
             private final FailedInvocationInterceptor failedInterceptor = Optional
                     .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())
-                    .map(propertyResolver::resolve)
-                    .filter(OneUtil::hasValue)
-                    .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationInterceptor.class)).orElse(null);
+                    .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                    .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationInterceptor.class))
+                    .orElse(null);
 
             @Override
             public From from() {
