@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 
-import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.At;
 
 /**
  * The abstraction of a fully-realized out-bound JMS message.
@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.jms.To;
  * @since 1.0
  */
 public interface JmsDispatch {
-    To to();
+    At to();
 
     default String type() {
         return null;
@@ -30,7 +30,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default To replyTo() {
+    default At replyTo() {
         return null;
     }
 
@@ -58,8 +58,8 @@ public interface JmsDispatch {
      * @param type
      * @return
      */
-    static JmsDispatch toDispatch(To to, String type) {
-        return toDispatch(to, type, UUID.randomUUID().toString(), null);
+    static JmsDispatch toDispatch(At to, String type) {
+        return toDispatch(to, type, null, UUID.randomUUID().toString());
     }
 
     /**
@@ -70,8 +70,8 @@ public interface JmsDispatch {
      * @param body
      * @return
      */
-    static JmsDispatch toDispatch(To to, String type, Object body) {
-        return toDispatch(to, type, UUID.randomUUID().toString(), body);
+    static JmsDispatch toDispatch(At to, String type, Object body) {
+        return toDispatch(to, type, body, UUID.randomUUID().toString());
     }
 
     /**
@@ -79,12 +79,12 @@ public interface JmsDispatch {
      * 
      * @param to
      * @param type
+     * @param body
      * @param id
-     * @param body
      * @return
      */
-    static JmsDispatch toDispatch(To to, String type, String id, Object body) {
-        return toDispatch(to, type, id, null, body);
+    static JmsDispatch toDispatch(At to, String type, Object body, String id) {
+        return toDispatch(to, type, body, id, null);
     }
 
     /**
@@ -92,15 +92,15 @@ public interface JmsDispatch {
      * 
      * @param to
      * @param type
+     * @param body
      * @param id
      * @param properties
-     * @param body
      * @return
      */
-    static JmsDispatch toDispatch(To to, String type, String id, Map<String, Object> properties, Object body) {
+    static JmsDispatch toDispatch(At to, String type, Object body, String id, Map<String, Object> properties) {
         return new JmsDispatch() {
             @Override
-            public To to() {
+            public At to() {
                 return to;
             }
 

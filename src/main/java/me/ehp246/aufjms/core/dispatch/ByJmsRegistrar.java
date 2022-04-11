@@ -16,7 +16,7 @@ import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.jms.To;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
 public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
@@ -47,10 +47,10 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
 
     private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
-        final var destination = byJms.value().type() == DestinationType.QUEUE ? To.toQueue(byJms.value().value())
-                : To.toTopic(byJms.value().value());
-        final var replyTo = byJms.replyTo().type() == DestinationType.QUEUE ? To.toQueue(byJms.replyTo().value())
-                : To.toTopic(byJms.replyTo().value());
+        final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(byJms.value().value())
+                : At.toTopic(byJms.value().value());
+        final var replyTo = byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(byJms.replyTo().value())
+                : At.toTopic(byJms.replyTo().value());
 
         final var ttl = byJms.ttl().equals("")
                 ? (map.get("ttl").toString().equals("") ? Duration.ZERO.toString() : map.get("ttl").toString())
@@ -65,12 +65,12 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             }
 
             @Override
-            public To to() {
+            public At to() {
                 return destination;
             }
 
             @Override
-            public To replyTo() {
+            public At replyTo() {
                 return replyTo;
             }
         });

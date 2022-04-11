@@ -7,5 +7,5 @@ import java.util.function.Supplier;
  * @since 1.0
  */
 @FunctionalInterface
-public interface BodySupplier extends Supplier<String> {
+public interface BodyPublisher extends Supplier<String> {
 }

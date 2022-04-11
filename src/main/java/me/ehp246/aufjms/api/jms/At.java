@@ -8,14 +8,14 @@ import javax.jms.Destination;
  * @author Lei Yang
  * @since 1.0
  */
-public sealed interface To permits ToTopic, ToQueue {
+public sealed interface At permits AtTopic, AtQueue {
     String name();
 
-    static ToQueue toQueue(String name) {
+    static AtQueue toQueue(String name) {
         return new Queue(name);
     }
 
-    static ToTopic toTopic(String name) {
+    static AtTopic toTopic(String name) {
         return new Topic(name);
     }
 }
