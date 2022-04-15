@@ -15,7 +15,7 @@ import javax.jms.TextMessage;
 public class MockTextMessage implements TextMessage {
 	private String messageId = UUID.randomUUID().toString();
 	private Destination replyTo;
-	private String correlId;
+    private String correlId = UUID.randomUUID().toString();
 	private String type;
 	private String text;
     private Destination destination = (Queue) () -> "mock";

@@ -10,6 +10,7 @@ import javax.jms.JMSException;
 import javax.jms.Session;
 
 import org.apache.logging.log4j.ThreadContext;
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -101,6 +102,7 @@ class DefaultMsgDispatcherTest {
 
     @Test
     void thread_01() throws JMSException {
+        final var msg = new MockTextMessage(UUID.randomUUID().toString());
         final var threadRef = new Thread[3];
         final var sessionRef = new Session[3];
         final var log4jRef = new ArrayList<Map<String, String>>();
@@ -117,17 +119,23 @@ class DefaultMsgDispatcherTest {
         }, null, m -> null, m -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        }).onMessage(new MockTextMessage(), session);
+        }).onMessage(msg, session);
 
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binding, action, failed msg consumer");
         Assertions.assertEquals(threadRef[1], threadRef[2]);
 
+        final var log4jMap = log4jRef.get(0);
         final var after = ThreadContext.getContext();
         for (final var v : Log4jContext.values()) {
-            Assertions.assertEquals(true, log4jRef.get(0).containsKey(v.name()));
+            Assertions.assertEquals(true, log4jMap.containsKey(v.name()));
             Assertions.assertEquals(true, !after.containsKey(v.name()));
         }
+
+        Assertions.assertEquals(msg.getJMSCorrelationID(), log4jMap.get(Log4jContext.AufJmsCorrelationId.name()));
+        Assertions.assertEquals(msg.getJMSType(), log4jMap.get(Log4jContext.AufJmsType.name()));
+        Assertions.assertEquals(msg.getJMSDestination().toString(),
+                log4jMap.get(Log4jContext.AufJmsDestination.name()));
 
         Assertions.assertEquals(session, sessionRef[0]);
         Assertions.assertEquals(session, sessionRef[1]);

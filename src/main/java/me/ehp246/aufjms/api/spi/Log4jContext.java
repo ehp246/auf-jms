@@ -13,8 +13,8 @@ public enum Log4jContext {
 
     public static void set(final JmsMsg msg) {
         ThreadContext.put(Log4jContext.AufJmsDestination.name(), msg.destination().toString());
-        ThreadContext.put(Log4jContext.AufJmsType.name(), msg.correlationId());
-        ThreadContext.put(Log4jContext.AufJmsCorrelationId.name(), msg.type());
+        ThreadContext.put(Log4jContext.AufJmsType.name(), msg.type());
+        ThreadContext.put(Log4jContext.AufJmsCorrelationId.name(), msg.correlationId());
     }
 
     public static void clear() {
