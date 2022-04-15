@@ -15,8 +15,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
-import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
 public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
@@ -43,6 +44,31 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
                     this.getProxyBeanDefinition(metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName()),
                             proxyInterface));
         });
+
+        final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
+
+        final var fns = (String[]) enablerAttributes.get("dispatchFns");
+        if (fns.length == 0) {
+            return;
+        }
+
+        LOGGER.atTrace().log("Defining {} on {}", JmsDispatchFn.class.getSimpleName(), fns);
+        for (var i = 0; i < fns.length; i++) {
+            registry.registerBeanDefinition(JmsDispatchFn.class.getSimpleName() + "-" + i, getFnBeanDefinition(fns[i]));
+        }
+    }
+
+    private BeanDefinition getFnBeanDefinition(final String name) {
+        final var args = new ConstructorArgumentValues();
+        args.addGenericArgumentValue(name);
+
+        final var proxyBeanDefinition = new GenericBeanDefinition();
+        proxyBeanDefinition.setBeanClass(JmsDispatchFn.class);
+        proxyBeanDefinition.setConstructorArgumentValues(args);
+        proxyBeanDefinition.setFactoryBeanName(DefaultDispatchFnProvider.class.getName());
+        proxyBeanDefinition.setFactoryMethodName("get");
+
+        return proxyBeanDefinition;
     }
 
     private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {

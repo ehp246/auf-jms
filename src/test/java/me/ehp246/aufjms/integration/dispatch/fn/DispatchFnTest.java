@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
@@ -27,7 +28,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class,
         EmbeddedArtemisConfig.class }, webEnvironment = WebEnvironment.NONE)
 class DispatchFnTest {
-    private static final At to = At.toQueue(TestQueueListener.DESTINATION_NAME);
+    private static final At TO = At.toQueue(TestQueueListener.DESTINATION_NAME);
 
     @Autowired
     private TestQueueListener listener;
@@ -35,12 +36,14 @@ class DispatchFnTest {
     private DefaultDispatchFnProvider fnProvider;
     @Autowired
     private ToJson toJson;
+    @Autowired
+    private JmsDispatchFn fn;
 
     @Test
     void test_01() throws JMSException {
         final var fn = fnProvider.get("");
 
-        fn.send(JmsDispatch.toDispatch(to, null));
+        fn.send(JmsDispatch.toDispatch(TO, null));
 
         final var message = listener.takeReceived();
 
@@ -55,7 +58,7 @@ class DispatchFnTest {
         final var id = UUID.randomUUID().toString();
         final var body = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.toDispatch(to, type, body, id));
+        fn.send(JmsDispatch.toDispatch(TO, type, body, id));
 
         final var message = listener.takeReceived();
 
@@ -72,7 +75,7 @@ class DispatchFnTest {
         final var type = UUID.randomUUID().toString();
         final var body = UUID.randomUUID();
 
-        fn.send(JmsDispatch.toDispatch(to, type, (BodyPublisher) body::toString));
+        fn.send(JmsDispatch.toDispatch(TO, type, (BodyPublisher) body::toString));
 
         final var message = listener.takeReceived();
 
@@ -85,7 +88,7 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.toDispatch(to, type, null, null, Map.of("p1", "v-1", "p2", "v-2")));
+        fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of("p1", "v-1", "p2", "v-2")));
 
         final var message = listener.takeReceived();
 
@@ -99,7 +102,7 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.toDispatch(to, type, null, null, null));
+        fn.send(JmsDispatch.toDispatch(TO, type, null, null, null));
 
         final var message = listener.takeReceived();
 
@@ -111,10 +114,15 @@ class DispatchFnTest {
         final var fn = fnProvider.get("");
         final var type = UUID.randomUUID().toString();
 
-        fn.send(JmsDispatch.toDispatch(to, type, null, null, Map.of()));
+        fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of()));
 
         final var message = listener.takeReceived();
 
         Assertions.assertEquals(type, message.getJMSType());
+    }
+
+    @Test
+    void defaultFn_01() {
+        Assertions.assertEquals(true, fn != null);
     }
 }

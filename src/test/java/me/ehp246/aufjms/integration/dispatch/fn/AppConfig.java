@@ -9,6 +9,6 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
  *
  */
 @EnableJms
-@EnableByJms
+@EnableByJms(dispatchFns = "")
 class AppConfig {
 }
