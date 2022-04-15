@@ -26,14 +26,14 @@ import me.ehp246.aufjms.util.MockTextMessage;
  * @author Lei Yang
  *
  */
-class DefaultMsgDispatcherTest {
+class DefaultMsgConsumerTest {
     private Session session = Mockito.mock(Session.class);
 
     @Test
     void ex_01() {
         final var ex = new RuntimeException();
         final var thrown = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgDispatcher(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
+                () -> new DefaultMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
                     return () -> InvocationOutcome.thrown(ex);
                 }, null, msg -> null, null).onMessage(new MockTextMessage(), session));
 
@@ -43,7 +43,7 @@ class DefaultMsgDispatcherTest {
     @Test
     void resolver_ex_01() {
         final var ex = new RuntimeException();
-        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new DefaultMsgDispatcher(jmsMsg -> {
+        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new DefaultMsgConsumer(jmsMsg -> {
             throw ex;
         }, (e, c) -> () -> InvocationOutcome.returned(null), null, msg -> null, null).onMessage(new MockTextMessage(),
                 session));
@@ -54,7 +54,7 @@ class DefaultMsgDispatcherTest {
     @Test
     void unmatched_ex_01() {
         Assertions.assertThrows(UnknownTypeException.class,
-                () -> new DefaultMsgDispatcher(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
+                () -> new DefaultMsgConsumer(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
                         .onMessage(new MockTextMessage(), session));
     }
 
@@ -63,7 +63,7 @@ class DefaultMsgDispatcherTest {
         final var ref = new FailedInvocation[1];
         final var msg = new MockTextMessage();
         final var ex = new RuntimeException();
-        new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
+        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
                 null, m -> null, m -> {
                     ref[0] = m;
                 }).onMessage(msg, session);
@@ -76,7 +76,7 @@ class DefaultMsgDispatcherTest {
         final var ex = new NullPointerException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null),
+                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
                         (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null, m -> {
                             throw ex;
                         }).onMessage(new MockTextMessage(), session),
@@ -90,7 +90,7 @@ class DefaultMsgDispatcherTest {
         final var ex = new RuntimeException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null),
+                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
                         (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null, m -> {
                             ref[0] = m;
                             throw new RuntimeException(m.thrown());
@@ -107,7 +107,7 @@ class DefaultMsgDispatcherTest {
         final var sessionRef = new Session[3];
         final var log4jRef = new ArrayList<Map<String, String>>();
 
-        new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[0] = Thread.currentThread();
             log4jRef.add(ThreadContext.getContext());
             sessionRef[0] = AufJmsContext.getSession();
@@ -152,7 +152,7 @@ class DefaultMsgDispatcherTest {
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
-        new DefaultMsgDispatcher(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[1] = Thread.currentThread();
             sessionRef[0] = AufJmsContext.getSession();
             return () -> {

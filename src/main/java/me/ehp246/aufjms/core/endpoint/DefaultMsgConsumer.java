@@ -34,8 +34,8 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message> {
-    private static final Logger LOGGER = LogManager.getLogger(DefaultMsgDispatcher.class);
+final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
+    private static final Logger LOGGER = LogManager.getLogger(DefaultMsgConsumer.class);
 
     private final Executor executor;
     private final ExecutableResolver executableResolver;
@@ -43,7 +43,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
     private final JmsDispatchFn dispatchFn;
     private final FailedInvocationInterceptor failureInterceptor;
 
-    DefaultMsgDispatcher(final ExecutableResolver executableResolver, final ExecutableBinder binder,
+    DefaultMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
             final Executor executor, final JmsDispatchFn dispatchFn,
             final FailedInvocationInterceptor failureInterceptor) {
         super();
@@ -164,7 +164,7 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
 
                 LOGGER.atTrace().log("Replying");
 
-                DefaultMsgDispatcher.this.dispatchFn.send(new JmsDispatch() {
+                DefaultMsgConsumer.this.dispatchFn.send(new JmsDispatch() {
                     private final At to = from(replyTo);
 
                     @Override
