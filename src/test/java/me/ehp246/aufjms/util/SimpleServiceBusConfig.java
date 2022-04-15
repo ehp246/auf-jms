@@ -1,55 +1,29 @@
 package me.ehp246.aufjms.util;
 
-import static com.azure.spring.utils.ApplicationId.AZURE_SPRING_SERVICE_BUS;
-
 import javax.jms.ConnectionFactory;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.apache.qpid.jms.JmsConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.jms.connection.SingleConnectionFactory;
 
-import com.azure.spring.autoconfigure.jms.AzureServiceBusJMSProperties;
-import com.azure.spring.autoconfigure.jms.SpringServiceBusJmsConnectionFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.azure.servicebus.jms.ServiceBusJmsConnectionFactorySettings;
 
 /**
  * @author Lei Yang
  *
  */
-@EnableConfigurationProperties(AzureServiceBusJMSProperties.class)
 public class SimpleServiceBusConfig {
-    @Bean
-    @Primary
-    public ConnectionFactory jmsConnectionFactory(AzureServiceBusJMSProperties serviceBusJMSProperties) {
-        final String connectionString = serviceBusJMSProperties.getConnectionString();
-        final String clientId = serviceBusJMSProperties.getTopicClientId();
-        final int idleTimeout = serviceBusJMSProperties.getIdleTimeout();
-
-        final ServiceBusJmsConnectionFactorySettings settings = new ServiceBusJmsConnectionFactorySettings(idleTimeout,
-                false);
-        final SpringServiceBusJmsConnectionFactory springServiceBusJmsConnectionFactory = new SpringServiceBusJmsConnectionFactory(
-                connectionString, settings);
-        springServiceBusJmsConnectionFactory.setClientId(clientId);
-        springServiceBusJmsConnectionFactory.setCustomUserAgent(AZURE_SPRING_SERVICE_BUS);
-
-        return springServiceBusJmsConnectionFactory;
-    }
+    @Value("${aufjms.servicebus.url}")
+    private String url;
+    @Value("${aufjms.servicebus.username}")
+    private String username;
+    @Value("${aufjms.servicebus.password}")
+    private String password;
 
     @Bean
-    public ConnectionFactory jmsConnectionFactory2(AzureServiceBusJMSProperties serviceBusJMSProperties) {
-        final String connectionString = serviceBusJMSProperties.getConnectionString();
-        final String clientId = serviceBusJMSProperties.getTopicClientId();
-        final int idleTimeout = serviceBusJMSProperties.getIdleTimeout();
-
-        final ServiceBusJmsConnectionFactorySettings settings = new ServiceBusJmsConnectionFactorySettings(idleTimeout,
-                false);
-        final SpringServiceBusJmsConnectionFactory springServiceBusJmsConnectionFactory = new SpringServiceBusJmsConnectionFactory(
-                connectionString, settings);
-        springServiceBusJmsConnectionFactory.setClientId(clientId);
-        springServiceBusJmsConnectionFactory.setCustomUserAgent(AZURE_SPRING_SERVICE_BUS);
-
-        return springServiceBusJmsConnectionFactory;
+    public ConnectionFactory jmsConnectionFactoryQpid() {
+        return new SingleConnectionFactory(new JmsConnectionFactory(username, password, url));
     }
 
     @Bean

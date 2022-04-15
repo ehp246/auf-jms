@@ -94,7 +94,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         if (receivers.size() > 0) {
-            fromJson.from(ctx.msg().text(), receivers);
+            fromJson.apply(ctx.msg().text(), receivers);
         }
 
         return () -> {

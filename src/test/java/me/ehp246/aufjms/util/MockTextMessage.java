@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Queue;
 import javax.jms.TextMessage;
 
 public class MockTextMessage implements TextMessage {
@@ -17,7 +18,7 @@ public class MockTextMessage implements TextMessage {
 	private String correlId;
 	private String type;
 	private String text;
-	private Destination destination;
+    private Destination destination = (Queue) () -> "mock";
 	private long timestamp = Instant.now().toEpochMilli();
 	private Map<String, String> property = new HashMap<>();
 

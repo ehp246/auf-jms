@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
 
+import me.ehp246.broker.sb.sub.localevent.LocalEvent;
+
 /**
  * @author Lei Yang
  *
@@ -22,10 +24,18 @@ class SubTest {
     @Autowired
     private ToEchoTopic echoTopic;
 
+    @Autowired
+    private LocalEvent event;
+
     @Test
     void sub_01() throws InterruptedException, ExecutionException {
         echoTopic.echo(1);
         echoTopic.echo(2);
         onCount.get();
+    }
+
+    @Test
+    void localEvent_01() throws InterruptedException, ExecutionException {
+        event.take();
     }
 }

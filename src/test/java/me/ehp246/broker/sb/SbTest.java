@@ -17,7 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import me.ehp246.broker.sb.dlq.dlq.LetterCollection;
-import me.ehp246.broker.sb.replyto.reply.OnReplyEchoInstant;
+import me.ehp246.broker.sb.replyto.reply.OnEchoInstant;
 
 /**
  * @author Lei Yang
@@ -30,7 +30,7 @@ class SbTest {
     private Echo echo;
 
     @Autowired
-    private OnReplyEchoInstant onReply;
+    private OnEchoInstant onReply;
 
     @Autowired
     private ToInbox toInbox;

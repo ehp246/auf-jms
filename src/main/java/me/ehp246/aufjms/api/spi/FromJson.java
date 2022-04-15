@@ -9,11 +9,11 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface FromJson {
-    List<?> from(String json, List<Receiver<?>> receivers);
+    List<?> apply(String json, List<Receiver<?>> receivers);
 
     @SuppressWarnings("unchecked")
     default <T> T from(final String json, final Receiver<T> receiver) {
-        return (T) this.from(json, List.of(receiver)).get(0);
+        return (T) this.apply(json, List.of(receiver)).get(0);
     }
 
     interface Receiver<T> {

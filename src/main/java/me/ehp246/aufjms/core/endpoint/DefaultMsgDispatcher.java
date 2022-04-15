@@ -13,7 +13,6 @@ import javax.jms.Topic;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
@@ -24,10 +23,10 @@ import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.core.configuration.AufJmsProperties;
+import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -56,38 +55,34 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
     }
 
     @Override
-    public void onMessage(Message message, Session session) throws JMSException {
+    public void onMessage(final Message message, final Session session) throws JMSException {
         if (!(message instanceof TextMessage textMessage)) {
-            throw new RuntimeException("Un-supported Message: " + message.getJMSCorrelationID());
+            throw new RuntimeException("Un-supported message type of " + message.getJMSCorrelationID());
         }
+        final var msg = TextJmsMsg.from(textMessage);
 
         // Make sure the thread context is cleaned up.
         try {
             AufJmsContext.set(session);
 
-            ThreadContext.put(AufJmsProperties.TYPE, message.getJMSType());
-            ThreadContext.put(AufJmsProperties.CORRELATION_ID, message.getJMSCorrelationID());
+            Log4jContext.set(msg);
 
             LOGGER.atTrace().log("Dispatching");
 
-            dispatch(textMessage);
+            dispatch(msg, session);
 
-            // Only when no exception.
             LOGGER.atTrace().log("Dispatched");
         } catch (Exception e) {
-            LOGGER.atTrace().log("Dispatch failed");
+            LOGGER.atError().log("Dispatch failed: {}", e.getMessage());
             throw e;
         } finally {
-            ThreadContext.remove(AufJmsProperties.TYPE);
-            ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
+            Log4jContext.clear();
 
             AufJmsContext.clearSession();
         }
     }
 
-    private void dispatch(final TextMessage message) {
-        final var msg = TextJmsMsg.from(message);
-
+    private void dispatch(final JmsMsg msg, final Session session) {
         LOGGER.atTrace().log("Resolving executable");
 
         final var executable = executableResolver.resolve(msg);
@@ -107,14 +102,14 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
         } else {
             executor.execute(() -> {
                 try {
-                    ThreadContext.put(AufJmsProperties.TYPE, msg.type());
-                    ThreadContext.put(AufJmsProperties.CORRELATION_ID, msg.correlationId());
+                    AufJmsContext.set(session);
+                    Log4jContext.set(msg);
 
                     runnable.run();
 
                 } finally {
-                    ThreadContext.remove(AufJmsProperties.TYPE);
-                    ThreadContext.remove(AufJmsProperties.CORRELATION_ID);
+                    Log4jContext.clear();
+                    AufJmsContext.clearSession();
                 }
             });
         }
@@ -204,4 +199,5 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
             throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
         }
     }
+
 }

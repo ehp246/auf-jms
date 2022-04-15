@@ -9,8 +9,9 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 
-import me.ehp246.aufjms.integration.reply.reply.OnReplyEchoInstant;
+import me.ehp246.broker.sb.replyto.reply.OnEchoInstant;
 
 /**
  * @author Lei Yang
@@ -18,11 +19,12 @@ import me.ehp246.aufjms.integration.reply.reply.OnReplyEchoInstant;
  */
 @SpringBootTest(classes = { AppConfig.class }, webEnvironment = WebEnvironment.NONE)
 @EnabledIfSystemProperty(named = "me.ehp246.broker.sb", matches = "true")
+@ActiveProfiles("local")
 class ReplyTest {
     @Autowired
     private Echo echo;
     @Autowired
-    private OnReplyEchoInstant onReply;
+    private OnEchoInstant onReply;
 
     @Test
     void reply_01() throws InterruptedException, ExecutionException {

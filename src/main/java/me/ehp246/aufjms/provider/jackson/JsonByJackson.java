@@ -54,7 +54,7 @@ public final class JsonByJackson implements FromJson, ToJson {
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<?> from(final String body, final List<Receiver<?>> receivers) {
+    public List<?> apply(final String body, final List<Receiver<?>> receivers) {
         if (receivers == null || receivers.size() == 0) {
             return List.of();
         }
