@@ -67,13 +67,13 @@ final class DefaultMsgDispatcher implements SessionAwareMessageListener<Message>
 
             Log4jContext.set(msg);
 
-            LOGGER.atTrace().log("Dispatching");
+            LOGGER.atTrace().log("Consuming");
 
             dispatch(msg, session);
 
-            LOGGER.atTrace().log("Dispatched");
+            LOGGER.atTrace().log("Consumed");
         } catch (Exception e) {
-            LOGGER.atError().log("Dispatch failed: {}", e.getMessage());
+            LOGGER.atError().log("Message failed: {}", e.getMessage());
             throw e;
         } finally {
             Log4jContext.clear();
