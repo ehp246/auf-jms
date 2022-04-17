@@ -20,7 +20,13 @@ public interface InboundEndpoint {
 
     String connectionFactory();
 
-    FailedInvocationInterceptor failedInvocationInterceptor();
+    default CompletedInvocationConsumer completedInvocationConsumer() {
+        return null;
+    }
+
+    default FailedInvocationInterceptor failedInvocationInterceptor() {
+        return null;
+    }
 
     interface From {
         At on();

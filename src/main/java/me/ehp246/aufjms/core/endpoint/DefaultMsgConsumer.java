@@ -20,7 +20,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
@@ -41,17 +40,17 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final FailedInvocationInterceptor failureInterceptor;
+    private final InvocationListenersSupplier invocationListener;
 
     DefaultMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
             final Executor executor, final JmsDispatchFn dispatchFn,
-            final FailedInvocationInterceptor failureInterceptor) {
+            final InvocationListenersSupplier invocationListener) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.failureInterceptor = failureInterceptor;
+        this.invocationListener = invocationListener;
     }
 
     @Override
@@ -132,9 +131,10 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
                 final var thrown = executionOutcome.thrown();
 
                 if (thrown != null) {
-                    if (failureInterceptor != null) {
+                    if (invocationListener.failedInterceptor() != null) {
                         try {
-                            failureInterceptor.accept(new FailedInvocationRecord(msg, target, thrown));
+                            invocationListener.failedInterceptor()
+                                    .accept(new FailedInvocationRecord(msg, target, thrown));
                             LOGGER.atTrace().log("Failure interceptor invoked");
                         } catch (Exception e) {
                             LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
@@ -147,6 +147,16 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
                         throw rtEx;
                     } else {
                         throw new RuntimeException(thrown);
+                    }
+                } else {
+                    if (invocationListener.completedConsumer() != null) {
+                        try {
+                            invocationListener.completedConsumer()
+                                    .accept(new CompletedInvocationRecord(msg, target, executionOutcome.returned()));
+                        } catch (Exception e) {
+                            // Swallow the exception. Do not re-throw.
+                            LOGGER.atError().log("Completed consumer failed: {}", e.getMessage(), e);
+                        }
                     }
                 }
 

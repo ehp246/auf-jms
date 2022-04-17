@@ -35,7 +35,8 @@ class DefaultMsgConsumerTest {
         final var thrown = Assertions.assertThrows(RuntimeException.class,
                 () -> new DefaultMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
                     return () -> InvocationOutcome.thrown(ex);
-                }, null, msg -> null, null).onMessage(new MockTextMessage(), session));
+                }, null, msg -> null, new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(),
+                        session));
 
         Assertions.assertEquals(true, ex == thrown);
     }
@@ -64,9 +65,9 @@ class DefaultMsgConsumerTest {
         final var msg = new MockTextMessage();
         final var ex = new RuntimeException();
         new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
-                null, m -> null, m -> {
+                null, m -> null, new InvocationListenersSupplier(null, m -> {
                     ref[0] = m;
-                }).onMessage(msg, session);
+                })).onMessage(msg, session);
 
         Assertions.assertEquals(ex, ref[0].thrown(), "should be the one thrown by application code");
     }
@@ -77,9 +78,10 @@ class DefaultMsgConsumerTest {
 
         final var t = Assertions.assertThrows(RuntimeException.class,
                 () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
-                        (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null, m -> {
+                        (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null,
+                        new InvocationListenersSupplier(null, m -> {
                             throw ex;
-                        }).onMessage(new MockTextMessage(), session),
+                        })).onMessage(new MockTextMessage(), session),
                 "should allow the consumer to throw");
         Assertions.assertEquals(t, ex);
     }
@@ -91,10 +93,11 @@ class DefaultMsgConsumerTest {
 
         final var t = Assertions.assertThrows(RuntimeException.class,
                 () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
-                        (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null, m -> {
+                        (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null,
+                        new InvocationListenersSupplier(null, m -> {
                             ref[0] = m;
                             throw new RuntimeException(m.thrown());
-                        }).onMessage(new MockTextMessage(), session));
+                        })).onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(t.getCause(), ex, "should be from the consumer");
         Assertions.assertEquals(t.getCause(), ref[0].thrown(), "should allow the consumer to throw");
@@ -116,10 +119,10 @@ class DefaultMsgConsumerTest {
                 sessionRef[1] = AufJmsContext.getSession();
                 return InvocationOutcome.thrown(new RuntimeException());
             };
-        }, null, m -> null, m -> {
+        }, null, m -> null, new InvocationListenersSupplier(null, m -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        }).onMessage(msg, session);
+        })).onMessage(msg, session);
 
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binding, action, failed msg consumer");
@@ -160,10 +163,10 @@ class DefaultMsgConsumerTest {
                 sessionRef[1] = AufJmsContext.getSession();
                 return InvocationOutcome.thrown(new RuntimeException());
             };
-        }, executor, m -> null, m -> {
+        }, executor, m -> null, new InvocationListenersSupplier(null, m -> {
             threadRef[3] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        }).onMessage(new MockTextMessage(), session);
+        })).onMessage(new MockTextMessage(), session);
 
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);

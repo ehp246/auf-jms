@@ -19,9 +19,9 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointConfigurer;
 
 /**
  *
@@ -50,18 +50,25 @@ public @interface EnableForJms {
         /**
          * The bean name of the endpoint. Must be unique if specified.
          * <p>
-         * Does not support Spring property holder.
+         * Does not support Spring property placeholder.
          */
         String name() default "";
 
         /**
          * Specifies whether the listener should be started automatically.
          * <p>
-         * Supports Spring property holder.
+         * Supports Spring property placeholder.
          */
         String autoStartup() default "true";
 
         String connectionFactory() default "";
+
+        /**
+         * 
+         * <p>
+         * Supports Spring property placeholder.
+         */
+        String completedInvocationConsumer() default "";
 
         /**
          * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type
@@ -83,13 +90,15 @@ public @interface EnableForJms {
          * {@linkplain Message#getJMSType()} matching, i.e.,
          * {@linkplain UnknownTypeException}.
          * <p>
-         * Supports Spring property holder.
+         * Supports Spring property placeholder.
          */
         String failedInvocationInterceptor() default "";
 
         @interface From {
             /**
              * Defines the destination name.
+             * <p>
+             * Supports Spring property placeholder.
              */
             String value();
 
@@ -103,7 +112,7 @@ public @interface EnableForJms {
              * <p>
              * See the JMS specification for a detailed definition of selector expressions.
              * <p>
-             * Supports Spring property holder.
+             * Supports Spring property placeholder.
              */
             String selector() default "";
 
@@ -116,7 +125,7 @@ public @interface EnableForJms {
                  * Only applicable when {@linkplain From#type()} is
                  * {@linkplain DestinationType#TOPIC}.
                  * <p>
-                 * Supports Spring property holder.
+                 * Supports Spring property placeholder.
                  */
                 String value() default "";
 
