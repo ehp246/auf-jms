@@ -154,7 +154,7 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
                             invocationListener.completedConsumer()
                                     .accept(new CompletedInvocationRecord(msg, target, executionOutcome.returned()));
                         } catch (Exception e) {
-                            // Swallow the exception. Do not re-throw.
+                            // Do not re-throw. Defined by the consumer API.
                             LOGGER.atError().log("Completed consumer failed: {}", e.getMessage(), e);
                         }
                     }

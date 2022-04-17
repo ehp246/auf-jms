@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -28,6 +30,7 @@ import me.ehp246.aufjms.util.MockTextMessage;
  */
 class DefaultMsgConsumerTest {
     private Session session = Mockito.mock(Session.class);
+    private final JmsDispatchFn noopFn = m -> null;
 
     @Test
     void ex_01() {
@@ -145,7 +148,6 @@ class DefaultMsgConsumerTest {
         Assertions.assertEquals(session, sessionRef[2]);
         Assertions.assertEquals(null, AufJmsContext.getSession());
     }
-    
 
     @Test
     void thread_02() throws JMSException, InterruptedException, ExecutionException {
@@ -171,7 +173,8 @@ class DefaultMsgConsumerTest {
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
-        Assertions.assertEquals(threadRef[0], threadRef[1], "should be the same thread for binding, action, failed msg consumer");
+        Assertions.assertEquals(threadRef[0], threadRef[1],
+                "should be the same thread for binding, action, failed msg consumer");
         Assertions.assertEquals(threadRef[1], threadRef[2]);
         Assertions.assertEquals(threadRef[2], threadRef[3]);
 
@@ -181,4 +184,39 @@ class DefaultMsgConsumerTest {
         Assertions.assertEquals(null, AufJmsContext.getSession());
     }
 
+    @Test
+    void completed_01() throws InterruptedException, ExecutionException, JMSException {
+        final var threadRef = new Thread[1];
+        final var completedThread = new Thread[1];
+        final var returned = new RuntimeException();
+        final var completedRef = new CompletedInvocation[1];
+
+        final var executor = Executors.newSingleThreadExecutor();
+        threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
+
+        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+            return () -> {
+                return InvocationOutcome.returned(returned);
+            };
+        }, executor, m -> null, new InvocationListenersSupplier(c -> {
+            completedRef[0] = c;
+            completedThread[0] = Thread.currentThread();
+        }, null)).onMessage(new MockTextMessage(), session);
+
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        Assertions.assertEquals(threadRef[0], completedThread[0]);
+        Assertions.assertEquals(returned, completedRef[0].returned());
+    }
+
+    @Test
+    void completed_02() throws JMSException {
+        final var swallowed = new RuntimeException("Completed should not re-throw");
+
+        Assertions.assertDoesNotThrow(() -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
+                (e, c) -> () -> InvocationOutcome.returned(null), null, noopFn, new InvocationListenersSupplier(c -> {
+                    throw swallowed;
+                }, null)).onMessage(new MockTextMessage(), session));
+    }
 }
