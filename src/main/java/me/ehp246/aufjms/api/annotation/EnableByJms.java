@@ -33,8 +33,8 @@ public @interface EnableByJms {
     String ttl() default "PT0S";
 
     /**
-     * Specifies whether to register {@linkplain JmsDispatchFn} beans with the given
-     * connection factory name.
+     * Specifies whether to register {@linkplain JmsDispatchFn} beans with JMS
+     * connection from the named connection factories.
      * <p>
      * The values are passed to {@linkplain ConnectionFactoryProvider#get(String)}
      * to create the bean.
