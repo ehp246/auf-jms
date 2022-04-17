@@ -28,7 +28,7 @@ import me.ehp246.aufjms.util.MockTextMessage;
  * @author Lei Yang
  *
  */
-class DefaultMsgConsumerTest {
+class InboundMsgConsumerTest {
     private Session session = Mockito.mock(Session.class);
     private final JmsDispatchFn noopFn = m -> null;
 
@@ -36,7 +36,7 @@ class DefaultMsgConsumerTest {
     void ex_01() {
         final var ex = new RuntimeException();
         final var thrown = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
+                () -> new InboundMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
                     return () -> InvocationOutcome.thrown(ex);
                 }, null, msg -> null, new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(),
                         session));
@@ -47,7 +47,7 @@ class DefaultMsgConsumerTest {
     @Test
     void resolver_ex_01() {
         final var ex = new RuntimeException();
-        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new DefaultMsgConsumer(jmsMsg -> {
+        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(jmsMsg -> {
             throw ex;
         }, (e, c) -> () -> InvocationOutcome.returned(null), null, msg -> null, null).onMessage(new MockTextMessage(),
                 session));
@@ -58,7 +58,7 @@ class DefaultMsgConsumerTest {
     @Test
     void unmatched_ex_01() {
         Assertions.assertThrows(UnknownTypeException.class,
-                () -> new DefaultMsgConsumer(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
+                () -> new InboundMsgConsumer(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
                         .onMessage(new MockTextMessage(), session));
     }
 
@@ -67,7 +67,7 @@ class DefaultMsgConsumerTest {
         final var ref = new FailedInvocation[1];
         final var msg = new MockTextMessage();
         final var ex = new RuntimeException();
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
                 null, m -> null, new InvocationListenersSupplier(null, m -> {
                     ref[0] = m;
                 })).onMessage(msg, session);
@@ -80,7 +80,7 @@ class DefaultMsgConsumerTest {
         final var ex = new NullPointerException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
                         (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null,
                         new InvocationListenersSupplier(null, m -> {
                             throw ex;
@@ -95,7 +95,7 @@ class DefaultMsgConsumerTest {
         final var ex = new RuntimeException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
                         (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null,
                         new InvocationListenersSupplier(null, m -> {
                             ref[0] = m;
@@ -113,7 +113,7 @@ class DefaultMsgConsumerTest {
         final var sessionRef = new Session[3];
         final var log4jRef = new ArrayList<Map<String, String>>();
 
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[0] = Thread.currentThread();
             log4jRef.add(ThreadContext.getContext());
             sessionRef[0] = AufJmsContext.getSession();
@@ -157,7 +157,7 @@ class DefaultMsgConsumerTest {
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[1] = Thread.currentThread();
             sessionRef[0] = AufJmsContext.getSession();
             return () -> {
@@ -194,7 +194,7 @@ class DefaultMsgConsumerTest {
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             return () -> {
                 return InvocationOutcome.returned(returned);
             };
@@ -212,11 +212,15 @@ class DefaultMsgConsumerTest {
 
     @Test
     void completed_02() throws JMSException {
-        final var swallowed = new RuntimeException("Completed should not re-throw");
+        final var expected = new RuntimeException("Completed should not re-throw");
 
-        Assertions.assertDoesNotThrow(() -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
-                (e, c) -> () -> InvocationOutcome.returned(null), null, noopFn, new InvocationListenersSupplier(c -> {
-                    throw swallowed;
-                }, null)).onMessage(new MockTextMessage(), session));
+        final var actual = Assertions.assertThrows(RuntimeException.class,
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
+                        (e, c) -> () -> InvocationOutcome.returned(null), null, noopFn,
+                        new InvocationListenersSupplier(c -> {
+                            throw expected;
+                        }, null)).onMessage(new MockTextMessage(), session));
+
+        Assertions.assertEquals(expected, actual);
     }
 }

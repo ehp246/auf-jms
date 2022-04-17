@@ -6,5 +6,5 @@ package me.ehp246.aufjms.api.endpoint;
  */
 @FunctionalInterface
 public interface FailedInvocationInterceptor {
-    void accept(FailedInvocation failed);
+    void accept(FailedInvocation failed) throws Exception;
 }
