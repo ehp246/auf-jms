@@ -8,12 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 
 /**
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, properties = {}, webEnvironment = WebEnvironment.NONE)
+@SpringBootTest(classes = { AppConfig.class }, properties = {
+        "comp1.name=comp1" }, webEnvironment = WebEnvironment.NONE)
 class CompletedInvocationTest {
     @Autowired
     private SendQ1 q1;
@@ -30,4 +34,13 @@ class CompletedInvocationTest {
         Assertions.assertEquals(id, completed.returned().toString());
     }
 
+    @Test
+    void completed_02() {
+        final var appCtx = new AnnotationConfigApplicationContext(AppConfig.class);
+
+        Assertions.assertEquals(null,
+                appCtx.getBean("InboundEndpoint-0", InboundEndpoint.class).completedInvocationConsumer());
+
+        appCtx.close();
+    }
 }

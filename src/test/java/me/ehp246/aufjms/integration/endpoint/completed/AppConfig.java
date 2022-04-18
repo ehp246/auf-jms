@@ -21,7 +21,7 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @ComponentScan
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From("q1"), completedInvocationConsumer = "comp1") })
+        @Inbound(value = @From("q1"), completedInvocationConsumer = "${comp1.name:}") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     public static CompletableFuture<CompletedInvocation> comp1Ref = new CompletableFuture<>();
