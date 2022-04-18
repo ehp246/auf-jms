@@ -95,4 +95,17 @@ public final class OneUtil {
         return Optional.ofNullable(annos).filter(Objects::nonNull).orElseGet(ArrayList::new).stream()
                 .filter(anno -> anno.annotationType() == type);
     }
+
+    public static RuntimeException toRuntime(Throwable thrown) {
+        if (thrown == null) {
+            return null;
+        }
+
+        if (thrown instanceof RuntimeException runtime) {
+            return runtime;
+        }
+
+        return new RuntimeException(thrown);
+    }
 }
+

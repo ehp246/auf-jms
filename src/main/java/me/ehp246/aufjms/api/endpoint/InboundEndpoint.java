@@ -12,29 +12,47 @@ public interface InboundEndpoint {
 
     ExecutableResolver resolver();
 
-    int concurrency();
-
     String name();
 
-    boolean autoStartup();
+    default int concurrency() {
+        return 0;
+    }
 
-    String connectionFactory();
+    default boolean autoStartup() {
+        return true;
+    }
 
-    FailedInvocationInterceptor failedInvocationInterceptor();
+    default String connectionFactory() {
+        return null;
+    }
+
+    default CompletedInvocationConsumer completedInvocationConsumer() {
+        return null;
+    }
+
+    default FailedInvocationInterceptor failedInvocationInterceptor() {
+        return null;
+    }
 
     interface From {
         At on();
 
-        String selector();
+        default String selector() {
+            return null;
+        }
 
         Sub sub();
 
         interface Sub {
             String name();
 
-            boolean shared();
+            default boolean shared() {
+                return true;
+            }
 
-            boolean durable();
+            default boolean durable() {
+                return true;
+            }
 
         }
     }

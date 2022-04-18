@@ -20,13 +20,13 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -34,24 +34,24 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
-    private static final Logger LOGGER = LogManager.getLogger(DefaultMsgConsumer.class);
+final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
+    private static final Logger LOGGER = LogManager.getLogger(InboundMsgConsumer.class);
 
     private final Executor executor;
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
     private final JmsDispatchFn dispatchFn;
-    private final FailedInvocationInterceptor failureInterceptor;
+    private final InvocationListenersSupplier invocationListener;
 
-    DefaultMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
+    InboundMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
             final Executor executor, final JmsDispatchFn dispatchFn,
-            final FailedInvocationInterceptor failureInterceptor) {
+            final InvocationListenersSupplier invocationListener) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.failureInterceptor = failureInterceptor;
+        this.invocationListener = invocationListener;
     }
 
     @Override
@@ -132,21 +132,33 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
                 final var thrown = executionOutcome.thrown();
 
                 if (thrown != null) {
-                    if (failureInterceptor != null) {
-                        try {
-                            failureInterceptor.accept(new FailedInvocationRecord(msg, target, thrown));
-                            LOGGER.atTrace().log("Failure interceptor invoked");
-                        } catch (Exception e) {
-                            LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
-                            throw e;
-                        }
-                        return;
+                    if (invocationListener.failedInterceptor() == null) {
+                        throw OneUtil.toRuntime(thrown);
                     }
 
-                    if (thrown instanceof RuntimeException rtEx) {
-                        throw rtEx;
-                    } else {
-                        throw new RuntimeException(thrown);
+                    LOGGER.atTrace().log("Executing failed interceptor");
+                    try {
+                        invocationListener.failedInterceptor().accept(new FailedInvocationRecord(msg, target, thrown));
+                        LOGGER.atTrace().log("Failure interceptor invoked");
+                    } catch (Exception e) {
+                        LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
+
+                        throw OneUtil.toRuntime(e);
+                    }
+                    // Stop further execution on invocation exception.
+                    return;
+                }
+
+                if (invocationListener.completedConsumer() != null) {
+                    LOGGER.atTrace().log("Executing completed consumer");
+                    try {
+                        invocationListener.completedConsumer()
+                                .accept(new CompletedInvocationRecord(msg, target, executionOutcome.returned()));
+                        LOGGER.atTrace().log("Completed consumer invoked");
+                    } catch (Exception e) {
+                        LOGGER.atTrace().log("Completed consumer failed: {}", e.getMessage());
+
+                        throw OneUtil.toRuntime(e);
                     }
                 }
 
@@ -164,34 +176,15 @@ final class DefaultMsgConsumer implements SessionAwareMessageListener<Message> {
 
                 LOGGER.atTrace().log("Replying");
 
-                DefaultMsgConsumer.this.dispatchFn.send(new JmsDispatch() {
-                    private final At to = from(replyTo);
+                InboundMsgConsumer.this.dispatchFn.send(JmsDispatch.toDispatch(toAt(replyTo), msg.type(),
+                        executionOutcome.returned(), msg.correlationId()));
 
-                    @Override
-                    public At to() {
-                        return to;
-                    }
-
-                    @Override
-                    public String type() {
-                        return msg.type();
-                    }
-
-                    @Override
-                    public String correlationId() {
-                        return msg.correlationId();
-                    }
-
-                    @Override
-                    public Object body() {
-                        return executionOutcome.returned();
-                    }
-                });
+                LOGGER.atTrace().log("Replied");
             }
         };
     }
 
-    private static At from(final Destination replyTo) {
+    private static At toAt(final Destination replyTo) {
         try {
             return replyTo instanceof Queue ? At.toQueue(((Queue) replyTo).getQueueName())
                     : At.toTopic(((Topic) replyTo).getTopicName());

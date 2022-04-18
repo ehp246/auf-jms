@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -26,16 +28,18 @@ import me.ehp246.aufjms.util.MockTextMessage;
  * @author Lei Yang
  *
  */
-class DefaultMsgConsumerTest {
+class InboundMsgConsumerTest {
     private Session session = Mockito.mock(Session.class);
+    private final JmsDispatchFn noopFn = m -> null;
 
     @Test
     void ex_01() {
         final var ex = new RuntimeException();
         final var thrown = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
+                () -> new InboundMsgConsumer(jmsMsg -> new ExecutableRecord(null, null), (e, c) -> {
                     return () -> InvocationOutcome.thrown(ex);
-                }, null, msg -> null, null).onMessage(new MockTextMessage(), session));
+                }, null, msg -> null, new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(),
+                        session));
 
         Assertions.assertEquals(true, ex == thrown);
     }
@@ -43,7 +47,7 @@ class DefaultMsgConsumerTest {
     @Test
     void resolver_ex_01() {
         final var ex = new RuntimeException();
-        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new DefaultMsgConsumer(jmsMsg -> {
+        final var thrown = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(jmsMsg -> {
             throw ex;
         }, (e, c) -> () -> InvocationOutcome.returned(null), null, msg -> null, null).onMessage(new MockTextMessage(),
                 session));
@@ -54,7 +58,7 @@ class DefaultMsgConsumerTest {
     @Test
     void unmatched_ex_01() {
         Assertions.assertThrows(UnknownTypeException.class,
-                () -> new DefaultMsgConsumer(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
+                () -> new InboundMsgConsumer(msg -> null, (e, c) -> () -> null, null, msg -> null, null)
                         .onMessage(new MockTextMessage(), session));
     }
 
@@ -63,10 +67,10 @@ class DefaultMsgConsumerTest {
         final var ref = new FailedInvocation[1];
         final var msg = new MockTextMessage();
         final var ex = new RuntimeException();
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
-                null, m -> null, m -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> () -> InvocationOutcome.thrown(ex),
+                null, m -> null, new InvocationListenersSupplier(null, m -> {
                     ref[0] = m;
-                }).onMessage(msg, session);
+                })).onMessage(msg, session);
 
         Assertions.assertEquals(ex, ref[0].thrown(), "should be the one thrown by application code");
     }
@@ -76,10 +80,11 @@ class DefaultMsgConsumerTest {
         final var ex = new NullPointerException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
-                        (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null, m -> {
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
+                        (e, c) -> () -> InvocationOutcome.thrown(new RuntimeException()), null, m -> null,
+                        new InvocationListenersSupplier(null, m -> {
                             throw ex;
-                        }).onMessage(new MockTextMessage(), session),
+                        })).onMessage(new MockTextMessage(), session),
                 "should allow the consumer to throw");
         Assertions.assertEquals(t, ex);
     }
@@ -90,11 +95,12 @@ class DefaultMsgConsumerTest {
         final var ex = new RuntimeException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultMsgConsumer(m -> new ExecutableRecord(null, null),
-                        (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null, m -> {
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
+                        (e, c) -> () -> InvocationOutcome.thrown(ex), null, m -> null,
+                        new InvocationListenersSupplier(null, m -> {
                             ref[0] = m;
                             throw new RuntimeException(m.thrown());
-                        }).onMessage(new MockTextMessage(), session));
+                        })).onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(t.getCause(), ex, "should be from the consumer");
         Assertions.assertEquals(t.getCause(), ref[0].thrown(), "should allow the consumer to throw");
@@ -107,7 +113,7 @@ class DefaultMsgConsumerTest {
         final var sessionRef = new Session[3];
         final var log4jRef = new ArrayList<Map<String, String>>();
 
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[0] = Thread.currentThread();
             log4jRef.add(ThreadContext.getContext());
             sessionRef[0] = AufJmsContext.getSession();
@@ -116,10 +122,10 @@ class DefaultMsgConsumerTest {
                 sessionRef[1] = AufJmsContext.getSession();
                 return InvocationOutcome.thrown(new RuntimeException());
             };
-        }, null, m -> null, m -> {
+        }, null, m -> null, new InvocationListenersSupplier(null, m -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        }).onMessage(msg, session);
+        })).onMessage(msg, session);
 
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binding, action, failed msg consumer");
@@ -142,7 +148,6 @@ class DefaultMsgConsumerTest {
         Assertions.assertEquals(session, sessionRef[2]);
         Assertions.assertEquals(null, AufJmsContext.getSession());
     }
-    
 
     @Test
     void thread_02() throws JMSException, InterruptedException, ExecutionException {
@@ -152,7 +157,7 @@ class DefaultMsgConsumerTest {
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
-        new DefaultMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
             threadRef[1] = Thread.currentThread();
             sessionRef[0] = AufJmsContext.getSession();
             return () -> {
@@ -160,15 +165,16 @@ class DefaultMsgConsumerTest {
                 sessionRef[1] = AufJmsContext.getSession();
                 return InvocationOutcome.thrown(new RuntimeException());
             };
-        }, executor, m -> null, m -> {
+        }, executor, m -> null, new InvocationListenersSupplier(null, m -> {
             threadRef[3] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        }).onMessage(new MockTextMessage(), session);
+        })).onMessage(new MockTextMessage(), session);
 
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
-        Assertions.assertEquals(threadRef[0], threadRef[1], "should be the same thread for binding, action, failed msg consumer");
+        Assertions.assertEquals(threadRef[0], threadRef[1],
+                "should be the same thread for binding, action, failed msg consumer");
         Assertions.assertEquals(threadRef[1], threadRef[2]);
         Assertions.assertEquals(threadRef[2], threadRef[3]);
 
@@ -178,4 +184,43 @@ class DefaultMsgConsumerTest {
         Assertions.assertEquals(null, AufJmsContext.getSession());
     }
 
+    @Test
+    void completed_01() throws InterruptedException, ExecutionException, JMSException {
+        final var threadRef = new Thread[1];
+        final var completedThread = new Thread[1];
+        final var returned = new RuntimeException();
+        final var completedRef = new CompletedInvocation[1];
+
+        final var executor = Executors.newSingleThreadExecutor();
+        threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
+
+        new InboundMsgConsumer(m -> new ExecutableRecord(null, null), (e, c) -> {
+            return () -> {
+                return InvocationOutcome.returned(returned);
+            };
+        }, executor, m -> null, new InvocationListenersSupplier(c -> {
+            completedRef[0] = c;
+            completedThread[0] = Thread.currentThread();
+        }, null)).onMessage(new MockTextMessage(), session);
+
+        executor.shutdown();
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        Assertions.assertEquals(threadRef[0], completedThread[0]);
+        Assertions.assertEquals(returned, completedRef[0].returned());
+    }
+
+    @Test
+    void completed_02() throws JMSException {
+        final var expected = new RuntimeException("Completed should not re-throw");
+
+        final var actual = Assertions.assertThrows(RuntimeException.class,
+                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, null),
+                        (e, c) -> () -> InvocationOutcome.returned(null), null, noopFn,
+                        new InvocationListenersSupplier(c -> {
+                            throw expected;
+                        }, null)).onMessage(new MockTextMessage(), session));
+
+        Assertions.assertEquals(expected, actual);
+    }
 }

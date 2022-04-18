@@ -28,8 +28,8 @@ import me.ehp246.aufjms.api.jms.JMSSupplier;
  * @author Lei Yang
  * @since 1.0
  */
-public final class InboundEndpointConfigurer implements JmsListenerConfigurer {
-    private final static Logger LOGGER = LogManager.getLogger(InboundEndpointConfigurer.class);
+public final class InboundEndpointListenerConfigurer implements JmsListenerConfigurer {
+    private final static Logger LOGGER = LogManager.getLogger(InboundEndpointListenerConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
@@ -37,7 +37,7 @@ public final class InboundEndpointConfigurer implements JmsListenerConfigurer {
     private final ConnectionFactoryProvider cfProvider;
     private final JmsDispatchFnProvider dispathFnProvider;
 
-    public InboundEndpointConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
+    public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
             final ExecutorProvider executorProvider, final ExecutableBinder binder,
             final JmsDispatchFnProvider dispathFnProvider) {
         super();
@@ -52,12 +52,13 @@ public final class InboundEndpointConfigurer implements JmsListenerConfigurer {
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
         final var listenerContainerFactory = jmsListenerContainerFactory(null);
 
-        this.endpoints.stream().forEach(endpoint -> {
+        for (final var endpoint : this.endpoints) {
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
-            final var dispatcher = new DefaultMsgConsumer(endpoint.resolver(), binder,
+            final var dispatcher = new InboundMsgConsumer(endpoint.resolver(), binder,
                     executorProvider.get(endpoint.concurrency()),
-                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.failedInvocationInterceptor());
+                    this.dispathFnProvider.get(endpoint.connectionFactory()), new InvocationListenersSupplier(
+                            endpoint.completedInvocationConsumer(), endpoint.failedInvocationInterceptor()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 
@@ -92,7 +93,7 @@ public final class InboundEndpointConfigurer implements JmsListenerConfigurer {
                 }
 
             }, listenerContainerFactory);
-        });
+        }
     }
 
     private DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final String cfName) {

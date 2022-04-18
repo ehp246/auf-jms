@@ -9,5 +9,4 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 record FailedInvocationRecord(JmsMsg msg, Executable target, Throwable thrown) implements FailedInvocation {
-
 }
