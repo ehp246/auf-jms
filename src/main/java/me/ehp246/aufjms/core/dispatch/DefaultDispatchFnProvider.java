@@ -25,11 +25,11 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -74,7 +74,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         return new JmsDispatchFn() {
             private final Logger LOGGER = LogManager
                     .getLogger(JmsDispatchFn.class.getName() + "@" + connectionFactoryName);
-
             @Override
             public JmsMsg send(JmsDispatch dispatch) {
                 /*
@@ -87,7 +86,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                 LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
                         dispatch.to().name().toString(), connectionFactoryName);
-
+                
                 Session session = null;
                 MessageProducer producer = null;
                 TextMessage message = null;
@@ -119,18 +118,18 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     producer.setTimeToLive(
                             Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
-                    // Call listeners pre-send
+                    // Call listeners on preSend
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.preSend(msg, dispatch);
+                        listener.preSend(dispatch, msg);
                     }
 
                     producer.send(toJMSDestintation(session, dispatch.to()), message);
 
                     LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
-                    // Call listeners post-send
+                    // Call listeners on postSend
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.postSend(msg, dispatch);
+                        listener.postSend(dispatch, msg);
                     }
 
                     return msg;
@@ -138,9 +137,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
                             dispatch.to().toString(), dispatch.type(), dispatch.correlationId(), e);
 
-                    // Call listeners on-exception
                     for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.onException(e, msg, dispatch);
+                        listener.onException(dispatch, msg, e);
                     }
 
                     throw new JmsDispatchFnException(e);

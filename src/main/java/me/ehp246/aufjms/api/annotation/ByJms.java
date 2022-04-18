@@ -29,7 +29,7 @@ public @interface ByJms {
     String name() default "";
 
     /**
-     * Spring Property supported.
+     * Supports Spring property placeholder.
      */
     String ttl() default "";
 
