@@ -30,24 +30,26 @@ public final class JsonByJackson implements FromJson, ToJson {
     }
 
     @Override
-    public String apply(final List<?> bodyValue) {
+    public String apply(final List<ToJson.From> values) {
         try {
             String json = null;
-            if (bodyValue == null) {
+            if (values == null) {
                 json = null;
-            } else if (bodyValue.size() == 1) {
-                json = this.objectMapper.writeValueAsString(bodyValue.get(0));
-            } else if (bodyValue.size() > 1) {
+            } else if (values.size() == 1) {
+                final var target = values.get(0);
+                json = this.objectMapper.writerFor(target.type()).writeValueAsString(target.value());
+            } else if (values.size() > 1) {
                 // Use wrapping array for multi-parameter only.
-                final var list = new ArrayList<String>(bodyValue.size());
-                for (int i = 0; i < bodyValue.size(); i++) {
-                    list.add(this.objectMapper.writeValueAsString(bodyValue.get(i)));
+                final var list = new ArrayList<String>(values.size());
+                for (int i = 0; i < values.size(); i++) {
+                    final var target = values.get(i);
+                    list.add(this.objectMapper.writerFor(target.type()).writeValueAsString(target.value()));
                 }
                 json = this.objectMapper.writeValueAsString(list);
             }
             return json;
         } catch (final Exception e) {
-            LOGGER.error("Failed to create message: {} {}", e.getClass().getName(), e.getMessage());
+            LOGGER.atError().log("Failed to serialize: {}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -90,20 +92,20 @@ public final class JsonByJackson implements FromJson, ToJson {
 
     private Object readOne(final String json, final Receiver<Object> receiver)
             throws JsonMappingException, JsonProcessingException {
-        final var collectionOf = receiver.getAnnotations() == null ? null
-                : receiver.getAnnotations().stream().filter(ann -> ann instanceof CollectionOf).findAny()
+        final var collectionOf = receiver.annotations() == null ? null
+                : receiver.annotations().stream().filter(ann -> ann instanceof CollectionOf).findAny()
                         .map(ann -> ((CollectionOf) ann).value()).orElse(null);
 
         if (collectionOf == null) {
-            return objectMapper.readValue(json, receiver.getType());
+            return objectMapper.readValue(json, receiver.type());
         }
         if (collectionOf.length == 1) {
             return objectMapper.readValue(json,
-                    objectMapper.getTypeFactory().constructParametricType(receiver.getType(), collectionOf));
+                    objectMapper.getTypeFactory().constructParametricType(receiver.type(), collectionOf));
         } else {
             final var typeFactory = objectMapper.getTypeFactory();
             final var types = new ArrayList<Class<?>>();
-            types.add(receiver.getType());
+            types.add(receiver.type());
             types.addAll(List.of(collectionOf));
 
             final var size = types.size();

@@ -65,7 +65,7 @@ class DispatchFnTest {
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(id, message.getJMSCorrelationID());
 
-        Assertions.assertEquals(toJson.apply(List.of(body)), message.getBody(String.class),
+        Assertions.assertEquals(toJson.apply(List.of(new ToJson.From(body))), message.getBody(String.class),
                 "should be encoded in JSON");
     }
 

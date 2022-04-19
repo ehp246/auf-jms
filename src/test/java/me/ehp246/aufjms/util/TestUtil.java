@@ -22,6 +22,10 @@ import me.ehp246.aufjms.api.jms.Invocation;
  *
  */
 public class TestUtil {
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule())
+            .registerModule(new ParameterNamesModule());
 
     @SuppressWarnings("unchecked")
     public static <T> T newProxy(final Class<T> t, final Consumer<Invocation> consumer) {
@@ -92,9 +96,4 @@ public class TestUtil {
 
         Invocation invocation();
     }
-
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
-    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule())
-    .registerModule(new ParameterNamesModule());
 }

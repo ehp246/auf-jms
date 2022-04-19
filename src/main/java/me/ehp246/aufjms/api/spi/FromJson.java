@@ -17,11 +17,11 @@ public interface FromJson {
     }
 
     interface Receiver<T> {
-        default List<? extends Annotation> getAnnotations() {
+        default List<? extends Annotation> annotations() {
             return List.of();
         }
 
-        Class<? extends T> getType();
+        Class<? extends T> type();
 
         default void receive(final T value) {
 

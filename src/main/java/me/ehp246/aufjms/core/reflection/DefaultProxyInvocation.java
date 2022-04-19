@@ -2,7 +2,6 @@ package me.ehp246.aufjms.core.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -170,6 +169,7 @@ public final class DefaultProxyInvocation implements Invocation {
         return map;
     }
 
+    @SuppressWarnings("unchecked")
     public <A extends Annotation> Stream<AnnotatedArgument<A>> streamOfAnnotatedArguments(
             final Class<A> annotationType) {
         final var builder = Stream.<AnnotatedArgument<A>>builder();
@@ -178,25 +178,7 @@ public final class DefaultProxyInvocation implements Invocation {
             final var arg = args.get(i);
             final var parameter = method.getParameters()[i];
             Stream.of(parameterAnnotations[i]).filter(annotation -> annotation.annotationType() == annotationType)
-                    .map(anno -> new AnnotatedArgument<A>() {
-
-                        @SuppressWarnings("unchecked")
-                        @Override
-                        public A annotation() {
-                            return (A) anno;
-                        }
-
-                        @Override
-                        public Object argument() {
-                            return arg;
-                        }
-
-                        @Override
-                        public Parameter parameter() {
-                            return parameter;
-                        }
-
-                    }).forEach(builder::add);
+                    .map(anno -> new AnnotatedArgument<A>((A) anno, arg, parameter)).forEach(builder::add);
             ;
         }
 

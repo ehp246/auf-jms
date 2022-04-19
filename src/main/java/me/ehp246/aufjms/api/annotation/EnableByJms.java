@@ -28,7 +28,7 @@ public @interface EnableByJms {
     Class<?>[] scan() default {};
 
     /**
-     * Spring property is supported.
+     * Support Spring property placeholder.
      */
     String ttl() default "PT0S";
 

@@ -82,12 +82,12 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
                 }
 
                 @Override
-                public Class<?> getType() {
+                public Class<?> type() {
                     return parameters[ref].getType();
                 }
 
                 @Override
-                public List<? extends Annotation> getAnnotations() {
+                public List<? extends Annotation> annotations() {
                     return List.of(parameters[ref].getAnnotations());
                 }
             });
