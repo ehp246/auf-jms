@@ -8,5 +8,5 @@ import java.lang.reflect.Parameter;
  * @author Lei Yang
  * @since 1.0
  */
-public record AnnotatedArgument<T extends Annotation> (T annotation, Object argument, Parameter parameter){
+public record AnnotatedArgument<T extends Annotation> (T annotation, Object argument, Parameter parameter) {
 }

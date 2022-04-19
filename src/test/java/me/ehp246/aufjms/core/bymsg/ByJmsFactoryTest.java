@@ -10,8 +10,8 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
-import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
 
 class ByJmsFactoryTest {

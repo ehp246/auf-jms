@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import me.ehp246.aufjms.api.jms.Invocation;
+import me.ehp246.aufjms.api.reflection.Invocation;
 
 /**
  * 
@@ -29,14 +30,17 @@ public final class DefaultProxyInvocation implements Invocation {
     private final List<?> args;
     private final Annotation[][] parameterAnnotations;
     private final List<Class<?>> threws;
+    private final Parameter[] parameters;
 
-    public DefaultProxyInvocation(final Class<?> declaringType, final Object target, final Method method, final List<?> args) {
+    public DefaultProxyInvocation(final Class<?> declaringType, final Object target, final Method method,
+            final List<?> args) {
         this.declaringType = declaringType;
         this.target = target;
         this.method = Objects.requireNonNull(method);
         this.args = Collections.unmodifiableList(args == null ? new ArrayList<Object>() : args);
         this.parameterAnnotations = this.method.getParameterAnnotations();
         this.threws = List.of(this.method.getExceptionTypes());
+        this.parameters = method.getParameters();
     }
 
     public Class<?> declaringType() {
@@ -64,6 +68,7 @@ public final class DefaultProxyInvocation implements Invocation {
     public String getDeclaringClassSimpleName() {
         return method.getDeclaringClass().getSimpleName();
     }
+
     @Override
     public List<?> args() {
         return args;
@@ -102,14 +107,15 @@ public final class DefaultProxyInvocation implements Invocation {
         return this.method.getReturnType().isAssignableFrom(type);
     }
 
-    public List<?> filterPayloadArgs(final Set<Class<? extends Annotation>> annotations) {
-        final var valueArgs = new ArrayList<>();
+    public List<ReflectedArgument> filterPayloadArgs(
+            final Set<Class<? extends Annotation>> exclusions) {
+        final var valueArgs = new ArrayList<ReflectedArgument>();
         for (var i = 0; i < parameterAnnotations.length; i++) {
             if (Stream.of(parameterAnnotations[i])
-                    .filter(annotation -> annotations.contains(annotation.annotationType())).findAny().isPresent()) {
+                    .filter(annotation -> exclusions.contains(annotation.annotationType())).findAny().isPresent()) {
                 continue;
             }
-            valueArgs.add(args.get(i));
+            valueArgs.add(new ReflectedArgument(args.get(i), this.parameters[i], method));
         }
 
         return valueArgs;
@@ -191,8 +197,7 @@ public final class DefaultProxyInvocation implements Invocation {
     }
 
     public <A extends Annotation, V> V firstArgumentAnnotationOf(final Class<A> annotationClass,
-            final Function<AnnotatedArgument<A>, V> mapper,
-            final Supplier<V> supplier) {
+            final Function<AnnotatedArgument<A>, V> mapper, final Supplier<V> supplier) {
         final var found = this.streamOfAnnotatedArguments(annotationClass).findFirst();
         return found.isPresent() ? mapper.apply(found.get()) : supplier.get();
     }
@@ -215,9 +220,8 @@ public final class DefaultProxyInvocation implements Invocation {
     public <A extends Annotation, V> V resolveAnnotatedValue(final Class<A> annotationClass,
             final Function<AnnotatedArgument<A>, V> argMapper, final Function<A, V> methodMapper,
             final Function<A, V> classMapper, final Supplier<V> supplier) {
-        return firstArgumentAnnotationOf(annotationClass, argMapper, 
-                () -> methodAnnotationOf(annotationClass, methodMapper, 
-                        () -> classAnnotationOf(annotationClass, classMapper, supplier)));
+        return firstArgumentAnnotationOf(annotationClass, argMapper, () -> methodAnnotationOf(annotationClass,
+                methodMapper, () -> classAnnotationOf(annotationClass, classMapper, supplier)));
     }
 
     public <A extends Annotation> Optional<A> findOnMethod(final Class<A> annotationClass) {

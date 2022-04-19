@@ -178,6 +178,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     return supplier.get();
                 }
 
+                if (body instanceof ToJson.From from) {
+                    return toJson.apply(List.of(from));
+                }
+
                 return toJson.apply(List.of(new ToJson.From(body)));
             }
         };

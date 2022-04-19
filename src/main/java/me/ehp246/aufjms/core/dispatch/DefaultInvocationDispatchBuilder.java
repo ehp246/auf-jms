@@ -2,6 +2,7 @@ package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -17,10 +18,11 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.jms.Invocation;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -52,8 +54,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
         // Optional.
         final var replyTo = Optional.ofNullable(config.replyTo())
-                .map(at -> at instanceof AtQueue
-                        ? At.toQueue(propertyResolver.resolve(at.name()))
+                .map(at -> at instanceof AtQueue ? At.toQueue(propertyResolver.resolve(at.name()))
                         : At.toTopic(propertyResolver.resolve(at.name())))
                 .orElse(null);
 
@@ -115,7 +116,10 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
         final var correlId = proxyInvocation.firstArgumentAnnotationOf(OfCorrelationId.class,
                 annoArg -> Optional.ofNullable(annoArg.argument()).map(Object::toString).orElse(null),
                 () -> UUID.randomUUID().toString());
-        final var body = proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS).stream().findFirst().orElse(null);
+        final var body = proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS).stream().findFirst()
+                .map(arg -> new ToJson.From(arg.argument(), arg.parameter().getType(),
+                        Arrays.asList(arg.parameter().getAnnotations())))
+                .orElse(null);
 
         return new JmsDispatch() {
 

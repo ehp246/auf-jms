@@ -1,19 +1,26 @@
 package me.ehp246.aufjms.integration.dispatch;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
 
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.integration.dispatch.AppConfig.BodyCase01;
+import me.ehp246.aufjms.integration.dispatch.AppConfig.ToJsonAsTypeCase01;
+import me.ehp246.aufjms.integration.dispatch.JsonAsType.Person;
+import me.ehp246.aufjms.integration.dispatch.JsonAsType.PersonDob;
+import me.ehp246.aufjms.integration.dispatch.JsonAsType.PersonName;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -27,16 +34,20 @@ class BodyTest {
     @Autowired
     private ToJson toJson;
     @Autowired
+    private FromJson fromJson;
+    @Autowired
     private TestQueueListener listener;
     @Autowired
     private BodyCase01 case01;
+    @Autowired
+    private ToJsonAsTypeCase01 asTypeCase01;
 
     @Test
     void destination_01() {
         case01.ping();
-        
+
         final var received = listener.takeReceived();
-        
+
         Assertions.assertEquals(true, received != null);
         Assertions.assertEquals(true, received instanceof TextMessage);
     }
@@ -89,5 +100,48 @@ class BodyTest {
         Assertions.assertEquals(true, text.contains(now.toString()));
         // Assertions.assertEquals(false, text.contains(toJson.apply(List.of(-1))),
         // "should be implemented");
+    }
+
+    @Test
+    void toJsonAsType_01() throws JMSException {
+        final var firstName = UUID.randomUUID().toString();
+        final var lastName = UUID.randomUUID().toString();
+
+        final var now = Instant.now();
+        asTypeCase01.ping(new Person(firstName, lastName, now));
+
+        Assertions.assertEquals("{\"firstName\":\"" + firstName + "\",\"lastName\":\"" + lastName + "\",\"dob\":\""
+                + now.toString() + "\"}", ((TextMessage) listener.takeReceived()).getText());
+    }
+
+    @Test
+    void toJsonAsType_02() throws JMSException {
+        final var firstName = UUID.randomUUID().toString();
+        final var lastName = UUID.randomUUID().toString();
+
+        final var now = Instant.now();
+        final var expected = new Person(firstName, lastName, now);
+        asTypeCase01.ping((PersonName) expected);
+
+        final var text = ((TextMessage) listener.takeReceived()).getText();
+        final var actual = (Person)(fromJson.apply(text, List.of(() -> Person.class)).get(0));
+
+        Assertions.assertEquals(firstName, actual.firstName());
+        Assertions.assertEquals(lastName, actual.lastName());
+        Assertions.assertEquals(null, actual.dob());
+    }
+
+    @Test
+    void toJsonAsType_03() throws JMSException {
+        final var now = Instant.now();
+        final var expected = new Person(null, null, now);
+        asTypeCase01.ping((PersonDob) expected);
+
+        final var text = ((TextMessage) listener.takeReceived()).getText();
+        final var actual = (Person) (fromJson.apply(text, List.of(() -> Person.class)).get(0));
+
+        Assertions.assertEquals(null, actual.firstName());
+        Assertions.assertEquals(null, actual.lastName());
+        Assertions.assertEquals(now.toString(), actual.dob().toString());
     }
 }

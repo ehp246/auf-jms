@@ -1,15 +1,21 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
@@ -338,11 +344,19 @@ class DefaultInvocationDispatchBuilderTest {
     void body_02() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
-        final var body = Map.of("", "");
+        final var expected = Map.of("", "");
 
-        captor.proxy().m02(body);
+        captor.proxy().m02(expected);
 
-        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        final var actual = dispatchBuilder.get(captor.invocation(), proxyConfig).body();
+
+        Assertions.assertEquals(ToJson.From.class, actual.getClass());
+
+        final var from = (ToJson.From) actual;
+
+        Assertions.assertEquals(expected, from.value());
+        Assertions.assertEquals(Map.class, from.type());
+        Assertions.assertEquals(0, from.annotations().size());
     }
 
     @Test
@@ -364,6 +378,23 @@ class DefaultInvocationDispatchBuilderTest {
     }
 
     @Test
+    void body_03() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var expected = Instant.now();
+
+        captor.proxy().m04(expected);
+
+        final var actual = (ToJson.From) dispatchBuilder.get(captor.invocation(), proxyConfig).body();
+
+        Assertions.assertEquals(expected, actual.value());
+        Assertions.assertEquals(TemporalAccessor.class, actual.type());
+        Assertions.assertEquals(2, actual.annotations().size());
+        Assertions.assertEquals(true, actual.annotations().get(0) instanceof Nonnull);
+        Assertions.assertEquals(true, actual.annotations().get(1) instanceof Nullable);
+    }
+
+    @Test
     void body_04() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
@@ -371,7 +402,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(UUID.randomUUID().toString(), body);
 
-        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(body,
+                ((ToJson.From) dispatchBuilder.get(captor.invocation(), proxyConfig).body()).value());
     }
 
     @Test
@@ -382,7 +414,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(body, UUID.randomUUID().toString(), null);
 
-        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(body,
+                ((ToJson.From) dispatchBuilder.get(captor.invocation(), proxyConfig).body()).value());
     }
 
     @Test

@@ -14,9 +14,9 @@ import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.jms.Invocation;
 
 /**
  *
