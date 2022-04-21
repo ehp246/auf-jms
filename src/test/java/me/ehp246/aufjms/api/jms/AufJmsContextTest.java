@@ -33,7 +33,7 @@ class AufJmsContextTest {
     @Test
     void test_03() {
         AufJmsContext.set(Mockito.mock(Session.class));
-        Assertions.assertThrows(RuntimeException.class, () -> AufJmsContext.set(Mockito.mock(Session.class)));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> AufJmsContext.set(Mockito.mock(Session.class)));
     }
 
     @Test

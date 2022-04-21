@@ -21,7 +21,7 @@ public final class AufJmsContext {
         Objects.requireNonNull(session);
 
         if (CONTEXT.threadLocalSession.get() != null) {
-            throw new RuntimeException("Context session present");
+            throw new IllegalArgumentException("Context session present");
         }
         CONTEXT.threadLocalSession.set(session);
     }
