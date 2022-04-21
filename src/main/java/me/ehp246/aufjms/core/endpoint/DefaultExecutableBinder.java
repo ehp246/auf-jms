@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.jms.JMSContext;
@@ -21,6 +22,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
+import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
@@ -159,7 +161,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
                     .findAny();
             if (found.isPresent()) {
                 if (Map.class.isAssignableFrom(type)) {
-                    arguments[i] = msg.propertyMap();
+                    arguments[i] = propertyMap(msg);
                 } else {
                     arguments[i] = msg.property(((OfProperty) found.get()).value(), type);
                 }
@@ -168,5 +170,11 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
         }
 
         return markers;
+    }
+
+    private static Map<String, Object> propertyMap(final JmsMsg msg) {
+        final var message = msg.message();
+        return msg.propertyNames().stream().collect(Collectors.toMap(Function.identity(),
+                name -> JMSSupplier.invoke(() -> message.getObjectProperty(name))));
     }
 }
