@@ -7,7 +7,7 @@ import java.util.Map;
  * @author Lei Yang
  * @since 1.0
  */
-public final class JmsPropertyContext {
+final class JmsPropertyContext {
     private final static String TYPE = "ae5dbae8-13b5-40f5-a852-065b67755a29";
     private final static String CORRELATIONID = "36da23de-e9a2-4ae7-927b-03a852bc312f";
     

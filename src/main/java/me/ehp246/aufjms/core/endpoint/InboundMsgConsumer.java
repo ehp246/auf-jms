@@ -57,7 +57,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     @Override
     public void onMessage(final Message message, final Session session) throws JMSException {
         if (!(message instanceof TextMessage textMessage)) {
-            throw new RuntimeException("Un-supported message type of " + message.getJMSCorrelationID());
+            throw new IllegalArgumentException("Un-supported message type of " + message.getJMSCorrelationID());
         }
         final var msg = TextJmsMsg.from(textMessage);
 
@@ -140,13 +140,15 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     try {
                         invocationListener.failedInterceptor().accept(new FailedInvocationRecord(msg, target, thrown));
                         LOGGER.atTrace().log("Failure interceptor invoked");
+                        /*
+                         * Skip further execution on invocation exception but acknowledge the message.
+                         */
+                        return;
                     } catch (Exception e) {
                         LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
 
                         throw OneUtil.toRuntime(e);
                     }
-                    // Stop further execution on invocation exception.
-                    return;
                 }
 
                 if (invocationListener.completedConsumer() != null) {
@@ -166,11 +168,6 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                 final var replyTo = msg.replyTo();
                 if (replyTo == null) {
                     LOGGER.atTrace().log("No replyTo");
-                    return;
-                }
-
-                if (executionOutcome.hasThrown()) {
-                    LOGGER.atTrace().log("Execution thrown, skipping reply");
                     return;
                 }
 

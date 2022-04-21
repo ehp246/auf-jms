@@ -6,7 +6,12 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Queue;
 
+import javax.jms.Connection;
+import javax.jms.Topic;
+
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
@@ -17,10 +22,14 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 @Target(TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ByJms {
+    /**
+     * Specifies the destination name and type, i.e., {@linkplain Queue} vs
+     * {@linkplain Topic} for out-bound messages.
+     */
     To value();
 
     /**
-     * Defines an optional bean name by which the proxy interface can be injected.
+     * Specifies an optional bean name by which the proxy interface can be injected.
      * <p>
      * The default name is {@link Class#getSimpleName()}.
      * 
@@ -35,16 +44,26 @@ public @interface ByJms {
 
     To replyTo() default @To("");
 
+    /**
+     * Specifies the connection factory name with which the interface retrieves a
+     * {@linkplain Connection} from
+     * {@linkplain ConnectionFactoryProvider#get(String)}.
+     */
     String connectionFactory() default "";
 
     @interface To {
         /**
-         * Defines the destination name for the proxy interface.
+         * Specifies the destination name for the proxy interface.
          * <p>
-         * Supports Spring property.
+         * Supports Spring property placeholder.
          */
         String value();
 
+        /**
+         * Specifies the destination type.
+         * <p>
+         * Defaults to {@linkplain Queue}.
+         */
         DestinationType type() default DestinationType.QUEUE;
     }
 }

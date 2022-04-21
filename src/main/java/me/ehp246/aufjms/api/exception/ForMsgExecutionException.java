@@ -4,7 +4,7 @@ package me.ehp246.aufjms.api.exception;
  * @author Lei Yang
  *
  */
-public class ForMsgExecutionException extends RuntimeException implements ExecutionThrown {
+public final class ForMsgExecutionException extends RuntimeException implements ExecutionThrown {
     private static final long serialVersionUID = 1L;
     private final Integer code;
 

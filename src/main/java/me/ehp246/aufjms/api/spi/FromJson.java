@@ -11,11 +11,6 @@ import java.util.List;
 public interface FromJson {
     List<?> apply(String json, List<Receiver<?>> receivers);
 
-    @SuppressWarnings("unchecked")
-    default <T> T from(final String json, final Receiver<T> receiver) {
-        return (T) this.apply(json, List.of(receiver)).get(0);
-    }
-
     interface Receiver<T> {
         default List<? extends Annotation> annotations() {
             return List.of();
