@@ -52,8 +52,9 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             return;
         }
 
-        LOGGER.atTrace().log("Defining {} on {}", JmsDispatchFn.class.getSimpleName(), fns);
         for (var i = 0; i < fns.length; i++) {
+            LOGGER.atTrace().log("Defining {} on '{}'", JmsDispatchFn.class.getSimpleName(), fns[i]);
+
             registry.registerBeanDefinition(JmsDispatchFn.class.getSimpleName() + "-" + i, getFnBeanDefinition(fns[i]));
         }
     }
