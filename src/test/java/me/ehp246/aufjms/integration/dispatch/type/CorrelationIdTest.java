@@ -3,6 +3,7 @@ package me.ehp246.aufjms.integration.dispatch.type;
 import javax.jms.JMSException;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,11 @@ class CorrelationIdTest {
 
     @Autowired
     private OfCorrelationIdCase01 case01;
+
+    @BeforeEach
+    void reset() {
+        listener.reset();
+    }
 
     @Test
     void correlationId_01() throws JMSException {

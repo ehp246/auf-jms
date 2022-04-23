@@ -136,5 +136,9 @@ public interface JmsDispatch {
 
     interface BodyAs {
         Class<?> type();
+
+        static BodyAs of(Class<?> type) {
+            return () -> type;
+        }
     }
 }

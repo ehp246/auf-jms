@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.jms.annotation.EnableJms;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
@@ -15,21 +14,19 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
-import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
  * @author Lei Yang
  *
  */
-@EnableJms
 @EnableByJms
-@Import({ TestQueueListener.class, EmbeddedArtemisConfig.class })
+@Import({ EmbeddedArtemisConfig.class })
 class AppConfig {
     public CompletableFuture<DispatchRecord> preRef;
     public CompletableFuture<DispatchRecord> postRef;
     public CompletableFuture<DispatchRecord> exRef;
 
-    @ByJms(@To(TestQueueListener.DESTINATION_NAME))
+    @ByJms(@To("q1"))
     interface BodyCase01 {
         void ping();
 

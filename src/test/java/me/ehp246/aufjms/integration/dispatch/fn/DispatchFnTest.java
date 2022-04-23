@@ -8,6 +8,7 @@ import javax.jms.JMSException;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +41,11 @@ class DispatchFnTest {
     private ToJson toJson;
     @Autowired
     private JmsDispatchFn fn;
+
+    @BeforeEach
+    void reset() {
+        listener.reset();
+    }
 
     @Test
     void test_01() throws JMSException {
@@ -126,7 +132,7 @@ class DispatchFnTest {
 
             @Override
             public BodyAs bodyAs() {
-                return () -> PersonDob.class;
+                return BodyAs.of(PersonDob.class);
             }
 
         });

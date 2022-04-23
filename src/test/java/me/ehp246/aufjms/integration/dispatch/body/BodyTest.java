@@ -9,6 +9,7 @@ import javax.jms.TextMessage;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,11 @@ class BodyTest {
     private BodyPublisherCase01 pubCase01;
     @Autowired
     private BodyAsTypeCase01 asTypeCase01;
+
+    @BeforeEach
+    void reset() {
+        listener.reset();
+    }
 
     @Test
     void destination_01() {

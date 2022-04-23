@@ -4,6 +4,7 @@ import javax.jms.JMSException;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,11 @@ class TypeTest {
 
     @Autowired
     private OfTypeCase01 case01;
+
+    @BeforeEach
+    void reset() {
+        listener.reset();
+    }
 
     @Test
     void type_01() throws JMSException {
