@@ -19,6 +19,9 @@ public class TestQueueListener {
 
     @JmsListener(destination = TestQueueListener.DESTINATION_NAME)
     public void receive(Message message) {
+        if (received.isDone()) {
+            throw new IllegalStateException();
+        }
         received.complete(message);
     }
 

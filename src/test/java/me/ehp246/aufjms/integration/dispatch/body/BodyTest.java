@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.dispatch;
+package me.ehp246.aufjms.integration.dispatch.body;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,11 +16,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.integration.dispatch.AppConfig.BodyCase01;
-import me.ehp246.aufjms.integration.dispatch.AppConfig.ToJsonAsTypeCase01;
-import me.ehp246.aufjms.integration.dispatch.JsonAsType.Person;
-import me.ehp246.aufjms.integration.dispatch.JsonAsType.PersonDob;
-import me.ehp246.aufjms.integration.dispatch.JsonAsType.PersonName;
+import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyAsTypeCase01;
+import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyCase01;
+import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyPublisherCase01;
+import me.ehp246.aufjms.integration.dispatch.body.JsonAsType.Person;
+import me.ehp246.aufjms.integration.dispatch.body.JsonAsType.PersonDob;
+import me.ehp246.aufjms.integration.dispatch.body.JsonAsType.PersonName;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -40,7 +41,9 @@ class BodyTest {
     @Autowired
     private BodyCase01 case01;
     @Autowired
-    private ToJsonAsTypeCase01 asTypeCase01;
+    private BodyPublisherCase01 pubCase01;
+    @Autowired
+    private BodyAsTypeCase01 asTypeCase01;
 
     @Test
     void destination_01() {
@@ -103,7 +106,25 @@ class BodyTest {
     }
 
     @Test
-    void toJsonAsType_01() throws JMSException {
+    void bodyPublisher_01() throws JMSException {
+        final var expected = UUID.randomUUID().toString();
+
+        pubCase01.send(expected::toString);
+
+        Assertions.assertEquals(expected, listener.takeReceived().getBody(String.class));
+    }
+
+    @Test
+    void bodyPublisher_02() throws JMSException {
+        final var expected = UUID.randomUUID().toString();
+
+        pubCase01.send(expected);
+
+        Assertions.assertEquals("\"" + expected + "\"", listener.takeReceived().getBody(String.class));
+    }
+
+    @Test
+    void bodyAsType_01() throws JMSException {
         final var firstName = UUID.randomUUID().toString();
         final var lastName = UUID.randomUUID().toString();
 
@@ -115,7 +136,7 @@ class BodyTest {
     }
 
     @Test
-    void toJsonAsType_02() throws JMSException {
+    void bodyAsType_02() throws JMSException {
         final var firstName = UUID.randomUUID().toString();
         final var lastName = UUID.randomUUID().toString();
 
@@ -132,7 +153,7 @@ class BodyTest {
     }
 
     @Test
-    void toJsonAsType_03() throws JMSException {
+    void bodyAsType_03() throws JMSException {
         final var now = Instant.now();
         final var expected = new Person(null, null, now);
         asTypeCase01.ping((PersonDob) expected);

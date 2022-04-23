@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.dispatch;
+package me.ehp246.aufjms.integration.dispatch.body;
 
 import java.time.Instant;
 

@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.dispatch;
+package me.ehp246.aufjms.integration.dispatch.type;
 
 import javax.jms.JMSException;
 
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.integration.dispatch.AppConfig.OfTypeCase01;
+import me.ehp246.aufjms.integration.dispatch.type.AppConfig.OfTypeCase01;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 

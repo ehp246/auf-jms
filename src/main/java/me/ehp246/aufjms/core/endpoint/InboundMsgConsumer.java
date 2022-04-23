@@ -145,7 +145,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                          */
                         return;
                     } catch (Exception e) {
-                        LOGGER.atTrace().log("Failure interceptor failed: {}", e::getMessage);
+                        LOGGER.atTrace().log("Failure interceptor threw: {}", e::getMessage);
 
                         throw OneUtil.toRuntime(e);
                     }
