@@ -31,7 +31,11 @@ public interface JmsDispatch {
     }
 
     default BodyAs bodyAs() {
-        return BodyAs.of(body());
+        if (body() == null) {
+            return null;
+        }
+
+        return () -> body().getClass();
     }
 
     default At replyTo() {
@@ -132,13 +136,5 @@ public interface JmsDispatch {
 
     interface BodyAs {
         Class<?> type();
-
-        static <T> BodyAs of(T value) {
-            if (value == null) {
-                return null;
-            }
-
-            return () -> value.getClass();
-        }
     }
 }

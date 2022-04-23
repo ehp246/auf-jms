@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.integration.dispatch.fn;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
+import me.ehp246.aufjms.integration.dispatch.fn.BodyAsType.PersonDob;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -82,7 +84,57 @@ class DispatchFnTest {
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(body.toString(), message.getBody(String.class), "should be as-is");
     }
-    
+
+    @Test
+    void bodySupplier_02() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var expected = UUID.randomUUID().toString();
+
+        fn.send(new JmsDispatch() {
+
+            @Override
+            public At to() {
+                return TO;
+            }
+
+            @Override
+            public Object body() {
+                return (BodyPublisher) expected::toString;
+            }
+        });
+
+        Assertions.assertEquals(expected, listener.takeReceived().getBody(String.class));
+    }
+
+    @Test
+    void bodyAs_01() throws JMSException {
+        final var fn = fnProvider.get("");
+        final var expected = new BodyAsType.Person(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                Instant.now());
+
+        fn.send(new JmsDispatch() {
+
+            @Override
+            public At to() {
+                return TO;
+            }
+
+            @Override
+            public Object body() {
+                return expected;
+            }
+
+            @Override
+            public BodyAs bodyAs() {
+                return () -> PersonDob.class;
+            }
+
+        });
+
+        Assertions.assertEquals("{\"dob\":\"" + expected.dob().toString() + "\"}",
+                listener.takeReceived().getBody(String.class));
+    }
+
     @Test
     void properties_01() throws JMSException {
         final var fn = fnProvider.get("");
