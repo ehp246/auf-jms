@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.jms.At;
  *
  */
 public class MockProxyConfig implements InvocationDispatchConfig {
-    private final At dest = At.toQueue("");
+    private final At dest = At.toQueue("q");
 
     @Override
     public At to() {

@@ -20,7 +20,7 @@ import me.ehp246.aufjms.util.TestUtil;
  *
  */
 class DefaultInvocationDispatchBuilderTest {
-    private final static At at = At.toQueue("");
+    private final static At at = At.toQueue("d");
 
     private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
 

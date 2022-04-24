@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
@@ -22,6 +23,7 @@ import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  *
@@ -34,28 +36,35 @@ public final class ByJmsFactory {
     private final InvocationDispatchBuilder dispatchProvider;
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
+    private final EnableByJmsConfig enableByJmsConfig;
 
-    public ByJmsFactory(final JmsDispatchFnProvider dispatchFnProvider,
+    public ByJmsFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final InvocationDispatchBuilder dispatchProvider, final PropertyResolver propertyResolver) {
         super();
+        this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchProvider = dispatchProvider;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(EnableByJmsConfig enableByJmsConfig, final Class<T> proxyInterface) {
+    public <T> T newInstance(final Class<T> proxyInterface) {
         LOGGER.atDebug().log("Instantiating {}", proxyInterface.getCanonicalName());
 
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
 
         final var toName = propertyResolver.resolve(byJms.value().value());
-        final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(toName)
-                : At.toTopic(toName);
+        if (!OneUtil.hasValue(toName)) {
+            throw new IllegalArgumentException("Un-supported To: '" + toName + "'");
+        }
+
+        final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(toName) : At.toTopic(toName);
 
         final var replyToName = propertyResolver.resolve(byJms.replyTo().value());
-        final var replyTo = byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName)
-                : At.toTopic(replyToName);
+
+        final var replyTo = OneUtil.hasValue(replyToName)
+                ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
+                : null;
 
         final var ttl = propertyResolver.resolve(byJms.ttl().equals("")
                 ? (enableByJmsConfig.ttl().equals("") ? Duration.ZERO.toString() : enableByJmsConfig.ttl())
