@@ -28,6 +28,6 @@ public class SimpleServiceBusConfig {
 
     @Bean
     ObjectMapper objectMapper() {
-        return TestUtil.OBJECT_MAPPER;
+        return JacksonConfig.OBJECT_MAPPER;
     }
 }

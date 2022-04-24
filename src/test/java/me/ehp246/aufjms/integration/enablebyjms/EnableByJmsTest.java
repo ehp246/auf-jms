@@ -49,4 +49,10 @@ class EnableByJmsTest {
     void name_02() {
         new AnnotationConfigApplicationContext(AppConfig.class).getBean(Case02.NAME, Case02.class);
     }
+
+    @Test
+    void property_01() {
+        Assertions.assertThrows(RuntimeException.class,
+                () -> new AnnotationConfigApplicationContext(PropertyAppConfig.class));
+    }
 }

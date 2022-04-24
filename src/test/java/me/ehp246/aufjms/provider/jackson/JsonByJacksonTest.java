@@ -10,10 +10,10 @@ import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.Person;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonDob;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonName;
-import me.ehp246.aufjms.util.TestUtil;
+import me.ehp246.aufjms.util.JacksonConfig;
 
 class JsonByJacksonTest {
-    private final JsonByJackson jackson = new JsonByJackson(TestUtil.OBJECT_MAPPER);
+    private final JsonByJackson jackson = new JsonByJackson(JacksonConfig.OBJECT_MAPPER);
 
     @Test
     void toType_01() {
