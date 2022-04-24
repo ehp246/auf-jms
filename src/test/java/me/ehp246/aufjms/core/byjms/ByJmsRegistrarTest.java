@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.core.byjms.registrar.case01.RegistrarCase01;
 import me.ehp246.aufjms.core.byjms.registrar.case02.RegistrarCase02;
 import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
+import me.ehp246.aufjms.core.dispatch.EnableByJmsConfig;
 
 /**
  * @author Lei Yang
@@ -48,50 +48,14 @@ class ByJmsRegistrarTest {
     }
 
     @Test
-    void replyTo_01() {
-        final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.ReplyToConfig01.class), registry);
-
-        Assertions.assertEquals("",
-                ((InvocationDispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, InvocationDispatchConfig.class).getValue()))
-                                .replyTo().name());
-    }
-
-    @Test
-    void destination_01() {
-        final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.DestinationConfig01.class), registry);
-
-        Assertions.assertEquals("9c4a0935-bdf6-43bc-a10c-765faf6ed771",
-                ((InvocationDispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, InvocationDispatchConfig.class).getValue()))
-                                .to().name());
-    }
-
-    @Test
-    void destination_02() {
-        final var registry = new SimpleBeanDefinitionRegistry();
-        new ByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.DestinationConfig02.class), registry);
-
-        Assertions.assertEquals("2f954f8b-8162-47c1-bb6d-d405a25bba73",
-                ((InvocationDispatchConfig) (registry.getBeanDefinition("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09")
-                        .getConstructorArgumentValues().getArgumentValue(1, InvocationDispatchConfig.class).getValue()))
-                                .to().name());
-    }
-
-    @Test
     void ttl_01() {
         final var registry = new SimpleBeanDefinitionRegistry();
         new ByJmsRegistrar().registerBeanDefinitions(
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig01.class), registry);
 
         Assertions.assertEquals("PT0.11S",
-                ((InvocationDispatchConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
-                        .getConstructorArgumentValues().getArgumentValue(1, InvocationDispatchConfig.class).getValue()))
+                ((EnableByJmsConfig) (registry.getBeanDefinition(RegistrarCase01.class.getSimpleName())
+                        .getConstructorArgumentValues().getArgumentValue(0, EnableByJmsConfig.class).getValue()))
                                 .ttl());
     }
 
@@ -101,9 +65,9 @@ class ByJmsRegistrarTest {
         new ByJmsRegistrar().registerBeanDefinitions(
                 AnnotationMetadata.introspect(RegistrarAppConfigs.TtlConfig02.class), registry);
 
-        Assertions.assertEquals("PT1S",
-                ((InvocationDispatchConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
-                        .getConstructorArgumentValues().getArgumentValue(1, InvocationDispatchConfig.class).getValue()))
+        Assertions.assertEquals("PT0.112S",
+                ((EnableByJmsConfig) (registry.getBeanDefinition(RegistrarCase02.NAME)
+                        .getConstructorArgumentValues().getArgumentValue(0, EnableByJmsConfig.class).getValue()))
                                 .ttl());
     }
 

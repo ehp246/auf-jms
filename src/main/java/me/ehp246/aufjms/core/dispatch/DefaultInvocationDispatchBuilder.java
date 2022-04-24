@@ -33,7 +33,6 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
-
     private final PropertyResolver propertyResolver;
 
     public DefaultInvocationDispatchBuilder(final PropertyResolver propertyResolver) {
@@ -47,15 +46,12 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                 invocation.target(), invocation.method(), invocation.args());
 
         // Destination is required.
-        final var destination = config.to() instanceof AtQueue
-                ? At.toQueue(propertyResolver.resolve(config.to().name()))
-                : At.toTopic(propertyResolver.resolve(config.to().name()));
+        final var destination = config.to() instanceof AtQueue ? At.toQueue(config.to().name())
+                : At.toTopic(config.to().name());
 
         // Optional.
         final var replyTo = Optional.ofNullable(config.replyTo())
-                .map(at -> at instanceof AtQueue ? At.toQueue(propertyResolver.resolve(at.name()))
-                        : At.toTopic(propertyResolver.resolve(at.name())))
-                .orElse(null);
+                .map(at -> at instanceof AtQueue ? At.toQueue(at.name()) : At.toTopic(at.name())).orElse(null);
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,

@@ -2,6 +2,7 @@ package me.ehp246.aufjms.integration.enablebyjms;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -52,7 +53,7 @@ class EnableByJmsTest {
 
     @Test
     void property_01() {
-        Assertions.assertThrows(RuntimeException.class,
+        Assertions.assertThrows(BeanCreationException.class,
                 () -> new AnnotationConfigApplicationContext(PropertyAppConfig.class));
     }
 }
