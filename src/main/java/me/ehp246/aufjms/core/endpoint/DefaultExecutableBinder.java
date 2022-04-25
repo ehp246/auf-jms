@@ -69,14 +69,14 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
 
         final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
 
-        final var receivers = new ArrayList<FromJson.Receiver<?>>();
+        final var receivers = new ArrayList<FromJson.To>();
         for (int i = 0; i < boundMarkers.length; i++) {
             if (boundMarkers[i]) {
                 continue;
             }
 
             final var ref = Integer.valueOf(i);
-            receivers.add(new FromJson.Receiver<>() {
+            receivers.add(new FromJson.To() {
 
                 @Override
                 public void receive(final Object value) {

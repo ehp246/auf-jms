@@ -1,8 +1,8 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -15,16 +15,15 @@ import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
+import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
-import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.reflection.AnnotatedArgument;
 import me.ehp246.aufjms.core.reflection.DefaultProxyInvocation;
+import me.ehp246.aufjms.core.reflection.ReflectedArgument;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -34,7 +33,6 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class DefaultInvocationDispatchBuilder implements InvocationDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
-
     private final PropertyResolver propertyResolver;
 
     public DefaultInvocationDispatchBuilder(final PropertyResolver propertyResolver) {
@@ -43,20 +41,16 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
     }
 
     @Override
-    public JmsDispatch get(final Invocation invocation, final InvocationDispatchConfig config) {
-        final var proxyInvocation = new DefaultProxyInvocation(invocation.method().getDeclaringClass(),
-                invocation.target(), invocation.method(), invocation.args());
+    public JmsDispatch get(final Object proxy, final Method method, final Object[] args, final ByJmsConfig config) {
+        final var proxyInvocation = new DefaultProxyInvocation(method.getDeclaringClass(), proxy, method, args);
 
         // Destination is required.
-        final var destination = config.to() instanceof AtQueue
-                ? At.toQueue(propertyResolver.resolve(config.to().name()))
-                : At.toTopic(propertyResolver.resolve(config.to().name()));
+        final var destination = config.to() instanceof AtQueue ? At.toQueue(config.to().name())
+                : At.toTopic(config.to().name());
 
         // Optional.
         final var replyTo = Optional.ofNullable(config.replyTo())
-                .map(at -> at instanceof AtQueue ? At.toQueue(propertyResolver.resolve(at.name()))
-                        : At.toTopic(propertyResolver.resolve(at.name())))
-                .orElse(null);
+                .map(at -> at instanceof AtQueue ? At.toQueue(at.name()) : At.toTopic(at.name())).orElse(null);
 
         // In the priority of Argument, Method, Type.
         final String type = proxyInvocation.resolveAnnotatedValue(OfType.class,
@@ -98,30 +92,29 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
                     }
                 });
 
-        final var delay = Optional
-                .ofNullable(proxyInvocation.resolveAnnotatedValue(OfDelay.class,
-                        arg -> arg.argument() != null ? arg.argument().toString()
-                                : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                        OfDelay::value, anno -> null, config::delay))
-                .filter(OneUtil::hasValue).map(propertyResolver::resolve).map(Duration::parse).orElse(null);
+        final var delaySpecified = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfDelay.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfDelay::value, a -> null, () -> null)).map(propertyResolver::resolve).orElse(null);
 
         // Accepts null.
-        final var ttl = Optional
-                .ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
-                        arg -> arg.argument() != null ? arg.argument().toString()
-                                : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                        OfTtl::value, OfTtl::value, config::ttl))
-                .filter(OneUtil::hasValue).map(propertyResolver::resolve).map(Duration::parse).orElse(null);
+        final var ttlSpecified = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
+                arg -> arg.argument() != null ? arg.argument().toString()
+                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
+                OfTtl::value, a -> null, () -> null)).map(propertyResolver::resolve).orElse(null);
 
         final var correlId = proxyInvocation.firstArgumentAnnotationOf(OfCorrelationId.class,
                 annoArg -> Optional.ofNullable(annoArg.argument()).map(Object::toString).orElse(null),
                 () -> UUID.randomUUID().toString());
-        final var body = proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS).stream().findFirst()
-                .map(arg -> new ToJson.From(arg.argument(), arg.parameter().getType(),
-                        Arrays.asList(arg.parameter().getAnnotations())))
-                .orElse(null);
+
+        final var bodyArg = proxyInvocation.filterPayloadArgs(PARAMETER_ANNOTATIONS).stream().findFirst()
+                .orElseGet(() -> new ReflectedArgument(null, null, null));
 
         return new JmsDispatch() {
+            private final Duration ttl = ttlSpecified == null ? config.ttl()
+                    : OneUtil.hasValue(ttlSpecified) ? Duration.parse(ttlSpecified) : null;
+            private final Duration delay = delaySpecified == null ? config.delay()
+                    : OneUtil.hasValue(delaySpecified) ? Duration.parse(delaySpecified) : null;
 
             @Override
             public At to() {
@@ -140,7 +133,12 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
             @Override
             public Object body() {
-                return body;
+                return bodyArg.argument();
+            }
+
+            @Override
+            public BodyAs bodyAs() {
+                return () -> bodyArg.parameter().getType();
             }
 
             @Override

@@ -54,9 +54,8 @@ public final class JsonByJackson implements FromJson, ToJson {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<?> apply(final String body, final List<Receiver<?>> receivers) {
+    public List<?> apply(final String body, final List<To> receivers) {
         if (receivers == null || receivers.size() == 0) {
             return List.of();
         }
@@ -65,7 +64,7 @@ public final class JsonByJackson implements FromJson, ToJson {
             // Single parameter
             if (receivers.size() == 1) {
                 // List.of does not take null.
-                return Arrays.asList(new Object[] { receiveOne(body, (Receiver<Object>) receivers.get(0)) });
+                return Arrays.asList(new Object[] { receiveOne(body, receivers.get(0)) });
             }
 
             // Multiple parameters
@@ -73,7 +72,7 @@ public final class JsonByJackson implements FromJson, ToJson {
             final var values = new ArrayList<Object>();
 
             for (int i = 0; i < receivers.size(); i++) {
-                values.add(receiveOne(jsons[i], (Receiver<Object>) receivers.get(i)));
+                values.add(receiveOne(jsons[i], receivers.get(i)));
             }
 
             return values;
@@ -83,15 +82,14 @@ public final class JsonByJackson implements FromJson, ToJson {
         }
     }
 
-    private Object receiveOne(final String json, final FromJson.Receiver<Object> receiver)
+    private Object receiveOne(final String json, final FromJson.To receiver)
             throws JsonMappingException, JsonProcessingException {
         final var value = json != null && !json.isBlank() ? readOne(json, receiver) : null;
         receiver.receive(value);
         return value;
     }
 
-    private Object readOne(final String json, final Receiver<Object> receiver)
-            throws JsonMappingException, JsonProcessingException {
+    private Object readOne(final String json, final To receiver) throws JsonMappingException, JsonProcessingException {
         final var collectionOf = receiver.annotations() == null ? null
                 : receiver.annotations().stream().filter(ann -> ann instanceof CollectionOf).findAny()
                         .map(ann -> ((CollectionOf) ann).value()).orElse(null);

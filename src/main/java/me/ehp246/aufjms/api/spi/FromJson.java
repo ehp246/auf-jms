@@ -9,16 +9,16 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface FromJson {
-    List<?> apply(String json, List<Receiver<?>> receivers);
+    List<?> apply(String json, List<To> receivers);
 
-    interface Receiver<T> {
+    interface To {
+        Class<?> type();
+
         default List<? extends Annotation> annotations() {
             return List.of();
         }
 
-        Class<? extends T> type();
-
-        default void receive(final T value) {
+        default <T> void receive(final T value) {
 
         }
     }

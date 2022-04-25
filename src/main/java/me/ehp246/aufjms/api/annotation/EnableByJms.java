@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Import;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
-import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
-import me.ehp246.aufjms.core.dispatch.ByJmsRegistrar;
+import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
+import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
 
 /**
@@ -26,7 +26,7 @@ import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, ByJmsRegistrar.class, ByJmsFactory.class, DefaultInvocationDispatchBuilder.class })
+@Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, ByJmsProxyFactory.class, DefaultInvocationDispatchBuilder.class })
 public @interface EnableByJms {
     /**
      * Specifies the packages to scan for {@linkplain ByJms} interfaces.

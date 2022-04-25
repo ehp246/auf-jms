@@ -27,7 +27,7 @@ class AppConfigs {
 
                 @Override
                 public From from() {
-                    return new MockFrom(At.toQueue(""));
+                    return new MockFrom(At.toQueue("q"));
                 }
 
                 @Override
@@ -55,7 +55,7 @@ class AppConfigs {
 
                 @Override
                 public From from() {
-                    return new MockFrom(At.toTopic(""));
+                    return new MockFrom(At.toTopic("t"));
                 }
 
                 @Override

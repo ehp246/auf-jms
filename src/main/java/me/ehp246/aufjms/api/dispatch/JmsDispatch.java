@@ -30,6 +30,14 @@ public interface JmsDispatch {
         return null;
     }
 
+    default BodyAs bodyAs() {
+        if (body() == null) {
+            return null;
+        }
+
+        return () -> body().getClass();
+    }
+
     default At replyTo() {
         return null;
     }
@@ -124,5 +132,13 @@ public interface JmsDispatch {
                 return properties;
             }
         };
+    }
+
+    interface BodyAs {
+        Class<?> type();
+
+        static BodyAs of(Class<?> type) {
+            return () -> type;
+        }
     }
 }

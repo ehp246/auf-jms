@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.integration.enablebyjms.case01.AppConfig01;
 import me.ehp246.aufjms.integration.enablebyjms.case01.Case01;
 import me.ehp246.aufjms.integration.enablebyjms.case02.AppConfig02;
@@ -16,6 +17,24 @@ import me.ehp246.aufjms.integration.enablebyjms.case02.Case02;
  */
 @SuppressWarnings("resource")
 class EnableByJmsTest {
+    @Test
+    void appConfig_01() {
+        final var config = new AnnotationConfigApplicationContext(AppConfig01.class).getBean(EnableByJmsConfig.class);
+
+        Assertions.assertEquals(0, config.scan().size());
+        Assertions.assertEquals("PT0S", config.ttl());
+        Assertions.assertEquals(0, config.dispatchFns().size());
+    }
+
+    @Test
+    void appConfig_02() {
+        final var config = new AnnotationConfigApplicationContext(AppConfig02.class).getBean(EnableByJmsConfig.class);
+
+        Assertions.assertEquals(1, config.scan().size());
+        Assertions.assertEquals(Case01.class, config.scan().get(0));
+        Assertions.assertEquals("PT0S", config.ttl());
+        Assertions.assertEquals(0, config.dispatchFns().size());
+    }
 
     @Test
     void scan_01() {

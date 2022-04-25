@@ -25,23 +25,6 @@ class RegistrarAppConfigs {
     }
 
     @EnableByJms(scan = {
-            RegistrarCase01.class })
-    public static class ReplyToConfig01 {
-
-    }
-
-    @EnableByJms(scan = {
-            RegistrarCase01.class })
-    public static class DestinationConfig01 {
-
-    }
-
-    @EnableByJms(scan = { RegistrarCase02.class })
-    public static class DestinationConfig02 {
-
-    }
-
-    @EnableByJms(scan = {
             RegistrarCase01.class }, ttl = "PT0.11S")
     public static class TtlConfig01 {
 

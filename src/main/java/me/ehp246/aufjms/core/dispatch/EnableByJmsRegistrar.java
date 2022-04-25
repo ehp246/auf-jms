@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import java.time.Duration;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,17 +14,22 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
 
-public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
-    private final static Logger LOGGER = LogManager.getLogger(ByJmsRegistrar.class);
+public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar {
+    private final static Logger LOGGER = LogManager.getLogger(EnableByJmsRegistrar.class);
 
     @Override
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
+        final var enableMap = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
+
+        LOGGER.atTrace().log("Registering {} as '{}'", EnableByJmsConfig.class.getCanonicalName(),
+                EnableByJmsConfig.class.getSimpleName());
+
+        registry.registerBeanDefinition(EnableByJmsConfig.class.getSimpleName(), getAppConfigBeanDefinition(enableMap));
+
         LOGGER.atTrace().log("Scanning for {}", ByJms.class.getCanonicalName());
 
         new EnabledScanner(EnableByJms.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
@@ -41,8 +46,7 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             final var name = proxyInterface.getAnnotation(ByJms.class).name();
 
             registry.registerBeanDefinition(name.equals("") ? proxyInterface.getSimpleName() : name,
-                    this.getProxyBeanDefinition(metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName()),
-                            proxyInterface));
+                    this.getProxyBeanDefinition(proxyInterface));
         });
 
         final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
@@ -52,10 +56,26 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
             return;
         }
 
-        LOGGER.atTrace().log("Defining {} on {}", JmsDispatchFn.class.getSimpleName(), fns);
         for (var i = 0; i < fns.length; i++) {
-            registry.registerBeanDefinition(JmsDispatchFn.class.getSimpleName() + "-" + i, getFnBeanDefinition(fns[i]));
+            final var fnBeanName = JmsDispatchFn.class.getSimpleName() + "-" + i;
+
+            LOGGER.atTrace().log("Defining '{}' on '{}'", fnBeanName, fns[i]);
+
+            registry.registerBeanDefinition(fnBeanName, getFnBeanDefinition(fns[i]));
         }
+    }
+
+    private BeanDefinition getAppConfigBeanDefinition(final Map<String, Object> map) {
+        final var args = new ConstructorArgumentValues();
+        args.addGenericArgumentValue(Arrays.asList((Class<?>[]) map.get("scan")));
+        args.addGenericArgumentValue(map.get("ttl"));
+        args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
+
+        final var proxyBeanDefinition = new GenericBeanDefinition();
+        proxyBeanDefinition.setBeanClass(EnableByJmsConfig.class);
+        proxyBeanDefinition.setConstructorArgumentValues(args);
+
+        return proxyBeanDefinition;
     }
 
     private BeanDefinition getFnBeanDefinition(final String name) {
@@ -71,41 +91,14 @@ public final class ByJmsRegistrar implements ImportBeanDefinitionRegistrar {
         return proxyBeanDefinition;
     }
 
-    private BeanDefinition getProxyBeanDefinition(Map<String, Object> map, final Class<?> proxyInterface) {
-        final var byJms = proxyInterface.getAnnotation(ByJms.class);
-        final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(byJms.value().value())
-                : At.toTopic(byJms.value().value());
-        final var replyTo = byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(byJms.replyTo().value())
-                : At.toTopic(byJms.replyTo().value());
-
-        final var ttl = byJms.ttl().equals("")
-                ? (map.get("ttl").toString().equals("") ? Duration.ZERO.toString() : map.get("ttl").toString())
-                : byJms.ttl();
-
+    private BeanDefinition getProxyBeanDefinition(final Class<?> proxyInterface) {
         final var args = new ConstructorArgumentValues();
         args.addGenericArgumentValue(proxyInterface);
-        args.addGenericArgumentValue(new InvocationDispatchConfig() {
-            @Override
-            public String ttl() {
-                return ttl;
-            }
-
-            @Override
-            public At to() {
-                return destination;
-            }
-
-            @Override
-            public At replyTo() {
-                return replyTo;
-            }
-        });
-        args.addGenericArgumentValue(byJms.connectionFactory());
 
         final var proxyBeanDefinition = new GenericBeanDefinition();
         proxyBeanDefinition.setBeanClass(proxyInterface);
         proxyBeanDefinition.setConstructorArgumentValues(args);
-        proxyBeanDefinition.setFactoryBeanName(ByJmsFactory.class.getName());
+        proxyBeanDefinition.setFactoryBeanName(ByJmsProxyFactory.class.getName());
         proxyBeanDefinition.setFactoryMethodName("newInstance");
 
         return proxyBeanDefinition;

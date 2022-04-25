@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.api.dispatch;
 
+import java.lang.reflect.Method;
+
 import javax.jms.Message;
 
 import me.ehp246.aufjms.api.reflection.Invocation;
@@ -13,5 +15,5 @@ import me.ehp246.aufjms.api.reflection.Invocation;
  */
 @FunctionalInterface
 public interface InvocationDispatchBuilder {
-    JmsDispatch get(Invocation invocation, InvocationDispatchConfig config);
+    JmsDispatch get(Object proxy, Method method, Object[] args, ByJmsConfig config);
 }

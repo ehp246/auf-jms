@@ -12,6 +12,6 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
  *
  */
 @EnableByJms(scan = { Case01.class, Case02.class })
-@Import(EmbeddedArtemisConfig.class)
+@Import({ EmbeddedArtemisConfig.class })
 class AppConfig {
 }

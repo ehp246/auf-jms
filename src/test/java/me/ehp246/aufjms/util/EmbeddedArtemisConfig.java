@@ -15,6 +15,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class EmbeddedArtemisConfig {
     @Bean
     ObjectMapper objectMapper() {
-        return TestUtil.OBJECT_MAPPER;
+        return JacksonConfig.OBJECT_MAPPER;
     }
 }
