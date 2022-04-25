@@ -3,25 +3,20 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -30,19 +25,19 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  * @since 1.0
  */
-public final class ByJmsFactory {
-    private final static Logger LOGGER = LogManager.getLogger(ByJmsFactory.class);
+public final class ByJmsProxyFactory {
+    private final static Logger LOGGER = LogManager.getLogger(ByJmsProxyFactory.class);
 
-    private final InvocationDispatchBuilder dispatchProvider;
+    private final InvocationDispatchBuilder dispatchBuilder;
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
 
-    public ByJmsFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
+    public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final InvocationDispatchBuilder dispatchProvider, final PropertyResolver propertyResolver) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
-        this.dispatchProvider = dispatchProvider;
+        this.dispatchBuilder = dispatchProvider;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
     }
@@ -66,26 +61,12 @@ public final class ByJmsFactory {
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
                 : null;
 
-        final var ttl = propertyResolver.resolve(byJms.ttl().equals("")
+        final var ttl = Duration.parse(propertyResolver.resolve(byJms.ttl().equals("")
                 ? (enableByJmsConfig.ttl().equals("") ? Duration.ZERO.toString() : enableByJmsConfig.ttl())
-                : byJms.ttl());
+                : byJms.ttl()));
 
-        final var jmsDispatchConfig = new InvocationDispatchConfig() {
-            @Override
-            public String ttl() {
-                return ttl;
-            }
-
-            @Override
-            public At to() {
-                return destination;
-            }
-
-            @Override
-            public At replyTo() {
-                return replyTo;
-            }
-        };
+        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, null,
+                byJms.connectionFactory());
 
         final JmsDispatchFn dispatchFn = this.dispatchFnProvider.get(byJms.connectionFactory());
         final var hashCode = new Object().hashCode();
@@ -109,25 +90,7 @@ public final class ByJmsFactory {
                                 .bindTo(proxy).invokeWithArguments(args);
                     }
 
-                    final var jmsDispatch = dispatchProvider.get(new Invocation() {
-                        private final List<?> asList = Collections
-                                .unmodifiableList(args == null ? List.of() : Arrays.asList(args));
-
-                        @Override
-                        public Object target() {
-                            return proxy;
-                        }
-
-                        @Override
-                        public Method method() {
-                            return method;
-                        }
-
-                        @Override
-                        public List<?> args() {
-                            return asList;
-                        }
-                    }, jmsDispatchConfig);
+                    final var jmsDispatch = dispatchBuilder.get(proxy, method, args, byJmsConfig);
 
                     dispatchFn.send(jmsDispatch);
 

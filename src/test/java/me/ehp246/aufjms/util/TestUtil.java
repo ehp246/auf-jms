@@ -83,4 +83,24 @@ public class TestUtil {
 
         Invocation invocation();
     }
+
+    public static Invocation toInvocation(Object proxy, Method method, Object[] args) {
+        return new Invocation() {
+
+            @Override
+            public Object target() {
+                return proxy;
+            }
+
+            @Override
+            public Method method() {
+                return method;
+            }
+
+            @Override
+            public List<?> args() {
+                return args == null ? List.of() : Arrays.asList(args);
+            }
+        };
+    }
 }

@@ -3,7 +3,6 @@ package me.ehp246.aufjms.integration.enablebyjms.propertycase.ttl;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -33,7 +32,6 @@ class TtlTest {
         Assertions.assertEquals(true, appCtx.getBean(Case01.class) != null);
     }
 
-    @Disabled
     @Test
     void property_03() {
         final var appCtx = new AnnotationConfigApplicationContext();

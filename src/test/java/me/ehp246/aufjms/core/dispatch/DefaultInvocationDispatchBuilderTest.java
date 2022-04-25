@@ -10,9 +10,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
 import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.util.MockProxyConfig;
 import me.ehp246.aufjms.util.TestUtil;
 
 /**
@@ -22,18 +21,7 @@ import me.ehp246.aufjms.util.TestUtil;
 class DefaultInvocationDispatchBuilderTest {
     private final static At at = At.toQueue("d");
 
-    private final static InvocationDispatchConfig proxyConfig = new InvocationDispatchConfig() {
-
-        @Override
-        public At to() {
-            return at;
-        }
-
-        @Override
-        public At replyTo() {
-            return at;
-        }
-    };
+    private final static ByJmsConfig proxyConfig = new ByJmsConfig(at, at);
 
     private DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(String::toString);
 
@@ -45,7 +33,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01(argType);
 
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation(), proxyConfig).type(),
+        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type(),
                 "should take arg");
     }
 
@@ -57,11 +46,15 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01_II(argType);
 
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type());
 
         captor.proxy().type01_II("");
 
-        Assertions.assertEquals("", dispatchBuilder.get(captor.invocation(), proxyConfig).type(),
+        Assertions
+                .assertEquals("",
+                        dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig).type(),
                 "should supress the default");
     }
 
@@ -73,7 +66,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01_III(argType);
 
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -82,7 +76,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01_III(null);
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -91,7 +86,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01_II(null);
 
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation(), proxyConfig).type(),
+        Assertions
+                .assertEquals(
+                        TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation().target(),
+                                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type(),
                 "should use the default");
     }
 
@@ -101,7 +99,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type02();
 
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation().target(),
+                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -110,7 +109,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type02_I();
 
-        Assertions.assertEquals("Type02_I", dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals("Type02_I", dispatchBuilder.get(captor.invocation().target(),
+                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -121,7 +121,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01(argType);
 
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -130,7 +131,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type01(null);
 
-        final var dispatch = dispatchBuilder.get(captor.invocation(), proxyConfig);
+        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig);
 
         Assertions.assertEquals(null, dispatch.type());
     }
@@ -141,7 +143,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type02();
 
-        final var dispatch = dispatchBuilder.get(captor.invocation(), proxyConfig);
+        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig);
 
         Assertions.assertEquals(TypeCases.TYPE_II, dispatch.type());
     }
@@ -152,7 +155,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type03();
 
-        final var dispatch = dispatchBuilder.get(captor.invocation(), proxyConfig);
+        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig);
 
         Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type(), "should find annotated first");
     }
@@ -163,7 +167,8 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().type04();
 
-        Assertions.assertEquals("Type04", dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals("Type04", dispatchBuilder.get(captor.invocation().target(),
+                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -171,7 +176,8 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
         captor.proxy().m01();
 
-        Assertions.assertEquals("M01", dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals("M01", dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -179,7 +185,8 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
         captor.proxy().m01();
 
-        Assertions.assertEquals("Case03", dispatchBuilder.get(captor.invocation(), proxyConfig).type());
+        Assertions.assertEquals("Case03", dispatchBuilder.get(captor.invocation().target(),
+                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test
@@ -187,7 +194,10 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
         captor.proxy().m02();
 
-        Assertions.assertEquals("M02", dispatchBuilder.get(captor.invocation(), proxyConfig).type(),
+        Assertions
+                .assertEquals("M02",
+                        dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig).type(),
                 "should follow the first annotated");
     }
 
@@ -196,7 +206,8 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().get();
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).ttl());
+        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                captor.invocation().args().toArray(), proxyConfig).ttl());
     }
 
     @Test
@@ -205,14 +216,10 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().get();
 
         Assertions.assertEquals(Duration.ofDays(1).toMillis(),
-                dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
-
-                    @Override
-                    public String ttl() {
-                        return Duration.ofDays(1).toString();
-                    }
-
-                }).ttl().toMillis());
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), new ByJmsConfig(at, Duration.ofDays(1)))
+                        .ttl().toMillis());
     }
 
     @Test
@@ -220,14 +227,11 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().getTtl01();
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
-
-            @Override
-            public String ttl() {
-                return Duration.ofDays(1).toString();
-            }
-
-        }).ttl(), "should surpress");
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(),
+                        new ByJmsConfig(at, Duration.ofDays(1))).ttl(),
+                "should surpress");
     }
 
     @Test
@@ -236,14 +240,12 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().getTtl02();
 
         Assertions.assertEquals(Duration.ofSeconds(10).toMillis(),
-                dispatchBuilder.get(captor.invocation(), new MockProxyConfig() {
-
-                    @Override
-                    public String ttl() {
-                        return Duration.ofDays(1).toString();
-                    }
-
-                }).ttl().toMillis());
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(),
+                                new ByJmsConfig(at, Duration.ofDays(1)))
+                        .ttl()
+                        .toMillis());
     }
 
     @Test
@@ -251,7 +253,9 @@ class DefaultInvocationDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().getTtl03();
 
-        Assertions.assertThrows(Exception.class, () -> dispatchBuilder.get(captor.invocation(), proxyConfig));
+        Assertions.assertThrows(Exception.class,
+                () -> dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig));
     }
 
     @Test
@@ -264,7 +268,8 @@ class DefaultInvocationDispatchBuilderTest {
         final var ttl = new DefaultInvocationDispatchBuilder(v -> {
             value[0] = v;
             return "PT1S";
-        }).get(captor.invocation(), proxyConfig).ttl().toMillis();
+        }).get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                proxyConfig).ttl().toMillis();
 
         Assertions.assertEquals("PT10S", value[0], "should run it through the resolver");
         Assertions.assertEquals(Duration.parse("PT1S").toMillis(), ttl, "should use the resolved");
@@ -277,16 +282,22 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().getTtl03("PT0.1S");
 
         Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis());
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).ttl()
+                        .toMillis());
 
         captor.proxy().getTtl03("");
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).ttl(),
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).ttl(),
                 "should suppress other annotations");
 
         captor.proxy().getTtl03(null);
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).ttl(),
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).ttl(),
                 "should suppress other annotations");
     }
 
@@ -297,17 +308,27 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().getTtl04("PT0.1S");
 
         Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis());
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig)
+                        .ttl()
+                        .toMillis());
 
         captor.proxy().getTtl04("");
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).ttl(),
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).ttl(),
                 "should supress the default");
 
         captor.proxy().getTtl04(null);
 
         Assertions.assertEquals(Duration.parse("PT1S").toMillis(),
-                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis(),
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig)
+                        .ttl()
+                        .toMillis(),
                 "should use it for the default");
     }
 
@@ -318,12 +339,20 @@ class DefaultInvocationDispatchBuilderTest {
         captor.proxy().getTtl05(Duration.parse("PT0.1S"));
 
         Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis());
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig)
+                        .ttl()
+                        .toMillis());
 
         captor.proxy().getTtl05(null);
 
         Assertions.assertEquals(Duration.parse("PT1S").toMillis(),
-                dispatchBuilder.get(captor.invocation(), proxyConfig).ttl().toMillis(),
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig)
+                        .ttl()
+                        .toMillis(),
                 "should use it for the default");
     }
 
@@ -333,7 +362,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -344,7 +375,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(expected);
 
-        Assertions.assertEquals(expected, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(expected,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -353,7 +386,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), "");
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -362,7 +397,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "");
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -373,8 +410,14 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m04(expected);
 
-        final var actual = dispatchBuilder.get(captor.invocation(), proxyConfig).body();
-        final var actualAs = dispatchBuilder.get(captor.invocation(), proxyConfig).bodyAs();
+        final var actual = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .body();
+        final var actualAs = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .bodyAs();
 
         Assertions.assertEquals(expected, actual);
         Assertions.assertEquals(TemporalAccessor.class, actualAs.type());
@@ -388,7 +431,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(UUID.randomUUID().toString(), body);
 
-        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(body,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -399,7 +444,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(body, UUID.randomUUID().toString(), null);
 
-        Assertions.assertEquals(body, dispatchBuilder.get(captor.invocation(), proxyConfig).body());
+        Assertions.assertEquals(body,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).body());
     }
 
     @Test
@@ -408,7 +455,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(Map.of("key1", "value1"), Map.of("key2", "value2"));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
 
@@ -422,7 +472,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01("");
 
-        Assertions.assertThrows(RuntimeException.class, () -> dispatchBuilder.get(captor.invocation(), proxyConfig),
+        Assertions.assertThrows(RuntimeException.class,
+                () -> dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig),
                 "should require a property name");
     }
 
@@ -432,7 +484,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(null, Map.of("key2", "value2"));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(1, properties.keySet().size());
 
@@ -445,7 +500,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(Map.of("key2", "value1"), Map.of("key2", "value2"));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(1, properties.keySet().size());
 
@@ -461,7 +519,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(map, Map.of("key2", ""));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
         Assertions.assertEquals(null, properties.get("key1"), "should accept null");
@@ -474,7 +535,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01("id1", 123, Map.of("key2", "value2"));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(3, properties.keySet().size());
 
@@ -489,7 +553,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01("id1", 123, Map.of("ID", "id2"));
 
-        final var properties = dispatchBuilder.get(captor.invocation(), proxyConfig).properties();
+        final var properties = dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
 
@@ -503,7 +570,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        Assertions.assertEquals(2000, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toMillis());
+        Assertions.assertEquals(2000, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .delay().toMillis());
     }
 
     @Test
@@ -516,7 +586,8 @@ class DefaultInvocationDispatchBuilderTest {
         Assertions.assertEquals(100, new DefaultInvocationDispatchBuilder(v -> {
             property[0] = v;
             return "PT0.1S";
-        }).get(captor.invocation(), proxyConfig).delay().toMillis());
+        }).get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                proxyConfig).delay().toMillis());
 
         Assertions.assertEquals("PT2S", property[0]);
     }
@@ -527,7 +598,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(Duration.ofDays(1));
 
-        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toDays());
+        Assertions.assertEquals(1, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .delay().toDays());
     }
 
     @Test
@@ -536,7 +610,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01((Duration) null);
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).delay());
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).delay());
     }
 
     @Test
@@ -545,7 +621,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(Duration.ofMillis(1).toString());
 
-        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toMillis());
+        Assertions.assertEquals(1, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .delay().toMillis());
     }
 
     @Test
@@ -554,7 +633,9 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01((String) null);
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).delay());
+        Assertions.assertEquals(null,
+                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
+                        captor.invocation().args().toArray(), proxyConfig).delay());
     }
 
     @Test
@@ -563,7 +644,12 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(null);
 
-        Assertions.assertEquals(2, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toSeconds(),
+        Assertions.assertEquals(2,
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(), proxyConfig)
+                        .delay()
+                        .toSeconds(),
                 "should use the default");
     }
 
@@ -573,7 +659,53 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02("PT100S");
 
-        Assertions.assertEquals(100, dispatchBuilder.get(captor.invocation(), proxyConfig).delay().toSeconds());
+        Assertions.assertEquals(100, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .delay().toSeconds());
+    }
+
+    @Test
+    void delay_m03_1() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m03();
+
+        Assertions.assertEquals(null, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        new ByJmsConfig(at, at, Duration.ofHours(1), Duration.ofSeconds(2), ""))
+                .delay(),
+                "should suppress");
+    }
+
+    @Test
+    void delay_m03_2() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m03("");
+
+        Assertions.assertEquals(null,
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(),
+                                new ByJmsConfig(at, at, Duration.ofHours(2), Duration.ofSeconds(2), ""))
+                        .delay(),
+                "should suppress");
+    }
+
+    @Test
+    void delay_m03_3() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m03(null);
+
+        Assertions.assertEquals(Duration.ofSeconds(2),
+                dispatchBuilder
+                        .get(captor.invocation().target(), captor.invocation().method(),
+                                captor.invocation().args().toArray(),
+                                new ByJmsConfig(at, at, Duration.ofHours(12), Duration.ofSeconds(2), ""))
+                        .delay(),
+                "should not suppress");
     }
 
     @Test
@@ -583,7 +715,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m01(id);
 
-        Assertions.assertEquals(id.toString(), dispatchBuilder.get(captor.invocation(), proxyConfig).correlationId());
+        Assertions.assertEquals(id.toString(), dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .correlationId());
     }
 
     @Test
@@ -592,7 +727,10 @@ class DefaultInvocationDispatchBuilderTest {
 
         captor.proxy().m02(null, UUID.randomUUID().toString());
 
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation(), proxyConfig).correlationId(),
+        Assertions.assertEquals(null, dispatchBuilder
+                .get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
+                        proxyConfig)
+                .correlationId(),
                 "should take the first one");
     }
 }

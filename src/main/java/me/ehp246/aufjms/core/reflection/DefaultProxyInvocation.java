@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +34,11 @@ public final class DefaultProxyInvocation implements Invocation {
     private final Parameter[] parameters;
 
     public DefaultProxyInvocation(final Class<?> declaringType, final Object target, final Method method,
-            final List<?> args) {
+            final Object[] args) {
         this.declaringType = declaringType;
         this.target = target;
         this.method = Objects.requireNonNull(method);
-        this.args = Collections.unmodifiableList(args == null ? new ArrayList<Object>() : args);
+        this.args = Collections.unmodifiableList(args == null ? List.of() : Arrays.asList(args));
         this.parameterAnnotations = this.method.getParameterAnnotations();
         this.threws = List.of(this.method.getExceptionTypes());
         this.parameters = method.getParameters();

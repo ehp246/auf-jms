@@ -15,5 +15,8 @@ import java.lang.annotation.Target;
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD, ElementType.PARAMETER })
 public @interface OfTtl {
+    /*
+     * Supports Spring property placeholder.
+     */
     String value() default "";
 }

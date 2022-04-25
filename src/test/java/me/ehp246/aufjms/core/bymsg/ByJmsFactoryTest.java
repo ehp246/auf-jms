@@ -11,16 +11,17 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.dispatch.ByJmsFactory;
+import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
+import me.ehp246.aufjms.util.TestUtil;
 
 class ByJmsFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;
-    private final InvocationDispatchBuilder dispatchProvider = (invocation, config) -> null;
+    private final InvocationDispatchBuilder dispatchProvider = (proxy, method, args, config) -> null;
     private final JmsDispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
     private final PropertyResolver propertyResolver = n -> n;
     private final EnableByJmsConfig config = new EnableByJmsConfig();
 
-    private final ByJmsFactory factory = new ByJmsFactory(config, dispatchFnProvider, dispatchProvider,
+    private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, dispatchProvider,
             propertyResolver);
 
     @Test
@@ -54,11 +55,11 @@ class ByJmsFactoryTest {
         };
         final var con = new String[1];
         final var inv = new Invocation[1];
-        final var newInstance = new ByJmsFactory(config, conection -> {
+        final var newInstance = new ByJmsProxyFactory(config, conection -> {
             con[0] = conection;
             return dispatchFn;
-        }, (invocation, config) -> {
-            inv[0] = invocation;
+        }, (proxy, method, args, config) -> {
+            inv[0] = TestUtil.toInvocation(proxy, method, args);
             return jmsDispatch;
         }, propertyResolver).newInstance(TestCases.Case01.class);
 
