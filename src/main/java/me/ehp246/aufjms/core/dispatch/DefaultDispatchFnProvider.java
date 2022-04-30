@@ -76,7 +76,9 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     .getLogger(JmsDispatchFn.class.getName() + "@" + connectionFactoryName);
 
             @Override
-            public JmsMsg send(JmsDispatch dispatch) {
+            public JmsMsg send(final JmsDispatch dispatch) {
+                Objects.requireNonNull(dispatch);
+
                 LOGGER.atTrace().log("Sending '{}' '{}' to '{}' on '{}'", dispatch.type(), dispatch.correlationId(),
                         dispatch.to(), connectionFactoryName);
 

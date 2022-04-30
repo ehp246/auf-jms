@@ -170,6 +170,15 @@ class DefaultDispatchFnProviderTest {
     }
 
     @Test
+    void ex_02() {
+        // Should allow to create.
+        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+
+        // Should throw without connection and context session.
+        Assertions.assertThrows(NullPointerException.class, () -> fn.send(null));
+    }
+
+    @Test
     void ttl_01() throws JMSException {
         new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
 
