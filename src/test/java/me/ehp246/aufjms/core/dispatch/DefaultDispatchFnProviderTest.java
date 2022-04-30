@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -64,12 +64,8 @@ class DefaultDispatchFnProviderTest {
     @Mock
     private Topic topic;
 
-//    @Mock
-//    private JMSContext ctx;
-//    @Mock
-//    private JMSProducer producer;
-
     private final ConnectionFactoryProvider cfProvder = name -> cf;
+    private final ArgumentMatcher<JmsMsg> matchMessage = msg -> msg.message() == textMessage;
 
     @BeforeEach
     public void before() throws JMSException {
@@ -77,6 +73,8 @@ class DefaultDispatchFnProviderTest {
         Mockito.when(this.conn.createSession()).thenReturn(this.session);
         Mockito.when(this.session.createProducer(null)).thenReturn(this.producer);
         Mockito.when(this.session.createTextMessage()).thenReturn(this.textMessage);
+        Mockito.when(this.session.createQueue(Mockito.anyString())).thenReturn(this.queue);
+        Mockito.when(this.session.createTopic(Mockito.anyString())).thenReturn(this.topic);
 
         AufJmsContext.clearSession();
 
@@ -93,23 +91,57 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void listener_01() {
-        final var count = new ArrayList<Object>();
-        final var listener = new DispatchListener() {
-
-            @Override
-            public void postSend(JmsDispatch dispatch, JmsMsg msg) {
-                count.add(msg);
-                count.add(dispatch);
-            }
-        };
+        final var listener = Mockito.mock(DispatchListener.class);
         final var dispatch = new MockDispatch();
+
         new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("").send(dispatch);
 
-        Assertions.assertEquals(count.get(0), count.get(2));
-        Assertions.assertEquals(4, count.size());
-        Assertions.assertEquals(count.get(1), count.get(3));
-        Assertions.assertEquals(true, count.get(1) == dispatch);
+        Mockito.verify(listener, times(2)).onDispatch(dispatch);
+        Mockito.verify(listener, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
+        Mockito.verify(listener, times(2)).postSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
+        Mockito.verify(listener, times(0)).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
+                Mockito.any(Exception.class));
+    }
 
+    @Test
+    void listener_02() throws JMSException {
+        final var jmsException = new JMSException("");
+        Mockito.doThrow(jmsException).when(this.conn).createSession();
+
+        final var listener = Mockito.mock(DispatchListener.class);
+        final var dispatch = new MockDispatch();
+
+        final var thrown = Assertions.assertThrows(JmsDispatchFnException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
+                        .send(dispatch));
+
+        Mockito.verify(listener, times(2)).onDispatch(dispatch);
+        Mockito.verify(listener, times(0)).preSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
+        Mockito.verify(listener, times(0)).postSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
+        Mockito.verify(listener, times(2)).onException(Mockito.eq(dispatch), Mockito.eq(null),
+                Mockito.eq(jmsException));
+
+        Assertions.assertEquals(jmsException, thrown.getCause());
+    }
+
+    @Test
+    void listener_03() throws JMSException {
+        final var jmsException = new JMSException("");
+        Mockito.doThrow(jmsException).when(this.producer).send(Mockito.any(Destination.class),
+                Mockito.eq(textMessage));
+
+        final var listener = Mockito.mock(DispatchListener.class);
+        final var dispatch = new MockDispatch();
+
+        Assertions.assertThrows(JmsDispatchFnException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
+                        .send(dispatch));
+
+        Mockito.verify(listener, times(2)).onDispatch(dispatch);
+        Mockito.verify(listener, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
+        Mockito.verify(listener, times(0)).postSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
+        Mockito.verify(listener, times(2)).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
+                Mockito.eq(jmsException));
     }
 
     @Test

@@ -22,6 +22,7 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @EnableByJms
 @Import({ EmbeddedArtemisConfig.class })
 class AppConfig {
+    public CompletableFuture<DispatchRecord> onDispatchRef;
     public CompletableFuture<DispatchRecord> preRef;
     public CompletableFuture<DispatchRecord> postRef;
     public CompletableFuture<DispatchRecord> exRef;
@@ -35,10 +36,15 @@ class AppConfig {
         void ping(BodyPublisher pub);
     }
 
-
     @Bean
     DispatchListener dispatchListener() {
         return new DispatchListener() {
+
+            @Override
+            public void onDispatch(JmsDispatch dispatch) {
+                onDispatchRef = new CompletableFuture<>();
+                onDispatchRef.complete(new DispatchRecord(dispatch, null, null));
+            }
 
             @Override
             public void preSend(JmsDispatch dispatch, JmsMsg msg) {

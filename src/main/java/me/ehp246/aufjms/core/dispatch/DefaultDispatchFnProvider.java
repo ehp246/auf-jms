@@ -74,19 +74,24 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         return new JmsDispatchFn() {
             private final Logger LOGGER = LogManager
                     .getLogger(JmsDispatchFn.class.getName() + "@" + connectionFactoryName);
+
             @Override
             public JmsMsg send(JmsDispatch dispatch) {
+                LOGGER.atTrace().log("Sending '{}' '{}' to '{}' on '{}'", dispatch.type(), dispatch.correlationId(),
+                        dispatch.to(), connectionFactoryName);
+
+                for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                    listener.onDispatch(dispatch);
+                }
+
                 /*
-                 * If connection is not set, look for the context. It's an error, if both are
-                 * missing.
+                 * If connection is not set, look for one in the context. It is an error, if
+                 * both are missing.
                  */
                 if (connection == null && AufJmsContext.getSession() == null) {
                     throw new JmsDispatchFnException("No session can be created");
                 }
 
-                LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
-                        dispatch.to().name().toString(), connectionFactoryName);
-                
                 Session session = null;
                 MessageProducer producer = null;
                 TextMessage message = null;
@@ -173,7 +178,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 if (body == null) {
                     return null;
                 }
-                
+
                 if (body instanceof BodyPublisher publisher) {
                     return publisher.get();
                 }
