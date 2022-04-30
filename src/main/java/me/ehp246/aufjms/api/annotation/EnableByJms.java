@@ -14,9 +14,10 @@ import org.springframework.context.annotation.Import;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
-import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
-import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
+import me.ehp246.aufjms.core.dispatch.ByJmsBeanFactory;
 import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
+import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
+import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 
 /**
  * Enables {@link ByJms}-annotated proxy interfaces scanning.
@@ -26,7 +27,8 @@ import me.ehp246.aufjms.core.dispatch.DefaultInvocationDispatchBuilder;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, ByJmsProxyFactory.class, DefaultInvocationDispatchBuilder.class })
+@Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, EnableByJmsBeanFactory.class, ByJmsBeanFactory.class,
+        DefaultInvocationDispatchBuilder.class })
 public @interface EnableByJms {
     /**
      * Specifies the packages to scan for {@linkplain ByJms} interfaces.
@@ -38,14 +40,14 @@ public @interface EnableByJms {
 
     /**
      * Specifies a value for {@linkplain MessageProducer#setTimeToLive(long)} that
-     * applies to all out-bound messages from this proxy.
+     * applies to all out-bound messages from the application.
      * <p>
-     * The value can be overridden by higher-priority sources from individual
-     * methods.
+     * The value can be overridden by higher-priority sources from
+     * {@linkplain ByJms} proxies. The default is no TTL.
      * <p>
      * Supports Spring property placeholder.
      */
-    String ttl() default "PT0S";
+    String ttl() default "";
 
     /**
      * Specifies whether to register {@linkplain JmsDispatchFn} beans backed by a

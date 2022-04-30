@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
+import me.ehp246.aufjms.core.dispatch.ByJmsBeanFactory;
 import me.ehp246.aufjms.util.TestUtil;
 
 class ByJmsFactoryTest {
@@ -21,12 +21,12 @@ class ByJmsFactoryTest {
     private final PropertyResolver propertyResolver = n -> n;
     private final EnableByJmsConfig config = new EnableByJmsConfig();
 
-    private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, dispatchProvider,
+    private final ByJmsBeanFactory factory = new ByJmsBeanFactory(config, dispatchFnProvider, dispatchProvider,
             propertyResolver);
 
     @Test
     void object_01() {
-        final var newInstance = factory.newInstance(TestCases.Case01.class);
+        final var newInstance = factory.newByJmsProxy(TestCases.Case01.class);
 
         Assertions.assertTrue(newInstance instanceof TestCases.Case01);
         Assertions.assertTrue(newInstance.toString() instanceof String);
@@ -37,7 +37,7 @@ class ByJmsFactoryTest {
 
     @Test
     void default_01() {
-        Assertions.assertEquals(124, factory.newInstance(TestCases.Case01.class).inc(123));
+        Assertions.assertEquals(124, factory.newByJmsProxy(TestCases.Case01.class).inc(123));
     }
 
     @Test
@@ -55,13 +55,13 @@ class ByJmsFactoryTest {
         };
         final var con = new String[1];
         final var inv = new Invocation[1];
-        final var newInstance = new ByJmsProxyFactory(config, conection -> {
+        final var newInstance = new ByJmsBeanFactory(config, conection -> {
             con[0] = conection;
             return dispatchFn;
         }, (proxy, method, args, config) -> {
             inv[0] = TestUtil.toInvocation(proxy, method, args);
             return jmsDispatch;
-        }, propertyResolver).newInstance(TestCases.Case01.class);
+        }, propertyResolver).newByJmsProxy(TestCases.Case01.class);
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");
 

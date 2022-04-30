@@ -75,6 +75,9 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         proxyBeanDefinition.setBeanClass(EnableByJmsConfig.class);
         proxyBeanDefinition.setConstructorArgumentValues(args);
 
+        proxyBeanDefinition.setFactoryBeanName(EnableByJmsBeanFactory.class.getName());
+        proxyBeanDefinition.setFactoryMethodName("enableByJmsConfig");
+
         return proxyBeanDefinition;
     }
 
@@ -98,8 +101,8 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         final var proxyBeanDefinition = new GenericBeanDefinition();
         proxyBeanDefinition.setBeanClass(proxyInterface);
         proxyBeanDefinition.setConstructorArgumentValues(args);
-        proxyBeanDefinition.setFactoryBeanName(ByJmsProxyFactory.class.getName());
-        proxyBeanDefinition.setFactoryMethodName("newInstance");
+        proxyBeanDefinition.setFactoryBeanName(ByJmsBeanFactory.class.getName());
+        proxyBeanDefinition.setFactoryMethodName("newByJmsProxy");
 
         return proxyBeanDefinition;
     }

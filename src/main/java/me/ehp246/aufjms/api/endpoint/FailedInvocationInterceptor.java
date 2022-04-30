@@ -2,7 +2,7 @@ package me.ehp246.aufjms.api.endpoint;
 
 /**
  * @author Lei Yang
- * @since 0.7.0
+ * @since 1.0
  */
 @FunctionalInterface
 public interface FailedInvocationInterceptor {
