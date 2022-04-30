@@ -145,6 +145,22 @@ class DefaultDispatchFnProviderTest {
     }
 
     @Test
+    void listener_04() {
+        final var listener = Mockito.mock(DispatchListener.class);
+
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, listener)).get("")
+                        .send(null));
+
+        // Null should be checked very early on.
+        Mockito.verify(listener, times(0)).onDispatch(null);
+        Mockito.verify(listener, times(0)).preSend(Mockito.eq(null), Mockito.any(JmsMsg.class));
+        Mockito.verify(listener, times(0)).postSend(Mockito.eq(null), Mockito.any(JmsMsg.class));
+        Mockito.verify(listener, times(0)).onException(Mockito.eq(null), Mockito.any(JmsMsg.class),
+                Mockito.any(Exception.class));
+    }
+
+    @Test
     void send_01() throws JMSException {
         final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
 

@@ -18,7 +18,7 @@ public interface DispatchListener {
      * called and before any JMS API invocations to construct and send the message.
      * <p>
      * This is the first event on the listener. It is very unlikely to be
-     * interrupted by an exception.
+     * interrupted by an exception unless {@code dispatch} is {@code null}.
      * 
      * @param dispatch
      */
