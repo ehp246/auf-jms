@@ -94,8 +94,10 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
 
         final var delaySpecified = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfDelay.class,
                 arg -> arg.argument() != null ? arg.argument().toString()
-                        : arg.annotation().value().isBlank() ? null : arg.annotation().value(),
-                OfDelay::value, a -> null, () -> null)).map(propertyResolver::resolve).orElse(null);
+                        : arg.annotation().value().isBlank() ? null
+                                : propertyResolver.resolve(arg.annotation().value()),
+                ofDelay -> propertyResolver.resolve(ofDelay.value()),
+                ofDelay -> propertyResolver.resolve(ofDelay.value()), () -> null)).orElse(null);
 
         // Accepts null.
         final var ttlSpecified = Optional.ofNullable(proxyInvocation.resolveAnnotatedValue(OfTtl.class,
