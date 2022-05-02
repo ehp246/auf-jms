@@ -49,4 +49,8 @@ class BeanTest {
         Assertions.assertEquals(false, listenerContainer.isAutoStartup());
         Assertions.assertEquals(true, listenerContainer.isPubSubDomain());
     }
+
+    @Test
+    void bean_detory_01() {
+    }
 }

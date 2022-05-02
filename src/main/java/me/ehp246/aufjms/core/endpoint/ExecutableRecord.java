@@ -9,8 +9,9 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  * @author Lei Yang
  *
  */
-record ExecutableRecord(Object instance, Method method, InvocationModel invocationModel) implements Executable {
+record ExecutableRecord(Object instance, Method method, AutoCloseable closeable, InvocationModel invocationModel)
+        implements Executable {
     ExecutableRecord(Object instance, Method method) {
-        this(instance, method, InvocationModel.DEFAULT);
+        this(instance, method, null, InvocationModel.DEFAULT);
     }
 }
