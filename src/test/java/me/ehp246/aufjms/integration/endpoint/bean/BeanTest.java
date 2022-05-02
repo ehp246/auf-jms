@@ -1,12 +1,17 @@
 package me.ehp246.aufjms.integration.endpoint.bean;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeansException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.integration.endpoint.bean.AppConfigs.AppConfig03;
 
 /**
  * @author Lei Yang
@@ -51,6 +56,12 @@ class BeanTest {
     }
 
     @Test
-    void bean_detory_01() {
+    void bean_close_01() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig03.class);
+        appCtx.refresh();
+
+        appCtx.getBean(AppConfig03.Send.class).send();
+
+        Assertions.assertEquals(true, appCtx.getBean(CompletableFuture.class).get(), "should close");
     }
 }
