@@ -37,27 +37,42 @@ class AppConfig {
     }
 
     @Bean
-    DispatchListener dispatchListener() {
-        return new DispatchListener() {
+    DispatchListener onDispatch() {
+        return new DispatchListener.OnDispatch() {
 
             @Override
             public void onDispatch(JmsDispatch dispatch) {
                 onDispatchRef = new CompletableFuture<>();
                 onDispatchRef.complete(new DispatchRecord(dispatch, null, null));
             }
+        };
+    }
 
+    @Bean
+    DispatchListener preSend() {
+        return new DispatchListener.PreSend() {
             @Override
             public void preSend(JmsDispatch dispatch, JmsMsg msg) {
                 preRef = new CompletableFuture<>();
                 preRef.complete(new DispatchRecord(dispatch, msg, null));
             }
+        };
+    }
 
+    @Bean
+    DispatchListener postSend() {
+        return new DispatchListener.PostSend() {
             @Override
             public void postSend(JmsDispatch dispatch, JmsMsg msg) {
                 postRef = new CompletableFuture<>();
                 postRef.complete(new DispatchRecord(dispatch, msg, null));
             }
+        };
+    }
 
+    @Bean
+    DispatchListener onException() {
+        return new DispatchListener.OnException() {
             @Override
             public void onException(JmsDispatch dispatch, JmsMsg msg, Exception e) {
                 exRef = new CompletableFuture<>();

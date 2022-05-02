@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DispatchLogger implements DispatchListener {
+public final class DispatchLogger implements DispatchListener.PostSend {
     private final static Logger LOGGER = LogManager.getLogger(DispatchLogger.class);
 
     @Override
@@ -19,5 +19,4 @@ public final class DispatchLogger implements DispatchListener {
         LOGGER.atDebug().log("{}, {}, {}", () -> msg.destination().toString(), msg::type, msg::correlationId);
         LOGGER.atTrace().log("{}", msg::text);
     }
-
 }

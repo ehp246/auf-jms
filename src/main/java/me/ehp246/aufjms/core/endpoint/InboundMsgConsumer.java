@@ -133,7 +133,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                 if (thrown != null) {
                     if (invocationListener.failedInterceptor() == null) {
-                        throw OneUtil.toRuntime(thrown);
+                        throw OneUtil.ensureRuntime(thrown);
                     }
 
                     LOGGER.atTrace().log("Executing failed interceptor");
@@ -147,7 +147,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     } catch (Exception e) {
                         LOGGER.atTrace().log("Failure interceptor threw: {}", e::getMessage);
 
-                        throw OneUtil.toRuntime(e);
+                        throw OneUtil.ensureRuntime(e);
                     }
                 }
 
@@ -160,7 +160,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     } catch (Exception e) {
                         LOGGER.atTrace().log("Completed consumer failed: {}", e.getMessage());
 
-                        throw OneUtil.toRuntime(e);
+                        throw OneUtil.ensureRuntime(e);
                     }
                 }
 
