@@ -25,5 +25,7 @@ class DelayCases {
         void m03();
 
         void m03(@OfDelay String delay);
+
+        void m04(@OfDelay Duration delay);
     }
 }

@@ -1,10 +1,17 @@
 package me.ehp246.aufjms.integration.endpoint.bean;
 
-import org.jgroups.util.UUID;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import me.ehp246.aufjms.api.annotation.ByJms;
+import me.ehp246.aufjms.api.annotation.ByJms.To;
+import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.At;
@@ -73,6 +80,22 @@ class AppConfigs {
                     return false;
                 }
             };
+        }
+    }
+
+    @EnableByJms
+    @EnableForJms(@Inbound(@From("q1")))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig03 {
+        public static final CompletableFuture<Boolean> closeFuture = new CompletableFuture<>();
+        @Bean
+        CompletableFuture<Boolean> closeFuture() {
+            return closeFuture;
+        };
+
+        @ByJms(@To("q1"))
+        interface Send {
+            void send();
         }
     }
 }

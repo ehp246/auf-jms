@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -24,7 +25,6 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.exception.JmsDispatchFnException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -43,7 +43,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
     private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
-    private final List<DispatchListener> listeners;
+    private final List<DispatchListener.OnDispatch> onDispatchs = new ArrayList<>();
+    private final List<DispatchListener.PreSend> preSends = new ArrayList<>();
+    private final List<DispatchListener.PostSend> postSends = new ArrayList<>();
+    private final List<DispatchListener.OnException> onExs = new ArrayList<>();
     private final Set<Connection> closeable = ConcurrentHashMap.newKeySet();
 
     public DefaultDispatchFnProvider(final ConnectionFactoryProvider cfProvider, final ToJson jsonFn,
@@ -51,7 +54,18 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.toJson = Objects.requireNonNull(jsonFn);
-        this.listeners = dispatchListeners == null ? List.of() : Collections.unmodifiableList(dispatchListeners);
+
+        for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
+            if (listener instanceof DispatchListener.OnDispatch onDispatch) {
+                onDispatchs.add(onDispatch);
+            } else if (listener instanceof DispatchListener.PreSend preSend) {
+                preSends.add(preSend);
+            } else if (listener instanceof DispatchListener.PostSend postSend) {
+                postSends.add(postSend);
+            } else if (listener instanceof DispatchListener.OnException onEx) {
+                onExs.add(onEx);
+            }
+        }
     }
 
     @Override
@@ -60,10 +74,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         if (connectionFactoryName != null) {
             try {
                 connection = cfProvider.get(connectionFactoryName).createConnection();
-            } catch (Exception e) {
-                LOGGER.atError().log("Failed to create connection on factory {}:{}", connectionFactoryName,
+            } catch (JMSException e) {
+                LOGGER.atError().log("Failed to create connection on factory '{}': {}", connectionFactoryName,
                         e.getMessage());
-                throw new JmsDispatchFnException(e);
+                throw new JMSRuntimeException(e.getErrorCode(), e.getMessage(), e);
             }
 
             this.closeable.add(connection);
@@ -74,24 +88,31 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         return new JmsDispatchFn() {
             private final Logger LOGGER = LogManager
                     .getLogger(JmsDispatchFn.class.getName() + "@" + connectionFactoryName);
-            @Override
-            public JmsMsg send(JmsDispatch dispatch) {
-                /*
-                 * If connection is not set, look for the context. It's an error, if both are
-                 * missing.
-                 */
-                if (connection == null && AufJmsContext.getSession() == null) {
-                    throw new JmsDispatchFnException("No session can be created");
-                }
 
-                LOGGER.atTrace().log("Sending {} {} to {} on {}", dispatch.type(), dispatch.correlationId(),
-                        dispatch.to().name().toString(), connectionFactoryName);
-                
+            @Override
+            public JmsMsg send(final JmsDispatch dispatch) {
+                Objects.requireNonNull(dispatch);
+
+                LOGGER.atTrace().log("Sending '{}' '{}' to '{}' on '{}'", dispatch.type(), dispatch.correlationId(),
+                        dispatch.to(), connectionFactoryName);
+
                 Session session = null;
                 MessageProducer producer = null;
                 TextMessage message = null;
                 JmsMsg msg = null;
                 try {
+                    for (final var listener : DefaultDispatchFnProvider.this.onDispatchs) {
+                        listener.onDispatch(dispatch);
+                    }
+
+                    /*
+                     * If connection is not set, look for one in the context. It is an error, if
+                     * both are missing.
+                     */
+                    if (connection == null && AufJmsContext.getSession() == null) {
+                        throw new IllegalStateException("No session available");
+                    }
+
                     // Connection priority.
                     session = connection != null ? connection.createSession() : AufJmsContext.getSession();
                     producer = session.createProducer(null);
@@ -119,7 +140,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                             Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
                     // Call listeners on preSend
-                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                    for (final var listener : DefaultDispatchFnProvider.this.preSends) {
                         listener.preSend(dispatch, msg);
                     }
 
@@ -128,7 +149,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
 
                     // Call listeners on postSend
-                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
+                    for (final var listener : DefaultDispatchFnProvider.this.postSends) {
                         listener.postSend(dispatch, msg);
                     }
 
@@ -137,11 +158,21 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
                             dispatch.to().toString(), dispatch.type(), dispatch.correlationId(), e);
 
-                    for (final var listener : DefaultDispatchFnProvider.this.listeners) {
-                        listener.onException(dispatch, msg, e);
+                    try {
+                        for (final var listener : DefaultDispatchFnProvider.this.onExs) {
+                            listener.onException(dispatch, msg, e);
+                        }
+                    } catch (RuntimeException ex) {
+                        throw ex;
                     }
 
-                    throw new JmsDispatchFnException(e);
+                    // Re-throw anything unchecked.
+                    if (e instanceof RuntimeException re) {
+                        throw re;
+                    }
+
+                    // Wrap checked.
+                    throw OneUtil.ensureRuntime(e);
                 } finally {
                     /*
                      * Producer is always created.
@@ -173,7 +204,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 if (body == null) {
                     return null;
                 }
-                
+
                 if (body instanceof BodyPublisher publisher) {
                     return publisher.get();
                 }

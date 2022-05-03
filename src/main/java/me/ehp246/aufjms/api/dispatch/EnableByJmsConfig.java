@@ -1,13 +1,20 @@
 package me.ehp246.aufjms.api.dispatch;
 
+import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Lei Yang
  * @since 1.0
  */
-public record EnableByJmsConfig(List<Class<?>> scan, String ttl, List<String> dispatchFns) {
+public record EnableByJmsConfig(List<Class<?>> scan, Duration ttl, List<String> dispatchFns) {
+    public EnableByJmsConfig {
+        scan = Collections.unmodifiableList(scan);
+        dispatchFns = Collections.unmodifiableList(dispatchFns);
+    }
+
     public EnableByJmsConfig() {
-        this(List.of(), "", List.of());
+        this(List.of(), null, List.of());
     }
 }

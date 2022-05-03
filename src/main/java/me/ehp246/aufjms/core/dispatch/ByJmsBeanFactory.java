@@ -5,6 +5,7 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,15 +26,15 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  * @since 1.0
  */
-public final class ByJmsProxyFactory {
-    private final static Logger LOGGER = LogManager.getLogger(ByJmsProxyFactory.class);
+public final class ByJmsBeanFactory {
+    private final static Logger LOGGER = LogManager.getLogger(ByJmsBeanFactory.class);
 
     private final InvocationDispatchBuilder dispatchBuilder;
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
 
-    public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
+    public ByJmsBeanFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final InvocationDispatchBuilder dispatchProvider, final PropertyResolver propertyResolver) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
@@ -43,7 +44,7 @@ public final class ByJmsProxyFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T newInstance(final Class<T> proxyInterface) {
+    public <T> T newByJmsProxy(final Class<T> proxyInterface) {
         LOGGER.atDebug().log("Instantiating {}", proxyInterface.getCanonicalName());
 
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
@@ -61,12 +62,11 @@ public final class ByJmsProxyFactory {
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
                 : null;
 
-        final var ttl = Duration.parse(propertyResolver.resolve(byJms.ttl().equals("")
-                ? (enableByJmsConfig.ttl().equals("") ? Duration.ZERO.toString() : enableByJmsConfig.ttl())
-                : byJms.ttl()));
+        final var ttl = Optional.of(propertyResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
+                .map(Duration::parse)
+                .orElseGet(enableByJmsConfig::ttl);
 
-        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, null,
-                byJms.connectionFactory());
+        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, null, byJms.connectionFactory());
 
         final JmsDispatchFn dispatchFn = this.dispatchFnProvider.get(byJms.connectionFactory());
         final var hashCode = new Object().hashCode();

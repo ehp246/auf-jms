@@ -28,6 +28,7 @@ class ListenerTest {
     void body_01() throws InterruptedException, ExecutionException {
         case01.ping();
         
+        Assertions.assertEquals(null, appConfig.onDispatchRef.get().dispatch().body());
         Assertions.assertEquals(null, appConfig.preRef.get().dispatch().body());
         Assertions.assertEquals(appConfig.postRef.get().dispatch().body(),
                 appConfig.preRef.get().dispatch().body());
@@ -38,6 +39,7 @@ class ListenerTest {
         final var expected = Map.of("1", "2");
         case01.ping(expected);
 
+        Assertions.assertEquals(expected, appConfig.onDispatchRef.get().dispatch().body());
         Assertions.assertEquals(expected, appConfig.preRef.get().dispatch().body());
     }
 
@@ -47,6 +49,7 @@ class ListenerTest {
 
         case01.ping(expected);
 
+        Assertions.assertEquals(expected, appConfig.onDispatchRef.get().dispatch().body());
         Assertions.assertEquals(expected, appConfig.preRef.get().dispatch().body());
     }
 
@@ -56,6 +59,7 @@ class ListenerTest {
 
         case01.ping(expected);
 
+        Assertions.assertEquals(expected, appConfig.onDispatchRef.get().dispatch().body());
         Assertions.assertEquals(expected, appConfig.preRef.get().dispatch().body());
     }
 }

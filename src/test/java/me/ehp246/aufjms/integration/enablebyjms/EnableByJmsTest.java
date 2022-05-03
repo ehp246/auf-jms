@@ -22,7 +22,7 @@ class EnableByJmsTest {
         final var config = new AnnotationConfigApplicationContext(AppConfig01.class).getBean(EnableByJmsConfig.class);
 
         Assertions.assertEquals(0, config.scan().size());
-        Assertions.assertEquals("PT0S", config.ttl());
+        Assertions.assertEquals(null, config.ttl());
         Assertions.assertEquals(0, config.dispatchFns().size());
     }
 
@@ -32,7 +32,7 @@ class EnableByJmsTest {
 
         Assertions.assertEquals(1, config.scan().size());
         Assertions.assertEquals(Case01.class, config.scan().get(0));
-        Assertions.assertEquals("PT0S", config.ttl());
+        Assertions.assertEquals(null, config.ttl());
         Assertions.assertEquals(0, config.dispatchFns().size());
     }
 

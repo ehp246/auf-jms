@@ -12,6 +12,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.jms.JMSException;
+import javax.jms.JMSRuntimeException;
+
 /**
  * @author Lei Yang
  *
@@ -96,13 +99,17 @@ public final class OneUtil {
                 .filter(anno -> anno.annotationType() == type);
     }
 
-    public static RuntimeException toRuntime(Throwable thrown) {
+    public static RuntimeException ensureRuntime(Throwable thrown) {
         if (thrown == null) {
             return null;
         }
 
         if (thrown instanceof RuntimeException runtime) {
             return runtime;
+        }
+
+        if (thrown instanceof JMSException jmsE) {
+            return new JMSRuntimeException(jmsE.getMessage(), jmsE.getErrorCode(), jmsE);
         }
 
         return new RuntimeException(thrown);

@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.endpoint;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.jms.Destination;
@@ -73,7 +74,8 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
             LOGGER.atTrace().log("Consumed");
         } catch (Exception e) {
-            LOGGER.atError().log("Message failed: {}", e.getMessage());
+            LOGGER.atError().withThrowable(e).log("Message failed: {}", e.getMessage());
+
             throw e;
         } finally {
             Log4jContext.clear();
@@ -129,11 +131,18 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
             public void run() {
                 final var executionOutcome = binder.bind(target, () -> msg).get();
 
+                Optional.ofNullable(target.closeable()).ifPresent(closeable -> {
+                    try (closeable) {
+                    } catch (Exception e) {
+                        LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e.getMessage());
+                    }
+                });
+
                 final var thrown = executionOutcome.thrown();
 
                 if (thrown != null) {
                     if (invocationListener.failedInterceptor() == null) {
-                        throw OneUtil.toRuntime(thrown);
+                        throw OneUtil.ensureRuntime(thrown);
                     }
 
                     LOGGER.atTrace().log("Executing failed interceptor");
@@ -145,22 +154,24 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                          */
                         return;
                     } catch (Exception e) {
-                        LOGGER.atTrace().log("Failure interceptor threw: {}", e::getMessage);
+                        LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
 
-                        throw OneUtil.toRuntime(e);
+                        throw OneUtil.ensureRuntime(e);
                     }
                 }
 
                 if (invocationListener.completedConsumer() != null) {
                     LOGGER.atTrace().log("Executing completed consumer");
+
                     try {
                         invocationListener.completedConsumer()
                                 .accept(new CompletedInvocationRecord(msg, target, executionOutcome.returned()));
+
                         LOGGER.atTrace().log("Completed consumer invoked");
                     } catch (Exception e) {
-                        LOGGER.atTrace().log("Completed consumer failed: {}", e.getMessage());
+                        LOGGER.atTrace().withThrowable(e).log("Completed consumer failed: {}", e.getMessage());
 
-                        throw OneUtil.toRuntime(e);
+                        throw OneUtil.ensureRuntime(e);
                     }
                 }
 
