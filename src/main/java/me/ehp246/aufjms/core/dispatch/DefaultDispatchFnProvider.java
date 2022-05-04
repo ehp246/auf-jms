@@ -58,11 +58,14 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
             if (listener instanceof DispatchListener.OnDispatch onDispatch) {
                 onDispatchs.add(onDispatch);
-            } else if (listener instanceof DispatchListener.PreSend preSend) {
+            }
+            if (listener instanceof DispatchListener.PreSend preSend) {
                 preSends.add(preSend);
-            } else if (listener instanceof DispatchListener.PostSend postSend) {
+            }
+            if (listener instanceof DispatchListener.PostSend postSend) {
                 postSends.add(postSend);
-            } else if (listener instanceof DispatchListener.OnException onEx) {
+            }
+            if (listener instanceof DispatchListener.OnException onEx) {
                 onExs.add(onEx);
             }
         }
