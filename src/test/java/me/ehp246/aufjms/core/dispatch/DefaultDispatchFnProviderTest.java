@@ -3,6 +3,7 @@ package me.ehp246.aufjms.core.dispatch;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.time.Duration;
 import java.util.List;
@@ -119,8 +120,7 @@ class DefaultDispatchFnProviderTest {
         final var dispatch = new MockDispatch();
 
         final var thrown = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("")
-                        .send(dispatch));
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(dispatch));
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(0)).preSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
@@ -134,14 +134,12 @@ class DefaultDispatchFnProviderTest {
     @Test
     void listener_03() throws JMSException {
         final var jmsException = new JMSException("");
-        Mockito.doThrow(jmsException).when(this.producer).send(Mockito.any(Destination.class),
-                Mockito.eq(textMessage));
+        Mockito.doThrow(jmsException).when(this.producer).send(Mockito.any(Destination.class), Mockito.eq(textMessage));
 
         final var dispatch = new MockDispatch();
 
         Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("")
-                        .send(dispatch));
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(dispatch));
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
@@ -154,8 +152,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void listener_04() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("")
-                        .send(null));
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(null));
 
         // Null should be checked very early on.
         Mockito.verify(onDispatch, times(0)).onDispatch(null);
@@ -163,6 +160,26 @@ class DefaultDispatchFnProviderTest {
         Mockito.verify(postSend, times(0)).postSend(Mockito.eq(null), Mockito.any(JmsMsg.class));
         Mockito.verify(onException, times(0)).onException(Mockito.eq(null), Mockito.any(JmsMsg.class),
                 Mockito.any(Exception.class));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.WARN)
+    void listener_05() {
+        final var listener = Mockito.mock(DispatchListener.OnDispatch.class, withSettings().extraInterfaces(
+                DispatchListener.PreSend.class, DispatchListener.PostSend.class, DispatchListener.OnException.class));
+
+        final var expected = new MockDispatch();
+
+        new DefaultDispatchFnProvider(cfProvder, v -> null, List.of(listener)).get("").send(expected);
+
+        // Null should be checked very early on.
+        Mockito.verify(listener, times(1)).onDispatch(expected);
+        Mockito.verify((DispatchListener.PreSend) listener, times(1)).preSend(Mockito.eq(expected),
+                Mockito.any(JmsMsg.class));
+        Mockito.verify((DispatchListener.PostSend) listener, times(1)).postSend(Mockito.eq(expected),
+                Mockito.any(JmsMsg.class));
+        Mockito.verify((DispatchListener.OnException) listener, times(0)).onException(Mockito.any(JmsDispatch.class),
+                Mockito.any(JmsMsg.class), Mockito.any(Exception.class));
     }
 
     @Test
@@ -186,8 +203,7 @@ class DefaultDispatchFnProviderTest {
 
         final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
 
-        final var actual = Assertions.assertThrows(RuntimeException.class,
-                () -> dispatchFn.send(new MockDispatch()));
+        final var actual = Assertions.assertThrows(RuntimeException.class, () -> dispatchFn.send(new MockDispatch()));
 
         Assertions.assertEquals(jmsException, actual.getCause());
 
@@ -204,7 +220,7 @@ class DefaultDispatchFnProviderTest {
 
         // Should throw without connection and context session.
         Assertions.assertThrows(NullPointerException.class, () -> fn.send(null));
-        
+
         Mockito.verify(conn, times(0)).createSession();
         Mockito.verify(session, times(0)).createProducer(null);
     }
