@@ -8,6 +8,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 @FunctionalInterface
-public interface ExecutableResolver {
-    Executable resolve(JmsMsg msg);
+public interface InvocableResolver {
+    Invocable resolve(JmsMsg msg);
 }

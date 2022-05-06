@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  * @author Lei Yang
  * @since 1.0
  */
-public interface Executable {
+public interface Invocable {
     Object instance();
 
     Method method();

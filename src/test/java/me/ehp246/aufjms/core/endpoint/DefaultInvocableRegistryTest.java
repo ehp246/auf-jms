@@ -24,23 +24,23 @@ import me.ehp246.aufjms.util.MockJmsMsg;
  * @author Lei Yang
  *
  */
-class DefaultInvokableResolverTest {
+class DefaultInvocableRegistryTest {
     @Test
     void type_01() {
-        Assertions.assertEquals(null, DefaultInvokableResolver.registeryFrom(Set.of(Case01.class.getPackageName()))
+        Assertions.assertEquals(null, DefaultInvocableRegistry.registeryFrom(Set.of(Case01.class.getPackageName()))
                 .resolve(new MockJmsMsg()));
     }
 
     @Test
     void type_02() {
-        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case01.class.getPackageName()));
+        final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Case01.class.getPackageName()));
 
         Assertions.assertEquals(Case01.class, registery.resolve(new MockJmsMsg("Case01")).instanceType());
     }
 
     @Test
     void type_03() {
-        final var registery = DefaultInvokableResolver
+        final var registery = DefaultInvocableRegistry
                 .registeryFrom(Set.of(Case02.class.getPackageName()));
 
         Assertions.assertEquals(Case02.class,
@@ -55,7 +55,7 @@ class DefaultInvokableResolverTest {
 
     @Test
     void type_04() {
-        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case03.class.getPackageName()));
+        final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Case03.class.getPackageName()));
 
         Assertions.assertEquals(Case03.class, registery.resolve(new MockJmsMsg("")).instanceType());
 
@@ -68,7 +68,7 @@ class DefaultInvokableResolverTest {
 
     @Test
     void type_05() {
-        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case04.class.getPackageName()));
+        final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Case04.class.getPackageName()));
 
         Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("")));
 
@@ -86,31 +86,31 @@ class DefaultInvokableResolverTest {
     @Test
     void error_01() {
         Assertions.assertThrows(RuntimeException.class,
-                () -> DefaultInvokableResolver.registeryFrom(Set.of(ErrorCase01.class.getPackageName())));
+                () -> DefaultInvocableRegistry.registeryFrom(Set.of(ErrorCase01.class.getPackageName())));
 
         Assertions.assertThrows(Exception.class,
-                () -> DefaultInvokableResolver.registeryFrom(Set.of(ErrorCase02.class.getPackageName())));
+                () -> DefaultInvocableRegistry.registeryFrom(Set.of(ErrorCase02.class.getPackageName())));
 
         Assertions.assertThrows(Exception.class,
-                () -> DefaultInvokableResolver.registeryFrom(Set.of(ErrorCase03.class.getPackageName())));
+                () -> DefaultInvocableRegistry.registeryFrom(Set.of(ErrorCase03.class.getPackageName())));
 
         Assertions.assertThrows(Exception.class,
-                () -> DefaultInvokableResolver.registeryFrom(Set.of(ErrorCase04.class.getPackageName())));
+                () -> DefaultInvocableRegistry.registeryFrom(Set.of(ErrorCase04.class.getPackageName())));
 
         Assertions.assertThrows(Exception.class,
-                () -> DefaultInvokableResolver.registeryFrom(Set.of(ErrorCase05.class.getPackageName())));
+                () -> DefaultInvocableRegistry.registeryFrom(Set.of(ErrorCase05.class.getPackageName())));
     }
 
     @Test
     void scope_01() {
-        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Case06.class.getPackageName()));
+        final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Case06.class.getPackageName()));
 
         Assertions.assertEquals(InstanceScope.BEAN, registery.resolve(new MockJmsMsg("Case06")).scope());
     }
 
     @Test
     void invoking_01() {
-        final var registery = DefaultInvokableResolver.registeryFrom(Set.of(Cases09.class.getPackageName()));
+        final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Cases09.class.getPackageName()));
 
         Assertions.assertEquals(ReflectingType.reflect(Cases09.Case01.class).findMethod("invoke"),
                 registery.resolve(new MockJmsMsg("Case01")).method());

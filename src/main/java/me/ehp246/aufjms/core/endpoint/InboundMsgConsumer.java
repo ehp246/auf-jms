@@ -18,10 +18,10 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.endpoint.BoundInvoker;
-import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
+import me.ehp246.aufjms.api.endpoint.Invoker;
+import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocableResolver;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
@@ -40,18 +40,18 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(InboundMsgConsumer.class);
 
     private final Executor executor;
-    private final ExecutableResolver executableResolver;
-    private final ExecutableBinder binder;
-    private final BoundInvoker invoker;
+    private final InvocableResolver resolver;
+    private final InvocableBinder binder;
+    private final Invoker invoker;
     private final JmsDispatchFn dispatchFn;
     private final InvocationListenersSupplier invocationListener;
 
-    InboundMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
-            final BoundInvoker invoker,
+    InboundMsgConsumer(final InvocableResolver executableResolver, final InvocableBinder binder,
+            final Invoker invoker,
             final Executor executor, final JmsDispatchFn dispatchFn,
             final InvocationListenersSupplier invocationListener) {
         super();
-        this.executableResolver = executableResolver;
+        this.resolver = executableResolver;
         this.binder = binder;
         this.invoker = invoker;
         this.executor = executor;
@@ -91,7 +91,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private void dispatch(final JmsMsg msg, final Session session) {
         LOGGER.atTrace().log("Resolving executable");
 
-        final var executable = executableResolver.resolve(msg);
+        final var executable = resolver.resolve(msg);
 
         if (executable == null) {
             throw new UnknownTypeException(msg);
@@ -129,7 +129,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
      * @param target
      * @return
      */
-    private Runnable newRunnable(final JmsMsg msg, final Executable target) {
+    private Runnable newRunnable(final JmsMsg msg, final Invocable target) {
         return new Runnable() {
             @Override
             public void run() {

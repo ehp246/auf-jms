@@ -6,6 +6,6 @@ import java.util.List;
  * @author Lei Yang
  * @since 1.0
  */
-public interface BoundExecutable extends Executable {
+public interface BoundInvocable extends Invocable {
     List<Object> arguments();
 }

@@ -7,6 +7,6 @@ import me.ehp246.aufjms.core.reflection.InvocationOutcome;
  *
  */
 @FunctionalInterface
-public interface BoundInvoker {
-    InvocationOutcome invoke(BoundExecutable bound);
+public interface Invoker {
+    InvocationOutcome invoke(BoundInvocable bound);
 }

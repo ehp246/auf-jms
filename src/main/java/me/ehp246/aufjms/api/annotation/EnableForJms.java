@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
+import me.ehp246.aufjms.core.endpoint.DefaultInvocableBinder;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
@@ -32,7 +32,7 @@ import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
-        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultExecutableBinder.class })
+        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
     Inbound[] value();
 

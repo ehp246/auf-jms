@@ -2,16 +2,16 @@ package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.reflect.Method;
 
-import me.ehp246.aufjms.api.endpoint.Executable;
+import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
 /**
  * @author Lei Yang
  *
  */
-record ExecutableRecord(Object instance, Method method, AutoCloseable closeable, InvocationModel invocationModel)
-        implements Executable {
-    ExecutableRecord {
+record InvocableRecord(Object instance, Method method, AutoCloseable closeable, InvocationModel invocationModel)
+        implements Invocable {
+    InvocableRecord {
         // Instance could be null for static invocation.
         if (method == null) {
             throw new IllegalArgumentException("Method must be specified");
@@ -22,7 +22,7 @@ record ExecutableRecord(Object instance, Method method, AutoCloseable closeable,
         }
     }
 
-    ExecutableRecord(Object instance, Method method) {
+    InvocableRecord(Object instance, Method method) {
         this(instance, method, null, InvocationModel.DEFAULT);
     }
 }

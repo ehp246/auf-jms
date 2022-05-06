@@ -3,7 +3,7 @@ package me.ehp246.aufjms.core.reflection;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
-import me.ehp246.aufjms.api.endpoint.BoundExecutable;
+import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 
 /**
  * 
@@ -19,7 +19,7 @@ public final record InvocationOutcome(Object returned, Throwable thrown, boolean
         return new InvocationOutcome(null, thrown, false);
     }
 
-    public static InvocationOutcome invoke(final BoundExecutable bound) {
+    public static InvocationOutcome invoke(final BoundInvocable bound) {
         try {
             return InvocationOutcome.returned(bound.method().invoke(bound.instance(), bound.arguments().toArray()));
         } catch (InvocationTargetException e1) {

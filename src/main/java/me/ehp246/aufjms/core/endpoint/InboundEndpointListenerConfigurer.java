@@ -15,7 +15,7 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.AtTopic;
@@ -34,13 +34,13 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
-    private final ExecutableBinder binder;
+    private final InvocableBinder binder;
     private final ConnectionFactoryProvider cfProvider;
     private final JmsDispatchFnProvider dispathFnProvider;
 
     public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider,
             final Set<InboundEndpoint> endpoints, final ExecutorProvider executorProvider,
-            final ExecutableBinder binder, final JmsDispatchFnProvider dispathFnProvider) {
+            final InvocableBinder binder, final JmsDispatchFnProvider dispathFnProvider) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
@@ -59,7 +59,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
             final var dispatcher = new InboundMsgConsumer(endpoint.resolver(), binder, InvocationOutcome::invoke,
                     executorProvider.get(endpoint.concurrency()),
                     this.dispathFnProvider.get(endpoint.connectionFactory()),
-                    new InvocationListenersSupplier(endpoint.completedInvocationConsumer(),
+                    new InvocationListenersSupplier(endpoint.completedInvocationListener(),
                             endpoint.failedInvocationInterceptor()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {

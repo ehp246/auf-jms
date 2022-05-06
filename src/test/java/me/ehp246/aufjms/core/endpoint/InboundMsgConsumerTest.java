@@ -27,9 +27,9 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
 import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
-import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
-import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
+import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -46,8 +46,8 @@ import me.ehp246.aufjms.util.MockTextMessage;
  *
  */
 class InboundMsgConsumerTest {
-    private ExecutableResolver resolver = msg -> Mockito.mock(Executable.class);
-    private ExecutableBinder binder = Mockito.mock(ExecutableBinder.class);
+    private InvocableResolver resolver = msg -> Mockito.mock(Invocable.class);
+    private InvocableBinder binder = Mockito.mock(InvocableBinder.class);
     private Session session = Mockito.mock(Session.class);
     private final JmsDispatchFn noopFn = m -> null;
     private final Method method = ReflectingType.reflect(Object.class).findMethod("toString");
@@ -327,7 +327,7 @@ class InboundMsgConsumerTest {
     void close_01() throws Exception {
         final var closer = Mockito.mock(AutoCloseable.class);
         new InboundMsgConsumer(
-                m -> new ExecutableRecord(null, method, closer, InvocationModel.DEFAULT),
+                m -> new InvocableRecord(null, method, closer, InvocationModel.DEFAULT),
                 binder, b -> InvocationOutcome.returned(null), null, dispatch -> null,
                 new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(), session);
 
@@ -340,7 +340,7 @@ class InboundMsgConsumerTest {
         Mockito.doThrow(new RuntimeException()).when(closer).close();
         final var completed = Mockito.mock(CompletedInvocationListener.class);
 
-        new InboundMsgConsumer(m -> new ExecutableRecord(null, method, closer, InvocationModel.DEFAULT),
+        new InboundMsgConsumer(m -> new InvocableRecord(null, method, closer, InvocationModel.DEFAULT),
                 binder, b -> InvocationOutcome.returned(null), null, dispatch -> null,
                 new InvocationListenersSupplier(completed, null)).onMessage(new MockTextMessage(), session);
 
@@ -354,7 +354,7 @@ class InboundMsgConsumerTest {
         final var closer = Mockito.mock(AutoCloseable.class);
 
         Assertions.assertThrows(RuntimeException.class,
-                () -> new InboundMsgConsumer(m -> new ExecutableRecord(null, method, closer, InvocationModel.DEFAULT),
+                () -> new InboundMsgConsumer(m -> new InvocableRecord(null, method, closer, InvocationModel.DEFAULT),
                         binder, b -> InvocationOutcome.thrown(new RuntimeException()), null, dispatch -> null,
                         new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(), session));
 

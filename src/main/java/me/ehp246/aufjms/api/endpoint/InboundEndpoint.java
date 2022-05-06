@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.jms.At;
 public interface InboundEndpoint {
     From from();
 
-    ExecutableResolver resolver();
+    InvocableResolver resolver();
 
     String name();
 
@@ -26,7 +26,7 @@ public interface InboundEndpoint {
         return null;
     }
 
-    default CompletedInvocationListener completedInvocationConsumer() {
+    default CompletedInvocationListener completedInvocationListener() {
         return null;
     }
 

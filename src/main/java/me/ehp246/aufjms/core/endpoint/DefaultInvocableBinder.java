@@ -18,9 +18,9 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.endpoint.BoundExecutable;
-import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
+import me.ehp246.aufjms.api.endpoint.BoundInvocable;
+import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -32,7 +32,7 @@ import me.ehp246.aufjms.api.spi.FromJson;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultExecutableBinder implements ExecutableBinder {
+public final class DefaultInvocableBinder implements InvocableBinder {
     private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> PROPERTY_VALUE_SUPPLIERS = Map.of(
             OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId, OfDeliveryCount.class,
             msg -> msg.property(JmsNames.DELIVERY_COUNT, Integer.class));
@@ -42,19 +42,19 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
 
     private final FromJson fromJson;
 
-    public DefaultExecutableBinder(final FromJson fromJson) {
+    public DefaultInvocableBinder(final FromJson fromJson) {
         super();
         this.fromJson = fromJson;
     }
 
     @Override
-    public BoundExecutable bind(final Executable target, final MsgContext ctx) {
+    public BoundInvocable bind(final Invocable target, final MsgContext ctx) {
         final var method = target.method();
 
         method.setAccessible(true);
 
         if (method.getParameterCount() == 0) {
-            return new BoundExecutableRecord(target);
+            return new BoundInvocableRecord(target);
         }
 
         final var parameters = method.getParameters();
@@ -92,7 +92,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             fromJson.apply(ctx.msg().text(), receivers);
         }
 
-        return new BoundExecutableRecord(target, Arrays.asList(arguments));
+        return new BoundInvocableRecord(target, Arrays.asList(arguments));
     }
 
     /**

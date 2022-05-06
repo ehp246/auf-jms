@@ -4,16 +4,16 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
-import me.ehp246.aufjms.api.endpoint.BoundExecutable;
-import me.ehp246.aufjms.api.endpoint.Executable;
+import me.ehp246.aufjms.api.endpoint.BoundInvocable;
+import me.ehp246.aufjms.api.endpoint.Invocable;
 
 /**
  * @author Lei Yang
  *
  */
-record BoundExecutableRecord(Executable executable, List<Object> arguments)
-        implements BoundExecutable {
-    BoundExecutableRecord {
+record BoundInvocableRecord(Invocable executable, List<Object> arguments)
+        implements BoundInvocable {
+    BoundInvocableRecord {
         if (executable == null) {
             throw new IllegalArgumentException("Target must be specified");
         }
@@ -25,7 +25,7 @@ record BoundExecutableRecord(Executable executable, List<Object> arguments)
         arguments = Collections.unmodifiableList(arguments);
     }
 
-    BoundExecutableRecord(Executable executable) {
+    BoundInvocableRecord(Invocable executable) {
         this(executable, List.of());
     }
 

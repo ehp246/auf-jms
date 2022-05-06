@@ -4,10 +4,10 @@ import java.util.Objects;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
-import me.ehp246.aufjms.api.endpoint.InvokableResolver;
+import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
+import me.ehp246.aufjms.api.endpoint.InvocableResolver;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -17,22 +17,22 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-public final class AutowireCapableExecutableResolver implements ExecutableResolver {
+public final class AutowireCapableInvocableResolver implements InvocableResolver {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
-    private final InvokableResolver typeResolver;
+    private final InvocableTypeRegistry registry;
 
-    public AutowireCapableExecutableResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-            final InvokableResolver resolver) {
+    public AutowireCapableInvocableResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+            final InvocableTypeRegistry registry) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-        this.typeResolver = resolver;
+        this.registry = registry;
     }
 
     @Override
-    public Executable resolve(final JmsMsg msg) {
+    public Invocable resolve(final JmsMsg msg) {
         Objects.requireNonNull(msg);
 
-        final var registered = this.typeResolver.resolve(msg);
+        final var registered = this.registry.resolve(msg);
         if (registered == null) {
             return null;
         }
@@ -41,7 +41,7 @@ public final class AutowireCapableExecutableResolver implements ExecutableResolv
                 ? autowireCapableBeanFactory.getBean(registered.instanceType())
                 : autowireCapableBeanFactory.createBean(registered.instanceType());
 
-        return new ExecutableRecord(instance, registered.method(),
+        return new InvocableRecord(instance, registered.method(),
                 registered.scope() == InstanceScope.BEAN ? null
                         : () -> autowireCapableBeanFactory.destroyBean(instance),
                 registered.invocationModel());

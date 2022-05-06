@@ -9,11 +9,11 @@ import org.junit.jupiter.api.Test;
  * @author Lei Yang
  *
  */
-class ExecutableTest {
+class InvocableTest {
 
     @Test
     void test() {
-        final var actual = new Executable() {
+        final var actual = new Invocable() {
 
             @Override
             public Method method() {

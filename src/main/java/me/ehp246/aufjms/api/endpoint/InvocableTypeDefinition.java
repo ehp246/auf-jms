@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public interface InvokableDefinition {
+public interface InvocableTypeDefinition {
     Set<String> types();
 
     Class<?> instanceType();

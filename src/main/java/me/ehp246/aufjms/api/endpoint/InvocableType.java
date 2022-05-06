@@ -7,7 +7,7 @@ import java.lang.reflect.Method;
  * @author Lei Yang
  *
  */
-public interface ResolvedInstanceType {
+public interface InvocableType {
     Class<?> instanceType();
 
     Method method();

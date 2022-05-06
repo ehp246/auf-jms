@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface CompletedInvocation {
     JmsMsg msg();
 
-    BoundExecutable target();
+    BoundInvocable bound();
 
     Object returned();
 }
