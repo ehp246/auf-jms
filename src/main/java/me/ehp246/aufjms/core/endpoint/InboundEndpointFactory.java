@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationConsumer;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
@@ -58,10 +58,10 @@ public final class InboundEndpointFactory {
                 .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationInterceptor.class)).orElse(null);
-        final CompletedInvocationConsumer completedConsumer = Optional
-                .ofNullable(inboundAttributes.get("completedInvocationConsumer").toString())
+        final CompletedInvocationListener completedConsumer = Optional
+                .ofNullable(inboundAttributes.get("completedInvocationListener").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, CompletedInvocationConsumer.class)).orElse(null);
+                .map(name -> autowireCapableBeanFactory.getBean(name, CompletedInvocationListener.class)).orElse(null);
 
         return new InboundEndpointRecord(from, resolver, concurrency, beanName, autoStartup, connectionFactory,
                 completedConsumer, failedInterceptor);

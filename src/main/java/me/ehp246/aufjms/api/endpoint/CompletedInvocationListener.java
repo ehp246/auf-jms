@@ -6,6 +6,6 @@ package me.ehp246.aufjms.api.endpoint;
  *
  */
 @FunctionalInterface
-public interface CompletedInvocationConsumer {
+public interface CompletedInvocationListener {
     void accept(final CompletedInvocation completed);
 }

@@ -26,7 +26,7 @@ public interface InboundEndpoint {
         return null;
     }
 
-    default CompletedInvocationConsumer completedInvocationConsumer() {
+    default CompletedInvocationListener completedInvocationConsumer() {
         return null;
     }
 

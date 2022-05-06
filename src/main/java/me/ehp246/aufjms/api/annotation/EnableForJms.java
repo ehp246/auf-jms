@@ -19,8 +19,8 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 
 /**
@@ -68,7 +68,7 @@ public @interface EnableForJms {
          * <p>
          * Supports Spring property placeholder.
          */
-        String completedInvocationConsumer() default "";
+        String completedInvocationListener() default "";
 
         /**
          * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type

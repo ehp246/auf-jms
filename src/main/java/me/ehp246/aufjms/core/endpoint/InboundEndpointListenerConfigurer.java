@@ -21,6 +21,7 @@ import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
+import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
@@ -37,9 +38,9 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
     private final ConnectionFactoryProvider cfProvider;
     private final JmsDispatchFnProvider dispathFnProvider;
 
-    public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider, final Set<InboundEndpoint> endpoints,
-            final ExecutorProvider executorProvider, final ExecutableBinder binder,
-            final JmsDispatchFnProvider dispathFnProvider) {
+    public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider,
+            final Set<InboundEndpoint> endpoints, final ExecutorProvider executorProvider,
+            final ExecutableBinder binder, final JmsDispatchFnProvider dispathFnProvider) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
@@ -55,10 +56,11 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
         for (final var endpoint : this.endpoints) {
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
-            final var dispatcher = new InboundMsgConsumer(endpoint.resolver(), binder,
+            final var dispatcher = new InboundMsgConsumer(endpoint.resolver(), binder, InvocationOutcome::invoke,
                     executorProvider.get(endpoint.concurrency()),
-                    this.dispathFnProvider.get(endpoint.connectionFactory()), new InvocationListenersSupplier(
-                            endpoint.completedInvocationConsumer(), endpoint.failedInvocationInterceptor()));
+                    this.dispathFnProvider.get(endpoint.connectionFactory()),
+                    new InvocationListenersSupplier(endpoint.completedInvocationConsumer(),
+                            endpoint.failedInvocationInterceptor()));
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
 

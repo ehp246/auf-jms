@@ -1,27 +1,31 @@
 package me.ehp246.aufjms.core.reflection;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
-import java.util.concurrent.Callable;
+
+import me.ehp246.aufjms.api.endpoint.BoundExecutable;
 
 /**
  * 
  * @author Lei Yang
  * @since 1.0
  */
-public final record InvocationOutcome<T> (T returned, Throwable thrown, boolean hasReturned) {
-    public static <T> InvocationOutcome<T> returned(final T returned) {
-        return new InvocationOutcome<T>(returned, null, true);
+public final record InvocationOutcome(Object returned, Throwable thrown, boolean hasReturned) {
+    public static InvocationOutcome returned(final Object returned) {
+        return new InvocationOutcome(returned, null, true);
     }
 
-    public static <T> InvocationOutcome<T> thrown(final Throwable thrown) {
-        return new InvocationOutcome<T>(null, thrown, false);
+    public static InvocationOutcome thrown(final Throwable thrown) {
+        return new InvocationOutcome(null, thrown, false);
     }
 
-    public static <T> InvocationOutcome<T> invoke(final Callable<T> callable) {
+    public static InvocationOutcome invoke(final BoundExecutable bound) {
         try {
-            return InvocationOutcome.returned(callable.call());
-        } catch (final Exception e) {
-            return InvocationOutcome.thrown(e);
+            return InvocationOutcome.returned(bound.method().invoke(bound.instance(), bound.arguments().toArray()));
+        } catch (InvocationTargetException e1) {
+            return InvocationOutcome.thrown(e1.getCause());
+        } catch (Exception e2) {
+            return InvocationOutcome.thrown(e2);
         }
     }
 
@@ -33,7 +37,7 @@ public final record InvocationOutcome<T> (T returned, Throwable thrown, boolean 
         return hasReturned() ? returned() : thrown();
     }
 
-    public Optional<T> optionalReturned() {
+    public Optional<?> optionalReturned() {
         return hasReturned() ? Optional.of(returned) : Optional.empty();
     }
 }

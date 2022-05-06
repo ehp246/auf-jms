@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationConsumer;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.At;
  *
  */
 record InboundEndpointRecord(InboundEndpoint.From from, ExecutableResolver resolver, int concurrency, String name,
-        boolean autoStartup, String connectionFactory, CompletedInvocationConsumer completedInvocationConsumer,
+        boolean autoStartup, String connectionFactory, CompletedInvocationListener completedInvocationConsumer,
         FailedInvocationInterceptor failedInvocationInterceptor)
         implements InboundEndpoint {
 

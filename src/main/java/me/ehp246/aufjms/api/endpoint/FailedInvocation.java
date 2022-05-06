@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface FailedInvocation {
     JmsMsg msg();
 
-    Executable target();
+    BoundExecutable target();
 
     Throwable thrown();
 }

@@ -18,6 +18,7 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.Executable;
 import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
@@ -41,15 +42,18 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private final Executor executor;
     private final ExecutableResolver executableResolver;
     private final ExecutableBinder binder;
+    private final BoundInvoker invoker;
     private final JmsDispatchFn dispatchFn;
     private final InvocationListenersSupplier invocationListener;
 
     InboundMsgConsumer(final ExecutableResolver executableResolver, final ExecutableBinder binder,
+            final BoundInvoker invoker,
             final Executor executor, final JmsDispatchFn dispatchFn,
             final InvocationListenersSupplier invocationListener) {
         super();
         this.executableResolver = executableResolver;
         this.binder = binder;
+        this.invoker = invoker;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
         this.invocationListener = invocationListener;
@@ -129,7 +133,8 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
         return new Runnable() {
             @Override
             public void run() {
-                final var executionOutcome = binder.bind(target, () -> msg).get();
+                final var bound = binder.bind(target, () -> msg);
+                final var outcome = invoker.invoke(bound);
 
                 Optional.ofNullable(target.closeable()).ifPresent(closeable -> {
                     try (closeable) {
@@ -138,7 +143,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     }
                 });
 
-                final var thrown = executionOutcome.thrown();
+                final var thrown = outcome.thrown();
 
                 if (thrown != null) {
                     if (invocationListener.failedInterceptor() == null) {
@@ -147,7 +152,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                     LOGGER.atTrace().log("Executing failed interceptor");
                     try {
-                        invocationListener.failedInterceptor().accept(new FailedInvocationRecord(msg, target, thrown));
+                        invocationListener.failedInterceptor().accept(new FailedInvocationRecord(msg, bound, thrown));
                         LOGGER.atTrace().log("Failure interceptor invoked");
                         /*
                          * Skip further execution on invocation exception but acknowledge the message.
@@ -160,12 +165,12 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     }
                 }
 
-                if (invocationListener.completedConsumer() != null) {
+                if (invocationListener.completedListener() != null) {
                     LOGGER.atTrace().log("Executing completed consumer");
 
                     try {
-                        invocationListener.completedConsumer()
-                                .accept(new CompletedInvocationRecord(msg, target, executionOutcome.returned()));
+                        invocationListener.completedListener()
+                                .accept(new CompletedInvocationRecord(msg, bound, outcome.returned()));
 
                         LOGGER.atTrace().log("Completed consumer invoked");
                     } catch (Exception e) {
@@ -185,7 +190,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                 LOGGER.atTrace().log("Replying");
 
                 InboundMsgConsumer.this.dispatchFn.send(JmsDispatch.toDispatch(toAt(replyTo), msg.type(),
-                        executionOutcome.returned(), msg.correlationId()));
+                        outcome.returned(), msg.correlationId()));
 
                 LOGGER.atTrace().log("Replied");
             }
