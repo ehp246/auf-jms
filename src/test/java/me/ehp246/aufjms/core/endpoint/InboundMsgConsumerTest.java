@@ -25,12 +25,13 @@ import org.mockito.Mockito;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
 import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
+import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtQueue;
@@ -46,7 +47,8 @@ import me.ehp246.aufjms.util.MockTextMessage;
  *
  */
 class InboundMsgConsumerTest {
-    private InvocableResolver resolver = msg -> Mockito.mock(Invocable.class);
+    private final Invocable invocable = Mockito.mock(Invocable.class);
+    private InvocableResolver resolver = msg -> invocable;
     private InvocableBinder binder = Mockito.mock(InvocableBinder.class);
     private Session session = Mockito.mock(Session.class);
     private final JmsDispatchFn noopFn = m -> null;
@@ -91,16 +93,23 @@ class InboundMsgConsumerTest {
     }
 
     @Test
-    void failedMsg_02() throws JMSException {
+    void failed_02() throws JMSException {
         final var ref = new FailedInvocation[1];
-        final var msg = new MockTextMessage();
+        final var message = new MockTextMessage();
         final var ex = new RuntimeException();
+        final var bound = Mockito.mock(BoundInvocable.class);
+
+        Mockito.when(binder.bind(Mockito.eq(invocable), Mockito.argThat(ctx -> ctx.msg().message() == message)))
+                .thenReturn(bound);
+
         new InboundMsgConsumer(resolver, binder, b -> InvocationOutcome.thrown(ex),
                 null, m -> null, new InvocationListenersSupplier(null, m -> {
                     ref[0] = m;
-                })).onMessage(msg, session);
+                })).onMessage(message, session);
 
         Assertions.assertEquals(ex, ref[0].thrown(), "should be the one thrown by application code");
+        Assertions.assertEquals(message, ref[0].msg().message());
+        Assertions.assertEquals(bound, ref[0].bound());
     }
 
     @Test
@@ -118,7 +127,7 @@ class InboundMsgConsumerTest {
     }
 
     @Test
-    void failedMsg_04() throws JMSException {
+    void failed_04() throws JMSException {
         final var ref = new FailedInvocation[1];
         final var ex = new RuntimeException();
 
@@ -202,10 +211,15 @@ class InboundMsgConsumerTest {
 
     @Test
     void completed_01() throws InterruptedException, ExecutionException, JMSException {
+        final var message = new MockTextMessage();
         final var threadRef = new Thread[1];
         final var completedThread = new Thread[1];
         final var returned = new RuntimeException();
         final var completedRef = new CompletedInvocation[1];
+        final var bound = Mockito.mock(BoundInvocable.class);
+
+        Mockito.when(binder.bind(Mockito.eq(invocable), Mockito.argThat(ctx -> ctx.msg().message() == message)))
+                .thenReturn(bound);
 
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
@@ -215,12 +229,15 @@ class InboundMsgConsumerTest {
         }, executor, m -> null, new InvocationListenersSupplier(c -> {
             completedRef[0] = c;
             completedThread[0] = Thread.currentThread();
-        }, null)).onMessage(new MockTextMessage(), session);
+        }, null)).onMessage(message, session);
 
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
         Assertions.assertEquals(threadRef[0], completedThread[0]);
+
+        Assertions.assertEquals(message, completedRef[0].msg().message());
+        Assertions.assertEquals(bound, completedRef[0].bound());
         Assertions.assertEquals(returned, completedRef[0].returned());
     }
 
