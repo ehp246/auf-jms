@@ -15,6 +15,27 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 
 class DefaultExecutableBinderTestCases {
+    static class ArgCase01 {
+        public void m01() {
+
+        }
+
+        public JmsMsg m01(final JmsMsg msg) {
+            return msg;
+        }
+
+        public Object[] m01(final JmsMsg msg, final Message message) {
+            return new Object[] { msg, message };
+        }
+
+        public MsgContext m01(final MsgContext msgCtx, final FromJson fromJson) {
+            return msgCtx;
+        }
+
+        public Object[] m01(final List<Integer> integers, final JmsMsg msg) {
+            return new Object[] { integers, msg };
+        }
+    }
 
     static class MethodCase01 {
         public void m01() {

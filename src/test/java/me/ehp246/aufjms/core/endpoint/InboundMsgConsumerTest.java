@@ -107,13 +107,15 @@ class InboundMsgConsumerTest {
                     ref[0] = m;
                 })).onMessage(message, session);
 
-        Assertions.assertEquals(ex, ref[0].thrown(), "should be the one thrown by application code");
-        Assertions.assertEquals(message, ref[0].msg().message());
-        Assertions.assertEquals(bound, ref[0].bound());
+        final var failed = ref[0];
+
+        Assertions.assertEquals(ex, failed.thrown(), "should be the one thrown by application code");
+        Assertions.assertEquals(message, failed.msg().message());
+        Assertions.assertEquals(bound, failed.bound());
     }
 
     @Test
-    void failedMsg_03() throws JMSException {
+    void failed_03() throws JMSException {
         final var ex = new NullPointerException();
 
         final var t = Assertions.assertThrows(RuntimeException.class,
