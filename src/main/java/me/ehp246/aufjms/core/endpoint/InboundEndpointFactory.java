@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
-import me.ehp246.aufjms.api.endpoint.InvocableResolver;
+import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.At;
@@ -52,7 +52,7 @@ public final class InboundEndpointFactory {
                 .parseBoolean(propertyResolver.resolve(inboundAttributes.get("autoStartup").toString()));
         final String connectionFactory = propertyResolver
                 .resolve(inboundAttributes.get("connectionFactory").toString());
-        final InvocableResolver resolver = new AutowireCapableInvocableResolver(autowireCapableBeanFactory,
+        final InvocableFactory resolver = new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
                 DefaultInvocableRegistry.registeryFrom(scanPackages));
         final FailedInvocationInterceptor failedInterceptor = Optional
                 .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())

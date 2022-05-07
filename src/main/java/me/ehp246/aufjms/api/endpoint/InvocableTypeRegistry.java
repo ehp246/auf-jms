@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface InvocableTypeRegistry {
     void register(InvocableTypeDefinition definition);
 
-    List<InvocableTypeDefinition> getRegistered();
+    List<InvocableTypeDefinition> registered();
 
     InvocableType resolve(JmsMsg msg);
 }

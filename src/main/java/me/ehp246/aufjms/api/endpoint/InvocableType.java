@@ -7,12 +7,6 @@ import java.lang.reflect.Method;
  * @author Lei Yang
  *
  */
-public interface InvocableType {
-    Class<?> instanceType();
-
-    Method method();
-
-    InstanceScope scope();
-
-    InvocationModel invocationModel();
+public record InvocableType(Class<?> instanceType, Method method, InstanceScope scope,
+        InvocationModel model) {
 }

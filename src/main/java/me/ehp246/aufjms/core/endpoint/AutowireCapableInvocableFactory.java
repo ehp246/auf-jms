@@ -6,8 +6,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
-import me.ehp246.aufjms.api.endpoint.InvocableResolver;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -17,11 +17,11 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-public final class AutowireCapableInvocableResolver implements InvocableResolver {
+final class AutowireCapableInvocableFactory implements InvocableFactory {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final InvocableTypeRegistry registry;
 
-    public AutowireCapableInvocableResolver(final AutowireCapableBeanFactory autowireCapableBeanFactory,
+    public AutowireCapableInvocableFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
             final InvocableTypeRegistry registry) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
@@ -44,6 +44,6 @@ public final class AutowireCapableInvocableResolver implements InvocableResolver
         return new InvocableRecord(instance, registered.method(),
                 registered.scope() == InstanceScope.BEAN ? null
                         : () -> autowireCapableBeanFactory.destroyBean(instance),
-                registered.invocationModel());
+                registered.model());
     }
 }

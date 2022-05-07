@@ -7,5 +7,5 @@ package me.ehp246.aufjms.api.endpoint;
  */
 @FunctionalInterface
 public interface InvocableBinder {
-    BoundInvocable bind(Invocable resolved, MsgContext invocationContext);
+    BoundInvocable bind(Invocable invocable, MsgContext msgCtx);
 }

@@ -13,14 +13,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  * @since 1.0
  */
-public interface InvocableTypeDefinition {
-    Set<String> types();
-
-    Class<?> instanceType();
-
-    Map<String, Method> methods();
-
-    InstanceScope instanceScope();
-
-    InvocationModel invocationModel();
+public record InvocableTypeDefinition(Set<String> msgTypes, Class<?> type, Map<String, Method> methods,
+        InstanceScope scope, InvocationModel model) {
 }

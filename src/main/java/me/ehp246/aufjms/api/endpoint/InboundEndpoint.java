@@ -10,9 +10,11 @@ import me.ehp246.aufjms.api.jms.At;
 public interface InboundEndpoint {
     From from();
 
-    InvocableResolver resolver();
+    InvocableFactory invocableFactory();
 
-    String name();
+    default String name() {
+        return null;
+    }
 
     default int concurrency() {
         return 0;

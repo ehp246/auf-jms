@@ -31,7 +31,7 @@ import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocableResolver;
+import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtQueue;
@@ -48,7 +48,7 @@ import me.ehp246.aufjms.util.MockTextMessage;
  */
 class InboundMsgConsumerTest {
     private final Invocable invocable = Mockito.mock(Invocable.class);
-    private InvocableResolver resolver = msg -> invocable;
+    private InvocableFactory resolver = msg -> invocable;
     private InvocableBinder binder = Mockito.mock(InvocableBinder.class);
     private Session session = Mockito.mock(Session.class);
     private final JmsDispatchFn noopFn = m -> null;

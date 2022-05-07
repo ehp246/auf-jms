@@ -18,11 +18,11 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
-import me.ehp246.aufjms.api.endpoint.Invoker;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocableResolver;
+import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
+import me.ehp246.aufjms.api.endpoint.Invoker;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -40,13 +40,13 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(InboundMsgConsumer.class);
 
     private final Executor executor;
-    private final InvocableResolver resolver;
+    private final InvocableFactory resolver;
     private final InvocableBinder binder;
     private final Invoker invoker;
     private final JmsDispatchFn dispatchFn;
     private final InvocationListenersSupplier invocationListener;
 
-    InboundMsgConsumer(final InvocableResolver executableResolver, final InvocableBinder binder,
+    InboundMsgConsumer(final InvocableFactory executableResolver, final InvocableBinder binder,
             final Invoker invoker,
             final Executor executor, final JmsDispatchFn dispatchFn,
             final InvocationListenersSupplier invocationListener) {
@@ -89,19 +89,19 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     }
 
     private void dispatch(final JmsMsg msg, final Session session) {
-        LOGGER.atTrace().log("Resolving executable");
+        LOGGER.atTrace().log("Resolving {}", msg::type);
 
-        final var executable = resolver.resolve(msg);
+        final var inovcable = resolver.resolve(msg);
 
-        if (executable == null) {
+        if (inovcable == null) {
             throw new UnknownTypeException(msg);
         }
 
-        LOGGER.atTrace().log("Submitting {}", () -> executable.method().toString());
+        LOGGER.atTrace().log("Submitting {}", () -> inovcable.method().toString());
 
-        final var runnable = newRunnable(msg, executable);
+        final var runnable = newRunnable(msg, inovcable);
 
-        if (executor == null || executable.invocationModel() == InvocationModel.INLINE) {
+        if (executor == null || inovcable.invocationModel() == InvocationModel.INLINE) {
 
             runnable.run();
 
@@ -139,7 +139,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                 Optional.ofNullable(target.closeable()).ifPresent(closeable -> {
                     try (closeable) {
                     } catch (Exception e) {
-                        LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e.getMessage());
+                        LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
                     }
                 });
 
@@ -183,16 +183,13 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                 // Reply
                 final var replyTo = msg.replyTo();
                 if (replyTo == null) {
-                    LOGGER.atTrace().log("No replyTo");
                     return;
                 }
 
-                LOGGER.atTrace().log("Replying");
+                LOGGER.atTrace().log("Replying to {}", replyTo);
 
                 InboundMsgConsumer.this.dispatchFn.send(JmsDispatch.toDispatch(toAt(replyTo), msg.type(),
                         outcome.returned(), msg.correlationId()));
-
-                LOGGER.atTrace().log("Replied");
             }
         };
     }
