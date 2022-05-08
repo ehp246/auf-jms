@@ -1,6 +1,5 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.jms.Destination;
@@ -18,13 +17,13 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.ToInvoke;
+import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -42,13 +41,13 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(InboundMsgConsumer.class);
 
     private final Executor executor;
-    private final InvocableFactory factory;
+    private final MsgInvocableFactory factory;
     private final InvocableBinder binder;
-    private final ToInvoke invoker;
+    private final BoundInvoker invoker;
     private final JmsDispatchFn dispatchFn;
     private final InvocationListenersSupplier listenerSupplier;
 
-    InboundMsgConsumer(final InvocableFactory factory, final InvocableBinder binder, final ToInvoke invoker,
+    InboundMsgConsumer(final MsgInvocableFactory factory, final InvocableBinder binder, final BoundInvoker invoker,
             final Executor executor, final JmsDispatchFn dispatchFn,
             final InvocationListenersSupplier listenerSupplier) {
         super();
@@ -56,7 +55,8 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.listenerSupplier = listenerSupplier;
+        this.listenerSupplier = listenerSupplier == null ? new InvocationListenersSupplier(null, null)
+                : listenerSupplier;
         this.invoker = invoker;
     }
 
@@ -92,7 +92,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private void dispatch(final JmsMsg msg, final Session session) {
         LOGGER.atTrace().log("Resolving {}", msg::type);
 
-        final var inovcable = factory.resolve(msg);
+        final var inovcable = factory.get(msg);
 
         if (inovcable == null) {
             throw new UnknownTypeException(msg);
@@ -134,65 +134,73 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
         return new Runnable() {
             @Override
             public void run() {
-                final var bound = binder.bind(target, () -> msg);
-                final var outcome = invoker.apply(bound);
+                try {
+                    final var bound = binder.bind(target, () -> msg);
 
-                Optional.ofNullable(target.closeable()).ifPresent(closeable -> {
-                    try (closeable) {
+                    assert (bound != null);
+
+                    final var outcome = invoker.apply(bound);
+
+                    assert (outcome != null);
+
+                    if (outcome instanceof FailedInvocation failed) {
+                        if (listenerSupplier.failedInterceptor() == null) {
+                            throw failed.thrown();
+                        }
+
+                        LOGGER.atTrace().log("Executing failed interceptor");
+                        try {
+                            listenerSupplier.failedInterceptor().accept(failed);
+                            LOGGER.atTrace().log("Failure interceptor invoked");
+                            /*
+                             * If the interceptor does not throw, skip further execution and acknowledge the
+                             * message.
+                             */
+                            return;
+                        } catch (Exception e) {
+                            LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
+
+                            throw e;
+                        }
+                    }
+
+                    assert (outcome instanceof CompletedInvocation);
+
+                    final var completed = (CompletedInvocation) outcome;
+
+                    if (listenerSupplier.completedListener() != null) {
+                        LOGGER.atTrace().log("Executing completed consumer");
+
+                        try {
+                            listenerSupplier.completedListener().accept(completed);
+
+                            LOGGER.atTrace().log("Completed consumer invoked");
+                        } catch (Exception e) {
+                            LOGGER.atTrace().withThrowable(e).log("Completed consumer failed: {}", e.getMessage());
+
+                            throw e;
+                        }
+                    }
+
+                    // Reply
+                    final var replyTo = msg.replyTo();
+                    if (replyTo == null) {
+                        return;
+                    }
+
+                    LOGGER.atTrace().log("Replying to {}", replyTo);
+
+                    InboundMsgConsumer.this.dispatchFn.send(JmsDispatch.toDispatch(toAt(replyTo), msg.type(),
+                            completed.returned(), msg.correlationId()));
+                } catch (Throwable e) {
+                    throw OneUtil.ensureRuntime(e);
+                } finally {
+                    try (target) {
                     } catch (Exception e) {
                         LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
                     }
-                });
-
-                if (outcome instanceof FailedInvocation failed) {
-                    if (listenerSupplier.failedInterceptor() == null) {
-                        throw OneUtil.ensureRuntime(failed.thrown());
-                    }
-
-                    LOGGER.atTrace().log("Executing failed interceptor");
-                    try {
-                        listenerSupplier.failedInterceptor().accept(failed);
-                        LOGGER.atTrace().log("Failure interceptor invoked");
-                        /*
-                         * Skip further execution on invocation exception but acknowledge the message.
-                         */
-                        return;
-                    } catch (Exception e) {
-                        LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
-
-                        throw OneUtil.ensureRuntime(e);
-                    }
                 }
-
-                assert (outcome instanceof CompletedInvocation);
-
-                final var completed = (CompletedInvocation) outcome;
-
-                if (listenerSupplier.completedListener() != null) {
-                    LOGGER.atTrace().log("Executing completed consumer");
-
-                    try {
-                        listenerSupplier.completedListener().accept(completed);
-
-                        LOGGER.atTrace().log("Completed consumer invoked");
-                    } catch (Exception e) {
-                        LOGGER.atTrace().withThrowable(e).log("Completed consumer failed: {}", e.getMessage());
-
-                        throw OneUtil.ensureRuntime(e);
-                    }
-                }
-
-                // Reply
-                final var replyTo = msg.replyTo();
-                if (replyTo == null) {
-                    return;
-                }
-
-                LOGGER.atTrace().log("Replying to {}", replyTo);
-
-                InboundMsgConsumer.this.dispatchFn.send(
-                        JmsDispatch.toDispatch(toAt(replyTo), msg.type(), completed.returned(), msg.correlationId()));
-            }
+            };
         };
     }
 

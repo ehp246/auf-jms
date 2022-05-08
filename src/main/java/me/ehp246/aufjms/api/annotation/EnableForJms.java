@@ -12,6 +12,8 @@ import javax.jms.Message;
 
 import org.springframework.context.annotation.Import;
 
+import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
 import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -64,7 +66,15 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * 
+         * Specifies the bean name of the {@linkplain CompletedInvocationListener} type
+         * to receive {@linkplain CompletedInvocation}.
+         * <p>
+         * If the execution of a {@linkplain ForJmsType} object on this
+         * {@linkplain EnableForJms.Inbound} completes normally, the bean will be
+         * invoked.
+         * <p>
+         * If a {@linkplain RuntimeException} happens from the bean, the
+         * {@linkplain Message} will follow broker's dead-lettering process.
          * <p>
          * Supports Spring property placeholder.
          */
@@ -74,21 +84,21 @@ public @interface EnableForJms {
          * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type
          * to receive {@linkplain FailedInvocation}.
          * <p>
-         * If the execution of a {@linkplain ForJmsType} object on this in-bound
-         * endpoint throws an exception, the consumer bean will be invoked.
+         * If the execution of a {@linkplain ForJmsType} object on this
+         * {@linkplain EnableForJms.Inbound} throws an exception, the bean will be
+         * invoked.
          * <p>
          * If the invocation of the bean completes without an exception, the
          * {@linkplain Message} will be acknowledged to the broker as a success.
          * <p>
-         * The bean can throw exception in which case the message follows broker's
-         * dead-lettering process.
+         * The bean can throw {@linkplain Exception} in which case the message follows
+         * broker's dead-lettering process.
          * <p>
-         * The consumer bean is meant to handle exceptions thrown by
-         * {@linkplain ForJmsType} objects. It applies only after a matching
-         * {@linkplain ForJmsType} class has been found. E.g., the bean will not be
-         * invoked for basic {@linkplain JMSException} prior to
-         * {@linkplain Message#getJMSType()} matching, i.e.,
-         * {@linkplain UnknownTypeException}.
+         * The bean is meant to handle exceptions thrown by {@linkplain ForJmsType}
+         * objects. It applies only after a matching {@linkplain ForJmsType} class has
+         * been found. E.g., the bean will not be invoked for basic
+         * {@linkplain JMSException} prior to {@linkplain Message#getJMSType()}
+         * matching, i.e., {@linkplain UnknownTypeException}.
          * <p>
          * Supports Spring property placeholder.
          */

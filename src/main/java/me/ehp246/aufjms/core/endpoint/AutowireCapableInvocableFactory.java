@@ -1,13 +1,15 @@
 package me.ehp246.aufjms.core.endpoint;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.Invocable;
-import me.ehp246.aufjms.api.endpoint.InvocableFactory;
+import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
+import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -17,7 +19,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-final class AutowireCapableInvocableFactory implements InvocableFactory {
+final class AutowireCapableInvocableFactory implements MsgInvocableFactory {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final InvocableTypeRegistry registry;
 
@@ -29,7 +31,7 @@ final class AutowireCapableInvocableFactory implements InvocableFactory {
     }
 
     @Override
-    public Invocable resolve(final JmsMsg msg) {
+    public Invocable get(final JmsMsg msg) {
         Objects.requireNonNull(msg);
 
         final var registered = this.registry.resolve(msg);
@@ -41,9 +43,29 @@ final class AutowireCapableInvocableFactory implements InvocableFactory {
                 ? autowireCapableBeanFactory.getBean(registered.instanceType())
                 : autowireCapableBeanFactory.createBean(registered.instanceType());
 
-        return new InvocableRecord(instance, registered.method(),
-                registered.scope() == InstanceScope.BEAN ? null
-                        : () -> autowireCapableBeanFactory.destroyBean(instance),
-                registered.model());
+        return new Invocable() {
+
+            @Override
+            public Object instance() {
+                return instance;
+            }
+
+            @Override
+            public Method method() {
+                return registered.method();
+            }
+
+            @Override
+            public InvocationModel invocationModel() {
+                return registered.model();
+            }
+
+            @Override
+            public void close() throws Exception {
+                if (registered.scope() == InstanceScope.BEAN)
+                    return;
+                autowireCapableBeanFactory.destroyBean(instance);
+            }
+        };
     }
 }

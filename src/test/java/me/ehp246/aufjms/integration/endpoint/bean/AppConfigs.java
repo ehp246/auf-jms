@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.InvocableFactory;
+import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
@@ -38,7 +38,7 @@ class AppConfigs {
                 }
 
                 @Override
-                public InvocableFactory invocableFactory() {
+                public MsgInvocableFactory invocableFactory() {
                     return null;
                 }
 
@@ -66,7 +66,7 @@ class AppConfigs {
                 }
 
                 @Override
-                public InvocableFactory invocableFactory() {
+                public MsgInvocableFactory invocableFactory() {
                     return null;
                 }
 

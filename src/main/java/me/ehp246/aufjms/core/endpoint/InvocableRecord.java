@@ -25,4 +25,8 @@ record InvocableRecord(Object instance, Method method, AutoCloseable closeable, 
     InvocableRecord(Object instance, Method method) {
         this(instance, method, null, InvocationModel.DEFAULT);
     }
+
+    @Override
+    public void close() throws Exception {
+    }
 }

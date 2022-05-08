@@ -8,6 +8,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @since 1.0
  */
 @FunctionalInterface
-public interface InvocableFactory {
-    Invocable resolve(JmsMsg msg);
+public interface MsgInvocableFactory {
+    Invocable get(JmsMsg msg);
 }
