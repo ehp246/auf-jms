@@ -18,11 +18,13 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
+import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
+import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.Invoker;
+import me.ehp246.aufjms.api.endpoint.ToInvoke;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -40,23 +42,22 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private static final Logger LOGGER = LogManager.getLogger(InboundMsgConsumer.class);
 
     private final Executor executor;
-    private final InvocableFactory resolver;
+    private final InvocableFactory factory;
     private final InvocableBinder binder;
-    private final Invoker invoker;
+    private final ToInvoke invoker;
     private final JmsDispatchFn dispatchFn;
-    private final InvocationListenersSupplier invocationListener;
+    private final InvocationListenersSupplier listenerSupplier;
 
-    InboundMsgConsumer(final InvocableFactory executableResolver, final InvocableBinder binder,
-            final Invoker invoker,
+    InboundMsgConsumer(final InvocableFactory factory, final InvocableBinder binder, final ToInvoke invoker,
             final Executor executor, final JmsDispatchFn dispatchFn,
-            final InvocationListenersSupplier invocationListener) {
+            final InvocationListenersSupplier listenerSupplier) {
         super();
-        this.resolver = executableResolver;
+        this.factory = factory;
         this.binder = binder;
-        this.invoker = invoker;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.invocationListener = invocationListener;
+        this.listenerSupplier = listenerSupplier;
+        this.invoker = invoker;
     }
 
     @Override
@@ -91,7 +92,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private void dispatch(final JmsMsg msg, final Session session) {
         LOGGER.atTrace().log("Resolving {}", msg::type);
 
-        final var inovcable = resolver.resolve(msg);
+        final var inovcable = factory.resolve(msg);
 
         if (inovcable == null) {
             throw new UnknownTypeException(msg);
@@ -134,7 +135,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
             @Override
             public void run() {
                 final var bound = binder.bind(target, () -> msg);
-                final var outcome = invoker.invoke(bound);
+                final var outcome = invoker.apply(bound);
 
                 Optional.ofNullable(target.closeable()).ifPresent(closeable -> {
                     try (closeable) {
@@ -143,16 +144,14 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     }
                 });
 
-                final var thrown = outcome.thrown();
-
-                if (thrown != null) {
-                    if (invocationListener.failedInterceptor() == null) {
-                        throw OneUtil.ensureRuntime(thrown);
+                if (outcome instanceof FailedInvocation failed) {
+                    if (listenerSupplier.failedInterceptor() == null) {
+                        throw OneUtil.ensureRuntime(failed.thrown());
                     }
 
                     LOGGER.atTrace().log("Executing failed interceptor");
                     try {
-                        invocationListener.failedInterceptor().accept(new FailedInvocationRecord(msg, bound, thrown));
+                        listenerSupplier.failedInterceptor().accept(failed);
                         LOGGER.atTrace().log("Failure interceptor invoked");
                         /*
                          * Skip further execution on invocation exception but acknowledge the message.
@@ -165,12 +164,15 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     }
                 }
 
-                if (invocationListener.completedListener() != null) {
+                assert (outcome instanceof CompletedInvocation);
+
+                final var completed = (CompletedInvocation) outcome;
+
+                if (listenerSupplier.completedListener() != null) {
                     LOGGER.atTrace().log("Executing completed consumer");
 
                     try {
-                        invocationListener.completedListener()
-                                .accept(new CompletedInvocationRecord(msg, bound, outcome.returned()));
+                        listenerSupplier.completedListener().accept(completed);
 
                         LOGGER.atTrace().log("Completed consumer invoked");
                     } catch (Exception e) {
@@ -188,8 +190,8 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                 LOGGER.atTrace().log("Replying to {}", replyTo);
 
-                InboundMsgConsumer.this.dispatchFn.send(JmsDispatch.toDispatch(toAt(replyTo), msg.type(),
-                        outcome.returned(), msg.correlationId()));
+                InboundMsgConsumer.this.dispatchFn.send(
+                        JmsDispatch.toDispatch(toAt(replyTo), msg.type(), completed.returned(), msg.correlationId()));
             }
         };
     }
@@ -202,5 +204,4 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
             throw new JMSRuntimeException(e.getMessage(), e.getErrorCode(), e);
         }
     }
-
 }

@@ -1,20 +1,20 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-record BoundInvocableRecord(Invocable executable, List<Object> arguments)
+record BoundInvocableRecord(Invocable invocable, List<Object> arguments, JmsMsg msg)
         implements BoundInvocable {
     BoundInvocableRecord {
-        if (executable == null) {
+        if (invocable == null) {
             throw new IllegalArgumentException("Target must be specified");
         }
 
@@ -25,17 +25,7 @@ record BoundInvocableRecord(Invocable executable, List<Object> arguments)
         arguments = Collections.unmodifiableList(arguments);
     }
 
-    BoundInvocableRecord(Invocable executable) {
-        this(executable, List.of());
-    }
-
-    @Override
-    public Object instance() {
-        return executable.instance();
-    }
-
-    @Override
-    public Method method() {
-        return executable.method();
+    BoundInvocableRecord(Invocable invocable, JmsMsg msg) {
+        this(invocable, List.of(), msg);
     }
 }

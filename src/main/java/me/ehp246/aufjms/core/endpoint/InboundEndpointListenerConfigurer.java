@@ -15,13 +15,13 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.Invoked;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
-import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
@@ -56,7 +56,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
         for (final var endpoint : this.endpoints) {
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
-            final var dispatcher = new InboundMsgConsumer(endpoint.invocableFactory(), binder, InvocationOutcome::invoke,
+            final var dispatcher = new InboundMsgConsumer(endpoint.invocableFactory(), binder, Invoked::invoke,
                     executorProvider.get(endpoint.concurrency()),
                     this.dispathFnProvider.get(endpoint.connectionFactory()),
                     new InvocationListenersSupplier(endpoint.completedInvocationListener(),

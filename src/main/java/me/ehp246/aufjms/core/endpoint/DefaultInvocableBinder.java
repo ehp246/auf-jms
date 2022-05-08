@@ -54,7 +54,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         method.setAccessible(true);
 
         if (method.getParameterCount() == 0) {
-            return new BoundInvocableRecord(target);
+            return new BoundInvocableRecord(target, ctx.msg());
         }
 
         final var parameters = method.getParameters();
@@ -92,7 +92,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             fromJson.apply(ctx.msg().text(), receivers);
         }
 
-        return new BoundInvocableRecord(target, Arrays.asList(arguments));
+        return new BoundInvocableRecord(target, Arrays.asList(arguments), ctx.msg());
     }
 
     /**

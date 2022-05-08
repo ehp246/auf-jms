@@ -16,7 +16,7 @@ public interface SendToDlTopic extends FailedInvocationInterceptor {
     void send(JmsMsg msg);
 
     @Override
-    default void accept(FailedInvocation failedMsg) {
-        this.send(failedMsg.msg());
+    default void accept(FailedInvocation failed) {
+        this.send(failed.bound().msg());
     }
 }

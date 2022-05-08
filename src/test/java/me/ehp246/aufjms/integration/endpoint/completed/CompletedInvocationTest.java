@@ -31,7 +31,7 @@ class CompletedInvocationTest {
         
         final var completed = AppConfig.comp1Ref.get();
 
-        Assertions.assertEquals(id, completed.msg().correlationId());
+        Assertions.assertEquals(id, completed.bound().msg().correlationId());
         Assertions.assertEquals(true, completed.returned() instanceof String);
         Assertions.assertEquals(id, completed.returned().toString());
     }
