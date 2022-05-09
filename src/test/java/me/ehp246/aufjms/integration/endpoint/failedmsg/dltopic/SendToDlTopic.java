@@ -2,8 +2,8 @@ package me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
@@ -12,11 +12,11 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 @ByJms(value = @To(value = "dltopic", type = DestinationType.TOPIC), name = "consumer2")
-public interface SendToDlTopic extends FailedInvocationInterceptor {
+public interface SendToDlTopic extends FailedInterceptor {
     void send(JmsMsg msg);
 
     @Override
-    default void accept(FailedInvocation failed) {
+    default void onFailed(Failed failed) {
         this.send(failed.bound().msg());
     }
 }

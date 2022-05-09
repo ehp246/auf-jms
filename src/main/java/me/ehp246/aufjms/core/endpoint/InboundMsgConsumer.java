@@ -18,11 +18,11 @@ import org.springframework.jms.listener.SessionAwareMessageListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.At;
@@ -143,14 +143,14 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                     assert (outcome != null);
 
-                    if (outcome instanceof FailedInvocation failed) {
+                    if (outcome instanceof Failed failed) {
                         if (listenerSupplier.failedInterceptor() == null) {
                             throw failed.thrown();
                         }
 
                         LOGGER.atTrace().log("Executing failed interceptor");
                         try {
-                            listenerSupplier.failedInterceptor().accept(failed);
+                            listenerSupplier.failedInterceptor().onFailed(failed);
                             LOGGER.atTrace().log("Failure interceptor invoked");
                             /*
                              * If the interceptor does not throw, skip further execution and acknowledge the
@@ -164,15 +164,15 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                         }
                     }
 
-                    assert (outcome instanceof CompletedInvocation);
+                    assert (outcome instanceof Completed);
 
-                    final var completed = (CompletedInvocation) outcome;
+                    final var completed = (Completed) outcome;
 
                     if (listenerSupplier.completedListener() != null) {
                         LOGGER.atTrace().log("Executing completed consumer");
 
                         try {
-                            listenerSupplier.completedListener().accept(completed);
+                            listenerSupplier.completedListener().onCompleted(completed);
 
                             LOGGER.atTrace().log("Completed consumer invoked");
                         } catch (Exception e) {

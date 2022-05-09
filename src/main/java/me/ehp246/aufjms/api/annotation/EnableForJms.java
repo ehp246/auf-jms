@@ -12,10 +12,10 @@ import javax.jms.Message;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
@@ -66,8 +66,8 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * Specifies the bean name of the {@linkplain CompletedInvocationListener} type
-         * to receive {@linkplain CompletedInvocation}.
+         * Specifies the bean name of the {@linkplain CompletedListener} type
+         * to receive {@linkplain Completed}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
          * {@linkplain EnableForJms.Inbound} completes normally, the bean will be
@@ -81,8 +81,8 @@ public @interface EnableForJms {
         String completedInvocationListener() default "";
 
         /**
-         * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type
-         * to receive {@linkplain FailedInvocation}.
+         * Specifies the bean name of the {@linkplain FailedInterceptor} type
+         * to receive {@linkplain Failed}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
          * {@linkplain EnableForJms.Inbound} throws an exception, the bean will be

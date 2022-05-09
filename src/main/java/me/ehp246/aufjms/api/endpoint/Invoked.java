@@ -2,19 +2,30 @@ package me.ehp246.aufjms.api.endpoint;
 
 import java.lang.reflect.InvocationTargetException;
 
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
+
 /**
  * @author Lei Yang
  *
  */
 
-public sealed interface Invoked permits CompletedInvocation, FailedInvocation {
+public sealed interface Invoked permits Completed, Failed {
     BoundInvocable bound();
+
+    public non-sealed interface Completed extends Invoked {
+        Object returned();
+    }
+
+    public non-sealed interface Failed extends Invoked {
+        Throwable thrown();
+    }
 
     static Invoked invoke(final BoundInvocable bound) {
         try {
             final var returned = bound.invocable().method().invoke(bound.invocable().instance(),
                     bound.arguments().toArray());
-            return new CompletedInvocation() {
+            return new Completed() {
 
                 @Override
                 public BoundInvocable bound() {
@@ -27,7 +38,7 @@ public sealed interface Invoked permits CompletedInvocation, FailedInvocation {
                 }
             };
         } catch (InvocationTargetException e1) {
-            return new FailedInvocation() {
+            return new Failed() {
 
                 @Override
                 public BoundInvocable bound() {
@@ -40,7 +51,7 @@ public sealed interface Invoked permits CompletedInvocation, FailedInvocation {
                 }
             };
         } catch (Exception e2) {
-            return new FailedInvocation() {
+            return new Failed() {
 
                 @Override
                 public BoundInvocable bound() {

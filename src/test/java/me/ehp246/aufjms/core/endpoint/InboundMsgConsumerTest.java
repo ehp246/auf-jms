@@ -29,11 +29,11 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -52,7 +52,7 @@ class InboundMsgConsumerTest {
     private final Invocable invocable = Mockito.mock(Invocable.class);
     private MsgInvocableFactory factory = msg -> invocable;
     private InvocableBinder binder = Mockito.mock(InvocableBinder.class);
-    private BoundInvoker invoker = b -> Mockito.mock(CompletedInvocation.class);
+    private BoundInvoker invoker = b -> Mockito.mock(Completed.class);
     private BoundInvocable bound = Mockito.mock(BoundInvocable.class);
     private Session session = Mockito.mock(Session.class);
     private final JmsDispatchFn noopFn = m -> null;
@@ -73,7 +73,7 @@ class InboundMsgConsumerTest {
 
     private static BoundInvoker failed(final BoundInvocable bound, final Exception ex) {
         final var invoker = Mockito.mock(BoundInvoker.class);
-        final var failed = new FailedInvocation() {
+        final var failed = new Failed() {
 
             @Override
             public BoundInvocable bound() {
@@ -129,7 +129,7 @@ class InboundMsgConsumerTest {
 
     @Test
     void failed_02() throws JMSException {
-        final var ref = new FailedInvocation[1];
+        final var ref = new Failed[1];
         final var expected = new RuntimeException();
 
         new InboundMsgConsumer(factory, binder(invocable, bound), failed(bound, expected), null, m -> null,
@@ -148,7 +148,7 @@ class InboundMsgConsumerTest {
         final var expected = new NullPointerException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
-                b -> Mockito.mock(FailedInvocation.class), null, m -> null, new InvocationListenersSupplier(null, m -> {
+                b -> Mockito.mock(Failed.class), null, m -> null, new InvocationListenersSupplier(null, m -> {
                     throw expected;
                 })).onMessage(new MockTextMessage(), session), "should allow the listener to throw back to the broker");
 
@@ -157,7 +157,7 @@ class InboundMsgConsumerTest {
 
     @Test
     void failed_04() throws JMSException {
-        final var ref = new FailedInvocation[1];
+        final var ref = new Failed[1];
         final var expected = new RuntimeException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
@@ -186,7 +186,7 @@ class InboundMsgConsumerTest {
         }, b -> {
             threadRef[1] = Thread.currentThread();
             sessionRef[1] = AufJmsContext.getSession();
-            return Mockito.mock(FailedInvocation.class);
+            return Mockito.mock(Failed.class);
         }, null, m -> null, new InvocationListenersSupplier(null, m -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
@@ -232,7 +232,7 @@ class InboundMsgConsumerTest {
         }, b -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-            return Mockito.mock(CompletedInvocation.class);
+            return Mockito.mock(Completed.class);
         }, executor, m -> null, new InvocationListenersSupplier(m -> {
             threadRef[3] = Thread.currentThread();
             sessionRef[3] = AufJmsContext.getSession();
@@ -257,8 +257,8 @@ class InboundMsgConsumerTest {
     void completed_01() throws InterruptedException, ExecutionException, JMSException {
         final var threadRef = new Thread[1];
         final var completedThread = new Thread[1];
-        final var completed = Mockito.mock(CompletedInvocation.class);
-        final var completedRef = new CompletedInvocation[1];
+        final var completed = Mockito.mock(Completed.class);
+        final var completedRef = new Completed[1];
 
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
@@ -281,7 +281,7 @@ class InboundMsgConsumerTest {
         final var expected = new RuntimeException("Completed");
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
-                b -> Mockito.mock(CompletedInvocation.class), null, noopFn, new InvocationListenersSupplier(c -> {
+                b -> Mockito.mock(Completed.class), null, noopFn, new InvocationListenersSupplier(c -> {
                     throw expected;
                 }, null)).onMessage(new MockTextMessage(), session));
 
@@ -290,7 +290,7 @@ class InboundMsgConsumerTest {
 
     @Test
     void completed_close_01() throws Exception {
-        final var completed = Mockito.mock(CompletedInvocationListener.class);
+        final var completed = Mockito.mock(CompletedListener.class);
 
         Mockito.doThrow(new IllegalStateException("Don't close me")).when(invocable).close();
 
@@ -299,7 +299,7 @@ class InboundMsgConsumerTest {
 
         Mockito.verify(invocable, times(1)).close();
         // Exception from the close should be suppressed.
-        Mockito.verify(completed, times(1)).accept(Mockito.any(CompletedInvocation.class));
+        Mockito.verify(completed, times(1)).onCompleted(Mockito.any(Completed.class));
     }
 
     @Test
@@ -321,7 +321,7 @@ class InboundMsgConsumerTest {
             }
 
         };
-        final var completed = Mockito.mock(CompletedInvocation.class);
+        final var completed = Mockito.mock(Completed.class);
 
         Mockito.when(completed.returned()).thenReturn(expectedBody);
 

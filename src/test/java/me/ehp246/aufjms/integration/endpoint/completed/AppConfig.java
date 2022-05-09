@@ -10,8 +10,8 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocation;
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationListener;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 
 /**
@@ -24,10 +24,10 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
         @Inbound(value = @From("q1"), completedInvocationListener = "${comp1.name:}") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
-    public static CompletableFuture<CompletedInvocation> comp1Ref = new CompletableFuture<>();
+    public static CompletableFuture<Completed> comp1Ref = new CompletableFuture<>();
 
     @Bean
-    CompletedInvocationListener comp1() {
+    CompletedListener comp1() {
         return completed -> {
             comp1Ref.complete(completed);
         };
