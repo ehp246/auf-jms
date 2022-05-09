@@ -6,5 +6,5 @@ package me.ehp246.aufjms.api.endpoint;
  */
 @FunctionalInterface
 public interface BoundInvoker {
-    InvocationOutcome apply(BoundInvocable bound);
+    Invoked apply(BoundInvocable bound);
 }

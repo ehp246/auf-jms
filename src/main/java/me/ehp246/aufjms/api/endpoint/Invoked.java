@@ -7,10 +7,10 @@ import java.lang.reflect.InvocationTargetException;
  *
  */
 
-public sealed interface InvocationOutcome permits CompletedInvocation, FailedInvocation {
+public sealed interface Invoked permits CompletedInvocation, FailedInvocation {
     BoundInvocable bound();
 
-    static InvocationOutcome invoke(final BoundInvocable bound) {
+    static Invoked invoke(final BoundInvocable bound) {
         try {
             final var returned = bound.invocable().method().invoke(bound.invocable().instance(),
                     bound.arguments().toArray());
