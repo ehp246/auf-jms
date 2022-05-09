@@ -22,8 +22,8 @@ import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnCompleted;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
@@ -147,7 +147,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     assert (outcome != null);
 
                     if (outcome instanceof Failed failed) {
-                        if (!(listener instanceof FailedInterceptor failedListener)) {
+                        if (!(listener instanceof OnFailed failedListener)) {
                             throw failed.thrown();
                         }
 
@@ -171,7 +171,7 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                     final var completed = (Completed) outcome;
 
-                    if (listener instanceof CompletedListener completedListener) {
+                    if (listener instanceof OnCompleted completedListener) {
                         LOGGER.atTrace().log("Executing completed consumer");
 
                         try {

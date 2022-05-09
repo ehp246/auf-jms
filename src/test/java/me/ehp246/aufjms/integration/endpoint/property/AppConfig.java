@@ -10,7 +10,7 @@ import org.springframework.jms.annotation.EnableJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -26,7 +26,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
         @Inbound(value = @From("q"), invocationListener = "${interceptor.name.null:failedInvocationInterceptor}") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
-    final FailedInterceptor inteceptor = f -> {
+    final OnFailed inteceptor = f -> {
     };
 
     @Bean
@@ -35,7 +35,7 @@ class AppConfig {
     }
 
     @Bean
-    public FailedInterceptor failedInvocationInterceptor() {
+    public OnFailed failedInvocationInterceptor() {
         return inteceptor;
     }
 }

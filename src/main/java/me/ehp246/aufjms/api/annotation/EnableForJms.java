@@ -12,8 +12,7 @@ import javax.jms.Message;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -66,33 +65,34 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * Specifies the bean name of the {@linkplain CompletedListener} type to receive
-         * {@linkplain Completed}.
+         * Specifies the bean name of the {@linkplain InvocationListener} type to
+         * receive either {@linkplain Completed} or {@linkplain Failed} invocations on
+         * this {@linkplain EnableForJms.Inbound}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
-         * {@linkplain EnableForJms.Inbound} completes normally, the bean will be
+         * {@linkplain EnableForJms.Inbound} completes normally, the
+         * {@linkplain InvocationListener.OnCompleted#onCompleted(Completed)} will be
          * invoked.
          * <p>
          * If a {@linkplain RuntimeException} happens from the bean, the
-         * {@linkplain Message} will follow broker's dead-lettering process. Specifies
-         * the bean name of the {@linkplain FailedInterceptor} type to receive
-         * {@linkplain Failed}.
+         * {@linkplain Message} will follow broker's dead-lettering process.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
-         * {@linkplain EnableForJms.Inbound} throws an exception, the bean will be
-         * invoked.
+         * {@linkplain EnableForJms.Inbound} throws an exception, the
+         * {@linkplain InvocationListener.OnFailed#onFailed(Failed)} will be invoked.
          * <p>
          * If the invocation of the bean completes without an exception, the
-         * {@linkplain Message} will be acknowledged to the broker as a success.
+         * {@linkplain Message} will be <strong>acknowledged</strong> to the broker as a
+         * success.
          * <p>
-         * The bean can throw {@linkplain Exception} in which case the message follows
-         * broker's dead-lettering process.
+         * {@linkplain InvocationListener.OnFailed} can throw {@linkplain Exception} in
+         * which case the message follows broker's dead-lettering process.
          * <p>
-         * The bean is meant to handle exceptions thrown by {@linkplain ForJmsType}
-         * objects. It applies only after a matching {@linkplain ForJmsType} class has
-         * been found. E.g., the bean will not be invoked for basic
-         * {@linkplain JMSException} prior to {@linkplain Message#getJMSType()}
-         * matching, i.e., {@linkplain UnknownTypeException}.
+         * The listener bean is designed to support {@linkplain ForJmsType} objects. It
+         * applies only after a matching {@linkplain ForJmsType} class has been found.
+         * E.g., the bean will not be invoked for basic {@linkplain JMSException} prior
+         * to {@linkplain Message#getJMSType()} matching, i.e.,
+         * {@linkplain UnknownTypeException}.
          * <p>
          * Supports Spring property placeholder.
          */

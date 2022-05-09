@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -34,7 +34,7 @@ class AppConfig {
     public CompletableFuture<JmsMsg> dlqRef = new CompletableFuture<>();
     
     @Bean("consumer1")
-    FailedInterceptor consumer1() {
+    OnFailed consumer1() {
         return failed -> conRef1.complete(failed);
     }
 }
