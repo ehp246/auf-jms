@@ -14,12 +14,16 @@ import javax.jms.Topic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jms.listener.SessionAwareMessageListener;
+import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
@@ -45,19 +49,18 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
     private final InvocableBinder binder;
     private final BoundInvoker invoker;
     private final JmsDispatchFn dispatchFn;
-    private final InvocationListenersSupplier listenerSupplier;
+    private final InvocationListener listener;
 
     InboundMsgConsumer(final MsgInvocableFactory factory, final InvocableBinder binder, final BoundInvoker invoker,
-            final Executor executor, final JmsDispatchFn dispatchFn,
-            final InvocationListenersSupplier listenerSupplier) {
+            @Nullable final Executor executor, final JmsDispatchFn dispatchFn,
+            @Nullable final InvocationListener listener) {
         super();
         this.factory = factory;
         this.binder = binder;
         this.executor = executor;
         this.dispatchFn = dispatchFn;
-        this.listenerSupplier = listenerSupplier == null ? new InvocationListenersSupplier(null, null)
-                : listenerSupplier;
         this.invoker = invoker;
+        this.listener = listener;
     }
 
     @Override
@@ -144,13 +147,13 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
                     assert (outcome != null);
 
                     if (outcome instanceof Failed failed) {
-                        if (listenerSupplier.failedInterceptor() == null) {
+                        if (!(listener instanceof FailedInterceptor failedListener)) {
                             throw failed.thrown();
                         }
 
                         LOGGER.atTrace().log("Executing failed interceptor");
                         try {
-                            listenerSupplier.failedInterceptor().onFailed(failed);
+                            failedListener.onFailed(failed);
                             LOGGER.atTrace().log("Failure interceptor invoked");
                             /*
                              * If the interceptor does not throw, skip further execution and acknowledge the
@@ -168,11 +171,11 @@ final class InboundMsgConsumer implements SessionAwareMessageListener<Message> {
 
                     final var completed = (Completed) outcome;
 
-                    if (listenerSupplier.completedListener() != null) {
+                    if (listener instanceof CompletedListener completedListener) {
                         LOGGER.atTrace().log("Executing completed consumer");
 
                         try {
-                            listenerSupplier.completedListener().onCompleted(completed);
+                            completedListener.onCompleted(completed);
 
                             LOGGER.atTrace().log("Completed consumer invoked");
                         } catch (Exception e) {

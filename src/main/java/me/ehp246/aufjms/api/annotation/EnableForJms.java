@@ -66,23 +66,17 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * Specifies the bean name of the {@linkplain CompletedListener} type
-         * to receive {@linkplain Completed}.
+         * Specifies the bean name of the {@linkplain CompletedListener} type to receive
+         * {@linkplain Completed}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
          * {@linkplain EnableForJms.Inbound} completes normally, the bean will be
          * invoked.
          * <p>
          * If a {@linkplain RuntimeException} happens from the bean, the
-         * {@linkplain Message} will follow broker's dead-lettering process.
-         * <p>
-         * Supports Spring property placeholder.
-         */
-        String completedInvocationListener() default "";
-
-        /**
-         * Specifies the bean name of the {@linkplain FailedInterceptor} type
-         * to receive {@linkplain Failed}.
+         * {@linkplain Message} will follow broker's dead-lettering process. Specifies
+         * the bean name of the {@linkplain FailedInterceptor} type to receive
+         * {@linkplain Failed}.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
          * {@linkplain EnableForJms.Inbound} throws an exception, the bean will be
@@ -102,7 +96,7 @@ public @interface EnableForJms {
          * <p>
          * Supports Spring property placeholder.
          */
-        String failedInvocationInterceptor() default "";
+        String invocationListener() default "";
 
         @interface From {
             /**

@@ -25,8 +25,8 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @ComponentScan
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From("q1"), scan = FailMsg.class, failedInvocationInterceptor = "consumer1"),
-        @Inbound(value = @From("q2"), scan = FailMsg.class, failedInvocationInterceptor = "consumer2"),
+        @Inbound(value = @From("q1"), scan = FailMsg.class, invocationListener = "consumer1"),
+        @Inbound(value = @From("q2"), scan = FailMsg.class, invocationListener = "consumer2"),
         @Inbound(value = @From(value = "dltopic", type = DestinationType.TOPIC), scan = OnDlTopicMsg.class) })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {

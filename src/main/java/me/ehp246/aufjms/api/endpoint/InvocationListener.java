@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 
 /**
  * @author Lei Yang
- *
+ * @since 1.0
  */
 public sealed interface InvocationListener permits CompletedListener, FailedInterceptor {
     @FunctionalInterface

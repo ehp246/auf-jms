@@ -41,7 +41,7 @@ class CompletedInvocationTest {
         final var appCtx = new AnnotationConfigApplicationContext(AppConfig.class);
 
         Assertions.assertEquals(null,
-                appCtx.getBean("InboundEndpoint-0", InboundEndpoint.class).completedInvocationListener());
+                appCtx.getBean("InboundEndpoint-0", InboundEndpoint.class).invocationListener());
 
         appCtx.close();
     }

@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
 import me.ehp246.aufjms.api.jms.At;
 
 /**
@@ -30,11 +28,7 @@ public interface InboundEndpoint {
         return null;
     }
 
-    default CompletedListener completedInvocationListener() {
-        return null;
-    }
-
-    default FailedInterceptor failedInvocationInterceptor() {
+    default InvocationListener invocationListener() {
         return null;
     }
 

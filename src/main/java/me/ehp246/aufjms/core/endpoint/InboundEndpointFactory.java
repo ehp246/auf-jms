@@ -7,8 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
@@ -54,16 +53,12 @@ public final class InboundEndpointFactory {
                 .resolve(inboundAttributes.get("connectionFactory").toString());
         final MsgInvocableFactory resolver = new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
                 DefaultInvocableRegistry.registeryFrom(scanPackages));
-        final FailedInterceptor failedInterceptor = Optional
-                .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())
+        final var listener = Optional
+                .ofNullable(inboundAttributes.get("invocationListener").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, FailedInterceptor.class)).orElse(null);
-        final CompletedListener completedConsumer = Optional
-                .ofNullable(inboundAttributes.get("completedInvocationListener").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, CompletedListener.class)).orElse(null);
+                .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
 
         return new InboundEndpointRecord(from, resolver, concurrency, beanName, autoStartup, connectionFactory,
-                completedConsumer, failedInterceptor);
+                listener);
     }
 }

@@ -11,5 +11,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationListener.FailedInterceptor;
  */
 record InvocationListenersSupplier(CompletedListener completedListener,
         FailedInterceptor failedInterceptor) {
-
+    InvocationListenersSupplier() {
+        this(null, null);
+    }
 }

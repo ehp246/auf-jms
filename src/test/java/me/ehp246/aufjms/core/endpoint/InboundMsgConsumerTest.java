@@ -31,6 +31,7 @@ import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.InvocationListener.CompletedListener;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
@@ -95,8 +96,8 @@ class InboundMsgConsumerTest {
         final var expected = new RuntimeException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class,
-                () -> new InboundMsgConsumer(factory, binder, failed(bound, expected), null, msg -> null,
-                        new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(), session));
+                () -> new InboundMsgConsumer(factory, binder, failed(bound, expected), null, msg -> null, null)
+                        .onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(actual, expected, "should be the thrown from invocable");
     }
@@ -133,9 +134,9 @@ class InboundMsgConsumerTest {
         final var expected = new RuntimeException();
 
         new InboundMsgConsumer(factory, binder(invocable, bound), failed(bound, expected), null, m -> null,
-                new InvocationListenersSupplier(null, m -> {
+                (InvocationListener.FailedInterceptor) m -> {
                     ref[0] = m;
-                })).onMessage(new MockTextMessage(), session);
+                }).onMessage(new MockTextMessage(), session);
 
         final var failed = ref[0];
 
@@ -148,9 +149,9 @@ class InboundMsgConsumerTest {
         final var expected = new NullPointerException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
-                b -> Mockito.mock(Failed.class), null, m -> null, new InvocationListenersSupplier(null, m -> {
+                b -> Mockito.mock(Failed.class), null, m -> null, (InvocationListener.FailedInterceptor) m -> {
                     throw expected;
-                })).onMessage(new MockTextMessage(), session), "should allow the listener to throw back to the broker");
+                }).onMessage(new MockTextMessage(), session), "should allow the listener to throw back to the broker");
 
         Assertions.assertEquals(actual, expected);
     }
@@ -161,10 +162,10 @@ class InboundMsgConsumerTest {
         final var expected = new RuntimeException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
-                failed(bound, expected), null, m -> null, new InvocationListenersSupplier(null, m -> {
+                failed(bound, expected), null, m -> null, (InvocationListener.FailedInterceptor) m -> {
                     ref[0] = m;
                     throw (RuntimeException) (m.thrown());
-                })).onMessage(new MockTextMessage(), session));
+                }).onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(actual, expected, "should be from the invoker");
         Assertions.assertEquals(actual, ref[0].thrown(), "should allow the listener to throw");
@@ -187,10 +188,10 @@ class InboundMsgConsumerTest {
             threadRef[1] = Thread.currentThread();
             sessionRef[1] = AufJmsContext.getSession();
             return Mockito.mock(Failed.class);
-        }, null, m -> null, new InvocationListenersSupplier(null, m -> {
+        }, null, m -> null, (InvocationListener.FailedInterceptor) m -> {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
-        })).onMessage(msg, session);
+        }).onMessage(msg, session);
 
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binder, invoker, failed listener");
@@ -233,10 +234,10 @@ class InboundMsgConsumerTest {
             threadRef[2] = Thread.currentThread();
             sessionRef[2] = AufJmsContext.getSession();
             return Mockito.mock(Completed.class);
-        }, executor, m -> null, new InvocationListenersSupplier(m -> {
+        }, executor, m -> null, (InvocationListener.CompletedListener) m -> {
             threadRef[3] = Thread.currentThread();
             sessionRef[3] = AufJmsContext.getSession();
-        }, null)).onMessage(new MockTextMessage(), session);
+        }).onMessage(new MockTextMessage(), session);
 
         executor.shutdown();
         executor.awaitTermination(100, TimeUnit.SECONDS);
@@ -264,10 +265,10 @@ class InboundMsgConsumerTest {
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
         new InboundMsgConsumer(factory, binder, b -> completed, executor, m -> null,
-                new InvocationListenersSupplier(c -> {
+                (InvocationListener.CompletedListener) c -> {
                     completedRef[0] = c;
                     completedThread[0] = Thread.currentThread();
-                }, null)).onMessage(new MockTextMessage(), session);
+                }).onMessage(new MockTextMessage(), session);
 
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
@@ -281,9 +282,9 @@ class InboundMsgConsumerTest {
         final var expected = new RuntimeException("Completed");
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
-                b -> Mockito.mock(Completed.class), null, noopFn, new InvocationListenersSupplier(c -> {
+                b -> Mockito.mock(Completed.class), null, noopFn, (InvocationListener.CompletedListener) c -> {
                     throw expected;
-                }, null)).onMessage(new MockTextMessage(), session));
+                }).onMessage(new MockTextMessage(), session));
 
         Assertions.assertEquals(expected, actual, "should be thrown the broker");
     }
@@ -294,8 +295,8 @@ class InboundMsgConsumerTest {
 
         Mockito.doThrow(new IllegalStateException("Don't close me")).when(invocable).close();
 
-        new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null,
-                new InvocationListenersSupplier(completed, null)).onMessage(new MockTextMessage(), session);
+        new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null, completed)
+                .onMessage(new MockTextMessage(), session);
 
         Mockito.verify(invocable, times(1)).close();
         // Exception from the close should be suppressed.
@@ -328,7 +329,7 @@ class InboundMsgConsumerTest {
         new InboundMsgConsumer(factory, binder, b -> completed, null, dispatch -> {
             dispatchRef[0] = dispatch;
             return null;
-        }, new InvocationListenersSupplier(null, null)).onMessage(message, session);
+        }, null).onMessage(message, session);
 
         // Supported reply message: To, type, returned, correlation
         Assertions.assertEquals(true, dispatchRef[0].to() instanceof AtQueue);
@@ -361,7 +362,7 @@ class InboundMsgConsumerTest {
         new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> {
             dispatchRef[0] = dispatch;
             return null;
-        }, new InvocationListenersSupplier(null, null)).onMessage(message, session);
+        }, null).onMessage(message, session);
 
         Assertions.assertEquals(true, dispatchRef[0].to() instanceof AtTopic);
         Assertions.assertEquals("t1", dispatchRef[0].to().name());
@@ -385,16 +386,16 @@ class InboundMsgConsumerTest {
         };
 
         final var actual = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null,
-                        new InvocationListenersSupplier(null, null)).onMessage(message, session));
+                () -> new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null, null).onMessage(message,
+                        session));
 
         Assertions.assertEquals(expected, actual.getCause(), "should re-throw");
     }
 
     @Test
     void close_01() throws Exception {
-        new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null,
-                new InvocationListenersSupplier(null, null)).onMessage(new MockTextMessage(), session);
+        new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null, null).onMessage(new MockTextMessage(),
+                session);
 
         // Should close on completed invocation
         Mockito.verify(invocable, times(1)).close();
@@ -402,11 +403,8 @@ class InboundMsgConsumerTest {
 
     @Test
     void close_02() throws Exception {
-        Assertions
-                .assertThrows(RuntimeException.class,
-                        () -> new InboundMsgConsumer(factory, binder, failed(bound, new RuntimeException()), null,
-                                dispatch -> null, new InvocationListenersSupplier(null, null)).onMessage(message,
-                                        session));
+        Assertions.assertThrows(RuntimeException.class, () -> new InboundMsgConsumer(factory, binder,
+                failed(bound, new RuntimeException()), null, dispatch -> null, null).onMessage(message, session));
 
         // Should close on failed invocation
         Mockito.verify(invocable, times(1)).close();
@@ -416,8 +414,7 @@ class InboundMsgConsumerTest {
     void close_03() throws Exception {
         Assertions.assertThrows(RuntimeException.class,
                 () -> new InboundMsgConsumer(factory, (i, m) -> null, b -> null, null, dispatch -> null, null)
-                        .onMessage(message,
-                        session));
+                        .onMessage(message, session));
 
         // Should close on wrong data
         Mockito.verify(invocable, times(1)).close();

@@ -58,18 +58,18 @@ class PropertyTest {
     @Test
     void failureInterceptor_01() {
         Assertions.assertEquals(null,
-                beanFactory.getBean("InboundEndpoint-0", InboundEndpoint.class).failedInvocationInterceptor());
+                beanFactory.getBean("InboundEndpoint-0", InboundEndpoint.class).invocationListener());
         
         Assertions.assertEquals(appConfig.inteceptor,
-                beanFactory.getBean("InboundEndpoint-1", InboundEndpoint.class).failedInvocationInterceptor());
+                beanFactory.getBean("InboundEndpoint-1", InboundEndpoint.class).invocationListener());
 
         Assertions.assertEquals(null,
-                beanFactory.getBean("InboundEndpoint-2", InboundEndpoint.class).failedInvocationInterceptor());
+                beanFactory.getBean("InboundEndpoint-2", InboundEndpoint.class).invocationListener());
 
         Assertions.assertEquals(appConfig.inteceptor,
-                beanFactory.getBean("InboundEndpoint-3", InboundEndpoint.class).failedInvocationInterceptor());
+                beanFactory.getBean("InboundEndpoint-3", InboundEndpoint.class).invocationListener());
 
         Assertions.assertEquals(null,
-                beanFactory.getBean("InboundEndpoint-4", InboundEndpoint.class).failedInvocationInterceptor());
+                beanFactory.getBean("InboundEndpoint-4", InboundEndpoint.class).invocationListener());
     }
 }
