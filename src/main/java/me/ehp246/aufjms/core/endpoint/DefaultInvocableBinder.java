@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jms.JMSContext;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
@@ -125,8 +125,8 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             } else if (type.isAssignableFrom(FromJson.class)) {
                 arguments[i] = fromJson;
                 markers[i] = true;
-            } else if (type.isAssignableFrom(JMSContext.class)) {
-                arguments[i] = ctx.jmsContext();
+            } else if (type.isAssignableFrom(Session.class)) {
+                arguments[i] = ctx.session();
                 markers[i] = true;
             }
 

@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import javax.jms.JMSContext;
+import javax.jms.Session;
 
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface MsgContext {
     JmsMsg msg();
 
-    default JMSContext jmsContext() {
+    default Session session() {
         return null;
     }
 }

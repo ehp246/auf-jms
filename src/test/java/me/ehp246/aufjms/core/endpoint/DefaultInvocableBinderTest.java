@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.junit.jupiter.api.Assertions;
@@ -219,13 +219,13 @@ class DefaultInvocableBinderTest {
     @Test
     public void method_09() throws Exception {
         final var mq = Mockito.mock(MsgContext.class);
-        final var session = Mockito.mock(JMSContext.class);
-        Mockito.when(mq.jmsContext()).then(i -> session);
+        final var session = Mockito.mock(Session.class);
+        Mockito.when(mq.session()).then(i -> session);
 
         final var outcome = Invoked
                 .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
                         ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
-                                JMSContext.class, FromJson.class)),
+                                Session.class, FromJson.class)),
                         mq));
 
         final var returned = (Object[]) ((Completed) outcome).returned();

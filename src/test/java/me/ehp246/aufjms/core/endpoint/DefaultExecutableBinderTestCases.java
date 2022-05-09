@@ -3,8 +3,8 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.List;
 import java.util.Map;
 
-import javax.jms.JMSContext;
 import javax.jms.Message;
+import javax.jms.Session;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
@@ -54,7 +54,7 @@ class DefaultExecutableBinderTestCases {
             return msgCtx;
         }
 
-        public Object[] m01(final JMSContext session, final FromJson fromJson) {
+        public Object[] m01(final Session session, final FromJson fromJson) {
             return new Object[] { session, fromJson };
         }
 

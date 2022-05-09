@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.Destination;
-import javax.jms.JMSContext;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.endpoint.MsgContext;
@@ -117,7 +117,7 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     }
 
     @Override
-    public JMSContext jmsContext() {
+    public Session session() {
         return null;
     }
 
