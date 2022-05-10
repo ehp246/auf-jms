@@ -33,9 +33,9 @@ final class InvocableDispatcher {
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
-    InvocableDispatcher(@Nullable final Executor executor, final InvocableBinder binder,
-            final BoundInvoker invoker, 
-            @Nullable final List<InvocationListener> listeners) {
+    InvocableDispatcher(final InvocableBinder binder, final BoundInvoker invoker,
+            @Nullable final List<InvocationListener> listeners, 
+            @Nullable final Executor executor) {
         super();
         this.binder = binder;
         this.executor = executor;

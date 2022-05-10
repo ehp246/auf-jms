@@ -70,10 +70,10 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
                 private final InvocableDispatcher dispatcher = new InvocableDispatcher(
-                        executorProvider.get(endpoint.concurrency()), binder, Invoked::invoke,
-                        // Reply should be the first for the completed
+                        binder, Invoked::invoke, // Reply should be the first for the completed
                         Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
-                                endpoint.invocationListener()));
+                                endpoint.invocationListener()),
+                        executorProvider.get(endpoint.concurrency()));
 
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
