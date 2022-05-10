@@ -126,9 +126,9 @@ final class InvocableDispatcher {
                     try {
                         InvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
 
-                        LOGGER.atTrace().log("Completed consumer invoked");
+                        LOGGER.atTrace().log("Completed listener invoked");
                     } catch (Exception e) {
-                        LOGGER.atTrace().withThrowable(e).log("Completed consumer failed: {}", e.getMessage());
+                        LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());
 
                         throw e;
                     }

@@ -13,5 +13,10 @@ public interface BoundInvocable {
 
     JmsMsg msg();
 
+    /**
+     * Should never be {@code null}.
+     * 
+     * @return
+     */
     List<Object> arguments();
 }
