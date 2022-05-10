@@ -12,7 +12,5 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 public interface MsgContext {
     JmsMsg msg();
 
-    default Session session() {
-        return null;
-    }
+    Session session();
 }

@@ -23,7 +23,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.Invoked;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
@@ -70,12 +69,11 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
-                private final InvocationListener.OnCompleted replyCompleted = new ReplyInvoked(
-                        dispathFnProvider.get(endpoint.connectionFactory()));
                 private final InvocableDispatcher dispatcher = new InvocableDispatcher(
                         executorProvider.get(endpoint.concurrency()), binder, Invoked::invoke,
                         // Reply should be the first for the completed
-                        Arrays.asList(replyCompleted, endpoint.invocationListener()));
+                        Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
+                                endpoint.invocationListener()));
 
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {

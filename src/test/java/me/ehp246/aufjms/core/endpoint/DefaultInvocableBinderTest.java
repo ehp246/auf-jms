@@ -50,7 +50,18 @@ class DefaultInvocableBinderTest {
     private final DefaultInvocableBinder binder = new DefaultInvocableBinder(fromJson);
     private final TextMessage message = new MockTextMessage();
     private final JmsMsg msg = Mockito.mock(JmsMsg.class);
-    private final MsgContext ctx = () -> msg;
+    private final MsgContext ctx = new MsgContext() {
+
+        @Override
+        public Session session() {
+            return null;
+        }
+
+        @Override
+        public JmsMsg msg() {
+            return msg;
+        }
+    };
     private final ArgCase01 arg01 = new ArgCase01();
 
     @Test
@@ -125,12 +136,22 @@ class DefaultInvocableBinderTest {
     @Test
     void method_01() throws Exception {
         final var mq = Mockito.mock(JmsMsg.class);
-        final var outcome = Invoked
-                .invoke(binder.bind(
-                        new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
-                                new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                                        DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01")),
-                        () -> mq));
+        final var outcome = Invoked.invoke(binder.bind(
+                new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
+                        new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
+                                DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01")),
+                new MsgContext() {
+
+                    @Override
+                    public Session session() {
+                        return null;
+                    }
+
+                    @Override
+                    public JmsMsg msg() {
+                        return mq;
+                    }
+                }));
 
         Assertions.assertEquals(true, outcome instanceof Completed);
         Assertions.assertEquals(null, ((Completed) outcome).returned());
@@ -143,7 +164,18 @@ class DefaultInvocableBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var outcome = Invoked
                 .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
-                        reflectingType.findMethod("m01", JmsMsg.class)), () -> mq));
+                        reflectingType.findMethod("m01", JmsMsg.class)), new MsgContext() {
+
+                            @Override
+                            public Session session() {
+                                return null;
+                            }
+
+                            @Override
+                            public JmsMsg msg() {
+                                return mq;
+                            }
+                        }));
 
         Assertions.assertEquals(true, outcome instanceof Completed);
         Assertions.assertEquals(mq, ((Completed) outcome).returned());
@@ -156,8 +188,20 @@ class DefaultInvocableBinderTest {
         final var mq = Mockito.mock(JmsMsg.class);
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
-        final var outcome = Invoked.invoke(binder.bind(
-                new InvocableRecord(case01, reflectingType.findMethod("m01", JmsMsg.class, Message.class)), () -> mq));
+        final var outcome = Invoked.invoke(
+                binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m01", JmsMsg.class, Message.class)),
+                        new MsgContext() {
+
+                            @Override
+                            public Session session() {
+                                return null;
+                            }
+
+                            @Override
+                            public JmsMsg msg() {
+                                return mq;
+                            }
+                        }));
 
         final var returned = ((Completed) outcome).returned();
 
@@ -186,7 +230,18 @@ class DefaultInvocableBinderTest {
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m02")), () -> mq));
+                .invoke(binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m02")), new MsgContext() {
+
+                    @Override
+                    public Session session() {
+                        return null;
+                    }
+
+                    @Override
+                    public JmsMsg msg() {
+                        return mq;
+                    }
+                }));
 
         Assertions.assertEquals(null, ((Completed) outcome).returned());
     }
@@ -204,8 +259,20 @@ class DefaultInvocableBinderTest {
 
         final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
 
-        final var outcome = Invoked.invoke(binder.bind(
-                new InvocableRecord(case01, reflectingType.findMethod("m01", List.class, Message.class)), () -> mq));
+        final var outcome = Invoked.invoke(
+                binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m01", List.class, Message.class)),
+                        new MsgContext() {
+
+                            @Override
+                            public Session session() {
+                                return null;
+                            }
+
+                            @Override
+                            public JmsMsg msg() {
+                                return mq;
+                            }
+                        }));
 
         final var returned = (Object[]) ((Completed) outcome).returned();
 
@@ -386,7 +453,18 @@ class DefaultInvocableBinderTest {
         final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
                 new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01", Map.class,
                         String.class)),
-                () -> mq);
+                new MsgContext() {
+
+                    @Override
+                    public Session session() {
+                        return null;
+                    }
+
+                    @Override
+                    public JmsMsg msg() {
+                        return mq;
+                    }
+                });
         final var outcome = Invoked.invoke(bound);
 
         final var returned = (Object[]) ((Completed) outcome).returned();
@@ -438,11 +516,10 @@ class DefaultInvocableBinderTest {
 
         };
         final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.DeliveryCountCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class)
-                        .findMethod("m01", Long.class)),
+                new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class).findMethod("m01",
+                        Long.class)),
                 mq);
-        final var outcome = Invoked
-                .invoke(bound);
+        final var outcome = Invoked.invoke(bound);
 
         final var returned = (long) ((Completed) outcome).returned();
 
