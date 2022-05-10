@@ -3,13 +3,11 @@ package me.ehp246.aufjms.api.endpoint;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
+ * 
  * @author Lei Yang
- *
+ * @since 1.0
  */
-public interface CompletedInvocation {
-    JmsMsg msg();
-
-    Executable target();
-
-    Object returned();
+@FunctionalInterface
+public interface MsgInvocableFactory {
+    Invocable get(JmsMsg msg);
 }

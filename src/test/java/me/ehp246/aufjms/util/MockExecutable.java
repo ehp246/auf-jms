@@ -2,13 +2,13 @@ package me.ehp246.aufjms.util;
 
 import java.lang.reflect.Method;
 
-import me.ehp246.aufjms.api.endpoint.Executable;
+import me.ehp246.aufjms.api.endpoint.Invocable;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockExecutable implements Executable {
+public class MockExecutable implements Invocable {
     private final String method;
     private Exception ex;
 

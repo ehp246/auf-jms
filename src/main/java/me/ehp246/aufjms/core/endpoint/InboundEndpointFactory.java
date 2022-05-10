@@ -6,10 +6,9 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationConsumer;
-import me.ehp246.aufjms.api.endpoint.ExecutableResolver;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
+import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
@@ -52,18 +51,14 @@ public final class InboundEndpointFactory {
                 .parseBoolean(propertyResolver.resolve(inboundAttributes.get("autoStartup").toString()));
         final String connectionFactory = propertyResolver
                 .resolve(inboundAttributes.get("connectionFactory").toString());
-        final ExecutableResolver resolver = new AutowireCapableExecutableResolver(autowireCapableBeanFactory,
-                DefaultInvokableResolver.registeryFrom(scanPackages));
-        final FailedInvocationInterceptor failedInterceptor = Optional
-                .ofNullable(inboundAttributes.get("failedInvocationInterceptor").toString())
+        final MsgInvocableFactory resolver = new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
+                DefaultInvocableRegistry.registeryFrom(scanPackages));
+        final var listener = Optional
+                .ofNullable(inboundAttributes.get("invocationListener").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, FailedInvocationInterceptor.class)).orElse(null);
-        final CompletedInvocationConsumer completedConsumer = Optional
-                .ofNullable(inboundAttributes.get("completedInvocationConsumer").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, CompletedInvocationConsumer.class)).orElse(null);
+                .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
 
         return new InboundEndpointRecord(from, resolver, concurrency, beanName, autoStartup, connectionFactory,
-                completedConsumer, failedInterceptor);
+                listener);
     }
 }

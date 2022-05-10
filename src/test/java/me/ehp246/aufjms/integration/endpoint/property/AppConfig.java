@@ -10,7 +10,7 @@ import org.springframework.jms.annotation.EnableJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
 
@@ -20,13 +20,13 @@ import me.ehp246.aufjms.util.TestQueueListener;
  */
 @EnableJms
 @EnableForJms({ @Inbound(@From(TestQueueListener.DESTINATION_NAME)),
-        @Inbound(value = @From("q"), failedInvocationInterceptor = "failedInvocationInterceptor"),
-        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name:}"),
-        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name:failedInvocationInterceptor}"),
-        @Inbound(value = @From("q"), failedInvocationInterceptor = "${interceptor.name.null:failedInvocationInterceptor}") })
+        @Inbound(value = @From("q"), invocationListener = "failedInvocationInterceptor"),
+        @Inbound(value = @From("q"), invocationListener = "${interceptor.name:}"),
+        @Inbound(value = @From("q"), invocationListener = "${interceptor.name:failedInvocationInterceptor}"),
+        @Inbound(value = @From("q"), invocationListener = "${interceptor.name.null:failedInvocationInterceptor}") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
-    final FailedInvocationInterceptor inteceptor = f -> {
+    final OnFailed inteceptor = f -> {
     };
 
     @Bean
@@ -35,7 +35,7 @@ class AppConfig {
     }
 
     @Bean
-    public FailedInvocationInterceptor failedInvocationInterceptor() {
+    public OnFailed failedInvocationInterceptor() {
         return inteceptor;
     }
 }

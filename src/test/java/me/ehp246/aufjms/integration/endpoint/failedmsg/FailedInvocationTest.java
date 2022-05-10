@@ -42,8 +42,8 @@ class FailedInvocationTest {
         final var failed = appConfig.conRef1.get();
 
         Assertions.assertEquals(onMsg.ex, failed.thrown());
-        Assertions.assertEquals(id, failed.msg().correlationId());
-        Assertions.assertEquals(1, failed.msg().deliveryCount());
+        Assertions.assertEquals(id, failed.bound().msg().correlationId());
+        Assertions.assertEquals(1, failed.bound().msg().deliveryCount());
     }
 
     void dltopic_01() throws InterruptedException, ExecutionException {

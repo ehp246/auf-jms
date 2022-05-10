@@ -12,15 +12,16 @@ import javax.jms.Message;
 
 import org.springframework.context.annotation.Import;
 
-import me.ehp246.aufjms.api.endpoint.FailedInvocation;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinder;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
+import me.ehp246.aufjms.core.endpoint.DefaultInvocableBinder;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
+import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 
 /**
@@ -32,7 +33,7 @@ import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
-        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultExecutableBinder.class })
+        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
     Inbound[] value();
 
@@ -64,35 +65,38 @@ public @interface EnableForJms {
         String connectionFactory() default "";
 
         /**
-         * 
+         * Specifies the bean name of the {@linkplain InvocationListener} type to
+         * receive either {@linkplain Completed} or {@linkplain Failed} invocations on
+         * this {@linkplain EnableForJms.Inbound}.
          * <p>
-         * Supports Spring property placeholder.
-         */
-        String completedInvocationConsumer() default "";
-
-        /**
-         * Specifies the bean name of the {@linkplain FailedInvocationInterceptor} type
-         * to receive {@linkplain FailedInvocation}.
+         * If the execution of a {@linkplain ForJmsType} object on this
+         * {@linkplain EnableForJms.Inbound} completes normally, the
+         * {@linkplain InvocationListener.OnCompleted#onCompleted(Completed)} will be
+         * invoked.
          * <p>
-         * If the execution of a {@linkplain ForJmsType} object on this in-bound
-         * endpoint throws an exception, the consumer bean will be invoked.
+         * If a {@linkplain RuntimeException} happens from the bean, the
+         * {@linkplain Message} will follow broker's dead-lettering process.
+         * <p>
+         * If the execution of a {@linkplain ForJmsType} object on this
+         * {@linkplain EnableForJms.Inbound} throws an exception, the
+         * {@linkplain InvocationListener.OnFailed#onFailed(Failed)} will be invoked.
          * <p>
          * If the invocation of the bean completes without an exception, the
-         * {@linkplain Message} will be acknowledged to the broker as a success.
+         * {@linkplain Message} will be <strong>acknowledged</strong> to the broker as a
+         * success.
          * <p>
-         * The bean can throw exception in which case the message follows broker's
-         * dead-lettering process.
+         * {@linkplain InvocationListener.OnFailed} can throw {@linkplain Exception} in
+         * which case the message follows broker's dead-lettering process.
          * <p>
-         * The consumer bean is meant to handle exceptions thrown by
-         * {@linkplain ForJmsType} objects. It applies only after a matching
-         * {@linkplain ForJmsType} class has been found. E.g., the bean will not be
-         * invoked for basic {@linkplain JMSException} prior to
-         * {@linkplain Message#getJMSType()} matching, i.e.,
+         * The listener bean is designed to support {@linkplain ForJmsType} objects. It
+         * applies only after a matching {@linkplain ForJmsType} class has been found.
+         * E.g., the bean will not be invoked for basic {@linkplain JMSException} prior
+         * to {@linkplain Message#getJMSType()} matching, i.e.,
          * {@linkplain UnknownTypeException}.
          * <p>
          * Supports Spring property placeholder.
          */
-        String failedInvocationInterceptor() default "";
+        String invocationListener() default "";
 
         @interface From {
             /**

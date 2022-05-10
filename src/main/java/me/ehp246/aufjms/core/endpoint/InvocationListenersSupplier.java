@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import me.ehp246.aufjms.api.endpoint.CompletedInvocationConsumer;
-import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnCompleted;
+import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 
 /**
  * Supports <code>null</code>.
@@ -9,7 +9,9 @@ import me.ehp246.aufjms.api.endpoint.FailedInvocationInterceptor;
  * @author Lei Yang
  *
  */
-record InvocationListenersSupplier(CompletedInvocationConsumer completedConsumer,
-        FailedInvocationInterceptor failedInterceptor) {
-
+record InvocationListenersSupplier(OnCompleted completedListener,
+        OnFailed failedInterceptor) {
+    InvocationListenersSupplier() {
+        this(null, null);
+    }
 }

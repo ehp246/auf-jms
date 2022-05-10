@@ -1,67 +1,60 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jms.JMSContext;
+import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.endpoint.Executable;
-import me.ehp246.aufjms.api.endpoint.ExecutableBinder;
+import me.ehp246.aufjms.api.endpoint.BoundInvocable;
+import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.core.reflection.InvocationOutcome;
 
 /**
  *
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultExecutableBinder implements ExecutableBinder {
-    private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> PROPERTY_VALUE_SUPPLIERS = Map
-            .of(OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId, OfDeliveryCount.class,
-                    msg -> msg.property(JmsNames.DELIVERY_COUNT, Integer.class));
+public final class DefaultInvocableBinder implements InvocableBinder {
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> PROPERTY_VALUE_SUPPLIERS = Map.of(
+            OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId, OfDeliveryCount.class,
+            msg -> msg.property(JmsNames.DELIVERY_COUNT, Integer.class));
 
     private static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set
             .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());
 
     private final FromJson fromJson;
 
-    public DefaultExecutableBinder(final FromJson fromJson) {
+    public DefaultInvocableBinder(final FromJson fromJson) {
         super();
         this.fromJson = fromJson;
     }
 
     @Override
-    public Supplier<InvocationOutcome<?>> bind(final Executable target, final MsgContext ctx) {
+    public BoundInvocable bind(final Invocable target, final MsgContext ctx) {
         final var method = target.method();
+
+        method.setAccessible(true);
+
         if (method.getParameterCount() == 0) {
-            return () -> {
-                try {
-                    method.setAccessible(true);
-                    return InvocationOutcome.returned(method.invoke(target.instance(), (Object[]) null));
-                } catch (InvocationTargetException e1) {
-                    return InvocationOutcome.thrown(e1.getCause());
-                } catch (Exception e2) {
-                    return InvocationOutcome.thrown(e2);
-                }
-            };
+            return new BoundInvocableRecord(target, ctx.msg());
         }
 
         final var parameters = method.getParameters();
@@ -99,16 +92,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             fromJson.apply(ctx.msg().text(), receivers);
         }
 
-        return () -> {
-            try {
-                method.setAccessible(true);
-                return InvocationOutcome.returned(method.invoke(target.instance(), arguments));
-            } catch (InvocationTargetException e1) {
-                return InvocationOutcome.thrown(e1.getCause());
-            } catch (Exception e2) {
-                return InvocationOutcome.thrown(e2);
-            }
-        };
+        return new BoundInvocableRecord(target, Arrays.asList(arguments), ctx.msg());
     }
 
     /**
@@ -120,8 +104,7 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
      * @param arguments
      * @return
      */
-    private boolean[] bindContextArgs(final Parameter[] parameters, final MsgContext ctx,
-            final Object[] arguments) {
+    private boolean[] bindContextArgs(final Parameter[] parameters, final MsgContext ctx, final Object[] arguments) {
         final boolean[] markers = new boolean[parameters.length];
 
         for (int i = 0; i < parameters.length; i++) {
@@ -142,8 +125,8 @@ public final class DefaultExecutableBinder implements ExecutableBinder {
             } else if (type.isAssignableFrom(FromJson.class)) {
                 arguments[i] = fromJson;
                 markers[i] = true;
-            } else if (type.isAssignableFrom(JMSContext.class)) {
-                arguments[i] = ctx.jmsContext();
+            } else if (type.isAssignableFrom(Session.class)) {
+                arguments[i] = ctx.session();
                 markers[i] = true;
             }
 

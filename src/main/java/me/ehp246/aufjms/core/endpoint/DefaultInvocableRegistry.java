@@ -22,11 +22,9 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
-import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.InvokableDefinition;
-import me.ehp246.aufjms.api.endpoint.InvokableRegistry;
-import me.ehp246.aufjms.api.endpoint.InvokableResolver;
-import me.ehp246.aufjms.api.endpoint.ResolvedInstanceType;
+import me.ehp246.aufjms.api.endpoint.InvocableType;
+import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
+import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -39,36 +37,36 @@ import me.ehp246.aufjms.core.util.StreamOf;
  * @author Lei Yang
  * @since 1.0
  */
-public final class DefaultInvokableResolver implements InvokableRegistry, InvokableResolver {
-    private final static Logger LOGGER = LogManager.getLogger(DefaultInvokableResolver.class);
+final class DefaultInvocableRegistry implements InvocableTypeRegistry {
+    private final static Logger LOGGER = LogManager.getLogger(DefaultInvocableRegistry.class);
 
-    private final Map<String, InvokableDefinition> registeredInvokables = new ConcurrentHashMap<>();
+    private final Map<String, InvocableTypeDefinition> registeredInvokables = new ConcurrentHashMap<>();
     private final Map<Class<?>, Map<String, Method>> registeredMethods = new ConcurrentHashMap<>();
 
-    public DefaultInvokableResolver register(final Stream<InvokableDefinition> invokingDefinitions) {
+    public DefaultInvocableRegistry register(final Stream<InvocableTypeDefinition> invokingDefinitions) {
         invokingDefinitions.forEach(this::register);
         return this;
     }
 
     @Override
-    public void register(final InvokableDefinition invokingDefinition) {
-        invokingDefinition.types().forEach(type -> {
+    public void register(final InvocableTypeDefinition invokingDefinition) {
+        invokingDefinition.msgTypes().forEach(type -> {
             final var registered = registeredInvokables.putIfAbsent(type, invokingDefinition);
             if (registered != null) {
-                throw new RuntimeException("Duplicate type " + type + " from " + registered.instanceType());
+                throw new IllegalArgumentException("Duplicate type " + type + " from " + registered.type());
             }
 
-            registeredMethods.put(invokingDefinition.instanceType(), invokingDefinition.methods());
+            registeredMethods.put(invokingDefinition.type(), invokingDefinition.methods());
         });
     }
 
     @Override
-    public List<InvokableDefinition> getRegistered() {
+    public List<InvocableTypeDefinition> registered() {
         return this.registeredInvokables.values().stream().collect(Collectors.toList());
     }
 
     @Override
-    public ResolvedInstanceType resolve(final JmsMsg msg) {
+    public InvocableType resolve(final JmsMsg msg) {
         final var msgType = OneUtil.toString(Objects.requireNonNull(msg).type(), "");
 
         final var definition = registeredInvokables.entrySet().stream().filter(e -> msgType.matches(e.getKey()))
@@ -83,42 +81,21 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
         var invoking = msg.invoking();
         invoking = invoking != null ? invoking.strip() : "";
 
-        final var method = registeredMethods.get(definition.instanceType()).get(invoking);
+        final var method = registeredMethods.get(definition.type()).get(invoking);
 
         if (method == null) {
             LOGGER.atTrace().log("Method {} not found", invoking);
             return null;
         }
 
-        return new ResolvedInstanceType() {
-
-            @Override
-            public Method method() {
-                return method;
-            }
-
-            @Override
-            public Class<?> instanceType() {
-                return definition.instanceType();
-            }
-
-            @Override
-            public InstanceScope scope() {
-                return definition.instanceScope();
-            }
-
-            @Override
-            public InvocationModel invocationModel() {
-                return definition.invocationModel();
-            }
-        };
+        return new InvocableType(definition.type(), method, definition.scope(), definition.model());
     }
 
-    public static DefaultInvokableResolver registeryFrom(final Set<String> scanPackages) {
-        return new DefaultInvokableResolver().register(perform(scanPackages).stream());
+    public static DefaultInvocableRegistry registeryFrom(final Set<String> scanPackages) {
+        return new DefaultInvocableRegistry().register(perform(scanPackages).stream());
     }
 
-    private static Set<InvokableDefinition> perform(final Set<String> scanPackages) {
+    private static Set<InvocableTypeDefinition> perform(final Set<String> scanPackages) {
         final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
             @Override
             protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
@@ -140,35 +117,36 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
                 .collect(Collectors.toSet());
     }
 
-    private static InvokableDefinition newDefinition(final Class<?> instanceType) {
-        final var annotation = instanceType.getAnnotation(ForJmsType.class);
+    private static InvocableTypeDefinition newDefinition(final Class<?> type) {
+        final var annotation = type.getAnnotation(ForJmsType.class);
         if (annotation == null) {
             return null;
         }
 
-        if ((Modifier.isAbstract(instanceType.getModifiers()) && annotation.scope().equals(InstanceScope.MESSAGE))
-                || instanceType.isEnum()) {
-            throw new RuntimeException("Un-instantiable type " + instanceType.getName());
+        if ((Modifier.isAbstract(type.getModifiers()) && annotation.scope().equals(InstanceScope.MESSAGE))
+                || type.isEnum()) {
+            throw new IllegalArgumentException("Un-instantiable type " + type.getName());
         }
 
-        final var types = Arrays.asList(annotation.value()).stream()
+        final var msgTypes = Arrays.asList(annotation.value()).stream()
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
                 .map(entry -> {
                     if (entry.getValue() > 1) {
-                        throw new RuntimeException(
-                                "Duplicate type '" + entry.getKey() + "' on " + instanceType.getCanonicalName());
+                        throw new IllegalArgumentException(
+                                "Duplicate type '" + entry.getKey() + "' on " + type.getCanonicalName());
                     }
                     return entry.getKey();
                 }).collect(Collectors.toSet());
 
         final var invokings = new HashMap<String, Method>();
-        final var reflected = new ReflectingType<>(instanceType);
+        final var reflected = new ReflectingType<>(type);
 
         // Search for the annotation first
         for (final var method : reflected.findMethods(Invoking.class)) {
             final var invokingName = method.getAnnotation(Invoking.class).value().strip();
             if (invokings.containsKey(invokingName)) {
-                throw new RuntimeException("Duplicate invocation methods: " + invokings.get(invokingName).toString()
+                throw new IllegalArgumentException("Duplicate invocation methods: "
+                        + invokings.get(invokingName).toString()
                         + ", " + method.toString());
             }
             invokings.put(invokingName, method);
@@ -184,38 +162,12 @@ public final class DefaultInvokableResolver implements InvokableRegistry, Invoka
 
         // There should be at least one method.
         if (invokings.get("") == null) {
-            throw new RuntimeException("No invocation method defined by " + instanceType.getName());
+            throw new IllegalArgumentException("No invocation method defined by " + type.getName());
         }
 
-        LOGGER.atTrace().log("Registering {} on {}", types, instanceType.getCanonicalName());
+        LOGGER.atTrace().log("Registering {} on {}", msgTypes, type.getCanonicalName());
 
-        return new InvokableDefinition() {
-            private final Map<String, Method> methods = Map.copyOf(invokings);
-
-            @Override
-            public Set<String> types() {
-                return types;
-            }
-
-            @Override
-            public Class<?> instanceType() {
-                return instanceType;
-            }
-
-            @Override
-            public Map<String, Method> methods() {
-                return methods;
-            }
-
-            @Override
-            public InstanceScope instanceScope() {
-                return annotation.scope();
-            }
-
-            @Override
-            public InvocationModel invocationModel() {
-                return annotation.invocation();
-            }
-        };
+        return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings), annotation.scope(),
+                annotation.invocation());
     }
 }
