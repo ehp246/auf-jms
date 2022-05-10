@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.endpoint;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -22,13 +23,16 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.Invoked;
+import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -39,7 +43,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @since 1.0
  */
 public final class InboundEndpointListenerConfigurer implements JmsListenerConfigurer {
-    private final static Logger LOGGER = LogManager.getLogger(InboundEndpointListenerConfigurer.class);
+    final static Logger LOGGER = LogManager.getLogger(InboundEndpointListenerConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
@@ -65,11 +69,13 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
         for (final var endpoint : this.endpoints) {
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
-            final var dispatcher = new InvocableDispatcher(executorProvider.get(endpoint.concurrency()), binder,
-                    Invoked::invoke,
-                    this.dispathFnProvider.get(endpoint.connectionFactory()), endpoint.invocationListener());
-
             registrar.registerEndpoint(new JmsListenerEndpoint() {
+                private final InvocationListener.OnCompleted replyCompleted = new ReplyInvoked(
+                        dispathFnProvider.get(endpoint.connectionFactory()));
+                private final InvocableDispatcher dispatcher = new InvocableDispatcher(
+                        executorProvider.get(endpoint.concurrency()), binder, Invoked::invoke,
+                        // Reply should be the first for the completed
+                        Arrays.asList(replyCompleted, endpoint.invocationListener()));
 
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
@@ -119,12 +125,25 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                     throw new UnknownTypeException(msg);
                                 }
 
+                                final var msgCtx = new MsgContext() {
+
+                                    @Override
+                                    public JmsMsg msg() {
+                                        return msg;
+                                    }
+
+                                    @Override
+                                    public Session session() {
+                                        return session;
+                                    }
+
+                                };
+
                                 LOGGER.atTrace().log("Dispatching {}", () -> invocable.method().toString());
 
-                                dispatcher.dispatch(invocable, msg, session);
+                                dispatcher.dispatch(invocable, msgCtx);
 
                                 LOGGER.atTrace().log("Consumed");
-
                             } catch (Exception e) {
                                 LOGGER.atError().withThrowable(e).log("Message failed: {}", e.getMessage());
 

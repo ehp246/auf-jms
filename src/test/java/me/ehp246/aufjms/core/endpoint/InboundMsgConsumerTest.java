@@ -9,14 +9,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
 import javax.jms.Message;
-import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
-import javax.jms.Topic;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
@@ -25,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
@@ -38,8 +33,6 @@ import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
-import me.ehp246.aufjms.api.jms.AtQueue;
-import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.util.MockTextMessage;
@@ -301,95 +294,6 @@ class InboundMsgConsumerTest {
         Mockito.verify(invocable, times(1)).close();
         // Exception from the close should be suppressed.
         Mockito.verify(completed, times(1)).onCompleted(Mockito.any(Completed.class));
-    }
-
-    @Test
-    void reply_01() throws JMSException {
-        final var mock = Mockito.mock(Queue.class);
-        Mockito.when(mock.getQueueName()).thenReturn("q1");
-        final var dispatchRef = new JmsDispatch[1];
-        final var expectedBody = new Object();
-        final var expectedId = UUID.randomUUID().toString();
-        final var message = new MockTextMessage("t1") {
-            @Override
-            public String getJMSCorrelationID() throws JMSException {
-                return expectedId;
-            }
-
-            @Override
-            public Destination getJMSReplyTo() throws JMSException {
-                return mock;
-            }
-
-        };
-        final var completed = Mockito.mock(Completed.class);
-
-        Mockito.when(completed.returned()).thenReturn(expectedBody);
-
-        new InboundMsgConsumer(factory, binder, b -> completed, null, dispatch -> {
-            dispatchRef[0] = dispatch;
-            return null;
-        }, null).onMessage(message, session);
-
-        // Supported reply message: To, type, returned, correlation
-        Assertions.assertEquals(true, dispatchRef[0].to() instanceof AtQueue);
-        Assertions.assertEquals("q1", dispatchRef[0].to().name());
-        Assertions.assertEquals("t1", dispatchRef[0].type());
-        Assertions.assertEquals(expectedId, dispatchRef[0].correlationId());
-        Assertions.assertEquals(expectedBody, dispatchRef[0].body());
-    }
-
-    @Test
-    void reply_02() throws JMSException {
-        final var dispatchRef = new JmsDispatch[1];
-        final var mock = Mockito.mock(Topic.class);
-        Mockito.when(mock.getTopicName()).thenReturn("t1");
-
-        final var message = new MockTextMessage() {
-
-            @Override
-            public String getJMSCorrelationID() throws JMSException {
-                return null;
-            }
-
-            @Override
-            public Destination getJMSReplyTo() throws JMSException {
-                return mock;
-            }
-
-        };
-
-        new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> {
-            dispatchRef[0] = dispatch;
-            return null;
-        }, null).onMessage(message, session);
-
-        Assertions.assertEquals(true, dispatchRef[0].to() instanceof AtTopic);
-        Assertions.assertEquals("t1", dispatchRef[0].to().name());
-        Assertions.assertEquals(null, dispatchRef[0].type());
-        Assertions.assertEquals(null, dispatchRef[0].correlationId());
-        Assertions.assertEquals(null, dispatchRef[0].body());
-    }
-
-    @Test
-    void reply_03() throws JMSException {
-        final var expected = new JMSException("");
-        final var mock = Mockito.mock(Topic.class);
-        Mockito.when(mock.getTopicName()).thenThrow(expected);
-
-        final var message = new MockTextMessage() {
-            @Override
-            public Destination getJMSReplyTo() throws JMSException {
-                return mock;
-            }
-
-        };
-
-        final var actual = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new InboundMsgConsumer(factory, binder, invoker, null, dispatch -> null, null).onMessage(message,
-                        session));
-
-        Assertions.assertEquals(expected, actual.getCause(), "should re-throw");
     }
 
     @Test
