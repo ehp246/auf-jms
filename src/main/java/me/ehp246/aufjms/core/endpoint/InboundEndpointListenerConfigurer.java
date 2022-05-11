@@ -69,12 +69,6 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
             LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
-                private final InvocableDispatcher dispatcher = new InvocableDispatcher(
-                        binder, Invoked::invoke, // Reply should be the first for the completed
-                        Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
-                                endpoint.invocationListener()),
-                        executorProvider.get(endpoint.concurrency()));
-
                 @Override
                 public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
@@ -98,7 +92,12 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                     : session.createQueue(on.name())));
 
                     container.setupMessageListener(new SessionAwareMessageListener<Message>() {
+                        private final InvocableDispatcher dispatcher = new InvocableDispatcher(binder, Invoked::invoke,
+                                Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
+                                        endpoint.invocationListener()),
+                                executorProvider.get(endpoint.concurrency()));
                         private final MsgInvocableFactory invocableFactory = endpoint.invocableFactory();
+                        private final Logger logger = LogManager.getLogger(endpoint.name());
 
                         @Override
                         public void onMessage(Message message, Session session) throws JMSException {
@@ -113,9 +112,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                 AufJmsContext.set(session);
                                 Log4jContext.set(msg);
 
-                                LOGGER.atTrace().log("Consuming");
-
-                                LOGGER.atTrace().log("Resolving {}", msg::type);
+                                logger.atTrace().log("Consuming {}", msg::correlationId);
 
                                 final var invocable = invocableFactory.get(msg);
 
@@ -137,13 +134,13 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
                                 };
 
-                                LOGGER.atTrace().log("Dispatching {}", () -> invocable.method().toString());
+                                logger.atTrace().log("Dispatching {}", () -> invocable.method().toString());
 
                                 dispatcher.dispatch(invocable, msgCtx);
 
-                                LOGGER.atTrace().log("Consumed");
+                                logger.atTrace().log("Consumed {}", msg::correlationId);
                             } catch (Exception e) {
-                                LOGGER.atError().withThrowable(e).log("Message failed: {}", e.getMessage());
+                                logger.atError().withThrowable(e).log("Message failed: {}", e.getMessage());
 
                                 throw e;
                             } finally {
