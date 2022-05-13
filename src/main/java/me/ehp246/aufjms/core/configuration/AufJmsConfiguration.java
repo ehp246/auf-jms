@@ -3,6 +3,7 @@ package me.ehp246.aufjms.core.configuration;
 import javax.jms.ConnectionFactory;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -16,8 +17,14 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  * @author Lei Yang
  * @since 1.0
  */
-@Import({ JsonByJackson.class, DispatchLogger.class, DefaultDispatchFnProvider.class })
+@Import({ JsonByJackson.class, DefaultDispatchFnProvider.class })
 public final class AufJmsConfiguration {
+    @Bean
+    public DispatchLogger dispatchLogger(
+            @Value("${" + AufJmsConstants.DISPATCH_LOGTER + ":false}") final boolean enabled) {
+        return enabled ? new DispatchLogger() : null;
+    }
+
     @Bean
     public PropertyResolver propertyResolver(final org.springframework.core.env.PropertyResolver springResolver) {
         return springResolver::resolveRequiredPlaceholders;

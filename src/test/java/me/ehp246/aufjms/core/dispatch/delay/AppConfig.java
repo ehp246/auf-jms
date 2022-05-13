@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.enablebyjms.propertycase.ttl;
+package me.ehp246.aufjms.core.dispatch.delay;
 
 import org.springframework.context.annotation.Import;
 
@@ -14,7 +14,7 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @EnableByJms
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
-    @ByJms(value = @To("queue"), ttl = "${holder}")
+    @ByJms(value = @To("queue"), delay = "${holder}")
     interface Case01 {
     }
 }

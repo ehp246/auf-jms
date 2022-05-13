@@ -69,6 +69,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         final var args = new ConstructorArgumentValues();
         args.addGenericArgumentValue(Arrays.asList((Class<?>[]) map.get("scan")));
         args.addGenericArgumentValue(map.get("ttl"));
+        args.addGenericArgumentValue(map.get("delay"));
         args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
 
         final var proxyBeanDefinition = new GenericBeanDefinition();

@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
 import java.util.Queue;
 
 import javax.jms.Connection;
+import javax.jms.MessageProducer;
 import javax.jms.Topic;
 
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
@@ -38,9 +39,27 @@ public @interface ByJms {
     String name() default "";
 
     /**
+     * Specifies a value for {@linkplain MessageProducer#setTimeToLive(long)} that
+     * applies to all out-bound messages from the application.
+     * <p>
+     * The value can be overridden by higher-priority sources from
+     * {@linkplain ByJms} proxies. The default is no TTL.
+     * <p>
      * Supports Spring property placeholder.
      */
     String ttl() default "";
+
+    /**
+     * Specifies a value for {@linkplain MessageProducer#setDeliveryDelay(long)}
+     * that applies to all out-bound messages from the application.
+     * <p>
+     * This value overwrites {@linkplain EnableByJms#delay()}.
+     * <p>
+     * The default is no delay.
+     * <p>
+     * Supports Spring property placeholder.
+     */
+    String delay() default "";
 
     To replyTo() default @To("");
 

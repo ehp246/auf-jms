@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>0.8.0</version>
+	<version>0.8.1</version>
 	<name>Auf JMS</name>
 	<description>An annotation-driven declarative JMS development framework</description>
 
@@ -267,6 +267,11 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven-surefire-plugin.version}</version>
+				<configuration>
+					<systemPropertyVariables>
+						<me.ehp246.aufjms.dispatchLogger>true</me.ehp246.aufjms.dispatchLogger>
+					</systemPropertyVariables>
+					</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

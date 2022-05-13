@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.integration.enablebyjms.propertycase.ttl;
+package me.ehp246.aufjms.core.dispatch.ttl;
 
 import java.util.UUID;
 
@@ -8,7 +8,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mock.env.MockEnvironment;
 
-import me.ehp246.aufjms.integration.enablebyjms.propertycase.ttl.AppConfig.Case01;
+import me.ehp246.aufjms.core.dispatch.ttl.AppConfig.Case01;
 
 /**
  * @author Lei Yang

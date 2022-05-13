@@ -66,7 +66,10 @@ public final class ByJmsBeanFactory {
                 .map(Duration::parse)
                 .orElseGet(enableByJmsConfig::ttl);
 
-        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, null, byJms.connectionFactory());
+        final var delay = Optional.of(propertyResolver.resolve(byJms.delay())).filter(OneUtil::hasValue)
+                .map(Duration::parse).orElseGet(enableByJmsConfig::delay);
+
+        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, delay, byJms.connectionFactory());
 
         final JmsDispatchFn dispatchFn = this.dispatchFnProvider.get(byJms.connectionFactory());
         final var hashCode = new Object().hashCode();
