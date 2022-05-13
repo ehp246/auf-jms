@@ -78,8 +78,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             try {
                 connection = cfProvider.get(connectionFactoryName).createConnection();
             } catch (JMSException e) {
-                LOGGER.atError().log("Failed to create connection on factory '{}': {}", connectionFactoryName,
-                        e.getMessage());
+                LOGGER.atError().withThrowable(e).log("Failed to create connection on factory '{}': {}",
+                        connectionFactoryName, e.getMessage());
                 throw new JMSRuntimeException(e.getErrorCode(), e.getMessage(), e);
             }
 
@@ -95,9 +95,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             @Override
             public JmsMsg send(final JmsDispatch dispatch) {
                 Objects.requireNonNull(dispatch);
-
-                LOGGER.atTrace().log("Sending '{}' '{}' to '{}' on '{}'", dispatch.type(), dispatch.correlationId(),
-                        dispatch.to(), connectionFactoryName);
 
                 Session session = null;
                 MessageProducer producer = null;
@@ -149,8 +146,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     producer.send(toJMSDestintation(session, dispatch.to()), message);
 
-                    LOGGER.atTrace().log("Sent {} {}", dispatch.type(), dispatch.correlationId());
-
                     // Call listeners on postSend
                     for (final var listener : DefaultDispatchFnProvider.this.postSends) {
                         listener.postSend(dispatch, msg);
@@ -158,9 +153,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     return msg;
                 } catch (final Exception e) {
-                    LOGGER.atError().log("Message failed: destination {}, type {}, correclation id {}",
-                            dispatch.to().toString(), dispatch.type(), dispatch.correlationId(), e);
-
                     try {
                         for (final var listener : DefaultDispatchFnProvider.this.onExs) {
                             listener.onException(dispatch, msg, e);
@@ -184,7 +176,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         try {
                             producer.close();
                         } catch (JMSException e) {
-                            LOGGER.atError().log("Failed to close producer. Ignored", e);
+                            LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored", e);
                         }
                     }
 
@@ -195,7 +187,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         try {
                             session.close();
                         } catch (JMSException e) {
-                            LOGGER.atError().log("Failed to close session. Ignored.", e);
+                            LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored.", e);
                         }
                     }
                 }
@@ -231,7 +223,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             try {
                 t.close();
             } catch (JMSException e) {
-                LOGGER.atError().log("Failed to close connection. Ignored", e);
+                LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored", e);
             }
         });
         closeable.clear();

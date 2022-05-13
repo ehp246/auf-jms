@@ -19,6 +19,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.integration.dispatch.fn.BodyAsType.PersonDob;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
@@ -29,7 +30,8 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class,
-        EmbeddedArtemisConfig.class }, webEnvironment = WebEnvironment.NONE)
+        EmbeddedArtemisConfig.class }, webEnvironment = WebEnvironment.NONE, properties = {
+                AufJmsConstants.DISPATCH_LOGTER + "=true" })
 class DispatchFnTest {
     private static final At TO = At.toQueue(TestQueueListener.DESTINATION_NAME);
 

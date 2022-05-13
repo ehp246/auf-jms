@@ -61,12 +61,6 @@ public @interface EnableByJms {
     String delay() default "";
 
     /**
-     * <p>
-     * Supports Spring property placeholder.
-     */
-    String logging() default "";
-
-    /**
      * Specifies whether to register {@linkplain JmsDispatchFn} beans backed by a
      * {@linkplain Connection} retrieved from the named connection factories.
      * <p>

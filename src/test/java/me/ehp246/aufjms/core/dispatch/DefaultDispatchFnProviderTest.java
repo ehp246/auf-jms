@@ -455,7 +455,7 @@ class DefaultDispatchFnProviderTest {
         final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
 
         // Should throw without connection and context session.
-        Assertions.assertThrows(NullPointerException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)));
+        Assertions.assertThrows(IllegalStateException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)));
     }
 
     @Test
