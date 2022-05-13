@@ -50,6 +50,23 @@ public @interface EnableByJms {
     String ttl() default "";
 
     /**
+     * Specifies a value for {@linkplain MessageProducer#setDeliveryDelay(long)}
+     * that applies to all out-bound messages from the application.
+     * <p>
+     * The value can be overridden by higher-priority sources from
+     * {@linkplain ByJms} proxies. The default is no delay.
+     * <p>
+     * Supports Spring property placeholder.
+     */
+    String delay() default "";
+
+    /**
+     * <p>
+     * Supports Spring property placeholder.
+     */
+    String logging() default "";
+
+    /**
      * Specifies whether to register {@linkplain JmsDispatchFn} beans backed by a
      * {@linkplain Connection} retrieved from the named connection factories.
      * <p>

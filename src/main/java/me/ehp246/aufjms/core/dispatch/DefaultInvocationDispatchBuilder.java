@@ -154,15 +154,14 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
             }
 
             @Override
-            public Map<String, Object> properties() {
-                return properties;
-            }
-
-            @Override
             public Duration delay() {
                 return delay;
             }
 
+            @Override
+            public Map<String, Object> properties() {
+                return properties;
+            }
         };
     }
 }

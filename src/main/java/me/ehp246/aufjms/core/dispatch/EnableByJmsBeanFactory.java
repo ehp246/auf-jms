@@ -20,10 +20,12 @@ public final class EnableByJmsBeanFactory {
         this.propertyResolver = propertyResolver;
     }
 
-    public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl,
+    public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
             final List<String> dispatchFns) {
         return new EnableByJmsConfig(scan,
                 Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
+                        .orElse(null),
+                Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 dispatchFns);
     }
