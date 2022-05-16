@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.endpoint.BoundInvoker;
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
@@ -25,7 +26,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 final class InvocableDispatcher {
-    private static final Logger LOGGER = LogManager.getLogger(InvocableDispatcher.class);
+    private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
 
     private final Executor executor;
     private final InvocableBinder binder;
@@ -34,8 +35,7 @@ final class InvocableDispatcher {
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
     InvocableDispatcher(final InvocableBinder binder, final BoundInvoker invoker,
-            @Nullable final List<InvocationListener> listeners, 
-            @Nullable final Executor executor) {
+            @Nullable final List<InvocationListener> listeners, @Nullable final Executor executor) {
         super();
         this.binder = binder;
         this.executor = executor;
@@ -77,6 +77,7 @@ final class InvocableDispatcher {
     /**
      * The runnable returned is expected to handle all execution and exception. The
      * caller simply invokes this runnable without further processing.
+     * 
      * @param target
      * @param msg
      * 
@@ -96,13 +97,15 @@ final class InvocableDispatcher {
                     assert (outcome != null);
 
                     if (outcome instanceof Failed failed) {
+                        LOGGER.atTrace().log("Invocation failed");
+
                         if (InvocableDispatcher.this.failed.size() == 0) {
                             throw failed.thrown();
                         }
 
-                        try {
-                            LOGGER.atTrace().log("Invoking Failed interceptor");
+                        LOGGER.atTrace().log("Invoking Failed interceptor");
 
+                        try {
                             for (final var listener : InvocableDispatcher.this.failed) {
                                 listener.onFailed(failed);
                             }
@@ -124,9 +127,9 @@ final class InvocableDispatcher {
 
                     final var completed = (Completed) outcome;
 
-                    try {
-                        LOGGER.atTrace().log("Invoking Completed listener");
+                    LOGGER.atTrace().log("Invocation completed");
 
+                    try {
                         InvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
                     } catch (Exception e) {
                         LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());

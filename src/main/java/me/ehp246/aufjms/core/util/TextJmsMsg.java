@@ -87,7 +87,7 @@ public final class TextJmsMsg implements JmsMsg {
         return new HashSet<>(Collections.<String>list(JMSSupplier.invoke(message::getPropertyNames)));
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T> T property(String name, Class<T> type) {
         if (type == String.class) {
@@ -101,6 +101,10 @@ public final class TextJmsMsg implements JmsMsg {
         }
         if (type == boolean.class) {
             return (T) JMSSupplier.invoke(() -> message.getBooleanProperty(name));
+        }
+        if (type.isEnum()) {
+            return (T) JMSSupplier
+                    .invoke(() -> Enum.valueOf((Class<Enum>) type, message.getStringProperty(name)));
         }
 
         throw new RuntimeException("Un-supported property type " + type.getTypeName());
