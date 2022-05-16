@@ -135,5 +135,13 @@ class DefaultExecutableBinderTestCases {
         public Boolean m01(@OfProperty final Boolean value) {
             return value;
         }
+
+        public PropertyEnum m01(@OfProperty("prop1") final PropertyEnum value) {
+            return value;
+        }
+
+        enum PropertyEnum {
+            Enum1
+        }
     }
 }

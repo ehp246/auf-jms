@@ -30,6 +30,7 @@ import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinderTestCases.ArgCase01;
+import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinderTestCases.PropertyCase01.PropertyEnum;
 import me.ehp246.aufjms.core.reflection.ReflectingType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
@@ -500,6 +501,31 @@ class DefaultInvocableBinderTest {
 
         Assertions.assertEquals(1, bound.arguments().size());
         Assertions.assertEquals(true, bound.arguments().get(0));
+    }
+
+    @Test
+    void property_06() {
+        final var mq = new MockJmsMsg() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public <T> T property(String name, Class<T> type) {
+                if (!type.isEnum()) {
+                    throw new IllegalArgumentException();
+                }
+                return (T) PropertyEnum.Enum1;
+            }
+
+        };
+        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
+                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+                        PropertyEnum.class)),
+                mq);
+        final var outcome = Invoked.invoke(bound);
+
+        Assertions.assertEquals(PropertyEnum.Enum1, ((Completed) outcome).returned());
+
+        Assertions.assertEquals(1, bound.arguments().size());
+        Assertions.assertEquals(PropertyEnum.Enum1, bound.arguments().get(0));
     }
 
     @Test
