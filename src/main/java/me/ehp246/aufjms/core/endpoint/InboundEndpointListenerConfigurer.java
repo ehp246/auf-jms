@@ -92,12 +92,13 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                     : session.createQueue(on.name())));
 
                     container.setupMessageListener(new SessionAwareMessageListener<Message>() {
+                        private final static Logger logger = LogManager.getLogger(InboundEndpoint.class);
+
                         private final InvocableDispatcher dispatcher = new InvocableDispatcher(binder, Invoked::invoke,
                                 Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
                                         endpoint.invocationListener()),
                                 executorProvider.get(endpoint.concurrency()));
                         private final MsgInvocableFactory invocableFactory = endpoint.invocableFactory();
-                        private final Logger logger = LogManager.getLogger(endpoint.name());
 
                         @Override
                         public void onMessage(Message message, Session session) throws JMSException {
