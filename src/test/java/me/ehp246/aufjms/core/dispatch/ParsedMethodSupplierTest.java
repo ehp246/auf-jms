@@ -134,4 +134,47 @@ class ParsedMethodSupplierTest {
         Assertions.assertEquals("09bf9d41-d65a-4bf3-be39-75a318059c0d", ParsedMethodSupplier
                 .get(captor.invocation().method()).apply(handler, captor.invocation().args().toArray()).type());
     }
+
+    @Test
+    void type_02_05() {
+        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
+
+        captor.proxy().type04();
+
+        Assertions.assertEquals("", ParsedMethodSupplier.get(captor.invocation().method())
+                .apply(handler, captor.invocation().args().toArray()).type());
+    }
+
+    @Test
+    void correlationId_01() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+        final var id = Duration.parse("PT100S");
+
+        captor.proxy().m01(id);
+
+        Assertions.assertEquals(id.toString(), ParsedMethodSupplier.get(captor.invocation().method())
+                .apply(handler, captor.invocation().args().toArray()).correlationId());
+    }
+
+    @Test
+    void correlationId_02() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+
+        captor.proxy().m02(null, UUID.randomUUID().toString());
+
+        Assertions.assertEquals(null,
+                ParsedMethodSupplier.get(captor.invocation().method())
+                        .apply(handler, captor.invocation().args().toArray()).correlationId(),
+                "should take the first one");
+    }
+
+    @Test
+    void correlationId_03() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+
+        captor.proxy().m01();
+
+        Assertions.assertDoesNotThrow(() -> UUID.fromString(ParsedMethodSupplier.get(captor.invocation().method())
+                .apply(handler, captor.invocation().args().toArray()).correlationId()), "should be a UUID");
+    }
 }

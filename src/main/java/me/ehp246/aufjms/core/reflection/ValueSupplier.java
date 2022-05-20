@@ -1,7 +1,7 @@
-package me.ehp246.aufjms.core.dispatch;
+package me.ehp246.aufjms.core.reflection;
 
-import me.ehp246.aufjms.core.dispatch.ValueSupplier.IndexSupplier;
-import me.ehp246.aufjms.core.dispatch.ValueSupplier.StaticSupplier;
+import me.ehp246.aufjms.core.reflection.ValueSupplier.IndexSupplier;
+import me.ehp246.aufjms.core.reflection.ValueSupplier.StaticSupplier;
 
 /**
  * @author Lei Yang

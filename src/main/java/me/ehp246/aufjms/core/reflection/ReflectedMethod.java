@@ -6,10 +6,7 @@ import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
-import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.core.dispatch.ValueSupplier;
-import me.ehp246.aufjms.core.util.OneUtil;
+import java.util.function.Supplier;
 
 /**
  * @author Lei Yang
@@ -31,16 +28,21 @@ public final class ReflectedMethod {
     }
 
     public <A extends Annotation, V> ValueSupplier resolveSupplier(final Class<A> annotationClass,
-            final Function<A, V> mapper) {
-        return firstArgumentAnnotationOf(OfType.class).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
+            final Function<A, V> mapper, final Supplier<V> supplier) {
+        return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> {
                     final var value = findOnUp(annotationClass);
-                    return (ValueSupplier.StaticSupplier) () -> value == null ? OneUtil.firstUpper(method.getName())
-                            : mapper.apply(value);
+                    return (ValueSupplier.StaticSupplier) () -> value == null ? supplier.get() : mapper.apply(value);
                 });
     }
 
-    public Optional<Integer> firstArgumentAnnotationOf(final Class<? extends Annotation> annotationClass) {
+    public <A extends Annotation, V> ValueSupplier resolveArgSupplier(final Class<A> annotationClass,
+            final Supplier<V> supplier) {
+        return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
+                .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.StaticSupplier) supplier::get);
+    }
+
+    public Optional<Integer> firstArgWith(final Class<? extends Annotation> annotationClass) {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].isAnnotationPresent(annotationClass)) {
                 return Optional.of(i);

@@ -3,30 +3,32 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.core.dispatch.ValueSupplier.IndexSupplier;
-import me.ehp246.aufjms.core.dispatch.ValueSupplier.StaticSupplier;
 import me.ehp246.aufjms.core.reflection.ReflectedMethod;
+import me.ehp246.aufjms.core.reflection.ValueSupplier;
+import me.ehp246.aufjms.core.reflection.ValueSupplier.IndexSupplier;
+import me.ehp246.aufjms.core.reflection.ValueSupplier.StaticSupplier;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * @author Lei Yang
  *
  */
-record ParsedMethodSupplier(ValueSupplier typeSupplier) {
+record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSupplier) {
     private static final Map<Method, ParsedMethodSupplier> CACHED = new ConcurrentHashMap<>();
 
     private static ParsedMethodSupplier parse(final Method method) {
         final var reflected = new ReflectedMethod(method);
 
         // Type
-        final var typeSupplier = reflected.resolveSupplier(OfType.class, OfType::value);
-
-        return new ParsedMethodSupplier(typeSupplier);
+        return new ParsedMethodSupplier(reflected.resolveSupplier(OfType.class, OfType::value, () -> OneUtil.firstUpper(method.getName())), 
+                reflected.resolveArgSupplier(OfCorrelationId.class, () -> UUID.randomUUID().toString()));
     }
 
     public static ParsedMethodSupplier get(final Method method) {
@@ -38,6 +40,8 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier) {
         final var type = OneUtil
                 .toString(typeSupplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
                         : ((StaticSupplier) typeSupplier).get());
+        final var correlId = OneUtil.toString(correlIdSupplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
+                : ((StaticSupplier) correlIdSupplier).get());
 
         return new JmsDispatch() {
 
@@ -53,8 +57,7 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier) {
 
             @Override
             public String correlationId() {
-                // TODO Auto-generated method stub
-                return JmsDispatch.super.correlationId();
+                return correlId;
             }
 
             @Override

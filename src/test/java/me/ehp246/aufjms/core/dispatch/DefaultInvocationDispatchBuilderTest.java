@@ -36,37 +36,6 @@ class DefaultInvocationDispatchBuilderTest {
             String::toString);
 
     @Test
-    void type_method_09() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type04();
-
-        Assertions.assertEquals("Type04", dispatchBuilder.get(captor.invocation().target(),
-                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_type_10() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
-        captor.proxy().m01();
-
-        Assertions.assertEquals("Case03", dispatchBuilder.get(captor.invocation().target(),
-                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_type_11() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case03.class);
-        captor.proxy().m02();
-
-        Assertions
-                .assertEquals("M02",
-                        dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                                captor.invocation().args().toArray(), proxyConfig).type(),
-                        "should follow the first annotated");
-    }
-
-    @Test
     void ttl_01() {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
         captor.proxy().get();
@@ -541,28 +510,5 @@ class DefaultInvocationDispatchBuilderTest {
                         captor.invocation().args().toArray(),
                         BYJMS_CONFIG).delay(),
                 "should not suppress");
-    }
-
-    @Test
-    void correlationId_01() {
-        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
-        final var id = Duration.parse("PT100S");
-
-        captor.proxy().m01(id);
-
-        Assertions.assertEquals(id.toString(), dispatchBuilder.get(captor.invocation().target(),
-                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).correlationId());
-    }
-
-    @Test
-    void correlationId_02() {
-        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
-
-        captor.proxy().m02(null, UUID.randomUUID().toString());
-
-        Assertions.assertEquals(null,
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(), proxyConfig).correlationId(),
-                "should take the first one");
     }
 }
