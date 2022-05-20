@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.util;
+package me.ehp246.test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

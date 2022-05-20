@@ -13,7 +13,7 @@ class TypeCases {
 
     public final static String TYPE_II = "6f7779af-8c3e-4684-8a12-537415281b89";
 
-    static interface Case01 {
+    interface Case01 {
         void m01();
 
         void m02(Map<String, String> map);

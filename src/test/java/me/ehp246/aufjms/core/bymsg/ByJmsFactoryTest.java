@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.ByJmsBeanFactory;
-import me.ehp246.aufjms.util.TestUtil;
+import me.ehp246.test.TestUtil;
 
 class ByJmsFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;

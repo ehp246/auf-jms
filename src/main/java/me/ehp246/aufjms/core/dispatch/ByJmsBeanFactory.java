@@ -45,7 +45,7 @@ public final class ByJmsBeanFactory {
 
     @SuppressWarnings("unchecked")
     public <T> T newByJmsProxy(final Class<T> proxyInterface) {
-        LOGGER.atDebug().log("Instantiating {}", proxyInterface.getCanonicalName());
+        LOGGER.atDebug().log("Instantiating {}", proxyInterface::getCanonicalName);
 
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
 

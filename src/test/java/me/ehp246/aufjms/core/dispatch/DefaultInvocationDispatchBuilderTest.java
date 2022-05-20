@@ -17,7 +17,7 @@ import org.mockito.Mockito;
 import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.util.TestUtil;
+import me.ehp246.test.TestUtil;
 
 /**
  * @author Lei Yang
@@ -31,6 +31,7 @@ class DefaultInvocationDispatchBuilderTest {
     private final static ByJmsConfig proxyConfig = new ByJmsConfig(at, at);
 
     private final PropertyResolver resolver = Mockito.mock(PropertyResolver.class);
+
     private final DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
             String::toString);
 
