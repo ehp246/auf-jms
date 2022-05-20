@@ -36,93 +36,6 @@ class DefaultInvocationDispatchBuilderTest {
             String::toString);
 
     @Test
-    void type_01() {
-        final var argType = UUID.randomUUID().toString();
-
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type01(argType);
-
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type(), "should take arg");
-    }
-
-    @Test
-    void type_arg_01() {
-        final var argType = UUID.randomUUID().toString();
-
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type01_II(argType);
-
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type());
-
-        captor.proxy().type01_II("");
-
-        Assertions
-                .assertEquals("",
-                        dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                                captor.invocation().args().toArray(), proxyConfig).type(),
-                        "should supress the default");
-    }
-
-    @Test
-    void type_arg_02() {
-        final var argType = UUID.randomUUID().toString();
-
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type01_III(argType);
-
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_arg_03() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type01_III(null);
-
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_arg_04() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type01_II(null);
-
-        Assertions
-                .assertEquals(
-                        TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation().target(),
-                                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type(),
-                        "should use the default");
-    }
-
-    @Test
-    void type_04() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type02();
-
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatchBuilder.get(captor.invocation().target(),
-                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_05() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-
-        captor.proxy().type02_I();
-
-        Assertions.assertEquals("Type02_I", dispatchBuilder.get(captor.invocation().target(),
-                captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
     void type_arg_06() {
         final var argType = UUID.randomUUID().toString();
 
@@ -178,15 +91,6 @@ class DefaultInvocationDispatchBuilderTest {
 
         Assertions.assertEquals("Type04", dispatchBuilder.get(captor.invocation().target(),
                 captor.invocation().method(), captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_type_09() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
-        captor.proxy().m01();
-
-        Assertions.assertEquals("M01", dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type());
     }
 
     @Test

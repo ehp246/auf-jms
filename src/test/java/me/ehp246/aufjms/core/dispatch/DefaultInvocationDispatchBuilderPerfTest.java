@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
@@ -17,8 +18,9 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
+@EnabledIfSystemProperty(named = "me.ehp246.aufjms.perfTest", matches = "true")
 class DefaultInvocationDispatchBuilderPerfTest {
-    private final static int COUNT = 1000_000;
+    private final static int COUNT = 5_000_000;
     private final static At at = At.toQueue("d");
     private static final ByJmsConfig BYJMS_CONFIG = new ByJmsConfig(at, at, Duration.ofHours(12), Duration.ofSeconds(2),
             "");
@@ -32,8 +34,12 @@ class DefaultInvocationDispatchBuilderPerfTest {
         captor.proxy().m01();
 
         final var invocation = captor.invocation();
+        final var target = invocation.target();
+        final var method = invocation.method();
+        final var args = invocation.args().toArray();
 
-        IntStream.range(0, COUNT).forEach(i -> dispatchBuilder.get(invocation.target(), invocation.method(),
-                invocation.args().toArray(), BYJMS_CONFIG));
+        IntStream.range(0, COUNT).forEach(i -> {
+            dispatchBuilder.get(target, method, args, BYJMS_CONFIG);
+        });
     }
 }

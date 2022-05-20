@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import java.util.Map;
-
 import me.ehp246.aufjms.api.annotation.OfType;
 
 /**
@@ -14,22 +12,15 @@ class TypeCases {
     public final static String TYPE_II = "6f7779af-8c3e-4684-8a12-537415281b89";
 
     interface Case01 {
-        void m01();
-
-        void m02(Map<String, String> map);
+        void type01();
 
         void type01(@OfType final String type);
 
-        void type01_II(@OfType(TYPE_I) final String type);
-
-        @OfType(TYPE_I)
-        void type01_III(@OfType final String type);
-
-        @OfType(TYPE_I)
+        @OfType("09bf9d41-d65a-4bf3-be39-75a318059c0d")
         void type02();
 
         @OfType
-        void type02_I();
+        void type03();
     }
 
     @OfType(TYPE_I)
