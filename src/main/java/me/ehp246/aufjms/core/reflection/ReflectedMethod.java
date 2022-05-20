@@ -7,6 +7,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import me.ehp246.aufjms.api.annotation.OfType;
+import me.ehp246.aufjms.core.dispatch.ValueSupplier;
+import me.ehp246.aufjms.core.util.OneUtil;
+
 /**
  * @author Lei Yang
  *
@@ -26,6 +30,16 @@ public final class ReflectedMethod {
         this.parameters = method.getParameters();
     }
 
+    public <A extends Annotation, V> ValueSupplier resolveSupplier(final Class<A> annotationClass,
+            final Function<A, V> mapper) {
+        return firstArgumentAnnotationOf(OfType.class).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
+                .map(s -> (ValueSupplier) s).orElseGet(() -> {
+                    final var value = findOnUp(annotationClass);
+                    return (ValueSupplier.StaticSupplier) () -> value == null ? OneUtil.firstUpper(method.getName())
+                            : mapper.apply(value);
+                });
+    }
+
     public Optional<Integer> firstArgumentAnnotationOf(final Class<? extends Annotation> annotationClass) {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].isAnnotationPresent(annotationClass)) {
@@ -43,5 +57,14 @@ public final class ReflectedMethod {
 
     public Method method() {
         return this.method;
+    }
+
+    public <A extends Annotation> A findOnUp(final Class<A> annotationClass) {
+        final var found = method.getAnnotation(annotationClass);
+        if (found != null) {
+            return found;
+        }
+
+        return declaringType.getAnnotation(annotationClass);
     }
 }

@@ -7,7 +7,7 @@ import me.ehp246.aufjms.core.dispatch.ValueSupplier.StaticSupplier;
  * @author Lei Yang
  *
  */
-sealed interface ValueSupplier permits IndexSupplier, StaticSupplier {
+public sealed interface ValueSupplier permits IndexSupplier, StaticSupplier {
     @FunctionalInterface
     non-sealed interface IndexSupplier extends ValueSupplier {
         int get();

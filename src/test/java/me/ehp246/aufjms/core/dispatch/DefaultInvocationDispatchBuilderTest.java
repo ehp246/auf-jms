@@ -36,54 +36,6 @@ class DefaultInvocationDispatchBuilderTest {
             String::toString);
 
     @Test
-    void type_arg_06() {
-        final var argType = UUID.randomUUID().toString();
-
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type01(argType);
-
-        Assertions.assertEquals(argType, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).type());
-    }
-
-    @Test
-    void type_arg_07() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type01(null);
-
-        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig);
-
-        Assertions.assertEquals(null, dispatch.type());
-    }
-
-    @Test
-    void type_07() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type02();
-
-        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig);
-
-        Assertions.assertEquals(TypeCases.TYPE_II, dispatch.type());
-    }
-
-    @Test
-    void type_08() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type03();
-
-        final var dispatch = dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig);
-
-        Assertions.assertEquals(TypeCases.TYPE_I, dispatch.type(), "should find annotated first");
-    }
-
-    @Test
     void type_method_09() {
         final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
 

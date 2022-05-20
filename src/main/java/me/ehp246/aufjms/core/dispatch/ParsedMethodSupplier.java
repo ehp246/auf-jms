@@ -24,13 +24,7 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier) {
         final var reflected = new ReflectedMethod(method);
 
         // Type
-        final var typeSupplier = reflected.firstArgumentAnnotationOf(OfType.class)
-                .map(i -> (ValueSupplier.IndexSupplier) i::intValue).map(s -> (ValueSupplier) s).orElseGet(() -> {
-                    final var value = reflected.methodAnnotationOf(OfType.class, OfType::value);
-                    return (ValueSupplier.StaticSupplier) () -> value == null
-                            ? OneUtil.firstUpper(method.getName())
-                            : value;
-                });
+        final var typeSupplier = reflected.resolveSupplier(OfType.class, OfType::value);
 
         return new ParsedMethodSupplier(typeSupplier);
     }
