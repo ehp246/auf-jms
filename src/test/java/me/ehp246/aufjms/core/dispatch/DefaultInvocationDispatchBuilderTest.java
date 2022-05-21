@@ -1,10 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import static org.mockito.Mockito.times;
-
 import java.time.Duration;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +31,6 @@ class DefaultInvocationDispatchBuilderTest {
 
     private final DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
             String::toString);
-
-
 
     @Test
     void body_01() {
@@ -221,161 +216,5 @@ class DefaultInvocationDispatchBuilderTest {
 
         Assertions.assertEquals("id2", properties.get("ID"), "should be overwritten by later value");
         Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
-    }
-
-    @Test
-    void delay_m01() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01();
-
-        Assertions.assertEquals(2000, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay().toMillis());
-    }
-
-    @Test
-    void delay_m01_1() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01();
-
-        final var property = new String[1];
-        Assertions.assertEquals(100, new DefaultInvocationDispatchBuilder(v -> {
-            property[0] = v;
-            return "PT0.1S";
-        }).get(captor.invocation().target(), captor.invocation().method(), captor.invocation().args().toArray(),
-                proxyConfig).delay().toMillis());
-
-        Assertions.assertEquals("PT2S", property[0], "should be from the property resolver");
-    }
-
-    @Test
-    void delay_m01_2() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01(Duration.ofDays(1));
-
-        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay().toDays());
-    }
-
-    @Test
-    void delay_m01_3() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01((Duration) null);
-
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay());
-    }
-
-    @Test
-    void delay_m01_4() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01(Duration.ofMillis(1).toString());
-
-        Assertions.assertEquals(1, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay().toMillis());
-    }
-
-    @Test
-    void delay_m01_5() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01((String) null);
-
-        Assertions.assertEquals(null, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay());
-    }
-
-    @Test
-    void delay_m02_1() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m02(null);
-
-        Assertions.assertEquals(2,
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(), proxyConfig).delay().toSeconds(),
-                "should use the default");
-    }
-
-    @Test
-    void delay_m02_2() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m02("PT100S");
-
-        Assertions.assertEquals(100, dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                captor.invocation().args().toArray(), proxyConfig).delay().toSeconds());
-    }
-
-    @Test
-    void delay_m03_1() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03();
-
-        Assertions.assertEquals(null,
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(),
-                        new ByJmsConfig(at, at, Duration.ofHours(1), Duration.ofSeconds(2), "")).delay(),
-                "should suppress");
-    }
-
-    @Test
-    void delay_m03_2() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03("");
-
-        Assertions.assertEquals(null,
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(),
-                        new ByJmsConfig(at, at, Duration.ofHours(2), Duration.ofSeconds(2), "")).delay(),
-                "should suppress");
-    }
-
-    @Test
-    void delay_m03_3() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03(null);
-
-        Assertions.assertEquals(Duration.ofSeconds(2),
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(),
-                        BYJMS_CONFIG).delay(),
-                "should not suppress");
-    }
-
-    @Test
-    void delay_m03_4() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03("${delay}");
-
-        Assertions.assertThrows(DateTimeParseException.class,
-                () -> new DefaultInvocationDispatchBuilder(resolver)
-                        .get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(),
-                        BYJMS_CONFIG).delay(),
-                "should not suppress");
-
-        Mockito.verify(resolver, times(0)).resolve(Mockito.anyString());
-    }
-
-    @Test
-    void delay_m04() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m04(Duration.parse("PT112S"));
-
-        Assertions.assertEquals(Duration.ofSeconds(112),
-                dispatchBuilder.get(captor.invocation().target(), captor.invocation().method(),
-                        captor.invocation().args().toArray(),
-                        BYJMS_CONFIG).delay(),
-                "should not suppress");
     }
 }

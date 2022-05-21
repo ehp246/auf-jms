@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
+import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
@@ -23,7 +24,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSupplier, ValueSupplier ttlSupplier) {
+record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSupplier, ValueSupplier ttlSupplier,
+        ValueSupplier delaySupplier) {
     public static ParsedMethodSupplier parse(final Method method) {
         return parse(method, Object::toString);
     }
@@ -34,7 +36,8 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSu
         // Type
         return new ParsedMethodSupplier(reflected.resolveSupplier(OfType.class, OfType::value, () -> OneUtil.firstUpper(method.getName())), 
                 reflected.resolveArgSupplier(OfCorrelationId.class, () -> UUID.randomUUID().toString()),
-                reflected.resolveSupplier(OfTtl.class, ttl -> propertyResolver.resolve(ttl.value()), null));
+                reflected.resolveSupplier(OfTtl.class, a -> propertyResolver.resolve(a.value()), null),
+                reflected.resolveSupplier(OfDelay.class, a -> propertyResolver.resolve(a.value()), null));
     }
 
     public JmsDispatch apply(final ByJmsProxyConfig config, final Object[] args) {
@@ -44,6 +47,8 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSu
         final var ttl = Optional.ofNullable(OneUtil.toString(getValue(ttlSupplier, args, config.ttl())))
                 .filter(OneUtil::hasValue)
                 .map(Duration::parse).orElse(null);
+        final var delay = Optional.ofNullable(OneUtil.toString(getValue(delaySupplier, args, config.ttl())))
+                .filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
 
         return new JmsDispatch() {
 
@@ -86,14 +91,12 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSu
 
             @Override
             public Map<String, Object> properties() {
-                // TODO Auto-generated method stub
                 return JmsDispatch.super.properties();
             }
 
             @Override
             public Duration delay() {
-                // TODO Auto-generated method stub
-                return JmsDispatch.super.delay();
+                return delay;
             }
 
         };
