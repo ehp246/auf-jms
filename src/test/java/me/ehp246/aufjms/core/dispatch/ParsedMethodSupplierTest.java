@@ -4,6 +4,8 @@ import static org.mockito.Mockito.times;
 
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -461,5 +463,109 @@ class ParsedMethodSupplierTest {
 
         Assertions.assertEquals(Duration.ofSeconds(112), ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).delay(), "should nbe the argument");
+    }
+
+    @Test
+    void property_m01_11() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(Map.of("key1", "value1"), Map.of("key2", "value2"));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+
+        Assertions.assertEquals("value1", properties.get("key1"));
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_12() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("");
+
+        Assertions.assertThrows(
+                IllegalArgumentException.class, () -> ParsedMethodSupplier.parse(captor.invocation().method())
+                        .apply(config,
+                        captor.invocation().args().toArray()),
+                "should require a property name");
+    }
+
+    @Test
+    void property_m01_21() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(null, Map.of("key2", "value2"));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(1, properties.keySet().size());
+
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_22() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01(Map.of("key2", "value1"), Map.of("key2", "value2"));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(1, properties.keySet().size());
+
+        Assertions.assertEquals("value2", properties.get("key2"), "should be overwritten by later value");
+    }
+
+    @Test
+    void property_m01_23() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        final var map = new HashMap<String, Object>();
+        map.put("key1", null);
+
+        captor.proxy().m01(map, Map.of("key2", ""));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+        Assertions.assertEquals(null, properties.get("key1"), "should accept null");
+        Assertions.assertEquals("", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_31() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("id1", 123, Map.of("key2", "value2"));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(3, properties.keySet().size());
+
+        Assertions.assertEquals("id1", properties.get("ID"));
+        Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
+        Assertions.assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    void property_m01_32() {
+        final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+
+        captor.proxy().m01("id1", 123, Map.of("ID", "id2"));
+
+        final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).properties();
+
+        Assertions.assertEquals(2, properties.keySet().size());
+
+        Assertions.assertEquals("id2", properties.get("ID"), "should be overwritten by later value");
+        Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
     }
 }

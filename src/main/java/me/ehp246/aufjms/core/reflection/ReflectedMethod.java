@@ -15,21 +15,17 @@ import java.util.function.Supplier;
 public final class ReflectedMethod {
     private final Class<?> declaringType;
     private final Method method;
-    private final Annotation[][] parameterAnnotations;
-    private final Class<?>[] threws;
     private final Parameter[] parameters;
 
     public ReflectedMethod(final Method method) {
         this.method = Objects.requireNonNull(method);
         this.declaringType = method.getDeclaringClass();
-        this.parameterAnnotations = this.method.getParameterAnnotations();
-        this.threws = this.method.getExceptionTypes();
         this.parameters = method.getParameters();
     }
 
     public <A extends Annotation, V> ValueSupplier resolveSupplier(final Class<A> annotationClass,
             final Function<A, V> mapper, final ValueSupplier.SimpleSupplier supplier) {
-        return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
+        return firstParameterWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> {
                     final var value = findOnMethodUp(annotationClass);
                     return value == null ? supplier : (ValueSupplier.SimpleSupplier) () -> mapper.apply(value);
@@ -38,11 +34,11 @@ public final class ReflectedMethod {
 
     public <A extends Annotation, V> ValueSupplier resolveArgSupplier(final Class<A> annotationClass,
             final Supplier<V> supplier) {
-        return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
+        return firstParameterWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.SimpleSupplier) supplier::get);
     }
 
-    public Optional<Integer> firstArgWith(final Class<? extends Annotation> annotationClass) {
+    public Optional<Integer> firstParameterWith(final Class<? extends Annotation> annotationClass) {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].isAnnotationPresent(annotationClass)) {
                 return Optional.of(i);
@@ -52,6 +48,16 @@ public final class ReflectedMethod {
         return Optional.empty();
     }
 
+    public <A extends Annotation> void allParametersWith(final Class<A> annotationType,
+            final AnnotatedParameterConsumer<A> consumer) {
+        for (int i = 0; i < parameters.length; i++) {
+            final var parameter = parameters[i];
+            if (parameter.isAnnotationPresent(annotationType)) {
+                consumer.accept(parameter, i, parameter.getAnnotation(annotationType));
+            }
+        }
+    }
+
     public <A extends Annotation, V> V methodAnnotationOf(final Class<A> annotationClass, final Function<A, V> mapper) {
         final var found = method.getAnnotation(annotationClass);
         return found == null ? null : mapper.apply(found);
@@ -59,6 +65,10 @@ public final class ReflectedMethod {
 
     public Method method() {
         return this.method;
+    }
+
+    public Parameter getParameter(int index) {
+        return this.parameters[index];
     }
 
     public <A extends Annotation> A findOnMethodUp(final Class<A> annotationClass) {
