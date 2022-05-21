@@ -100,7 +100,6 @@ class DefaultExecutableBinderTestCases {
     }
 
     static class CorrelationIdCase01 {
-        @OfCorrelationId
         private String field;
         public String setter;
         public String method;
@@ -109,7 +108,6 @@ class DefaultExecutableBinderTestCases {
             return this.field;
         }
 
-        @OfCorrelationId
         public void set(final String id) {
             setter = id;
         }

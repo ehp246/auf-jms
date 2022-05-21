@@ -22,7 +22,7 @@ import javax.jms.Message;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ ElementType.PARAMETER })
 public @interface OfCorrelationId {
 
 }

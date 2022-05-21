@@ -28,18 +28,18 @@ public final class ReflectedMethod {
     }
 
     public <A extends Annotation, V> ValueSupplier resolveSupplier(final Class<A> annotationClass,
-            final Function<A, V> mapper, final Supplier<V> supplier) {
+            final Function<A, V> mapper, final ValueSupplier.SimpleSupplier supplier) {
         return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> {
-                    final var value = findOnUp(annotationClass);
-                    return (ValueSupplier.StaticSupplier) () -> value == null ? supplier.get() : mapper.apply(value);
+                    final var value = findOnMethodUp(annotationClass);
+                    return value == null ? supplier : (ValueSupplier.SimpleSupplier) () -> mapper.apply(value);
                 });
     }
 
     public <A extends Annotation, V> ValueSupplier resolveArgSupplier(final Class<A> annotationClass,
             final Supplier<V> supplier) {
         return firstArgWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
-                .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.StaticSupplier) supplier::get);
+                .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.SimpleSupplier) supplier::get);
     }
 
     public Optional<Integer> firstArgWith(final Class<? extends Annotation> annotationClass) {
@@ -61,7 +61,7 @@ public final class ReflectedMethod {
         return this.method;
     }
 
-    public <A extends Annotation> A findOnUp(final Class<A> annotationClass) {
+    public <A extends Annotation> A findOnMethodUp(final Class<A> annotationClass) {
         final var found = method.getAnnotation(annotationClass);
         if (found != null) {
             return found;

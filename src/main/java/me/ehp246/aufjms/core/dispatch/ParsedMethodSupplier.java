@@ -3,45 +3,47 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
+import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.reflection.ValueSupplier;
 import me.ehp246.aufjms.core.reflection.ValueSupplier.IndexSupplier;
-import me.ehp246.aufjms.core.reflection.ValueSupplier.StaticSupplier;
+import me.ehp246.aufjms.core.reflection.ValueSupplier.SimpleSupplier;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * @author Lei Yang
  *
  */
-record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSupplier) {
-    private static final Map<Method, ParsedMethodSupplier> CACHED = new ConcurrentHashMap<>();
+record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSupplier, ValueSupplier ttlSupplier) {
+    public static ParsedMethodSupplier parse(final Method method) {
+        return parse(method, Object::toString);
+    }
 
-    private static ParsedMethodSupplier parse(final Method method) {
+    public static ParsedMethodSupplier parse(final Method method, final PropertyResolver propertyResolver) {
         final var reflected = new ReflectedMethod(method);
 
         // Type
         return new ParsedMethodSupplier(reflected.resolveSupplier(OfType.class, OfType::value, () -> OneUtil.firstUpper(method.getName())), 
-                reflected.resolveArgSupplier(OfCorrelationId.class, () -> UUID.randomUUID().toString()));
+                reflected.resolveArgSupplier(OfCorrelationId.class, () -> UUID.randomUUID().toString()),
+                reflected.resolveSupplier(OfTtl.class, ttl -> propertyResolver.resolve(ttl.value()), null));
     }
 
-    public static ParsedMethodSupplier get(final Method method) {
-        return CACHED.computeIfAbsent(method, m -> ParsedMethodSupplier.parse(method));
-    }
-
-    public JmsDispatch apply(final ByJmsProxyHandler handler, final Object[] args) {
-        final var to = handler.to();
-        final var type = OneUtil
-                .toString(typeSupplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
-                        : ((StaticSupplier) typeSupplier).get());
-        final var correlId = OneUtil.toString(correlIdSupplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
-                : ((StaticSupplier) correlIdSupplier).get());
+    public JmsDispatch apply(final ByJmsProxyConfig config, final Object[] args) {
+        final var to = config.to();
+        final var type = OneUtil.toString(getValue(typeSupplier, args, null));
+        final var correlId = OneUtil.toString(getValue(correlIdSupplier, args, null));
+        final var ttl = Optional.ofNullable(OneUtil.toString(getValue(ttlSupplier, args, config.ttl())))
+                .filter(OneUtil::hasValue)
+                .map(Duration::parse).orElse(null);
 
         return new JmsDispatch() {
 
@@ -74,13 +76,12 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSu
 
             @Override
             public At replyTo() {
-                return handler.replyTo();
+                return config.replyTo();
             }
 
             @Override
             public Duration ttl() {
-                // TODO Auto-generated method stub
-                return JmsDispatch.super.ttl();
+                return ttl;
             }
 
             @Override
@@ -96,5 +97,11 @@ record ParsedMethodSupplier(ValueSupplier typeSupplier, ValueSupplier correlIdSu
             }
 
         };
+    }
+
+    private static Object getValue(ValueSupplier supplier, Object[] args, Object def) {
+        return supplier == null ? def
+                : supplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
+                : ((SimpleSupplier) supplier).get();
     }
 }
