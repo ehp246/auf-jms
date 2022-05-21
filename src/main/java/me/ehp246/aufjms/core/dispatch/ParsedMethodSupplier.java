@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
@@ -16,6 +18,7 @@ import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.dispatch.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.ReflectedMethod;
@@ -29,6 +32,9 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 final class ParsedMethodSupplier {
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
+            OfTtl.class, OfDelay.class, OfCorrelationId.class);
+
     private final ReflectedMethod reflected;
     private final ValueSupplier typeSupplier;
     private final ValueSupplier correlIdSupplier;
@@ -37,8 +43,10 @@ final class ParsedMethodSupplier {
     private final List<ValueSupplier.IndexSupplier> propertySuppliers = new ArrayList<>();
     private final List<String> propertyNames = new ArrayList<>();
     private final List<Class<?>> propertyTypes = new ArrayList<>();
+    private final Integer bodyIndex;
+    private final BodyAs bodyAs;
 
-    public ParsedMethodSupplier(final Method method, final PropertyResolver propertyResolver) {
+    private ParsedMethodSupplier(final Method method, final PropertyResolver propertyResolver) {
         this.reflected = new ReflectedMethod(method);
 
         this.typeSupplier = reflected.resolveSupplier(OfType.class, OfType::value,
@@ -47,11 +55,14 @@ final class ParsedMethodSupplier {
         this.ttlSupplier = reflected.resolveSupplier(OfTtl.class, a -> propertyResolver.resolve(a.value()), null);
         this.delaySupplier = reflected.resolveSupplier(OfDelay.class, a -> propertyResolver.resolve(a.value()), null);
 
-        reflected.allParametersWith(OfProperty.class, (parameter, index, ann) -> {
+        reflected.allParametersWith(OfProperty.class, (parameter, index) -> {
             propertySuppliers.add(Integer.valueOf(index)::intValue);
-            propertyNames.add(ann.value());
+            propertyNames.add(parameter.getAnnotation(OfProperty.class).value());
             propertyTypes.add(parameter.getType());
         });
+
+        bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS);
+        bodyAs = bodyIndex == null ? null : reflected.getParameter(bodyIndex)::getType;
     }
 
     public static ParsedMethodSupplier parse(final Method method) {
@@ -73,18 +84,18 @@ final class ParsedMethodSupplier {
                 .filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
         final var properties = new HashMap<String, Object>();
 
-        for (final var supplier : propertySuppliers) {
-            final var index = supplier.get();
-            final var key = propertyNames.get(index);
-            final var arg = args[index];
+        for (var i = 0; i < propertySuppliers.size(); i++) {
+            final var supplier = propertySuppliers.get(i);
+            final var key = propertyNames.get(i);
+            final var arg = args[supplier.get()];
 
             // Must have a property name for non-map values.
-            if (!OneUtil.hasValue(key) && !propertyTypes.get(index).isAssignableFrom(Map.class)) {
+            if (!OneUtil.hasValue(key) && !propertyTypes.get(i).isAssignableFrom(Map.class)) {
                 throw new IllegalArgumentException(
-                        "Un-defined property name on parameter " + reflected.getParameter(index));
+                        "Un-defined property name on parameter " + reflected.getParameter(supplier.get()));
             }
 
-            if (propertyTypes.get(index).isAssignableFrom(Map.class)) {
+            if (propertyTypes.get(i).isAssignableFrom(Map.class)) {
                 // Skip null maps.
                 if (arg != null) {
                     properties.putAll(((Map<String, Object>) arg));
@@ -93,6 +104,8 @@ final class ParsedMethodSupplier {
                 properties.put(key, arg);
             }
         }
+
+        final var body = bodyIndex == null ? null : args[bodyIndex];
 
         return new JmsDispatch() {
 
@@ -113,14 +126,12 @@ final class ParsedMethodSupplier {
 
             @Override
             public Object body() {
-                // TODO Auto-generated method stub
-                return JmsDispatch.super.body();
+                return body;
             }
 
             @Override
             public BodyAs bodyAs() {
-                // TODO Auto-generated method stub
-                return JmsDispatch.super.bodyAs();
+                return bodyAs;
             }
 
             @Override

@@ -3,7 +3,9 @@ package me.ehp246.aufjms.core.dispatch;
 import static org.mockito.Mockito.times;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -567,5 +569,88 @@ class ParsedMethodSupplierTest {
 
         Assertions.assertEquals("id2", properties.get("ID"), "should be overwritten by later value");
         Assertions.assertEquals(123, ((Integer) properties.get("SEQ")).intValue());
+    }
+
+    @Test
+    void body_01() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        captor.proxy().m01();
+
+        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
+    }
+
+    @Test
+    void body_02() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var expected = Map.of("", "");
+
+        captor.proxy().m02(expected);
+
+        Assertions.assertEquals(expected, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
+    }
+
+    @Test
+    void body_m03_1() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        captor.proxy().m03(UUID.randomUUID().toString(), "");
+
+        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
+    }
+
+    @Test
+    void body_m03_2() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "");
+
+        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
+    }
+
+    @Test
+    void body_03() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var expected = Instant.now();
+
+        captor.proxy().m04(expected);
+
+        final var actual = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body();
+        final var actualAs = ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).bodyAs();
+
+        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals(TemporalAccessor.class, actualAs.type());
+    }
+
+    @Test
+    void body_04() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var body = Map.of("", "");
+
+        captor.proxy().m02(UUID.randomUUID().toString(), body);
+
+        Assertions.assertEquals(body, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
+    }
+
+    @Test
+    void body_05() {
+        final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
+
+        final var body = Map.of("", "");
+
+        captor.proxy().m02(body, UUID.randomUUID().toString(), null);
+
+        Assertions.assertEquals(body, ParsedMethodSupplier.parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()).body());
     }
 }

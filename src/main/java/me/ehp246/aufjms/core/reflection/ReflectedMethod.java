@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -38,6 +39,17 @@ public final class ReflectedMethod {
                 .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.SimpleSupplier) supplier::get);
     }
 
+    public Integer firstPayloadParameter(final Set<Class<? extends Annotation>> exclusions) {
+        for (var i = 0; i < parameters.length; i++) {
+            final var parameter = parameters[i];
+            if (exclusions.stream().filter(type -> parameter.isAnnotationPresent(type)).findAny().isEmpty()) {
+                return i;
+            }
+        }
+
+        return null;
+    }
+
     public Optional<Integer> firstParameterWith(final Class<? extends Annotation> annotationClass) {
         for (int i = 0; i < parameters.length; i++) {
             if (parameters[i].isAnnotationPresent(annotationClass)) {
@@ -48,12 +60,11 @@ public final class ReflectedMethod {
         return Optional.empty();
     }
 
-    public <A extends Annotation> void allParametersWith(final Class<A> annotationType,
-            final AnnotatedParameterConsumer<A> consumer) {
+    public void allParametersWith(final Class<? extends Annotation> annotationType, final ParameterConsumer consumer) {
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
             if (parameter.isAnnotationPresent(annotationType)) {
-                consumer.accept(parameter, i, parameter.getAnnotation(annotationType));
+                consumer.accept(parameter, i);
             }
         }
     }

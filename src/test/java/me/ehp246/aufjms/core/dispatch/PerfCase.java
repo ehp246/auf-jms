@@ -2,6 +2,8 @@ package me.ehp246.aufjms.core.dispatch;
 
 import java.util.Map;
 
+import me.ehp246.aufjms.api.annotation.OfCorrelationId;
+import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfType;
 
 /**
@@ -14,4 +16,6 @@ interface PerfCase {
     void m02(Map<String, String> map);
 
     void m03(@OfType final String type);
+
+    void m04(@OfType final String type, @OfCorrelationId String id, @OfProperty Map<String, String> properties);
 }
