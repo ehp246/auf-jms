@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * @since 1.0
  */
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE })
+@Target({ ElementType.METHOD, ElementType.PARAMETER, ElementType.TYPE })
 public @interface OfType {
     String value() default "";
 }

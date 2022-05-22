@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author Lei Yang
@@ -25,18 +24,18 @@ public final class ReflectedMethod {
     }
 
     public <A extends Annotation, V> ValueSupplier resolveSupplier(final Class<A> annotationClass,
-            final Function<A, V> mapper, final ValueSupplier.SimpleSupplier supplier) {
+            final Function<A, String> mapper, final ValueSupplier.SimpleSupplier defValue) {
         return firstParameterWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> {
-                    final var value = findOnMethodUp(annotationClass);
-                    return value == null ? supplier : (ValueSupplier.SimpleSupplier) () -> mapper.apply(value);
+                    final var value = Optional.ofNullable(findOnMethodUp(annotationClass)).map(mapper::apply);
+                    return value.isEmpty() ? defValue : (ValueSupplier.SimpleSupplier) value::get;
                 });
     }
 
-    public <A extends Annotation, V> ValueSupplier resolveArgSupplier(final Class<A> annotationClass,
-            final Supplier<V> supplier) {
+    public <A extends Annotation, V> ValueSupplier resolveSupplierOnArgs(final Class<A> annotationClass,
+            final ValueSupplier.SimpleSupplier defValue) {
         return firstParameterWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
-                .map(s -> (ValueSupplier) s).orElseGet(() -> (ValueSupplier.SimpleSupplier) supplier::get);
+                .map(s -> (ValueSupplier) s).orElse(defValue);
     }
 
     public Integer firstPayloadParameter(final Set<Class<? extends Annotation>> exclusions) {

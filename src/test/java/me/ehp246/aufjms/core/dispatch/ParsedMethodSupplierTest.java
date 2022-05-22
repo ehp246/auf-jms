@@ -12,17 +12,20 @@ import java.util.Map;
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.test.TestUtil;
+import me.ehp246.test.TimingExtension;
 
 /**
  * @author Lei Yang
  *
  */
+@ExtendWith(TimingExtension.class)
 class ParsedMethodSupplierTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyHandler(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
@@ -162,8 +165,12 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().m01(id);
 
-        Assertions.assertEquals(id.toString(), ParsedMethodSupplier.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).correlationId());
+        final var dispatch = ParsedMethodSupplier.parse(captor.invocation().method()).apply(config,
+                captor.invocation().args().toArray());
+
+        Assertions.assertEquals(id.toString(), dispatch.correlationId());
+        Assertions.assertEquals(id.toString(), dispatch.correlationId());
+        Assertions.assertEquals(id.toString(), dispatch.correlationId());
     }
 
     @Test
@@ -172,10 +179,12 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().m02(null, UUID.randomUUID().toString());
 
-        Assertions.assertEquals(null,
-                ParsedMethodSupplier.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).correlationId(),
-                "should take the first one");
+        final var dispatch = ParsedMethodSupplier.parse(captor.invocation().method()).apply(config,
+                captor.invocation().args().toArray());
+
+        Assertions.assertEquals(null, dispatch.correlationId(), "should take the first one");
+        Assertions.assertEquals(null, dispatch.correlationId());
+        Assertions.assertEquals(null, dispatch.correlationId());
     }
 
     @Test
@@ -217,7 +226,7 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().getTtl01();
 
-        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+        Assertions.assertEquals(Duration.ofMillis(0), ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).ttl(), "should surpress");
     }
 
@@ -273,7 +282,7 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().getTtl03("");
 
-        Assertions.assertEquals(null,
+        Assertions.assertThrows(DateTimeParseException.class, () ->
                 ParsedMethodSupplier.parse(captor.invocation().method())
                         .apply(config, captor.invocation().args().toArray()).ttl(),
                 "should suppress other annotations");
@@ -298,7 +307,8 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().getTtl04("");
 
-        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+        Assertions.assertThrows(DateTimeParseException.class,
+                () -> ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).ttl(), "should ignore the annotated");
 
         captor.proxy().getTtl04(null);
@@ -418,7 +428,7 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().m03();
 
-        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
+        Assertions.assertEquals(Duration.ofMillis(0), ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).delay(), "should suppress");
     }
 
@@ -428,8 +438,9 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().m03("");
 
-        Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).delay());
+        Assertions.assertThrows(DateTimeParseException.class, () -> ParsedMethodSupplier
+                .parse(captor.invocation().method())
+                .apply(config, captor.invocation().args().toArray()));
     }
 
     @Test
@@ -453,7 +464,7 @@ class ParsedMethodSupplierTest {
         Assertions.assertThrows(DateTimeParseException.class,
                 () -> ParsedMethodSupplier.parse(captor.invocation().method(), resolver)
                         .apply(config, captor.invocation().args().toArray()).delay());
-        
+
         Mockito.verify(resolver, times(0)).resolve(Mockito.anyString());
     }
 
@@ -488,10 +499,8 @@ class ParsedMethodSupplierTest {
 
         captor.proxy().m01("");
 
-        Assertions.assertThrows(
-                IllegalArgumentException.class, () -> ParsedMethodSupplier.parse(captor.invocation().method())
-                        .apply(config,
-                        captor.invocation().args().toArray()),
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ParsedMethodSupplier
+                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()),
                 "should require a property name");
     }
 
@@ -544,7 +553,7 @@ class ParsedMethodSupplierTest {
     void property_m01_31() {
         final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
 
-        captor.proxy().m01("id1", 123, Map.of("key2", "value2"));
+        captor.proxy().m01("id1", 123, UUID.randomUUID().toString(), Map.of("key2", "value2"));
 
         final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).properties();
@@ -560,7 +569,7 @@ class ParsedMethodSupplierTest {
     void property_m01_32() {
         final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
 
-        captor.proxy().m01("id1", 123, Map.of("ID", "id2"));
+        captor.proxy().m01("id1", 123, UUID.randomUUID().toString(), Map.of("ID", "id2"));
 
         final var properties = ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).properties();
@@ -607,7 +616,7 @@ class ParsedMethodSupplierTest {
     void body_m03_2() {
         final var captor = TestUtil.newCaptor(BodyCases.Case01.class);
 
-        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "");
+        captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null);
 
         Assertions.assertEquals(null, ParsedMethodSupplier.parse(captor.invocation().method())
                 .apply(config, captor.invocation().args().toArray()).body());

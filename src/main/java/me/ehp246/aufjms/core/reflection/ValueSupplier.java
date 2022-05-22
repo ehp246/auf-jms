@@ -18,6 +18,6 @@ public sealed interface ValueSupplier permits IndexSupplier, SimpleSupplier {
     @FunctionalInterface
     non-sealed interface SimpleSupplier extends ValueSupplier, Supplier<Object> {
         @Override
-        Object get();
+        String get();
     }
 }

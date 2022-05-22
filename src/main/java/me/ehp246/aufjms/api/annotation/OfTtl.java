@@ -18,5 +18,5 @@ public @interface OfTtl {
     /*
      * Supports Spring property placeholder.
      */
-    String value() default "";
+    String value() default "PT0S";
 }

@@ -14,6 +14,7 @@ class PropertyCases {
 
         void m01(@OfProperty String name);
 
-        void m01(@OfProperty("ID") String id, @OfProperty("SEQ") int seq, @OfProperty Map<String, Object> map);
+        void m01(@OfProperty("ID") String id, @OfProperty("SEQ") int seq, String payload,
+                @OfProperty Map<String, Object> map);
     }
 }

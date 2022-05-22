@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,29 +39,42 @@ final class ParsedMethodSupplier {
     private final ValueSupplier correlIdSupplier;
     private final ValueSupplier ttlSupplier;
     private final ValueSupplier delaySupplier;
-    private final List<ValueSupplier.IndexSupplier> propertySuppliers = new ArrayList<>();
-    private final List<String> propertyNames = new ArrayList<>();
-    private final List<Class<?>> propertyTypes = new ArrayList<>();
-    private final Integer bodyIndex;
+    private final int[] propertyArgs;
+    private final String[] propertyNames;
+    private final Class<?>[] propertyTypes;
+    private final int bodyIndex;
     private final BodyAs bodyAs;
 
     private ParsedMethodSupplier(final Method method, final PropertyResolver propertyResolver) {
         this.reflected = new ReflectedMethod(method);
 
         this.typeSupplier = reflected.resolveSupplier(OfType.class, OfType::value,
-                () -> OneUtil.firstUpper(method.getName()));
-        this.correlIdSupplier = reflected.resolveArgSupplier(OfCorrelationId.class, () -> UUID.randomUUID().toString());
+                OneUtil.firstUpper(method.getName())::toString);
+        this.correlIdSupplier = reflected.resolveSupplierOnArgs(OfCorrelationId.class,
+                () -> UUID.randomUUID().toString());
         this.ttlSupplier = reflected.resolveSupplier(OfTtl.class, a -> propertyResolver.resolve(a.value()), null);
         this.delaySupplier = reflected.resolveSupplier(OfDelay.class, a -> propertyResolver.resolve(a.value()), null);
 
+        final var propArgs = new ArrayList<Integer>();
+        final var propNames = new ArrayList<String>();
+        final var propTypes = new ArrayList<Class<?>>();
         reflected.allParametersWith(OfProperty.class, (parameter, index) -> {
-            propertySuppliers.add(Integer.valueOf(index)::intValue);
-            propertyNames.add(parameter.getAnnotation(OfProperty.class).value());
-            propertyTypes.add(parameter.getType());
+            propArgs.add(index);
+            propNames.add(parameter.getAnnotation(OfProperty.class).value());
+            propTypes.add(parameter.getType());
         });
 
-        bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS);
-        bodyAs = bodyIndex == null ? null : reflected.getParameter(bodyIndex)::getType;
+        this.propertyArgs = new int[propArgs.size()];
+        this.propertyNames = new String[propArgs.size()];
+        this.propertyTypes = new Class[propArgs.size()];
+        for (int i = 0; i < propArgs.size(); i++) {
+            this.propertyArgs[i] = propArgs.get(i);
+            this.propertyNames[i] = propNames.get(i);
+            this.propertyTypes[i] = propTypes.get(i);
+        }
+
+        bodyIndex = Optional.ofNullable(reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS)).orElse(-1);
+        bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
     }
 
     public static ParsedMethodSupplier parse(final Method method) {
@@ -76,26 +88,27 @@ final class ParsedMethodSupplier {
     @SuppressWarnings("unchecked")
     public JmsDispatch apply(final ByJmsProxyConfig config, final Object[] args) {
         final var to = config.to();
-        final var type = OneUtil.toString(getValue(typeSupplier, args, null));
-        final var correlId = OneUtil.toString(getValue(correlIdSupplier, args, null));
-        final var ttl = Optional.ofNullable(OneUtil.toString(getValue(ttlSupplier, args, config.ttl())))
-                .filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
-        final var delay = Optional.ofNullable(OneUtil.toString(getValue(delaySupplier, args, config.ttl())))
-                .filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
+
+        final var type = applyStringArgs(typeSupplier, args);
+        final var correlId = applyStringArgs(correlIdSupplier, args);
+
+        final var ttl = applyDurationArgs(ttlSupplier, args, config.ttl());
+        final var delay = applyDurationArgs(delaySupplier, args, config.delay());
+
         final var properties = new HashMap<String, Object>();
 
-        for (var i = 0; i < propertySuppliers.size(); i++) {
-            final var supplier = propertySuppliers.get(i);
-            final var key = propertyNames.get(i);
-            final var arg = args[supplier.get()];
+        for (var i = 0; i < propertyArgs.length; i++) {
+            final var argIndex = propertyArgs[i];
+            final var key = propertyNames[i];
+            final var arg = args[argIndex];
 
             // Must have a property name for non-map values.
-            if (!OneUtil.hasValue(key) && !propertyTypes.get(i).isAssignableFrom(Map.class)) {
+            if (!OneUtil.hasValue(key) && !propertyTypes[i].isAssignableFrom(Map.class)) {
                 throw new IllegalArgumentException(
-                        "Un-defined property name on parameter " + reflected.getParameter(supplier.get()));
+                        "Un-defined property name on parameter " + reflected.getParameter(argIndex));
             }
 
-            if (propertyTypes.get(i).isAssignableFrom(Map.class)) {
+            if (propertyTypes[i].isAssignableFrom(Map.class)) {
                 // Skip null maps.
                 if (arg != null) {
                     properties.putAll(((Map<String, Object>) arg));
@@ -105,7 +118,7 @@ final class ParsedMethodSupplier {
             }
         }
 
-        final var body = bodyIndex == null ? null : args[bodyIndex];
+        final var body = bodyIndex == -1 ? null : args[bodyIndex];
 
         return new JmsDispatch() {
 
@@ -157,9 +170,16 @@ final class ParsedMethodSupplier {
         };
     }
 
-    private static Object getValue(ValueSupplier supplier, Object[] args, Object def) {
-        return supplier == null ? def
-                : supplier instanceof IndexSupplier indexSupplier ? args[indexSupplier.get()]
-                        : ((SimpleSupplier) supplier).get();
+    private static Duration applyDurationArgs(final ValueSupplier supplier, Object[] args, final Duration defValue) {
+        return supplier == null ? defValue
+                : Optional.ofNullable(applyStringArgs(supplier, args))
+                        .map(Duration::parse)
+                        .orElse(null);
+    }
+
+    private static String applyStringArgs(ValueSupplier supplier, Object[] args) {
+        return supplier instanceof IndexSupplier indexSupplier
+                ? Optional.ofNullable(args[indexSupplier.get()]).map(Object::toString).orElse(null)
+                : ((SimpleSupplier) supplier).get();
     }
 }

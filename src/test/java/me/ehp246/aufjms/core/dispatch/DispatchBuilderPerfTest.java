@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -22,7 +24,7 @@ import me.ehp246.test.TimingExtension;
 @ExtendWith(TimingExtension.class)
 @EnabledIfSystemProperty(named = "me.ehp246.aufjms.perfTest", matches = "true")
 class DispatchBuilderPerfTest {
-    private final static int COUNT = 10_000_000;
+    private final static int COUNT = 100_000_000;
     private final static At at = At.toQueue("d");
     private static final ByJmsConfig BYJMS_CONFIG = new ByJmsConfig(at, at, Duration.ofHours(12), Duration.ofSeconds(2),
             "");
@@ -121,7 +123,10 @@ class DispatchBuilderPerfTest {
 
     @Test
     void perf_04_1() {
-        captor.proxy().m04(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Map.of());
+        final var linked = new LinkedList<>(List.of(UUID.randomUUID().toString()));
+
+        captor.proxy().m04(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                Map.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()), linked);
 
         final var invocation = captor.invocation();
         final var target = invocation.target();
@@ -135,7 +140,10 @@ class DispatchBuilderPerfTest {
 
     @Test
     void perf_04_2() {
-        captor.proxy().m04(UUID.randomUUID().toString(), UUID.randomUUID().toString(), Map.of());
+        final var linked = new LinkedList<>(List.of(UUID.randomUUID().toString()));
+
+        captor.proxy().m04(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                Map.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()), linked);
 
         final var invocation = captor.invocation();
         final var args = invocation.args().toArray();
