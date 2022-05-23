@@ -108,58 +108,6 @@ class MethodParsingDispatchBuilderTest {
     }
 
     @Test
-    void type_02_01() {
-        final var argType = UUID.randomUUID().toString();
-
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type01(argType);
-
-        Assertions.assertEquals(argType, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).type());
-    }
-
-    @Test
-    void type_02_02() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type01(null);
-
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).type());
-    }
-
-    @Test
-    void type_02_03() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type02();
-
-        Assertions.assertEquals("6f7779af-8c3e-4684-8a12-537415281b89", MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()).type());
-    }
-
-    @Test
-    void type_02_04() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type03();
-
-        Assertions.assertEquals("09bf9d41-d65a-4bf3-be39-75a318059c0d", MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()).type());
-    }
-
-    @Test
-    void type_02_05() {
-        final var captor = TestUtil.newCaptor(TypeCases.Case02.class);
-
-        captor.proxy().type04();
-
-        Assertions.assertEquals("", MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).type());
-    }
-
-    @Test
     void correlationId_01() {
         final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
         final var id = Duration.parse("PT100S");
