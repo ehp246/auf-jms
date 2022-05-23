@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
-import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
@@ -68,14 +68,13 @@ public final class ByJmsProxyFactory {
         final var delay = Optional.of(propertyResolver.resolve(byJms.delay())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::delay);
 
-        final var byJmsConfig = new ByJmsConfig(destination, replyTo, ttl, delay, byJms.connectionFactory());
-
-        final JmsDispatchFn dispatchFn = this.dispatchFnProvider.get(byJms.connectionFactory());
-        final var hashCode = new Object().hashCode();
-
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
                 new InvocationHandler() {
+                    private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo, ttl, delay,
+                            byJms.connectionFactory());
                     private final Map<Method, MethodParsingDispatchBuilder> cache = new ConcurrentHashMap<>();
+                    private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
+                    private final int hashCode = new Object().hashCode();
 
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -99,7 +98,7 @@ public final class ByJmsProxyFactory {
                         final var jmsDispatch = cache
                                 .computeIfAbsent(method,
                                         m -> MethodParsingDispatchBuilder.parse(method, propertyResolver))
-                                .apply(byJmsConfig, args);
+                                .apply(proxyConfig, args);
 
                         dispatchFn.send(jmsDispatch);
 

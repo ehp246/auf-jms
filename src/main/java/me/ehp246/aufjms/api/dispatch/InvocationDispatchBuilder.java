@@ -15,5 +15,5 @@ import me.ehp246.aufjms.api.reflection.Invocation;
  */
 @FunctionalInterface
 public interface InvocationDispatchBuilder {
-    JmsDispatch get(Object proxy, Method method, Object[] args, ByJmsConfig config);
+    JmsDispatch get(Object proxy, Method method, Object[] args, ByJmsProxyConfig config);
 }

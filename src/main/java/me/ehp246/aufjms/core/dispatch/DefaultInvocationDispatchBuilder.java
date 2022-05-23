@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
@@ -41,7 +41,7 @@ public final class DefaultInvocationDispatchBuilder implements InvocationDispatc
     }
 
     @Override
-    public JmsDispatch get(final Object proxy, final Method method, final Object[] args, final ByJmsConfig config) {
+    public JmsDispatch get(final Object proxy, final Method method, final Object[] args, final ByJmsProxyConfig config) {
         final var proxyInvocation = new DefaultProxyInvocation(method.getDeclaringClass(), proxy, method, args);
 
         // Destination is required.

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.test.TestUtil;
 import me.ehp246.test.TestUtil.InvocationCaptor;
@@ -26,8 +26,8 @@ import me.ehp246.test.TimingExtension;
 class DispatchBuilderPerfTest {
     private final static int COUNT = 10_000_000;
     private final static At at = At.toQueue("d");
-    private static final ByJmsConfig BYJMS_CONFIG = new ByJmsConfig(at, at, Duration.ofHours(12), Duration.ofSeconds(2),
-            "");
+    private static final ByJmsProxyConfig BYJMS_CONFIG = new ByJmsProxyConfig(at, at, Duration.ofHours(12),
+            Duration.ofSeconds(2), "");
 
     private static final DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
             String::toString);
@@ -90,7 +90,6 @@ class DispatchBuilderPerfTest {
             parsedMethod.apply(BYJMS_CONFIG, args);
         });
     }
-
 
     @Test
     void perf_03_1() {
