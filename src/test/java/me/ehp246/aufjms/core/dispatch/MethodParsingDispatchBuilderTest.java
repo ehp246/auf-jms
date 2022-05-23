@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import static org.mockito.Mockito.times;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
@@ -11,14 +9,11 @@ import java.util.Map;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.test.TestUtil;
 import me.ehp246.test.TimingExtension;
 
@@ -222,8 +217,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().get();
 
-        Assertions.assertEquals(Duration.ofDays(1).toMillis(), MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
+        Assertions.assertEquals(Duration.ofDays(1).toMillis(),
+                MethodParsingDispatchBuilder.parse(captor.invocation().method())
+                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
     }
 
     @Test
@@ -256,8 +252,9 @@ class MethodParsingDispatchBuilderTest {
         Assertions.assertThrows(DateTimeParseException.class, () -> MethodParsingDispatchBuilder
                 .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
 
-        Assertions.assertEquals("PT1.1S", MethodParsingDispatchBuilder.parse(captor.invocation().method(), v -> "PT1.1S")
-                .apply(config, captor.invocation().args().toArray()).ttl().toString());
+        Assertions.assertEquals("PT1.1S",
+                MethodParsingDispatchBuilder.parse(captor.invocation().method(), v -> "PT1.1S")
+                        .apply(config, captor.invocation().args().toArray()).ttl().toString());
     }
 
     @Test
@@ -276,57 +273,14 @@ class MethodParsingDispatchBuilderTest {
         Assertions.assertEquals(Duration.parse("PT1S").toMillis(), ttl, "should use the resolved");
     }
 
-    @Disabled
     @Test
     void ttl_07() {
         final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
 
-        captor.proxy().getTtl03("PT0.1S");
-
-        Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
-
         captor.proxy().getTtl03("");
 
-        Assertions.assertThrows(DateTimeParseException.class,
-                () -> MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl(),
-                "should suppress other annotations");
-
-        captor.proxy().getTtl03(null);
-
-        Assertions.assertEquals(null,
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl(),
-                "should suppress other annotations");
-    }
-
-    @Disabled
-    @Test
-    void ttl_08() {
-        final var captor = TestUtil.newCaptor(TtlCases.Case01.class);
-
-        captor.proxy().getTtl04("PT0.1S");
-
-        Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
-
-        captor.proxy().getTtl04("");
-
-        Assertions
-                .assertThrows(DateTimeParseException.class,
-                        () -> MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                                .apply(config, captor.invocation().args().toArray()).ttl(),
-                        "should ignore the annotated");
-
-        captor.proxy().getTtl04(null);
-
-        Assertions.assertEquals(null,
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl(),
-                "should ignore the annotated value");
+        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
+                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
     }
 
     @Test
@@ -403,54 +357,15 @@ class MethodParsingDispatchBuilderTest {
         Assertions.assertTrue(dispatch.delay() == dispatch.delay());
     }
 
-    @Disabled
     @Test
     void delay_m01_4() {
         final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
 
-        captor.proxy().m01(Duration.ofMillis(1).toString());
+        captor.proxy().m01("");
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
-                captor.invocation().args().toArray());
+        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
+                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
 
-        Assertions.assertEquals(1, dispatch.delay().toMillis());
-        Assertions.assertTrue(dispatch.delay() == dispatch.delay());
-    }
-
-    @Test
-    void delay_m01_5() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m01((String) null);
-
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
-                captor.invocation().args().toArray());
-        Assertions.assertEquals(null, dispatch.delay());
-        Assertions.assertTrue(dispatch.delay() == dispatch.delay());
-    }
-
-    @Test
-    void delay_m02_1() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m02(null);
-
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
-                captor.invocation().args().toArray());
-
-        Assertions.assertEquals(null, dispatch.delay(), "should use the argument");
-        Assertions.assertTrue(dispatch.delay() == dispatch.delay());
-    }
-
-    @Disabled
-    @Test
-    void delay_m02_2() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m02("PT100S");
-
-        Assertions.assertEquals(100, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).delay().toSeconds());
     }
 
     @Test
@@ -463,51 +378,17 @@ class MethodParsingDispatchBuilderTest {
                 .apply(config, captor.invocation().args().toArray()).delay(), "should suppress");
     }
 
-    @Disabled
-    @Test
-    void delay_m03_2() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03("");
-
-        Assertions.assertThrows(DateTimeParseException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
-    }
-
-    @Test
-    void delay_m03_3() {
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03(null);
-
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).delay());
-    }
-
-    @Disabled
-    @Test
-    void delay_m03_4() {
-        final PropertyResolver resolver = Mockito.mock(PropertyResolver.class);
-
-        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
-
-        captor.proxy().m03("${delay}");
-
-        Assertions.assertThrows(DateTimeParseException.class,
-                () -> MethodParsingDispatchBuilder.parse(captor.invocation().method(), resolver)
-                        .apply(config, captor.invocation().args().toArray()).delay());
-
-        Mockito.verify(resolver, times(0)).resolve(Mockito.anyString());
-    }
-
     @Test
     void delay_m04() {
         final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
 
         captor.proxy().m04(Duration.parse("PT112S"));
 
-        Assertions.assertEquals(Duration.ofSeconds(112), MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).delay(), "should nbe the argument");
+        Assertions
+                .assertEquals(Duration.ofSeconds(112),
+                        MethodParsingDispatchBuilder.parse(captor.invocation().method())
+                                .apply(config, captor.invocation().args().toArray()).delay(),
+                        "should nbe the argument");
     }
 
     @Test

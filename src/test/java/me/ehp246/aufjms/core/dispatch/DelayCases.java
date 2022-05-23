@@ -16,15 +16,10 @@ class DelayCases {
         @OfDelay("PT2S")
         void m01();
 
-        @OfDelay("PT23S")
         void m01(@OfDelay String delay);
-
-        void m02(@OfDelay("PT2S") String delay);
 
         @OfDelay
         void m03();
-
-        void m03(@OfDelay String delay);
 
         void m04(@OfDelay Duration delay);
     }
