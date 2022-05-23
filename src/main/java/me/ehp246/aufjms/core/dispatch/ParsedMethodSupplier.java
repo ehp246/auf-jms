@@ -35,10 +35,10 @@ final class ParsedMethodSupplier {
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
     private final ReflectedMethod reflected;
-    private final ValueSupplier typeSupplier;
-    private final ValueSupplier correlIdSupplier;
-    private final ValueSupplier ttlSupplier;
-    private final ValueSupplier delaySupplier;
+    private final Object typeProto;
+    private final Object correlIdProto;
+    private final Object ttlProto;
+    private final Object delayProto;
     private final int[] propertyArgs;
     private final String[] propertyNames;
     private final Class<?>[] propertyTypes;
@@ -48,12 +48,18 @@ final class ParsedMethodSupplier {
     private ParsedMethodSupplier(final Method method, final PropertyResolver propertyResolver) {
         this.reflected = new ReflectedMethod(method);
 
-        this.typeSupplier = reflected.resolveSupplier(OfType.class, OfType::value,
-                OneUtil.firstUpper(method.getName())::toString);
-        this.correlIdSupplier = reflected.resolveSupplierOnArgs(OfCorrelationId.class,
-                () -> UUID.randomUUID().toString());
-        this.ttlSupplier = reflected.resolveSupplier(OfTtl.class, a -> propertyResolver.resolve(a.value()), null);
-        this.delaySupplier = reflected.resolveSupplier(OfDelay.class, a -> propertyResolver.resolve(a.value()), null);
+        this.typeProto = reflected.firstParameterWith(OfType.class).map(v -> (Object) v).orElseGet(() -> reflected
+                .findOnMethodUp(OfType.class).map(OfType::value).orElseGet(() -> OneUtil.firstUpper(method.getName())));
+
+        this.correlIdProto = reflected.firstParameterWith(OfCorrelationId.class).orElse(null);
+
+        this.ttlProto = reflected.firstParameterWith(OfTtl.class).map(v -> (Object) v)
+                .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class)
+                        .map(a -> Duration.parse(propertyResolver.resolve(a.value()))).orElse(null));
+
+        this.delayProto = reflected.firstParameterWith(OfDelay.class).map(v -> (Object) v)
+                .orElseGet(() -> reflected.findOnMethodUp(OfDelay.class)
+                        .map(a -> Duration.parse(propertyResolver.resolve(a.value()))).orElse(null));
 
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();
@@ -89,11 +95,14 @@ final class ParsedMethodSupplier {
     public JmsDispatch apply(final ByJmsProxyConfig config, final Object[] args) {
         final var to = config.to();
 
-        final var type = applyStringArgs(typeSupplier, args);
-        final var correlId = applyStringArgs(correlIdSupplier, args);
+        final String type = this.typeProto instanceof Integer index ? (String) args[index] : (String) this.typeProto;
+        final String correlId = this.correlIdProto == null ? UUID.randomUUID().toString()
+                : (String) args[(Integer) this.correlIdProto];
 
-        final var ttl = applyDurationArgs(ttlSupplier, args, config.ttl());
-        final var delay = applyDurationArgs(delaySupplier, args, config.delay());
+        final Duration ttl = this.ttlProto == null ? config.ttl()
+                : this.ttlProto instanceof Integer index ? (Duration) args[index] : (Duration) this.ttlProto;
+        final Duration delay = this.delayProto == null ? config.delay()
+                : this.delayProto instanceof Integer index ? (Duration) args[index] : (Duration) this.delayProto;
 
         final var properties = new HashMap<String, Object>();
 
@@ -172,9 +181,7 @@ final class ParsedMethodSupplier {
 
     private static Duration applyDurationArgs(final ValueSupplier supplier, Object[] args, final Duration defValue) {
         return supplier == null ? defValue
-                : Optional.ofNullable(applyStringArgs(supplier, args))
-                        .map(Duration::parse)
-                        .orElse(null);
+                : Optional.ofNullable(applyStringArgs(supplier, args)).map(Duration::parse).orElse(null);
     }
 
     private static String applyStringArgs(ValueSupplier supplier, Object[] args) {

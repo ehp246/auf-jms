@@ -27,8 +27,8 @@ public final class ReflectedMethod {
             final Function<A, String> mapper, final ValueSupplier.SimpleSupplier defValue) {
         return firstParameterWith(annotationClass).map(i -> (ValueSupplier.IndexSupplier) i::intValue)
                 .map(s -> (ValueSupplier) s).orElseGet(() -> {
-                    final var value = Optional.ofNullable(findOnMethodUp(annotationClass)).map(mapper::apply);
-                    return value.isEmpty() ? defValue : (ValueSupplier.SimpleSupplier) value::get;
+                    final var value = findOnMethodUp(annotationClass);
+                    return value.isEmpty() ? defValue : (ValueSupplier.SimpleSupplier) value.map(mapper::apply)::get;
                 });
     }
 
@@ -81,12 +81,12 @@ public final class ReflectedMethod {
         return this.parameters[index];
     }
 
-    public <A extends Annotation> A findOnMethodUp(final Class<A> annotationClass) {
+    public <A extends Annotation> Optional<A> findOnMethodUp(final Class<A> annotationClass) {
         final var found = method.getAnnotation(annotationClass);
         if (found != null) {
-            return found;
+            return Optional.of(found);
         }
 
-        return declaringType.getAnnotation(annotationClass);
+        return Optional.ofNullable(declaringType.getAnnotation(annotationClass));
     }
 }

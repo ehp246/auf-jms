@@ -24,7 +24,7 @@ import me.ehp246.test.TimingExtension;
 @ExtendWith(TimingExtension.class)
 @EnabledIfSystemProperty(named = "me.ehp246.aufjms.perfTest", matches = "true")
 class DispatchBuilderPerfTest {
-    private final static int COUNT = 100_000_000;
+    private final static int COUNT = 10_000_000;
     private final static At at = At.toQueue("d");
     private static final ByJmsConfig BYJMS_CONFIG = new ByJmsConfig(at, at, Duration.ofHours(12), Duration.ofSeconds(2),
             "");
