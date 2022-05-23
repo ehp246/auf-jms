@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
@@ -35,10 +36,10 @@ final class ParsedMethodSupplier {
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
     private final ReflectedMethod reflected;
-    private final Object typeProto;
-    private final Object correlIdProto;
-    private final Object ttlProto;
-    private final Object delayProto;
+    private final Function<Object[], String> typeFn;
+    private final Function<Object[], String> correlIdFn;
+    private final Function<Object[], Duration> ttlFn;
+    private final Function<Object[], Duration> delayFn;
     private final int[] propertyArgs;
     private final String[] propertyNames;
     private final Class<?>[] propertyTypes;
@@ -48,18 +49,26 @@ final class ParsedMethodSupplier {
     private ParsedMethodSupplier(final Method method, final PropertyResolver propertyResolver) {
         this.reflected = new ReflectedMethod(method);
 
-        this.typeProto = reflected.firstParameterWith(OfType.class).map(v -> (Object) v).orElseGet(() -> reflected
-                .findOnMethodUp(OfType.class).map(OfType::value).orElseGet(() -> OneUtil.firstUpper(method.getName())));
+        this.typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
+                .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])
+                .orElseGet(() -> reflected.findOnMethodUp(OfType.class)
+                        .map(an -> (Function<Object[], String>) args -> an.value())
+                        .orElseGet(() -> args -> OneUtil.firstUpper(method.getName())));
 
-        this.correlIdProto = reflected.firstParameterWith(OfCorrelationId.class).orElse(null);
+        this.correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream().findFirst()
+                .map(p -> (Function<Object[], String>) args -> (String) args[p.index()]).orElse(null);
 
-        this.ttlProto = reflected.firstParameterWith(OfTtl.class).map(v -> (Object) v)
-                .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class)
-                        .map(a -> Duration.parse(propertyResolver.resolve(a.value()))).orElse(null));
+        this.ttlFn = reflected.allParametersWith(OfTtl.class).stream().findFirst()
+                .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
+                .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class).map(
+                        a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
+                        .orElse(null));
 
-        this.delayProto = reflected.firstParameterWith(OfDelay.class).map(v -> (Object) v)
-                .orElseGet(() -> reflected.findOnMethodUp(OfDelay.class)
-                        .map(a -> Duration.parse(propertyResolver.resolve(a.value()))).orElse(null));
+        this.delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst()
+                .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
+                .orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(
+                        a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
+                        .orElse(null));
 
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();
@@ -95,14 +104,11 @@ final class ParsedMethodSupplier {
     public JmsDispatch apply(final ByJmsProxyConfig config, final Object[] args) {
         final var to = config.to();
 
-        final String type = this.typeProto instanceof Integer index ? (String) args[index] : (String) this.typeProto;
-        final String correlId = this.correlIdProto == null ? UUID.randomUUID().toString()
-                : (String) args[(Integer) this.correlIdProto];
+        final String type = this.typeFn.apply(args);
+        final String correlId = this.correlIdFn == null ? UUID.randomUUID().toString() : this.correlIdFn.apply(args);
 
-        final Duration ttl = this.ttlProto == null ? config.ttl()
-                : this.ttlProto instanceof Integer index ? (Duration) args[index] : (Duration) this.ttlProto;
-        final Duration delay = this.delayProto == null ? config.delay()
-                : this.delayProto instanceof Integer index ? (Duration) args[index] : (Duration) this.delayProto;
+        final Duration ttl = this.ttlFn == null ? config.ttl() : this.ttlFn.apply(args);
+        final Duration delay = this.delayFn == null ? config.delay() : this.delayFn.apply(args);
 
         final var properties = new HashMap<String, Object>();
 

@@ -3,6 +3,8 @@ package me.ehp246.aufjms.core.reflection;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -66,6 +68,19 @@ public final class ReflectedMethod {
                 consumer.accept(parameter, i);
             }
         }
+    }
+
+    public List<ReflectedParameter> allParametersWith(final Class<? extends Annotation> annotationType) {
+        final var list = new ArrayList<ReflectedParameter>();
+
+        for (int i = 0; i < parameters.length; i++) {
+            final var parameter = parameters[i];
+            if (parameter.isAnnotationPresent(annotationType)) {
+                list.add(new ReflectedParameter(parameter, i));
+            }
+        }
+
+        return list;
     }
 
     public <A extends Annotation, V> V methodAnnotationOf(final Class<A> annotationClass, final Function<A, V> mapper) {
