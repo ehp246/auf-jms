@@ -55,7 +55,7 @@ class DispatchBuilderPerfTest {
         final var args = invocation.args().toArray();
         final var method = invocation.method();
 
-        final var parsedMethod = ParsedMethodSupplier.parse(method);
+        final var parsedMethod = MethodParsingDispatchBuilder.parse(method);
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);
@@ -84,7 +84,7 @@ class DispatchBuilderPerfTest {
         final var args = invocation.args().toArray();
         final var method = invocation.method();
 
-        final var parsedMethod = ParsedMethodSupplier.parse(method);
+        final var parsedMethod = MethodParsingDispatchBuilder.parse(method);
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);
@@ -114,7 +114,7 @@ class DispatchBuilderPerfTest {
         final var args = invocation.args().toArray();
         final var method = invocation.method();
 
-        final var parsedMethod = ParsedMethodSupplier.parse(method);
+        final var parsedMethod = MethodParsingDispatchBuilder.parse(method);
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);
@@ -149,7 +149,7 @@ class DispatchBuilderPerfTest {
         final var args = invocation.args().toArray();
         final var method = invocation.method();
 
-        final var parsedMethod = ParsedMethodSupplier.parse(method);
+        final var parsedMethod = MethodParsingDispatchBuilder.parse(method);
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);

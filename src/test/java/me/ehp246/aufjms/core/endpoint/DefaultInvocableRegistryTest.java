@@ -17,7 +17,7 @@ import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case02.ErrorCa
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case03.ErrorCase03;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case04.ErrorCase04;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case05.ErrorCase05;
-import me.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.util.MockJmsMsg;
 
 /**
@@ -112,10 +112,10 @@ class DefaultInvocableRegistryTest {
     void invoking_01() {
         final var registery = DefaultInvocableRegistry.registeryFrom(Set.of(Cases09.class.getPackageName()));
 
-        Assertions.assertEquals(ReflectingType.reflect(Cases09.Case01.class).findMethod("invoke"),
+        Assertions.assertEquals(ReflectedType.reflect(Cases09.Case01.class).findMethod("invoke"),
                 registery.resolve(new MockJmsMsg("Case01")).method());
 
-        Assertions.assertEquals(ReflectingType.reflect(Cases09.Case02.class).findMethod("perform"),
+        Assertions.assertEquals(ReflectedType.reflect(Cases09.Case02.class).findMethod("perform"),
                 registery.resolve(new MockJmsMsg("Case02")).method());
     }
 }

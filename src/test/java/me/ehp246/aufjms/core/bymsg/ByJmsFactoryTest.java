@@ -4,25 +4,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.reflection.Invocation;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.dispatch.ByJmsBeanFactory;
-import me.ehp246.test.TestUtil;
+import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
 
-class ByJmsFactoryTest {
+class ByJmsProxyFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;
-    private final InvocationDispatchBuilder dispatchProvider = (proxy, method, args, config) -> null;
     private final JmsDispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
     private final PropertyResolver propertyResolver = n -> n;
     private final EnableByJmsConfig config = new EnableByJmsConfig();
 
-    private final ByJmsBeanFactory factory = new ByJmsBeanFactory(config, dispatchFnProvider, dispatchProvider,
-            propertyResolver);
+    private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, propertyResolver);
 
     @Test
     void object_01() {
@@ -42,8 +37,6 @@ class ByJmsFactoryTest {
 
     @Test
     void connection_01() {
-        final var jmsDispatch = (JmsDispatch) () -> null;
-
         final var disp = new JmsDispatch[1];
         final var dispatchFn = new JmsDispatchFn() {
 
@@ -54,22 +47,11 @@ class ByJmsFactoryTest {
             }
         };
         final var con = new String[1];
-        final var inv = new Invocation[1];
-        final var newInstance = new ByJmsBeanFactory(config, conection -> {
+        new ByJmsProxyFactory(config, conection -> {
             con[0] = conection;
             return dispatchFn;
-        }, (proxy, method, args, config) -> {
-            inv[0] = TestUtil.toInvocation(proxy, method, args);
-            return jmsDispatch;
         }, propertyResolver).newByJmsProxy(TestCases.Case01.class);
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");
-
-        newInstance.m001();
-
-        Assertions.assertEquals(newInstance, inv[0].target());
-        Assertions.assertEquals(TestCases.Case01.class, inv[0].method().getDeclaringClass());
-
-        Assertions.assertEquals(jmsDispatch, disp[0], "should pass JmsDispatch to DispatchFn");
     }
 }

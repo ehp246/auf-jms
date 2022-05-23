@@ -3,9 +3,12 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.dispatch.ByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
-import me.ehp246.aufjms.api.dispatch.InvocationDispatchBuilder;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
@@ -26,19 +28,17 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  * @since 1.0
  */
-public final class ByJmsBeanFactory {
-    private final static Logger LOGGER = LogManager.getLogger(ByJmsBeanFactory.class);
+public final class ByJmsProxyFactory {
+    private final static Logger LOGGER = LogManager.getLogger();
 
-    private final InvocationDispatchBuilder dispatchBuilder;
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
 
-    public ByJmsBeanFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
-            final InvocationDispatchBuilder dispatchProvider, final PropertyResolver propertyResolver) {
+    public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
+            final PropertyResolver propertyResolver) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
-        this.dispatchBuilder = dispatchProvider;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
     }
@@ -63,8 +63,7 @@ public final class ByJmsBeanFactory {
                 : null;
 
         final var ttl = Optional.of(propertyResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
-                .map(Duration::parse)
-                .orElseGet(enableByJmsConfig::ttl);
+                .map(Duration::parse).orElseGet(enableByJmsConfig::ttl);
 
         final var delay = Optional.of(propertyResolver.resolve(byJms.delay())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::delay);
@@ -75,30 +74,37 @@ public final class ByJmsBeanFactory {
         final var hashCode = new Object().hashCode();
 
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
-                (InvocationHandler) (proxy, method, args) -> {
-                    if (method.getName().equals("toString")) {
-                        return this.toString();
-                    }
-                    if (method.getName().equals("hashCode")) {
-                        return hashCode;
-                    }
-                    if (method.getName().equals("equals")) {
-                        return proxy == args[0];
-                    }
-                    if (method.isDefault()) {
-                        return MethodHandles.privateLookupIn(proxyInterface, MethodHandles.lookup())
-                                .findSpecial(proxyInterface, method.getName(),
-                                        MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                                        proxyInterface)
-                                .bindTo(proxy).invokeWithArguments(args);
-                    }
+                new InvocationHandler() {
+                    private final Map<Method, MethodParsingDispatchBuilder> cache = new ConcurrentHashMap<>();
 
-                    final var jmsDispatch = dispatchBuilder.get(proxy, method, args, byJmsConfig);
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        if (method.getName().equals("toString")) {
+                            return ByJmsProxyFactory.this.toString();
+                        }
+                        if (method.getName().equals("hashCode")) {
+                            return hashCode;
+                        }
+                        if (method.getName().equals("equals")) {
+                            return proxy == args[0];
+                        }
+                        if (method.isDefault()) {
+                            return MethodHandles.privateLookupIn(proxyInterface, MethodHandles.lookup())
+                                    .findSpecial(proxyInterface, method.getName(),
+                                            MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                                            proxyInterface)
+                                    .bindTo(proxy).invokeWithArguments(args);
+                        }
 
-                    dispatchFn.send(jmsDispatch);
+                        final var jmsDispatch = cache
+                                .computeIfAbsent(method,
+                                        m -> MethodParsingDispatchBuilder.parse(method, propertyResolver))
+                                .apply(byJmsConfig, args);
 
-                    return null;
+                        dispatchFn.send(jmsDispatch);
+
+                        return null;
+                    }
                 });
-
     }
 }

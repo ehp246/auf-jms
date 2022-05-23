@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyAsTypeCase01;
 import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyCase01;
 import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyPublisherCase01;
@@ -33,8 +32,6 @@ import me.ehp246.aufjms.util.TestQueueListener;
 @Timeout(5)
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
 class BodyTest {
-    @Autowired
-    private ToJson toJson;
     @Autowired
     private FromJson fromJson;
     @Autowired

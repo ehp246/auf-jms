@@ -44,19 +44,17 @@ class TypeTest {
     @Test
     void type_02() throws JMSException {
         final var type = UUID.randomUUID().toString();
+
         case01.ping(type);
 
-        final var received = listener.takeReceived();
-
-        Assertions.assertEquals(type, received.getJMSType());
+        Assertions.assertEquals(type, listener.takeReceived().getJMSType());
     }
 
     @Test
     void type_03() throws JMSException {
         case01.ping(null);
 
-        Assertions.assertEquals("default", listener.takeReceived().getJMSType(),
-                "should use the annotated for the default");
+        Assertions.assertEquals(null, listener.takeReceived().getJMSType());
     }
 
     @Test

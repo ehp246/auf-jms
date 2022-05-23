@@ -12,16 +12,16 @@ import java.util.stream.Stream;
  * @author Lei Yang
  * @since 1.0
  */
-public final class ReflectingType<T> {
+public final class ReflectedType<T> {
     private final Class<T> type;
 
-    public ReflectingType(final Class<T> type) {
+    public ReflectedType(final Class<T> type) {
         super();
         this.type = type;
     }
 
-    public static <T> ReflectingType<T> reflect(final Class<T> type) {
-        return new ReflectingType<T>(type);
+    public static <T> ReflectedType<T> reflect(final Class<T> type) {
+        return new ReflectedType<T>(type);
     }
 
     /**

@@ -1,6 +1,3 @@
-logging:
-  config: classpath:log4j.xml
-  
 spring:
   artemis:
     mode: embedded
