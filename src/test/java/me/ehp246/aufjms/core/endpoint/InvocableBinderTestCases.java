@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 
-class DefaultExecutableBinderTestCases {
+class InvocableBinderTestCases {
     static class ArgCase01 {
         public void m01() {
 

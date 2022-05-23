@@ -184,7 +184,6 @@ class MethodParsingDispatchBuilderTest {
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(null, dispatch.correlationId(), "should take the first one");
-        Assertions.assertTrue(dispatch.correlationId() == dispatch.correlationId());
     }
 
     @Test
@@ -199,6 +198,16 @@ class MethodParsingDispatchBuilderTest {
         Assertions.assertDoesNotThrow(() -> UUID.fromString(dispatch.correlationId()), "should be a UUID");
 
         Assertions.assertTrue(dispatch.correlationId() == dispatch.correlationId());
+    }
+
+    @Test
+    void correlationId_04() {
+        final var captor = TestUtil.newCaptor(CorrelationIdCases.Case01.class);
+
+        captor.proxy().m03(Instant.now());
+
+        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
+                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
     }
 
     @Test
