@@ -20,7 +20,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.reflection.ReflectedMethod;
+import me.ehp246.aufjms.core.reflection.ReflecteProxydMethod;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -32,7 +32,7 @@ final class MethodParsingDispatchBuilder {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
-    private final ReflectedMethod reflected;
+    private final ReflecteProxydMethod reflected;
     private final Function<Object[], String> typeFn;
     private final Function<Object[], String> correlIdFn;
     private final Function<Object[], Duration> ttlFn;
@@ -44,7 +44,7 @@ final class MethodParsingDispatchBuilder {
     private final BodyAs bodyAs;
 
     private MethodParsingDispatchBuilder(final Method method, final PropertyResolver propertyResolver) {
-        this.reflected = new ReflectedMethod(method);
+        this.reflected = new ReflecteProxydMethod(method);
 
         this.typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
                 .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])

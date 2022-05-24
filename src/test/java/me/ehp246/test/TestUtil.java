@@ -7,8 +7,6 @@ import java.util.function.Consumer;
 
 import org.assertj.core.util.Arrays;
 
-import me.ehp246.aufjms.api.reflection.Invocation;
-
 /**
  * @author Lei Yang
  *

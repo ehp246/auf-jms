@@ -13,12 +13,12 @@ import java.util.Set;
  * @author Lei Yang
  *
  */
-public final class ReflectedMethod {
+public final class ReflecteProxydMethod {
     private final Class<?> declaringType;
     private final Method method;
     private final Parameter[] parameters;
 
-    public ReflectedMethod(final Method method) {
+    public ReflecteProxydMethod(final Method method) {
         this.method = Objects.requireNonNull(method);
         this.declaringType = method.getDeclaringClass();
         this.parameters = method.getParameters();

@@ -29,23 +29,7 @@ class DispatchBuilderPerfTest {
     private static final ByJmsProxyConfig BYJMS_CONFIG = new ByJmsProxyConfig(at, at, Duration.ofHours(12),
             Duration.ofSeconds(2), "");
 
-    private static final DefaultInvocationDispatchBuilder dispatchBuilder = new DefaultInvocationDispatchBuilder(
-            String::toString);
     private static final InvocationCaptor<PerfCase> captor = TestUtil.newCaptor(PerfCase.class);
-
-    @Test
-    void perf_01_1() {
-        captor.proxy().m01();
-
-        final var invocation = captor.invocation();
-        final var target = invocation.target();
-        final var method = invocation.method();
-        final var args = invocation.args().toArray();
-
-        IntStream.range(0, COUNT).forEach(i -> {
-            dispatchBuilder.get(target, method, args, BYJMS_CONFIG);
-        });
-    }
 
     @Test
     void perf_01_2() {
@@ -59,20 +43,6 @@ class DispatchBuilderPerfTest {
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);
-        });
-    }
-
-    @Test
-    void perf_02_1() {
-        captor.proxy().m02(Map.of());
-
-        final var invocation = captor.invocation();
-        final var target = invocation.target();
-        final var method = invocation.method();
-        final var args = invocation.args().toArray();
-
-        IntStream.range(0, COUNT).forEach(i -> {
-            dispatchBuilder.get(target, method, args, BYJMS_CONFIG);
         });
     }
 
@@ -92,20 +62,6 @@ class DispatchBuilderPerfTest {
     }
 
     @Test
-    void perf_03_1() {
-        captor.proxy().m03(UUID.randomUUID().toString());
-
-        final var invocation = captor.invocation();
-        final var target = invocation.target();
-        final var method = invocation.method();
-        final var args = invocation.args().toArray();
-
-        IntStream.range(0, COUNT).forEach(i -> {
-            dispatchBuilder.get(target, method, args, BYJMS_CONFIG);
-        });
-    }
-
-    @Test
     void perf_03_2() {
         captor.proxy().m03(UUID.randomUUID().toString());
 
@@ -117,23 +73,6 @@ class DispatchBuilderPerfTest {
 
         IntStream.range(0, COUNT).forEach(i -> {
             parsedMethod.apply(BYJMS_CONFIG, args);
-        });
-    }
-
-    @Test
-    void perf_04_1() {
-        final var linked = new LinkedList<>(List.of(UUID.randomUUID().toString()));
-
-        captor.proxy().m04(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-                Map.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()), linked);
-
-        final var invocation = captor.invocation();
-        final var target = invocation.target();
-        final var method = invocation.method();
-        final var args = invocation.args().toArray();
-
-        IntStream.range(0, COUNT).forEach(i -> {
-            dispatchBuilder.get(target, method, args, BYJMS_CONFIG);
         });
     }
 
