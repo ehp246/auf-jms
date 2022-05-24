@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.api.reflection;
+package me.ehp246.test;
 
 import java.lang.reflect.Method;
 import java.util.List;
