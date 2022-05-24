@@ -31,6 +31,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
+    private final Map<Method, MethodParsingDispatchBuilder> cache = new ConcurrentHashMap<>();
+
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
@@ -72,7 +74,6 @@ public final class ByJmsProxyFactory {
                 new InvocationHandler() {
                     private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo, ttl, delay,
                             byJms.connectionFactory());
-                    private final Map<Method, MethodParsingDispatchBuilder> cache = new ConcurrentHashMap<>();
                     private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
                     private final int hashCode = new Object().hashCode();
 

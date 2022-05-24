@@ -11,7 +11,6 @@ import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -29,7 +28,6 @@ import me.ehp246.aufjms.util.TestQueueListener;
  * @author Lei Yang
  *
  */
-@Timeout(5)
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class })
 class BodyTest {
     @Autowired
