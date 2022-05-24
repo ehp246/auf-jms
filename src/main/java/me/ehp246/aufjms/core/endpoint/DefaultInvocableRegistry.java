@@ -26,7 +26,7 @@ import me.ehp246.aufjms.api.endpoint.InvocableType;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.StreamOf;
 
@@ -139,7 +139,7 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
                 }).collect(Collectors.toSet());
 
         final var invokings = new HashMap<String, Method>();
-        final var reflected = new ReflectingType<>(type);
+        final var reflected = new ReflectedType<>(type);
 
         // Search for the annotation first
         for (final var method : reflected.findMethods(Invoking.class)) {
@@ -165,7 +165,7 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
             throw new IllegalArgumentException("No invocation method defined by " + type.getName());
         }
 
-        LOGGER.atTrace().log("Registering {} on {}", msgTypes, type.getCanonicalName());
+        LOGGER.atTrace().log("Registering {} on {}", msgTypes::toString, type::getCanonicalName);
 
         return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings), annotation.scope(),
                 annotation.invocation());

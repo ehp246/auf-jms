@@ -11,18 +11,17 @@ import javax.jms.Message;
 
 /**
  * When applied to a parameter of a {@linkplain ByJms} interface, it specifies
- * the parameter argument value should be used for
+ * the argument value should be used for
  * {@linkplain Message#setJMSCorrelationID(String)}.
  * <p>
- * Only {@linkplain String} value is supported via
- * {@linkplain Object#toString()}.
+ * Only {@linkplain String} value is supported.
  * 
  * @author Lei Yang
  * @since 1.0
  */
 @Documented
 @Retention(RUNTIME)
-@Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
+@Target({ ElementType.PARAMETER })
 public @interface OfCorrelationId {
 
 }

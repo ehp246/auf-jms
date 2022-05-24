@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 
-class DefaultExecutableBinderTestCases {
+class InvocableBinderTestCases {
     static class ArgCase01 {
         public void m01() {
 
@@ -100,7 +100,6 @@ class DefaultExecutableBinderTestCases {
     }
 
     static class CorrelationIdCase01 {
-        @OfCorrelationId
         private String field;
         public String setter;
         public String method;
@@ -109,7 +108,6 @@ class DefaultExecutableBinderTestCases {
             return this.field;
         }
 
-        @OfCorrelationId
         public void set(final String id) {
             setter = id;
         }

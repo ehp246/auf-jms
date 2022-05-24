@@ -102,7 +102,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         final var proxyBeanDefinition = new GenericBeanDefinition();
         proxyBeanDefinition.setBeanClass(proxyInterface);
         proxyBeanDefinition.setConstructorArgumentValues(args);
-        proxyBeanDefinition.setFactoryBeanName(ByJmsBeanFactory.class.getName());
+        proxyBeanDefinition.setFactoryBeanName(ByJmsProxyFactory.class.getName());
         proxyBeanDefinition.setFactoryMethodName("newByJmsProxy");
 
         return proxyBeanDefinition;

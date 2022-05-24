@@ -29,9 +29,9 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinderTestCases.ArgCase01;
-import me.ehp246.aufjms.core.endpoint.DefaultExecutableBinderTestCases.PropertyCase01.PropertyEnum;
-import me.ehp246.aufjms.core.reflection.ReflectingType;
+import me.ehp246.aufjms.core.endpoint.InvocableBinderTestCases.ArgCase01;
+import me.ehp246.aufjms.core.endpoint.InvocableBinderTestCases.PropertyCase01.PropertyEnum;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 import me.ehp246.aufjms.util.MockJmsMsg;
@@ -67,7 +67,7 @@ class DefaultInvocableBinderTest {
 
     @Test
     void bound_01() {
-        final var method = new ReflectingType<>(DefaultExecutableBinderTestCases.ArgCase01.class).findMethod("m01");
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01");
         final var invocable = new InvocableRecord(arg01, method);
         final var bound = binder.bind(invocable, ctx);
 
@@ -79,7 +79,7 @@ class DefaultInvocableBinderTest {
 
     @Test
     void arg_01() {
-        final var method = new ReflectingType<>(DefaultExecutableBinderTestCases.ArgCase01.class).findMethod("m01",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01",
                 JmsMsg.class);
         final var bound = binder.bind(new InvocableRecord(arg01, method), ctx);
 
@@ -89,7 +89,7 @@ class DefaultInvocableBinderTest {
 
     @Test
     void arg_02() {
-        final var method = new ReflectingType<>(DefaultExecutableBinderTestCases.ArgCase01.class).findMethod("m01",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01",
                 JmsMsg.class, Message.class);
         Mockito.when(msg.message()).thenReturn(message);
 
@@ -102,7 +102,7 @@ class DefaultInvocableBinderTest {
 
     @Test
     void arg_03() {
-        final var method = new ReflectingType<>(DefaultExecutableBinderTestCases.ArgCase01.class).findMethod("m01",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01",
                 MsgContext.class, FromJson.class);
 
         final var bound = binder.bind(new InvocableRecord(arg01, method), ctx);
@@ -115,7 +115,7 @@ class DefaultInvocableBinderTest {
     @SuppressWarnings("unchecked")
     @Test
     void arg_04() {
-        final var method = new ReflectingType<>(DefaultExecutableBinderTestCases.ArgCase01.class).findMethod("m01",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01",
                 List.class, JmsMsg.class);
 
         Mockito.when(msg.text()).thenReturn(toJson.from(List.of(1, 2, 3)));
@@ -138,9 +138,9 @@ class DefaultInvocableBinderTest {
     void method_01() throws Exception {
         final var mq = Mockito.mock(JmsMsg.class);
         final var outcome = Invoked.invoke(binder.bind(
-                new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
-                        new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                                DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01")),
+                new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
+                        new ReflectedType<InvocableBinderTestCases.MethodCase01>(
+                                InvocableBinderTestCases.MethodCase01.class).findMethod("m01")),
                 new MsgContext() {
 
                     @Override
@@ -160,11 +160,11 @@ class DefaultInvocableBinderTest {
 
     @Test
     void method_02() throws Exception {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
+        final var reflectingType = new ReflectedType<InvocableBinderTestCases.MethodCase01>(
+                InvocableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
                         reflectingType.findMethod("m01", JmsMsg.class)), new MsgContext() {
 
                             @Override
@@ -184,10 +184,10 @@ class DefaultInvocableBinderTest {
 
     @Test
     public void method_03() throws Exception {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
+        final var reflectingType = new ReflectedType<InvocableBinderTestCases.MethodCase01>(
+                InvocableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
+        final var case01 = new InvocableBinderTestCases.MethodCase01();
 
         final var outcome = Invoked.invoke(
                 binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m01", JmsMsg.class, Message.class)),
@@ -215,8 +215,8 @@ class DefaultInvocableBinderTest {
     public void method_04() throws Exception {
         final var mq = Mockito.mock(MsgContext.class);
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
-                        ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
+                        ReflectedType.reflect(InvocableBinderTestCases.MethodCase01.class).findMethod("m01",
                                 MsgContext.class)),
                         mq));
 
@@ -225,10 +225,10 @@ class DefaultInvocableBinderTest {
 
     @Test
     public void method_05() throws Exception {
-        final var reflectingType = new ReflectingType<DefaultExecutableBinderTestCases.MethodCase01>(
-                DefaultExecutableBinderTestCases.MethodCase01.class);
+        final var reflectingType = new ReflectedType<InvocableBinderTestCases.MethodCase01>(
+                InvocableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
-        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
+        final var case01 = new InvocableBinderTestCases.MethodCase01();
 
         final var outcome = Invoked
                 .invoke(binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m02")), new MsgContext() {
@@ -250,7 +250,7 @@ class DefaultInvocableBinderTest {
     @SuppressWarnings("unchecked")
     @Test
     void method_08() throws JsonProcessingException {
-        final var reflectingType = new ReflectingType<>(DefaultExecutableBinderTestCases.MethodCase01.class);
+        final var reflectingType = new ReflectedType<>(InvocableBinderTestCases.MethodCase01.class);
         final var mq = Mockito.mock(JmsMsg.class);
         final var msg = Mockito.mock(TextMessage.class);
 
@@ -258,7 +258,7 @@ class DefaultInvocableBinderTest {
 
         Mockito.when(mq.text()).thenReturn(objectMapper.writeValueAsString(new Integer[] { 3, 2, 3 }));
 
-        final var case01 = new DefaultExecutableBinderTestCases.MethodCase01();
+        final var case01 = new InvocableBinderTestCases.MethodCase01();
 
         final var outcome = Invoked.invoke(
                 binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m01", List.class, Message.class)),
@@ -291,8 +291,8 @@ class DefaultInvocableBinderTest {
         Mockito.when(mq.session()).then(i -> session);
 
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.MethodCase01(),
-                        ReflectingType.reflect(DefaultExecutableBinderTestCases.MethodCase01.class).findMethod("m01",
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
+                        ReflectedType.reflect(InvocableBinderTestCases.MethodCase01.class).findMethod("m01",
                                 Session.class, FromJson.class)),
                         mq));
 
@@ -307,8 +307,8 @@ class DefaultInvocableBinderTest {
 
         final var outcome = Invoked
                 .invoke(binder.bind(
-                        new InvocableRecord(new DefaultExecutableBinderTestCases.ExceptionCase01(), ReflectingType
-                                .reflect(DefaultExecutableBinderTestCases.ExceptionCase01.class).findMethod("m01")),
+                        new InvocableRecord(new InvocableBinderTestCases.ExceptionCase01(), ReflectedType
+                                .reflect(InvocableBinderTestCases.ExceptionCase01.class).findMethod("m01")),
                         mq));
 
         Assertions.assertEquals(IllegalArgumentException.class, ((Failed) outcome).thrown().getClass());
@@ -317,10 +317,10 @@ class DefaultInvocableBinderTest {
     @Test
     void correlId_01() {
         final var mq = new MockJmsMsg();
-        final var case01 = new DefaultExecutableBinderTestCases.CorrelationIdCase01();
+        final var case01 = new InvocableBinderTestCases.CorrelationIdCase01();
 
         final var outcome = Invoked.invoke(binder.bind(new InvocableRecord(case01,
-                new ReflectingType<>(DefaultExecutableBinderTestCases.CorrelationIdCase01.class).findMethod("m01",
+                new ReflectedType<>(InvocableBinderTestCases.CorrelationIdCase01.class).findMethod("m01",
                         String.class, String.class)),
                 mq));
 
@@ -340,10 +340,10 @@ class DefaultInvocableBinderTest {
             }
 
         };
-        final var case01 = new DefaultExecutableBinderTestCases.TypeCase01();
+        final var case01 = new InvocableBinderTestCases.TypeCase01();
 
         final var outcome = Invoked.invoke(binder.bind(
-                new InvocableRecord(case01, new ReflectingType<>(DefaultExecutableBinderTestCases.TypeCase01.class)
+                new InvocableRecord(case01, new ReflectedType<>(InvocableBinderTestCases.TypeCase01.class)
                         .findMethod("m01", JmsMsg.class, String.class, String.class)),
                 mq));
 
@@ -356,8 +356,8 @@ class DefaultInvocableBinderTest {
 
     @Test
     void property_01() {
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                ReflectingType.reflect(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                ReflectedType.reflect(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class)),
                 new MockJmsMsg());
 
@@ -378,8 +378,8 @@ class DefaultInvocableBinderTest {
             }
 
         };
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class, String.class)),
                 mq);
 
@@ -408,8 +408,8 @@ class DefaultInvocableBinderTest {
 
         };
 
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         String.class, String.class)),
                 mq);
         final var outcome = Invoked.invoke(bound);
@@ -451,8 +451,8 @@ class DefaultInvocableBinderTest {
 
         };
 
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01", Map.class,
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01", Map.class,
                         String.class)),
                 new MsgContext() {
 
@@ -489,8 +489,8 @@ class DefaultInvocableBinderTest {
             }
 
         };
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         Boolean.class)),
                 mq);
         final var outcome = Invoked.invoke(bound);
@@ -516,8 +516,8 @@ class DefaultInvocableBinderTest {
             }
 
         };
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.PropertyCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.PropertyCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.PropertyCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.PropertyCase01.class).findMethod("m01",
                         PropertyEnum.class)),
                 mq);
         final var outcome = Invoked.invoke(bound);
@@ -541,8 +541,8 @@ class DefaultInvocableBinderTest {
             }
 
         };
-        final var bound = binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.DeliveryCountCase01(),
-                new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class).findMethod("m01",
+        final var bound = binder.bind(new InvocableRecord(new InvocableBinderTestCases.DeliveryCountCase01(),
+                new ReflectedType<>(InvocableBinderTestCases.DeliveryCountCase01.class).findMethod("m01",
                         Long.class)),
                 mq);
         final var outcome = Invoked.invoke(bound);
@@ -567,8 +567,8 @@ class DefaultInvocableBinderTest {
 
         };
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.DeliveryCountCase01(),
-                        new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class)
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.DeliveryCountCase01(),
+                        new ReflectedType<>(InvocableBinderTestCases.DeliveryCountCase01.class)
                                 .findMethod("m01", Integer.class)),
                         mq));
 
@@ -591,8 +591,8 @@ class DefaultInvocableBinderTest {
 
         };
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.DeliveryCountCase01(),
-                        new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class)
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.DeliveryCountCase01(),
+                        new ReflectedType<>(InvocableBinderTestCases.DeliveryCountCase01.class)
                                 .findMethod("m01", int.class)),
                         mq));
 
@@ -605,8 +605,8 @@ class DefaultInvocableBinderTest {
     void deliveryCount_04() {
         final var mq = new MockJmsMsg();
         final var outcome = Invoked
-                .invoke(binder.bind(new InvocableRecord(new DefaultExecutableBinderTestCases.DeliveryCountCase01(),
-                        new ReflectingType<>(DefaultExecutableBinderTestCases.DeliveryCountCase01.class)
+                .invoke(binder.bind(new InvocableRecord(new InvocableBinderTestCases.DeliveryCountCase01(),
+                        new ReflectedType<>(InvocableBinderTestCases.DeliveryCountCase01.class)
                                 .findMethod("m02", Integer.class)),
                         mq));
 
