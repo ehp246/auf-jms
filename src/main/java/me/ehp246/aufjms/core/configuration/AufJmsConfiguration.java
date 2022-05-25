@@ -19,18 +19,18 @@ import me.ehp246.aufjms.provider.jackson.JsonByJackson;
  */
 @Import({ JsonByJackson.class, DefaultDispatchFnProvider.class })
 public final class AufJmsConfiguration {
-    @Bean
+    @Bean("2392a7ae-3e11-4eeb-bd8c-cf54f5a1fa4b")
     public DispatchLogger dispatchLogger(
             @Value("${" + AufJmsConstants.DISPATCH_LOGTER + ":false}") final boolean enabled) {
         return enabled ? new DispatchLogger() : null;
     }
 
-    @Bean
+    @Bean("2744a1e7-9576-4f2e-8c56-6623247155e7")
     public PropertyResolver propertyResolver(final org.springframework.core.env.PropertyResolver springResolver) {
         return springResolver::resolveRequiredPlaceholders;
     }
 
-    @Bean
+    @Bean("90462ee7-99cd-4ce9-b299-89c983a8b069")
     public ConnectionFactoryProvider connectionFactoryProvider(final BeanFactory beanFactory) {
         return name -> {
             if (name == null || name.isBlank()) {
