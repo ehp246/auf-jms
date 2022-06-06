@@ -31,11 +31,12 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Method, MethodParsingDispatchBuilder> cache = new ConcurrentHashMap<>();
+    private final Map<Method, ParsedMethodDispatchBuilder> cache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
+    private final ProxyMethodParser methodParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final PropertyResolver propertyResolver) {
@@ -43,6 +44,7 @@ public final class ByJmsProxyFactory {
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
+        this.methodParser = new ProxyMethodParser(propertyResolver);
     }
 
     @SuppressWarnings("unchecked")
@@ -96,10 +98,8 @@ public final class ByJmsProxyFactory {
                                     .bindTo(proxy).invokeWithArguments(args);
                         }
 
-                        final var jmsDispatch = cache
-                                .computeIfAbsent(method,
-                                        m -> MethodParsingDispatchBuilder.parse(method, propertyResolver))
-                                .apply(proxyConfig, args);
+                        final var jmsDispatch = cache.computeIfAbsent(method, m -> methodParser.parse(m, proxyConfig))
+                                .apply(proxy, args);
 
                         dispatchFn.send(jmsDispatch);
 
