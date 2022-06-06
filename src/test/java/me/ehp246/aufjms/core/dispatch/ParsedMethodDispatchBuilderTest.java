@@ -22,10 +22,11 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class MethodParsingDispatchBuilderTest {
+class ParsedMethodDispatchBuilderTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
             UUID.randomUUID().toString());
+    private final ProxyMethodParser parser = new ProxyMethodParser(Object::toString);
 
     @Test
     void to_01() {
@@ -33,8 +34,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        final var actual = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).to();
+        final var actual = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).to();
 
         Assertions.assertEquals(config.to(), actual);
     }
@@ -45,8 +46,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        final var actual = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).replyTo();
+        final var actual = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).replyTo();
 
         Assertions.assertEquals(config.replyTo(), actual);
     }
@@ -56,7 +57,7 @@ class MethodParsingDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(TypeCases.Case01.class);
         captor.proxy().type01();
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals("Type01", dispatch.type());
@@ -73,18 +74,18 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().type01(expected);
 
-        final var supplier = MethodParsingDispatchBuilder.parse(captor.invocation().method());
+        final var supplier = parser.parse(captor.invocation().method(), config);
 
-        Assertions.assertEquals(expected, supplier.apply(config, captor.invocation().args().toArray()).type(),
+        Assertions.assertEquals(expected, supplier.apply(null, captor.invocation().args().toArray()).type(),
                 "should take arg");
 
         captor.proxy().type01("");
 
-        Assertions.assertEquals("", supplier.apply(config, captor.invocation().args().toArray()).type());
+        Assertions.assertEquals("", supplier.apply(null, captor.invocation().args().toArray()).type());
 
         captor.proxy().type01(null);
 
-        Assertions.assertEquals(null, supplier.apply(config, captor.invocation().args().toArray()).type());
+        Assertions.assertEquals(null, supplier.apply(null, captor.invocation().args().toArray()).type());
     }
 
     @Test
@@ -93,8 +94,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().type02();
 
-        Assertions.assertEquals("09bf9d41-d65a-4bf3-be39-75a318059c0d", MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()).type());
+        Assertions.assertEquals("09bf9d41-d65a-4bf3-be39-75a318059c0d", parser
+                .parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray()).type());
     }
 
     @Test
@@ -103,8 +104,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().type03();
 
-        Assertions.assertEquals("", MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).type());
+        Assertions.assertEquals("", parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).type());
     }
 
     @Test
@@ -114,7 +115,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(id.toString());
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(id.toString(), dispatch.correlationId());
@@ -128,7 +129,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m02(null, UUID.randomUUID().toString());
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(null, dispatch.correlationId(), "should take the first one");
@@ -140,7 +141,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertDoesNotThrow(() -> UUID.fromString(dispatch.correlationId()), "should be a UUID");
@@ -154,8 +155,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m03(Instant.now());
 
-        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
+        Assertions.assertThrows(ClassCastException.class, () -> parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()));
     }
 
     @Test
@@ -164,8 +165,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().get();
 
-        Assertions.assertEquals("PT24H", MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).ttl().toString());
+        Assertions.assertEquals("PT24H", parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).ttl().toString());
     }
 
     @Test
@@ -174,9 +175,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().get();
 
-        Assertions.assertEquals(Duration.ofDays(1).toMillis(),
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
+        Assertions.assertEquals(Duration.ofDays(1).toMillis(), parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).ttl().toMillis());
     }
 
     @Test
@@ -185,8 +185,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl01();
 
-        Assertions.assertEquals(Duration.ofMillis(0), MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).ttl(), "should surpress");
+        Assertions.assertEquals(Duration.ofMillis(0), parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).ttl(), "should surpress");
     }
 
     @Test
@@ -195,9 +195,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl02();
 
-        Assertions.assertEquals(Duration.ofSeconds(10).toMillis(),
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
+        Assertions.assertEquals(Duration.ofSeconds(10).toMillis(), parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).ttl().toMillis());
     }
 
     @Test
@@ -206,12 +205,12 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl03();
 
-        Assertions.assertThrows(DateTimeParseException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
+        Assertions.assertThrows(DateTimeParseException.class, () -> parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()));
 
         Assertions.assertEquals("PT1.1S",
-                MethodParsingDispatchBuilder.parse(captor.invocation().method(), v -> "PT1.1S")
-                        .apply(config, captor.invocation().args().toArray()).ttl().toString());
+                new ProxyMethodParser(v -> "PT1.1S").parse(captor.invocation().method(), config)
+                        .apply(null, captor.invocation().args().toArray()).ttl().toString());
     }
 
     @Test
@@ -221,10 +220,11 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl02();
 
-        final var ttl = MethodParsingDispatchBuilder.parse(captor.invocation().method(), v -> {
+        final var ttl = new ProxyMethodParser(v -> {
             value[0] = v;
             return "PT1S";
-        }).apply(config, captor.invocation().args().toArray()).ttl().toMillis();
+        }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray()).ttl()
+                .toMillis();
 
         Assertions.assertEquals("PT10S", value[0], "should run it through the resolver");
         Assertions.assertEquals(Duration.parse("PT1S").toMillis(), ttl, "should use the resolved");
@@ -236,8 +236,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl03("");
 
-        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
+        Assertions.assertThrows(ClassCastException.class,
+                () -> parser.parse(captor.invocation().method(), config).apply(null,
+                        captor.invocation().args().toArray()));
     }
 
     @Test
@@ -246,14 +247,14 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().getTtl05(Duration.parse("PT0.1S"));
 
-        Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(),
-                MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                        .apply(config, captor.invocation().args().toArray()).ttl().toMillis());
+        Assertions.assertEquals(Duration.parse("PT0.1S").toMillis(), parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).ttl().toMillis());
 
         captor.proxy().getTtl05(null);
 
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).ttl());
+        Assertions.assertEquals(null,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .ttl());
     }
 
     @Test
@@ -261,12 +262,11 @@ class MethodParsingDispatchBuilderTest {
         final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
 
         captor.proxy().m01();
-
         final var property = new String[1];
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method(), v -> {
+        final var dispatch = new ProxyMethodParser(v -> {
             property[0] = v;
             return "PT0.1S";
-        }).apply(config, captor.invocation().args().toArray());
+        }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray());
 
         Assertions.assertEquals(100, dispatch.delay().toMillis());
 
@@ -280,7 +280,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(2000, dispatch.delay().toMillis());
@@ -294,7 +294,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(expected);
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(1, dispatch.delay().toDays(), "should be the argument");
@@ -307,7 +307,7 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01((Duration) null);
 
-        final var dispatch = MethodParsingDispatchBuilder.parse(captor.invocation().method()).apply(config,
+        final var dispatch = parser.parse(captor.invocation().method(), config).apply(null,
                 captor.invocation().args().toArray());
 
         Assertions.assertEquals(null, dispatch.delay());
@@ -320,8 +320,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01("");
 
-        Assertions.assertThrows(ClassCastException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()));
+        Assertions.assertThrows(ClassCastException.class,
+                () -> parser.parse(captor.invocation().method(), config).apply(null,
+                        captor.invocation().args().toArray()));
 
     }
 
@@ -331,8 +332,10 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m03();
 
-        Assertions.assertEquals(Duration.ofMillis(0), MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).delay(), "should suppress");
+        Assertions.assertEquals(Duration.ofMillis(0),
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .delay(),
+                "should suppress");
     }
 
     @Test
@@ -341,11 +344,10 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m04(Duration.parse("PT112S"));
 
-        Assertions
-                .assertEquals(Duration.ofSeconds(112),
-                        MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                                .apply(config, captor.invocation().args().toArray()).delay(),
-                        "should nbe the argument");
+        Assertions.assertEquals(Duration.ofSeconds(112),
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .delay(),
+                "should nbe the argument");
     }
 
     @Test
@@ -354,8 +356,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(Map.of("key1", "value1"), Map.of("key2", "value2"));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
 
@@ -369,8 +371,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01("");
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> MethodParsingDispatchBuilder
-                .parse(captor.invocation().method()).apply(config, captor.invocation().args().toArray()),
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> parser.parse(captor.invocation().method(), config).apply(null,
+                        captor.invocation().args().toArray()),
                 "should require a property name");
     }
 
@@ -380,8 +383,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(null, Map.of("key2", "value2"));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(1, properties.keySet().size());
 
@@ -394,8 +397,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(Map.of("key2", "value1"), Map.of("key2", "value2"));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(1, properties.keySet().size());
 
@@ -411,8 +414,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01(map, Map.of("key2", ""));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
         Assertions.assertEquals(null, properties.get("key1"), "should accept null");
@@ -425,8 +428,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01("id1", 123, UUID.randomUUID().toString(), Map.of("key2", "value2"));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(3, properties.keySet().size());
 
@@ -441,8 +444,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01("id1", 123, UUID.randomUUID().toString(), Map.of("ID", "id2"));
 
-        final var properties = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).properties();
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
         Assertions.assertEquals(2, properties.keySet().size());
 
@@ -456,8 +459,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m01();
 
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(null,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 
     @Test
@@ -468,8 +472,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m02(expected);
 
-        Assertions.assertEquals(expected, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(expected,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 
     @Test
@@ -478,8 +483,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), "");
 
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(null,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 
     @Test
@@ -488,8 +494,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m03(UUID.randomUUID().toString(), UUID.randomUUID().toString(), null);
 
-        Assertions.assertEquals(null, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(null,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 
     @Test
@@ -500,10 +507,10 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m04(expected);
 
-        final var actual = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body();
-        final var actualAs = MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).bodyAs();
+        final var actual = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).body();
+        final var actualAs = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).bodyAs();
 
         Assertions.assertEquals(expected, actual);
         Assertions.assertEquals(TemporalAccessor.class, actualAs.type());
@@ -517,8 +524,9 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m02(UUID.randomUUID().toString(), body);
 
-        Assertions.assertEquals(body, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(body,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 
     @Test
@@ -529,7 +537,8 @@ class MethodParsingDispatchBuilderTest {
 
         captor.proxy().m02(body, UUID.randomUUID().toString(), null);
 
-        Assertions.assertEquals(body, MethodParsingDispatchBuilder.parse(captor.invocation().method())
-                .apply(config, captor.invocation().args().toArray()).body());
+        Assertions.assertEquals(body,
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .body());
     }
 }

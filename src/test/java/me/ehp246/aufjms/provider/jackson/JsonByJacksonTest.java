@@ -6,14 +6,14 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import me.ehp246.aufjms.api.spi.JacksonConfig;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.Person;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonDob;
 import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonName;
-import me.ehp246.aufjms.util.JacksonConfig;
 
 class JsonByJacksonTest {
-    private final JsonByJackson jackson = new JsonByJackson(JacksonConfig.OBJECT_MAPPER);
+    private final JsonByJackson jackson = new JsonByJackson(new JacksonConfig().objectMapper());
 
     @Test
     void toType_01() {
