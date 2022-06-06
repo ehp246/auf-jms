@@ -3,7 +3,7 @@ package me.ehp246.aufjms.core.byjms.delay;
 import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.util.JacksonConfig;
+import me.ehp246.aufjms.api.spi.JacksonConfig;
 
 /**
  * @author Lei Yang
