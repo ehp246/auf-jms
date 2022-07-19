@@ -132,6 +132,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
+
                     message.setText(toText(dispatch));
 
                     producer.setDeliveryDelay(
