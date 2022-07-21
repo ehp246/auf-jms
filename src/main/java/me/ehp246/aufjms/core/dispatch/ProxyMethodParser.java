@@ -50,11 +50,19 @@ final class ProxyMethodParser {
                         a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
                         .orElse(null));
 
-        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst()
-                .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
-                .orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(
-                        a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
-                        .orElse(null));
+        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type.isAssignableFrom(String.class)) {
+                return (Function<Object[], Duration>) args -> Duration.parse((String) args[p.index()]);
+            } else if (type.isAssignableFrom(Duration.class)) {
+                return (Function<Object[], Duration>) args -> (Duration) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported Delay type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(a -> {
+            final var parsed = Duration.parse(propertyResolver.resolve(a.value()));
+            return (Function<Object[], Duration>) args -> parsed;
+        }).orElse(null));
 
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();

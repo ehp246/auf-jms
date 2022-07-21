@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.time.Instant;
 
 import me.ehp246.aufjms.api.annotation.OfDelay;
 
@@ -17,6 +18,8 @@ class DelayCases {
         void m01();
 
         void m01(@OfDelay String delay);
+
+        void m01(@OfDelay Instant delay);
 
         @OfDelay
         void m03();
