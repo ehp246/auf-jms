@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
+import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -32,7 +33,7 @@ final class ProxyMethodParser {
         this.propertyResolver = propertyResolver;
     }
 
-    ParsedMethodDispatchBuilder parse(final Method method, final ByJmsProxyConfig config) {
+    ParsedDispatchMethod parse(final Method method, final ByJmsProxyConfig config) {
         final var reflected = new ReflectedProxyMethod(method);
 
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
@@ -64,6 +65,18 @@ final class ProxyMethodParser {
             return (Function<Object[], Duration>) args -> parsed;
         }).orElse(null));
 
+        final var groupIdFn = reflected.allParametersWith(OfGroupId.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type.isAssignableFrom(String.class)) {
+                return (Function<Object[], String>) args -> (String) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported GroupId type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElseGet(() -> reflected.findOnMethodUp(OfGroupId.class).map(a -> {
+            final var parsed = propertyResolver.resolve(a.value());
+            return (Function<Object[], String>) args -> parsed;
+        }).orElse(null));
+
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();
         final var propTypes = new ArrayList<Class<?>>();
@@ -86,7 +99,7 @@ final class ProxyMethodParser {
                 .orElse(-1);
         final BodyAs bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
 
-        return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
-                propertyTypes, propertyNames, ttlFn, delayFn);
+        return new ParsedDispatchMethod(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
+                propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, null);
     }
 }

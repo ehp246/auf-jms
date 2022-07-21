@@ -11,6 +11,7 @@ import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.mock.env.MockEnvironment;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
@@ -22,11 +23,12 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class ParsedMethodDispatchBuilderTest {
+class ParsedDispatchMethodTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
             UUID.randomUUID().toString());
-    private final ProxyMethodParser parser = new ProxyMethodParser(Object::toString);
+    private final ProxyMethodParser parser = new ProxyMethodParser(
+            new MockEnvironment().withProperty("id", "15df5c8b-adb4-4880-90d9-e370a7a97887")::resolvePlaceholders);
 
     @Test
     void to_01() {
@@ -256,6 +258,67 @@ class ParsedMethodDispatchBuilderTest {
     }
 
     @Test
+    void group_01() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get();
+
+        Assertions.assertEquals("", parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).groupId());
+    }
+
+    @Test
+    void group_02() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get("");
+
+        Assertions.assertEquals("", parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).groupId());
+    }
+
+    @Test
+    void group_03() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get(null);
+
+        Assertions.assertEquals(null, parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).groupId());
+    }
+
+    @Test
+    void group_04() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get2();
+
+        Assertions.assertEquals("15df5c8b-adb4-4880-90d9-e370a7a97887",
+                parser.parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray())
+                        .groupId());
+    }
+
+    @Test
+    void group_06() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get(0);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray())).printStackTrace();
+    }
+
+    @Test
+    void group_05() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get3();
+
+        Assertions.assertEquals("id", parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).groupId());
+    }
+
+    @Test
     void delay_m01_1() {
         final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
 
@@ -318,7 +381,7 @@ class ParsedMethodDispatchBuilderTest {
 
         captor.proxy().m01("");
 
-        Assertions.assertThrows(ClassCastException.class, () -> parser.parse(captor.invocation().method(), config)
+        Assertions.assertThrows(DateTimeParseException.class, () -> parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()));
 
     }
