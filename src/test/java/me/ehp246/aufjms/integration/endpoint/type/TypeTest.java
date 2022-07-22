@@ -29,6 +29,9 @@ class TypeTest {
     @Autowired
     private JmsTemplate jmsTemplate;
 
+    @Autowired
+    private Unmatched umatcher;
+
     @Test
     void type_01() throws InterruptedException, ExecutionException {
         final var i = (int) (Math.random() * 100);
@@ -44,5 +47,21 @@ class TypeTest {
         });
 
         Assertions.assertEquals(i, ref.get().get());
+    }
+
+    @Test
+    void type_02() throws InterruptedException, ExecutionException {
+        final var i = (int) (Math.random() * 100);
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("Subtract");
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals("Subtract", umatcher.ref.get().get().type());
     }
 }

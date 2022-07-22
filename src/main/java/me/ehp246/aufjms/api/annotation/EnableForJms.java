@@ -98,6 +98,8 @@ public @interface EnableForJms {
          */
         String invocationListener() default "";
 
+        String defaultConsumer() default "";
+
         @interface From {
             /**
              * Defines the destination name.

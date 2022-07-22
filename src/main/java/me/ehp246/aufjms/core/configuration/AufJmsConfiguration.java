@@ -7,10 +7,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
+import me.ehp246.aufjms.core.endpoint.UnknownTypeLogger;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -38,5 +40,10 @@ public final class AufJmsConfiguration {
             }
             return beanFactory.getBean(name, ConnectionFactory.class);
         };
+    }
+
+    @Bean("44fc3968-7eba-47a3-a7b4-54e2b365d027")
+    public MsgConsumer unknowTypeLogger() {
+        return new UnknownTypeLogger();
     }
 }

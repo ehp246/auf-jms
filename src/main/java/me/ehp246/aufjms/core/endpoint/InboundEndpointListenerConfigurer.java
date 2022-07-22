@@ -24,6 +24,7 @@ import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.Invoked;
+import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
@@ -99,12 +100,12 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                         endpoint.invocationListener()),
                                 executorProvider.get(endpoint.concurrency()));
                         private final MsgInvocableFactory invocableFactory = endpoint.invocableFactory();
+                        private final MsgConsumer defaultConsumer = endpoint.defaultConsumer();
 
                         @Override
                         public void onMessage(Message message, Session session) throws JMSException {
                             if (!(message instanceof TextMessage textMessage)) {
-                                throw new IllegalArgumentException(
-                                        "Un-supported message type of " + message.getJMSCorrelationID());
+                                throw new IllegalArgumentException("Un-supported message type");
                             }
 
                             final var msg = TextJmsMsg.from(textMessage);
@@ -118,7 +119,12 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                 final var invocable = invocableFactory.get(msg);
 
                                 if (invocable == null) {
-                                    throw new UnknownTypeException(msg);
+                                    if (defaultConsumer == null) {
+                                        throw new UnknownTypeException(msg);
+                                    } else {
+                                        defaultConsumer.accept(msg);
+                                        return;
+                                    }
                                 }
 
                                 final var msgCtx = new MsgContext() {

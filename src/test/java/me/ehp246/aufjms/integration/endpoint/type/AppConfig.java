@@ -18,11 +18,16 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @EnableJms
-@EnableForJms(@Inbound(@From(TestQueueListener.DESTINATION_NAME)))
-@Import(EmbeddedArtemisConfig.class)
+@EnableForJms(@Inbound(value = @From(TestQueueListener.DESTINATION_NAME), defaultConsumer = "unmatched"))
+@Import({ EmbeddedArtemisConfig.class })
 class AppConfig {
     @Bean
     public AtomicReference<CompletableFuture<Integer>> ref() {
         return new AtomicReference<CompletableFuture<Integer>>(new CompletableFuture<>());
+    }
+
+    @Bean
+    public Unmatched unmatched() {
+        return new Unmatched();
     }
 }
