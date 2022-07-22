@@ -51,7 +51,6 @@ class TypeTest {
 
     @Test
     void type_02() throws InterruptedException, ExecutionException {
-        final var i = (int) (Math.random() * 100);
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
 
             @Override
