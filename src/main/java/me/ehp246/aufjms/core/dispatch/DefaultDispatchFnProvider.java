@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +31,7 @@ import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -40,6 +42,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  */
 public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, AutoCloseable {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
+    private final static Set<String> RESERVED_PROPERTIES = Set.of(JmsNames.GROUP_ID, JmsNames.GROUP_SEQ);
 
     private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
@@ -113,7 +116,19 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         throw new IllegalStateException("No session available");
                     }
 
-                    // Connection priority.
+                    /*
+                     * Validation
+                     */
+                    final var properties = Optional.ofNullable(dispatch.properties());
+                    properties.map(Map::keySet).map(Set::stream)
+                            .flatMap(keys -> keys.filter(key -> RESERVED_PROPERTIES.contains(key)).findAny())
+                            .ifPresent(key -> {
+                                throw new IllegalArgumentException("Un-allowed property name '" + key + "'");
+                            });
+
+                    /*
+                     * Connection priority.
+                     */
                     session = connection != null ? connection.createSession() : AufJmsContext.getSession();
                     producer = session.createProducer(null);
                     message = session.createTextMessage();
@@ -121,8 +136,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     // Fill the custom properties first so the framework ones won't get
                     // overwritten.
-                    for (final var entry : Optional.ofNullable(dispatch.properties())
-                            .orElseGet(HashMap<String, Object>::new).entrySet()) {
+                    for (final var entry : properties.orElseGet(HashMap<String, Object>::new).entrySet()) {
                         message.setObjectProperty(entry.getKey().toString(), entry.getValue());
                     }
 
@@ -132,6 +146,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
+                    if (dispatch.groupId() != null && !dispatch.groupId().isBlank()) {
+                        message.setStringProperty(JmsNames.GROUP_ID, dispatch.groupId());
+                        message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
+                    }
 
                     message.setText(toText(dispatch));
 

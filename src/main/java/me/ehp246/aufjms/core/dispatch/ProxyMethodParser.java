@@ -10,6 +10,7 @@ import java.util.function.Function;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
+import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -83,6 +84,15 @@ final class ProxyMethodParser {
             return (Function<Object[], String>) args -> parsed;
         }).orElse(null));
 
+        final var groupSeqFn = reflected.allParametersWith(OfGroupSeq.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type == int.class || type.isAssignableFrom(Integer.class)) {
+                return (Function<Object[], Integer>) args -> (Integer) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported GroupSeq type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElse(null);
+
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();
         final var propTypes = new ArrayList<Class<?>>();
@@ -106,6 +116,6 @@ final class ProxyMethodParser {
         final BodyAs bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
 
         return new ParsedDispatchMethod(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
-                propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, null);
+                propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 }

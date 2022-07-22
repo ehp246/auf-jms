@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import me.ehp246.aufjms.api.annotation.OfGroupId;
+import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 
 /**
  * @author Lei Yang
@@ -21,5 +22,16 @@ class GroupCases {
 
         @OfGroupId("id")
         void get3();
+    }
+
+    interface Case02 {
+        @OfGroupId
+        void get(@OfGroupSeq int seq);
+
+        @OfGroupId
+        void get(@OfGroupSeq Integer seq);
+
+        @OfGroupId
+        void get(@OfGroupSeq String seq);
     }
 }
