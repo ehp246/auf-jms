@@ -54,7 +54,13 @@ final class ProxyMethodParser {
         final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst().map(p -> {
             final var type = p.parameter().getType();
             if (type.isAssignableFrom(String.class)) {
-                return (Function<Object[], Duration>) args -> Duration.parse((String) args[p.index()]);
+                return (Function<Object[], Duration>) args -> {
+                    final var delayArg = args[p.index()];
+                    if (delayArg == null) {
+                        return null;
+                    }
+                    return Duration.parse((String) delayArg);
+                };
             } else if (type.isAssignableFrom(Duration.class)) {
                 return (Function<Object[], Duration>) args -> (Duration) args[p.index()];
             }

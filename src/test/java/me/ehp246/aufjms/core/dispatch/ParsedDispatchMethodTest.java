@@ -299,16 +299,6 @@ class ParsedDispatchMethodTest {
     }
 
     @Test
-    void group_06() {
-        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
-
-        captor.proxy().get(0);
-
-        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
-                .apply(null, captor.invocation().args().toArray())).printStackTrace();
-    }
-
-    @Test
     void group_05() {
         final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
 
@@ -316,6 +306,16 @@ class ParsedDispatchMethodTest {
 
         Assertions.assertEquals("id", parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).groupId());
+    }
+
+    @Test
+    void group_06() {
+        final var captor = TestUtil.newCaptor(GroupCases.Case01.class);
+
+        captor.proxy().get(0);
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray())).printStackTrace();
     }
 
     @Test
@@ -418,6 +418,16 @@ class ParsedDispatchMethodTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray())).printStackTrace();
         ;
+    }
+
+    @Test
+    void delay_m01_8() {
+        final var captor = TestUtil.newCaptor(DelayCases.Case01.class);
+
+        captor.proxy().m01((String) null);
+
+        Assertions.assertEquals(null, parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).delay());
     }
 
     @Test
