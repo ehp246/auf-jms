@@ -31,7 +31,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Method, ParsedDispatchMethod> cache = new ConcurrentHashMap<>();
+    private final Map<Method, ParsedMethodDispatchBuilder> cache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;

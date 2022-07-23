@@ -17,7 +17,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class ParsedDispatchMethod {
+final class ParsedMethodDispatchBuilder {
     private final ReflectedProxyMethod reflected;
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;
@@ -32,7 +32,7 @@ final class ParsedDispatchMethod {
     private final int bodyIndex;
     private final BodyAs bodyAs;
 
-    ParsedDispatchMethod(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
+    ParsedMethodDispatchBuilder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
             BodyAs bodyAs, final int[] propertyArgs, final Class<?>[] propertyTypes, String[] propertyNames,
             final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,

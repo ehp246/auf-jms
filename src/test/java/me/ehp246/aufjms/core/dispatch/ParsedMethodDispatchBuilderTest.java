@@ -23,7 +23,7 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class ParsedDispatchMethodTest {
+class ParsedMethodDispatchBuilderTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
             UUID.randomUUID().toString());

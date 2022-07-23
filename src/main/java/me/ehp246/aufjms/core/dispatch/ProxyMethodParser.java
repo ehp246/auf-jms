@@ -34,7 +34,7 @@ final class ProxyMethodParser {
         this.propertyResolver = propertyResolver;
     }
 
-    ParsedDispatchMethod parse(final Method method, final ByJmsProxyConfig config) {
+    ParsedMethodDispatchBuilder parse(final Method method, final ByJmsProxyConfig config) {
         final var reflected = new ReflectedProxyMethod(method);
 
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
@@ -115,7 +115,7 @@ final class ProxyMethodParser {
                 .orElse(-1);
         final BodyAs bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
 
-        return new ParsedDispatchMethod(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
+        return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
                 propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 }
