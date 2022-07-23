@@ -10,12 +10,13 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-public final class UnknownTypeLogger implements MsgConsumer {
+public final class NoopConsumer implements MsgConsumer {
     private final static Logger LOGGER = LogManager.getLogger();
 
     @Override
     public void accept(final JmsMsg msg) {
-        LOGGER.atTrace().log("Ignored type {}, id {} ", msg::type, msg::correlationId);
+        LOGGER.atDebug().log("Noop on: id '{}', type '{}', destination '{}'", msg::type, msg::correlationId,
+                msg::destination);
     }
 
 }

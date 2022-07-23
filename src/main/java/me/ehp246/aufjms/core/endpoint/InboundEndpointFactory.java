@@ -33,7 +33,11 @@ public final class InboundEndpointFactory {
 
     @SuppressWarnings("unchecked")
     public InboundEndpoint newInstance(final Map<String, Object> inboundAttributes, final Set<String> scanPackages,
-            final String beanName) {
+            final String beanName, final String defaultConsumerName) {
+        final var defaultConsumer = Optional.ofNullable(defaultConsumerName)
+                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                .map(name -> autowireCapableBeanFactory.getBean(name, MsgConsumer.class)).orElse(null);
+
         final var fromAttribute = (Map<String, Object>) inboundAttributes.get("value");
         final Map<String, Object> subAttribute = (Map<String, Object>) fromAttribute.get("sub");
 
@@ -58,10 +62,6 @@ public final class InboundEndpointFactory {
                 .ofNullable(inboundAttributes.get("invocationListener").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
-
-        final var defaultConsumer = Optional.ofNullable(inboundAttributes.get("defaultConsumer").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
-                .map(name -> autowireCapableBeanFactory.getBean(name, MsgConsumer.class)).orElse(null);
 
         return new InboundEndpointRecord(from, resolver, concurrency, beanName, autoStartup, connectionFactory,
                 invocationListener, defaultConsumer);

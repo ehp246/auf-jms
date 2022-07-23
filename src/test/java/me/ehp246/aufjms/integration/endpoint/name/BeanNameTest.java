@@ -28,7 +28,10 @@ class BeanNameTest {
         final var bean = appCtx.getBean("a778506e-a1dc-40c6-aeb3-42114f993c22");
 
         Assertions.assertEquals(true, bean instanceof InboundEndpoint);
-        Assertions.assertEquals("a903988f-89af-42ba-9777-f52831b480ff", ((InboundEndpoint) bean).from().on().name());
+
+        final var endpoint = (InboundEndpoint) bean;
+        Assertions.assertEquals("a903988f-89af-42ba-9777-f52831b480ff", endpoint.from().on().name());
+        Assertions.assertEquals(appCtx.getBean("44fc3968-7eba-47a3-a7b4-54e2b365d027"), endpoint.defaultConsumer());
     }
 
     @Test
@@ -36,5 +39,4 @@ class BeanNameTest {
         Assertions.assertEquals(true, appCtx.getBean(JmsListenerEndpointRegistry.class)
                 .getListenerContainer("a778506e-a1dc-40c6-aeb3-42114f993c22") != null);
     }
-
 }

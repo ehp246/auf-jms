@@ -18,7 +18,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  *
  */
 @EnableJms
-@EnableForJms(@Inbound(value = @From(TestQueueListener.DESTINATION_NAME), defaultConsumer = "unmatched"))
+@EnableForJms(value = @Inbound(value = @From(TestQueueListener.DESTINATION_NAME)), defaultConsumer = "unmatched")
 @Import({ EmbeddedArtemisConfig.class })
 class AppConfig {
     @Bean

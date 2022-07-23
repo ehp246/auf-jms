@@ -8,6 +8,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,16 +52,17 @@ class TypeTest {
 
     @Test
     void type_02() throws InterruptedException, ExecutionException {
+        final var id = UUID.randomUUID().toString();
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
 
             @Override
             public Message createMessage(Session session) throws JMSException {
                 final var msg = session.createTextMessage();
-                msg.setJMSType("Subtract");
+                msg.setJMSType(id);
                 return msg;
             }
         });
 
-        Assertions.assertEquals("Subtract", umatcher.ref.get().get().type());
+        Assertions.assertEquals(id, umatcher.ref.get().get().type());
     }
 }

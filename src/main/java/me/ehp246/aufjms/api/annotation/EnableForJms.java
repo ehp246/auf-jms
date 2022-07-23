@@ -37,6 +37,8 @@ import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 public @interface EnableForJms {
     Inbound[] value();
 
+    String defaultConsumer() default "44fc3968-7eba-47a3-a7b4-54e2b365d027";
+
     @Retention(RUNTIME)
     @interface Inbound {
         /**
@@ -97,8 +99,6 @@ public @interface EnableForJms {
          * Supports Spring property placeholder.
          */
         String invocationListener() default "";
-
-        String defaultConsumer() default "";
 
         @interface From {
             /**

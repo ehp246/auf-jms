@@ -12,7 +12,7 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
-import me.ehp246.aufjms.core.endpoint.UnknownTypeLogger;
+import me.ehp246.aufjms.core.endpoint.NoopConsumer;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 
 /**
@@ -43,7 +43,7 @@ public final class AufJmsConfiguration {
     }
 
     @Bean("44fc3968-7eba-47a3-a7b4-54e2b365d027")
-    public MsgConsumer unknowTypeLogger() {
-        return new UnknownTypeLogger();
+    public MsgConsumer noopConsumer() {
+        return new NoopConsumer();
     }
 }
