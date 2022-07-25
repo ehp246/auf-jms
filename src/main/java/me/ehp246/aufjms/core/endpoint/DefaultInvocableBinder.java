@@ -16,7 +16,10 @@ import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
+import me.ehp246.aufjms.api.annotation.OfGroupId;
+import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
+import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.Invocable;
@@ -33,12 +36,13 @@ import me.ehp246.aufjms.api.spi.FromJson;
  * @since 1.0
  */
 public final class DefaultInvocableBinder implements InvocableBinder {
-    private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> PROPERTY_VALUE_SUPPLIERS = Map.of(
+    private static final Map<Class<? extends Annotation>, Function<JmsMsg, Object>> HEADER_VALUE_SUPPLIERS = Map.of(
             OfType.class, JmsMsg::type, OfCorrelationId.class, JmsMsg::correlationId, OfDeliveryCount.class,
-            msg -> msg.property(JmsNames.DELIVERY_COUNT, Integer.class));
+            msg -> msg.property(JmsNames.DELIVERY_COUNT, Integer.class), OfGroupId.class, JmsMsg::groupId,
+            OfGroupSeq.class, JmsMsg::groupSeq, OfRedelivered.class, JmsMsg::redelivered);
 
-    private static final Set<Class<? extends Annotation>> PROPERTY_ANNOTATIONS = Set
-            .copyOf(PROPERTY_VALUE_SUPPLIERS.keySet());
+    private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
+            .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
 
     private final FromJson fromJson;
 
@@ -133,9 +137,9 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             // Bind Headers
             final var annotations = parameter.getAnnotations();
             var found = Stream.of(annotations)
-                    .filter(annotation -> PROPERTY_ANNOTATIONS.contains(annotation.annotationType())).findAny();
+                    .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
             if (found.isPresent()) {
-                arguments[i] = PROPERTY_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
+                arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
                 markers[i] = true;
             }
 

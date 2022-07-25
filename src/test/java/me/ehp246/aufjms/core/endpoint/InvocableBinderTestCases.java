@@ -8,7 +8,10 @@ import javax.jms.Session;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
+import me.ehp246.aufjms.api.annotation.OfGroupId;
+import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
+import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -140,6 +143,25 @@ class InvocableBinderTestCases {
 
         enum PropertyEnum {
             Enum1
+        }
+    }
+
+    static class GroupCase {
+        public Group m01(@OfGroupId String id, @OfGroupSeq int seq) {
+            return new Group(id, seq);
+        }
+
+        public Group m01(@OfGroupId String id, @OfGroupSeq Integer seq) {
+            return new Group(id, seq.intValue());
+        }
+
+        record Group(String id, int seq) {
+        }
+    }
+
+    static class RedeliveredCase {
+        public boolean m(@OfRedelivered boolean redelieverd) {
+            return redelieverd;
         }
     }
 }

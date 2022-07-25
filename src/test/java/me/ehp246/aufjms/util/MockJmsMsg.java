@@ -127,4 +127,9 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     public int deliveryCount() {
         return 1;
     }
+
+    @Override
+    public boolean redelivered() {
+        return false;
+    }
 }

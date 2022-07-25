@@ -31,6 +31,8 @@ public interface JmsMsg {
 
     int groupSeq();
 
+    boolean redelivered();
+
     int deliveryCount();
 
     Instant expiration();
