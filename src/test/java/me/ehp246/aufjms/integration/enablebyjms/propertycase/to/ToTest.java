@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.integration.enablebyjms.propertycase.to;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -12,8 +14,21 @@ import me.ehp246.aufjms.integration.enablebyjms.propertycase.to.AppConfig.Case01
  * @author Lei Yang
  *
  */
-@SuppressWarnings("resource")
 class ToTest {
+    private AnnotationConfigApplicationContext appCtx;
+
+    @BeforeEach
+    void create() {
+        appCtx = new AnnotationConfigApplicationContext();
+    }
+
+    @AfterEach
+    void close() {
+        if (appCtx != null) {
+            appCtx.close();
+        }
+    }
+
     @Test
     void property_01() {
         Assertions.assertThrows(BeanCreationException.class,
@@ -22,7 +37,6 @@ class ToTest {
 
     @Test
     void property_02() {
-        final var appCtx = new AnnotationConfigApplicationContext();
         appCtx.setEnvironment(new MockEnvironment().withProperty("holder", "queue"));
         appCtx.register(AppConfig.class);
         appCtx.refresh();
@@ -32,7 +46,6 @@ class ToTest {
 
     @Test
     void property_03() {
-        final var appCtx = new AnnotationConfigApplicationContext();
         appCtx.setEnvironment(new MockEnvironment().withProperty("holder", ""));
         appCtx.register(AppConfig.class);
 

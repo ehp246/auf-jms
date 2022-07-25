@@ -72,6 +72,11 @@ public final class TextJmsMsg implements JmsMsg {
     }
 
     @Override
+    public boolean redelivered() {
+        return JMSSupplier.invoke(() -> message.getJMSRedelivered());
+    }
+
+    @Override
     public Destination destination() {
         return JMSSupplier.invoke(message::getJMSDestination);
     }
@@ -93,13 +98,13 @@ public final class TextJmsMsg implements JmsMsg {
         if (type == String.class) {
             return (T) JMSSupplier.invoke(() -> message.getStringProperty(name));
         }
-        if (type == int.class) {
+        if (type == int.class || type == Integer.class) {
             return (T) JMSSupplier.invoke(() -> message.getIntProperty(name));
         }
-        if (type == long.class) {
+        if (type == long.class || type == Long.class) {
             return (T) JMSSupplier.invoke(() -> message.getLongProperty(name));
         }
-        if (type == boolean.class) {
+        if (type == boolean.class || type == Boolean.class) {
             return (T) JMSSupplier.invoke(() -> message.getBooleanProperty(name));
         }
         if (type.isEnum()) {

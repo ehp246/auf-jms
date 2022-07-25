@@ -22,6 +22,8 @@ final class ParsedMethodDispatchBuilder {
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;
     private final Function<Object[], String> correlIdFn;
+    private final Function<Object[], String> groupIdFn;
+    private final Function<Object[], Integer> groupSeqFn;
     private final Function<Object[], Duration> ttlFn;
     private final Function<Object[], Duration> delayFn;
     private final int[] propertyArgs;
@@ -30,16 +32,19 @@ final class ParsedMethodDispatchBuilder {
     private final int bodyIndex;
     private final BodyAs bodyAs;
 
-    ParsedMethodDispatchBuilder(ReflectedProxyMethod reflected, ByJmsProxyConfig config,
-            Function<Object[], String> typeFn, Function<Object[], String> correlIdFn, int bodyIndex, BodyAs bodyAs,
-            int[] propertyArgs, Class<?>[] propertyTypes, String[] propertyNames,
-            Function<Object[], Duration> ttlFn, Function<Object[], Duration> delayFn) {
+    ParsedMethodDispatchBuilder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
+            final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
+            BodyAs bodyAs, final int[] propertyArgs, final Class<?>[] propertyTypes, String[] propertyNames,
+            final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,
+            final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn) {
         this.reflected = reflected;
         this.config = config;
         this.typeFn = typeFn;
         this.correlIdFn = correlIdFn;
         this.ttlFn = ttlFn;
         this.delayFn = delayFn;
+        this.groupIdFn = groupIdFn;
+        this.groupSeqFn = groupSeqFn;
         this.propertyArgs = propertyArgs;
         this.propertyNames = propertyNames;
         this.propertyTypes = propertyTypes;
@@ -56,6 +61,8 @@ final class ParsedMethodDispatchBuilder {
 
         final var ttl = this.ttlFn == null ? config.ttl() : this.ttlFn.apply(args);
         final var delay = this.delayFn == null ? config.delay() : this.delayFn.apply(args);
+        final var groupId = this.groupIdFn == null ? null : this.groupIdFn.apply(args);
+        final var groupSeq = groupId == null || this.groupSeqFn == null ? 0 : this.groupSeqFn.apply(args);
 
         final var properties = new HashMap<String, Object>();
 
@@ -117,6 +124,16 @@ final class ParsedMethodDispatchBuilder {
             @Override
             public Duration ttl() {
                 return ttl;
+            }
+
+            @Override
+            public String groupId() {
+                return groupId;
+            }
+
+            @Override
+            public int groupSeq() {
+                return groupSeq;
             }
 
             @Override

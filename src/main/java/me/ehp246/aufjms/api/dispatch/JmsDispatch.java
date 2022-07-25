@@ -51,6 +51,17 @@ public interface JmsDispatch {
         return null;
     }
 
+    default String groupId() {
+        return null;
+    }
+
+    default int groupSeq() {
+        return 0;
+    }
+
+    /**
+     * Application properties.
+     */
     default Map<String, Object> properties() {
         return null;
     }

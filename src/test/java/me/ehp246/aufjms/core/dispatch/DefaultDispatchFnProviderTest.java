@@ -498,4 +498,97 @@ class DefaultDispatchFnProviderTest {
         Mockito.verify(producer).close();
         Mockito.verify(session).close();
     }
+
+    @Test
+    void group_01() throws JMSException {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+            @Override
+            public String groupId() {
+                return null;
+            }
+
+        });
+
+        verify(textMessage, times(0)).setStringProperty(Mockito.eq("JMSXGroupID"), Mockito.anyString());
+        verify(textMessage, times(0)).setIntProperty(Mockito.eq("JMSXGroupSeq"), Mockito.anyInt());
+    }
+
+    @Test
+    void group_02() throws JMSException {
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+            @Override
+            public String groupId() {
+                return "";
+            }
+
+        });
+
+        verify(textMessage, times(0)).setStringProperty(Mockito.eq("JMSXGroupID"), Mockito.anyString());
+        verify(textMessage, times(0)).setIntProperty(Mockito.eq("JMSXGroupSeq"), Mockito.anyInt());
+    }
+
+    @Test
+    void group_03() throws JMSException {
+        final var id = UUID.randomUUID().toString();
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+            @Override
+            public String groupId() {
+                return id;
+            }
+
+        });
+
+        verify(textMessage, times(1)).setStringProperty(Mockito.eq("JMSXGroupID"), Mockito.eq(id));
+        verify(textMessage, times(1)).setIntProperty(Mockito.eq("JMSXGroupSeq"), Mockito.eq(0));
+    }
+
+    @Test
+    void group_04() throws JMSException {
+        final var id = UUID.randomUUID().toString();
+        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+            @Override
+            public String groupId() {
+                return id;
+            }
+
+            @Override
+            public int groupSeq() {
+                return -123;
+            }
+
+        });
+
+        verify(textMessage, times(1)).setStringProperty(Mockito.eq("JMSXGroupID"), Mockito.eq(id));
+        verify(textMessage, times(1)).setIntProperty(Mockito.eq("JMSXGroupSeq"), Mockito.eq(-123));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.WARN)
+    void group_05() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+                    @Override
+                    public Map<String, Object> properties() {
+                        return Map.of("JMSXGroupID", UUID.randomUUID().toString());
+                    }
+                })).printStackTrace();
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.WARN)
+    void group_06() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+
+                    @Override
+                    public Map<String, Object> properties() {
+                        return Map.of("JMSXGroupSeq", UUID.randomUUID().toString());
+                    }
+                })).printStackTrace();
+    }
 }

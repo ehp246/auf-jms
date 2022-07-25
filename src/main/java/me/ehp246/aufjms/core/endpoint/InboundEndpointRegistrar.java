@@ -33,6 +33,8 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             return;
         }
 
+        final var defaultConsumer = (String) enablerAttributes.get("defaultConsumer");
+
         final var inbounds = Arrays.asList(((Map<String, Object>[]) enablerAttributes.get("value")));
         for (int i = 0; i < inbounds.size(); i++) {
             final var inbound = inbounds.get(i);
@@ -54,6 +56,7 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             constructorArgumentValues.addGenericArgumentValue(inbound);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
             constructorArgumentValues.addGenericArgumentValue(beanName);
+            constructorArgumentValues.addGenericArgumentValue(defaultConsumer);
 
             beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
 

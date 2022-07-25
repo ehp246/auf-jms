@@ -33,7 +33,6 @@ class PropertyTest {
         listener.reset();
     }
 
-    @Test
     void property_01() throws JMSException {
         final var id = UUID.randomUUID().toString();
         case01.ping(id, 10);

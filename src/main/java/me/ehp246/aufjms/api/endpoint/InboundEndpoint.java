@@ -32,6 +32,10 @@ public interface InboundEndpoint {
         return null;
     }
 
+    default MsgConsumer defaultConsumer() {
+        return null;
+    }
+
     interface From {
         At on();
 

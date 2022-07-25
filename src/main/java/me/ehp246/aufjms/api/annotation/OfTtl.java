@@ -8,17 +8,21 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.time.Duration;
 
-import javax.jms.Message;
+import javax.jms.JMSProducer;
 
 /**
- * 
- * Specified the value for {@linkplain Message#setJMSExpiration(long)}.
+ * Specifies the value for {@linkplain JMSProducer#setTimeToLive(long)}.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>
- * When applied to a parameter, only {@linkplain Duration} type is supported.
+ * When applied to a parameter, {@linkplain Duration} or {@linkplain String}
+ * type is supported.
+ * <p>
+ * When applied to a parameter, the specified value is ignored.
  * <p>
  * When applied to a method, Spring property placeholder is supported.
+ * <p>
+ * Only applicable on {@linkplain ByJms} interfaces.
  * 
  * @author Lei Yang
  * @since 1.0

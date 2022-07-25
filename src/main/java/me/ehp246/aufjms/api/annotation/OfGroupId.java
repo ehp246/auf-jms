@@ -1,29 +1,25 @@
 package me.ehp246.aufjms.api.annotation;
 
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.jms.Message;
-
 /**
- * Specifies the value for {@linkplain Message#setJMSType(String)}.
+ * Specifies the value for {@code JMSXGroupID}.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>
- * When applied to a parameter, only {@linkplain String} type is supported.
- * <p>
- * When applied to a parameter, the specified value is ignored.
+ * When applied to a parameter, Only {@linkplain String} type is supported. The
+ * specified value on annotation is ignored. {@code null} is accepted.
  * <p>
  * When applied to a method, Spring property placeholder is supported.
  * 
  * @author Lei Yang
  * @since 1.0
  */
-@Retention(RUNTIME)
-@Target({ ElementType.METHOD, ElementType.PARAMETER })
-public @interface OfType {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.PARAMETER, ElementType.METHOD })
+public @interface OfGroupId {
     String value() default "";
 }

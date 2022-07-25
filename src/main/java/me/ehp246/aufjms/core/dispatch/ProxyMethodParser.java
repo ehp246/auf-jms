@@ -9,6 +9,8 @@ import java.util.function.Function;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
+import me.ehp246.aufjms.api.annotation.OfGroupId;
+import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -50,11 +52,46 @@ final class ProxyMethodParser {
                         a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
                         .orElse(null));
 
-        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst()
-                .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
-                .orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(
-                        a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
-                        .orElse(null));
+        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type.isAssignableFrom(String.class)) {
+                return (Function<Object[], Duration>) args -> {
+                    final var delayArg = args[p.index()];
+                    if (delayArg == null) {
+                        return null;
+                    }
+                    return Duration.parse((String) delayArg);
+                };
+            } else if (type.isAssignableFrom(Duration.class)) {
+                return (Function<Object[], Duration>) args -> (Duration) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported Delay type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(a -> {
+            final var parsed = Duration.parse(propertyResolver.resolve(a.value()));
+            return (Function<Object[], Duration>) args -> parsed;
+        }).orElse(null));
+
+        final var groupIdFn = reflected.allParametersWith(OfGroupId.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type.isAssignableFrom(String.class)) {
+                return (Function<Object[], String>) args -> (String) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported GroupId type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElseGet(() -> reflected.findOnMethodUp(OfGroupId.class).map(a -> {
+            final var parsed = propertyResolver.resolve(a.value());
+            return (Function<Object[], String>) args -> parsed;
+        }).orElse(null));
+
+        final var groupSeqFn = reflected.allParametersWith(OfGroupSeq.class).stream().findFirst().map(p -> {
+            final var type = p.parameter().getType();
+            if (type == int.class || type.isAssignableFrom(Integer.class)) {
+                return (Function<Object[], Integer>) args -> (Integer) args[p.index()];
+            }
+            throw new IllegalArgumentException(
+                    "Un-supported GroupSeq type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
+        }).orElse(null);
 
         final var propArgs = new ArrayList<Integer>();
         final var propNames = new ArrayList<String>();
@@ -79,6 +116,6 @@ final class ProxyMethodParser {
         final BodyAs bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
 
         return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
-                propertyTypes, propertyNames, ttlFn, delayFn);
+                propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 }

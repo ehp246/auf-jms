@@ -12,18 +12,19 @@ import java.time.Duration;
 import javax.jms.MessageProducer;
 
 /**
- * When applied to a parameter of a {@linkplain ByJms} interface, it specified
- * the argument should be used for
+ * Specifies the argument should be used for
  * {@linkplain MessageProducer#setDeliveryDelay(long)}.
  * <p>
  * If applied to multiple parameters, only the first applies.
  * <p>
- * When applied to a parameter, the parameter type must be
+ * When applied to a parameter, its type must be {@linkplain String} or
  * {@linkplain Duration}. The value of the annotation is ignored.
  * <p>
- * Can be applied to a method as well.
+ * Can be applied to a method.
  * <p>
  * When applied to method, Spring property placeholder is supported.
+ * <p>
+ * Only applicable to {@linkplain ByJms} interfaces.
  * 
  * @author Lei Yang
  * @since 1.0

@@ -8,6 +8,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.Session;
 
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ class TypeTest {
     @Autowired
     private JmsTemplate jmsTemplate;
 
+    @Autowired
+    private Unmatched umatcher;
+
     @Test
     void type_01() throws InterruptedException, ExecutionException {
         final var i = (int) (Math.random() * 100);
@@ -44,5 +48,21 @@ class TypeTest {
         });
 
         Assertions.assertEquals(i, ref.get().get());
+    }
+
+    @Test
+    void type_02() throws InterruptedException, ExecutionException {
+        final var id = UUID.randomUUID().toString();
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType(id);
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(id, umatcher.ref.get().get().type());
     }
 }

@@ -6,13 +6,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import javax.jms.Message;
+
 /**
- * Specifies the injection point for the value of JMS header 'JMSXDeliveryCount'
- * on a {@linkplain ForJmsType} object.
+ * Specifies the injection point for the value of
+ * {@linkplain Message#getJMSRedelivered()} on a {@linkplain ForJmsType} object.
  * <p>
  * The injection point should be of {@code int} type.
  * <p>
- * Ignored on {@linkplain ByJms} interfaces.
+ * Not applicable to {@linkplain ByJms} interfaces.
  * 
  * @author Lei Yang
  * @since 1.0
@@ -20,5 +22,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RUNTIME)
 @Target({ ElementType.PARAMETER })
-public @interface OfDeliveryCount {
+public @interface OfRedelivered {
+
 }
