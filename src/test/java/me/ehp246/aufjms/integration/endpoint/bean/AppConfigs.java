@@ -12,8 +12,8 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.MockFrom;
@@ -97,5 +97,10 @@ class AppConfigs {
         interface Send {
             void send();
         }
+    }
+
+    @EnableForJms(value = @Inbound(@From("q1")), defaultConsumer = "")
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig04 {
     }
 }

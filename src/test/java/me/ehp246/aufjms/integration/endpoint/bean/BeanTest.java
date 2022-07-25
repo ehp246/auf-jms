@@ -11,6 +11,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.core.endpoint.NoopConsumer;
 import me.ehp246.aufjms.integration.endpoint.bean.AppConfigs.AppConfig03;
 
 /**
@@ -56,12 +57,26 @@ class BeanTest {
     }
 
     @Test
-    void bean_close_01() throws BeansException, InterruptedException, ExecutionException {
+    void bean_03() throws BeansException, InterruptedException, ExecutionException {
         appCtx.register(AppConfigs.AppConfig03.class);
         appCtx.refresh();
 
         appCtx.getBean(AppConfig03.Send.class).send();
 
         Assertions.assertEquals(true, appCtx.getBean(CompletableFuture.class).get(), "should close");
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(appCtx.getBean(NoopConsumer.class), endpoint.defaultConsumer());
+    }
+
+    @Test
+    void defaultConsumer_01() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig04.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(null, endpoint.defaultConsumer());
     }
 }

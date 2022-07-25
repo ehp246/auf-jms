@@ -10,11 +10,15 @@ import java.lang.annotation.Target;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Import;
 
+import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
+import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
@@ -37,6 +41,24 @@ import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 public @interface EnableForJms {
     Inbound[] value();
 
+    /**
+     * Specifies the bean name of {@linkplain MsgConsumer} type to receive any
+     * message that no matching {@linkplain Invocable} can be found for its
+     * {@linkplain Message#getJMSType()}.
+     * <p>
+     * The default value specifies a no-operation bean that logs the un-matched
+     * message by {@linkplain Logger#atDebug()}. This means un-matched messages are
+     * to be expected and acknowledged to the broker without triggering the
+     * dead-lettering process.
+     * <p>
+     * If no bean name is specified, i.e., the value is an empty string, an
+     * un-matched message will result an {@linkplain UnknownTypeException} thus
+     * trigger the dead-lettering process.
+     * <p>
+     * The setting applies to all {@linkplain InboundEndpoint}'s.
+     * <p>
+     * Supports Spring property placeholder.
+     */
     String defaultConsumer() default "44fc3968-7eba-47a3-a7b4-54e2b365d027";
 
     @Retention(RUNTIME)

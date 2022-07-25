@@ -15,7 +15,7 @@ public final class NoopConsumer implements MsgConsumer {
 
     @Override
     public void accept(final JmsMsg msg) {
-        LOGGER.atDebug().log("Noop on: id '{}', type '{}', destination '{}'", msg::type, msg::correlationId,
+        LOGGER.atDebug().log("Noop on: id '{}', type '{}', destination '{}'", msg::correlationId, msg::type,
                 msg::destination);
     }
 
