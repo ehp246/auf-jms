@@ -17,15 +17,17 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
     private final static Logger LOGGER = LogManager.getLogger(AufJmsConstants.DISPATCH_LOGTER);
 
     @Override
-    public void onDispatch(JmsDispatch dispatch) {
-        LOGGER.atInfo().log("Sending {}, {}, {}", dispatch::to, dispatch::type, dispatch::correlationId);
+    public void onDispatch(final JmsDispatch dispatch) {
+        LOGGER.atInfo().log("Sending '{}', '{}', '{}'", dispatch::to, dispatch::type, dispatch::correlationId);
     }
 
     @Override
-    public void preSend(JmsDispatch dispatch, JmsMsg msg) {
-        LOGGER.atTrace().log("Sending {}, {}",
-                () -> dispatch.body() == null ? null : dispatch.bodyAs().type(),
-                msg::text);
+    public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
+        LOGGER.atTrace().log("Sending '{}', '{}'",
+                () -> dispatch != null && dispatch.bodyAs() != null && dispatch.bodyAs().type() != null
+                        ? dispatch.bodyAs().type().getSimpleName()
+                        : "null",
+                () -> msg == null ? "null" : msg.text());
     }
 
     @Override
@@ -34,7 +36,7 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
     }
 
     @Override
-    public void onException(JmsDispatch dispatch, JmsMsg msg, Exception e) {
+    public void onException(final JmsDispatch dispatch, final JmsMsg msg, final Exception e) {
         LOGGER.atError().withThrowable(e).log("Failed: {}", e.getMessage());
     }
 }
