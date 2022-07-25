@@ -6,6 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Specifies the value for {@code JMSXGroupSeq}.
+ * <p>
+ * Only applicable, when {@linkplain OfGroupId} is specified.
+ * <p>
+ * {@linkplain int} and {@linkplain Integer} types are supported.
+ * <p>
+ * In case of {@linkplain Integer}, {@code null} is not supported.
+ * 
  * @author Lei Yang
  * @since 1.0
  */

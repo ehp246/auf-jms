@@ -342,9 +342,9 @@ class ParsedMethodDispatchBuilderTest {
     void group_09() {
         final var captor = TestUtil.newCaptor(GroupCases.Case02.class);
 
-        captor.proxy().get(Integer.valueOf(1));
+        captor.proxy().get(Integer.valueOf(12));
 
-        Assertions.assertEquals(1, parser.parse(captor.invocation().method(), config)
+        Assertions.assertEquals(12, parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).groupSeq());
     }
 

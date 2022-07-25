@@ -11,6 +11,8 @@ import java.lang.annotation.Target;
  * on a {@linkplain ForJmsType} object.
  * <p>
  * The injection point should be of {@code int} type.
+ * <p>
+ * Ignored on {@linkplain ByJms} interfaces.
  * 
  * @author Lei Yang
  * @since 1.0
