@@ -13,7 +13,7 @@
 		<Logger name="org.apache.qpid" level="warn" additivity="false">
             <AppenderRef ref="console" />
 		</Logger>
-		<Root level="error" additivity="false">
+		<Root level="warn" additivity="false">
 			<AppenderRef ref="console" />
 		</Root>
 	</Loggers>
