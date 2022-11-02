@@ -23,12 +23,14 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class InboundEndpointFactory {
     private final PropertyResolver propertyResolver;
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
+    private final DefaultInvocableScanner invocableScanner;
 
     public InboundEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
             final PropertyResolver propertyResolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
         this.propertyResolver = propertyResolver;
+        this.invocableScanner = new DefaultInvocableScanner(propertyResolver);
     }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +59,7 @@ public final class InboundEndpointFactory {
         final String connectionFactory = propertyResolver
                 .resolve(inboundAttributes.get("connectionFactory").toString());
         final MsgInvocableFactory resolver = new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
-                DefaultInvocableRegistry.registeryFrom(scanPackages));
+                this.invocableScanner.registeryFrom(scanPackages));
         final var invocationListener = Optional
                 .ofNullable(inboundAttributes.get("invocationListener").toString())
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)

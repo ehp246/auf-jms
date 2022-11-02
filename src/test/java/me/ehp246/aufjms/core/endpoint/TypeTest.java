@@ -13,7 +13,7 @@ class TypeTest {
     @Test
     void type_01() {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> DefaultInvocableRegistry
+                () -> new DefaultInvocableScanner(Object::toString)
                         .registeryFrom(Set.of("me.ehp246.aufjms.core.endpoint.invokableresolvercase.case07")),
                 "should not allow duplicate types on the same class");
     }
@@ -21,7 +21,7 @@ class TypeTest {
     @Test
     void type_03() {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> DefaultInvocableRegistry
+                () -> new DefaultInvocableScanner(Object::toString)
                         .registeryFrom(Set.of("me.ehp246.aufjms.core.endpoint.invokableresolvercase.case08")),
                 "should not allow duplicate types across classes");
     }
