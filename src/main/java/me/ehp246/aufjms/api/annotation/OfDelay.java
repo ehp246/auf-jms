@@ -12,13 +12,14 @@ import java.time.Duration;
 import javax.jms.MessageProducer;
 
 /**
- * Specifies the argument should be used for
+ * Specifies the argument to be passed to
  * {@linkplain MessageProducer#setDeliveryDelay(long)}.
  * <p>
- * If applied to multiple parameters, only the first applies.
+ * If applied to multiple parameters, only the first is accepted.
  * <p>
- * When applied to a parameter, its type must be {@linkplain String} or
- * {@linkplain Duration}. The value of the annotation is ignored.
+ * When applied to a parameter on a {@linkplain ByJms} interface, its type must
+ * be {@linkplain String} or {@linkplain Duration}. The value of the annotation
+ * is ignored.
  * <p>
  * Can be applied to a method.
  * <p>
