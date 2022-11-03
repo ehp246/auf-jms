@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.util;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     private final String type;
     private final String correlId = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(UUID.randomUUID().toString());
+    private final Map<String, Object> properties = new HashMap<>();
 
     public MockJmsMsg() {
         super();
@@ -30,6 +33,11 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     public MockJmsMsg(String type) {
         super();
         this.type = type;
+    }
+
+    public MockJmsMsg withProperty(final String key, final String value) {
+        this.properties.put(key, value);
+        return this;
     }
 
     @Override
@@ -72,10 +80,10 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T property(String name, Class<T> type) {
-        // TODO Auto-generated method stub
-        return null;
+        return (T) this.properties.get(name);
     }
 
     @Override

@@ -57,10 +57,23 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
         final var msgType = OneUtil.toString(Objects.requireNonNull(msg).type(), "");
 
         final var definition = registeredInvokables.entrySet().stream().filter(e -> msgType.matches(e.getKey()))
-                .findAny().map(Map.Entry::getValue).orElse(null);
+                .findAny()
+                .filter(e -> {
+                    final var properties = e.getValue().properties();
+                    if (properties.isEmpty()) {
+                        return true;
+                    }
+                    for (var entry : properties.entrySet()) {
+                        final var value = msg.property(entry.getKey(), String.class);
+                        if (value != null && value.matches(entry.getValue())) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
+                .map(Map.Entry::getValue).orElse(null);
 
         if (definition == null) {
-            LOGGER.atTrace().log("Type {} not found", msgType);
             return null;
         }
 

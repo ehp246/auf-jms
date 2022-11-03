@@ -1,8 +1,8 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.util.Set;
+import java.util.UUID;
 
-import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
@@ -15,11 +15,14 @@ import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case04.Case04;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case06.Case06;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case09.Cases09;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case10.Cases10;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case11.Cases11;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.case12.Cases12;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case01.ErrorCase01;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case02.ErrorCase02;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case03.ErrorCase03;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case04.ErrorCase04;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case05.ErrorCase05;
+import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case06.ErrorCase06;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.util.MockJmsMsg;
 
@@ -31,8 +34,7 @@ class DefaultInvocableScannerTest {
     @Test
     void type_01() {
         Assertions.assertEquals(null, new DefaultInvocableScanner(Object::toString)
-                .registeryFrom(Set.of(Case01.class.getPackageName()))
-                .resolve(new MockJmsMsg()));
+                .registeryFrom(Set.of(Case01.class.getPackageName())).resolve(new MockJmsMsg()));
     }
 
     @Test
@@ -48,14 +50,11 @@ class DefaultInvocableScannerTest {
         final var registery = new DefaultInvocableScanner(Object::toString)
                 .registeryFrom(Set.of(Case02.class.getPackageName()));
 
-        Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01")).instanceType());
+        Assertions.assertEquals(Case02.class, registery.resolve(new MockJmsMsg("Case01")).instanceType());
 
-        Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01-1")).instanceType());
+        Assertions.assertEquals(Case02.class, registery.resolve(new MockJmsMsg("Case01-1")).instanceType());
 
-        Assertions.assertEquals(Case02.class,
-                registery.resolve(new MockJmsMsg("Case01-2")).instanceType());
+        Assertions.assertEquals(Case02.class, registery.resolve(new MockJmsMsg("Case01-2")).instanceType());
     }
 
     @Test
@@ -91,26 +90,39 @@ class DefaultInvocableScannerTest {
     }
 
     @Test
+    void type_06() {
+        final var expected = UUID.randomUUID().toString();
+        final var registery = new DefaultInvocableScanner(
+                new MockEnvironment().withProperty("number", expected)::resolvePlaceholders)
+                        .registeryFrom(Set.of(Cases10.Case01.class.getPackageName()));
+
+        Assertions.assertEquals(Cases10.Case01.class,
+                registery.resolve(new MockJmsMsg("Case" + expected)).instanceType());
+    }
+
+    @Test
+    void type_07() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new DefaultInvocableScanner(new MockEnvironment()::resolveRequiredPlaceholders)
+                        .registeryFrom(Set.of(Cases10.Case01.class.getPackageName())));
+    }
+
+    @Test
     void error_01() {
-        Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultInvocableScanner(Object::toString)
-                        .registeryFrom(Set.of(ErrorCase01.class.getPackageName())));
+        Assertions.assertThrows(RuntimeException.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(ErrorCase01.class.getPackageName())));
 
-        Assertions.assertThrows(Exception.class,
-                () -> new DefaultInvocableScanner(Object::toString)
-                        .registeryFrom(Set.of(ErrorCase02.class.getPackageName())));
+        Assertions.assertThrows(Exception.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(ErrorCase02.class.getPackageName())));
 
-        Assertions.assertThrows(Exception.class,
-                () -> new DefaultInvocableScanner(Object::toString)
-                        .registeryFrom(Set.of(ErrorCase03.class.getPackageName())));
+        Assertions.assertThrows(Exception.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(ErrorCase03.class.getPackageName())));
 
-        Assertions.assertThrows(Exception.class,
-                () -> new DefaultInvocableScanner(Object::toString)
-                        .registeryFrom(Set.of(ErrorCase04.class.getPackageName())));
+        Assertions.assertThrows(Exception.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(ErrorCase04.class.getPackageName())));
 
-        Assertions.assertThrows(Exception.class,
-                () -> new DefaultInvocableScanner(Object::toString)
-                        .registeryFrom(Set.of(ErrorCase05.class.getPackageName())));
+        Assertions.assertThrows(Exception.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(ErrorCase05.class.getPackageName())));
     }
 
     @Test
@@ -134,12 +146,62 @@ class DefaultInvocableScannerTest {
     }
 
     @Test
-    void placeholder_01() {
+    void property_01() {
+        final var registery = new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(Cases11.class.getPackageName()));
+
+        Assertions.assertEquals(Cases11.Case01.class,
+                registery.resolve(new MockJmsMsg("Case01").withProperty("JMXGroupId", "1")).instanceType());
+    }
+
+    @Test
+    void property_02() {
+        final var registery = new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(Cases11.class.getPackageName()));
+
+        Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("Case01").withProperty("JMXGroupId", "2")));
+    }
+
+    @Test
+    void property_03() {
+        final var registery = new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(Cases11.class.getPackageName()));
+
+        Assertions.assertEquals(null, registery.resolve(new MockJmsMsg("Case01")));
+    }
+
+    @Test
+    void property_04() {
+        final var registery = new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(Cases11.class.getPackageName()));
+
+        Assertions.assertEquals(Cases11.Case01.class,
+                registery.resolve(new MockJmsMsg("Case01").withProperty("JMXGroupSeq", "2")).instanceType());
+    }
+
+    @Test
+    void property_05() {
         final var expected = UUID.randomUUID().toString();
         final var registery = new DefaultInvocableScanner(
-                new MockEnvironment().withProperty("number", expected)::resolvePlaceholders)
-                .registeryFrom(Set.of(Cases10.class.getPackageName()));
+                new MockEnvironment().withProperty("1", expected)::resolveRequiredPlaceholders)
+                        .registeryFrom(Set.of(Cases12.class.getPackageName()));
 
-        Assertions.assertEquals(Cases10.class, registery.resolve(new MockJmsMsg("Case" + expected)).instanceType());
+        Assertions.assertEquals(Cases12.Case01.class,
+                registery.resolve(new MockJmsMsg("Case01").withProperty("JMXGroupId", expected)).instanceType());
+    }
+
+    @Test
+    void property_06() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new DefaultInvocableScanner(new MockEnvironment()::resolveRequiredPlaceholders)
+                        .registeryFrom(Set.of(Cases12.class.getPackageName())));
+    }
+
+    @Test
+    void property_07() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> new DefaultInvocableScanner(new MockEnvironment()::resolveRequiredPlaceholders)
+                        .registeryFrom(Set.of(ErrorCase06.class.getPackageName())))
+                .printStackTrace();
     }
 }
