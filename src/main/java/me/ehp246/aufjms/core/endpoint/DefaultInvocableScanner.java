@@ -74,8 +74,7 @@ final class DefaultInvocableScanner {
             throw new IllegalArgumentException("Un-instantiable type " + type.getName());
         }
 
-        final var msgTypes = Arrays.asList(annotation.value()).stream()
-                .map(this.propertyResolver::resolve)
+        final var msgTypes = Arrays.asList(annotation.value()).stream().map(this.propertyResolver::resolve)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
                 .map(entry -> {
                     if (entry.getValue() > 1) {
@@ -84,16 +83,6 @@ final class DefaultInvocableScanner {
                     }
                     return entry.getKey();
                 }).collect(Collectors.toSet());
-
-        final var properties = annotation.properties();
-        if ((properties.length & 1) != 0) {
-            throw new IllegalArgumentException(
-                    "Properties should be name/value pairs: " + annotation + ", " + type.getCanonicalName());
-        }
-        final Map<String, String> msgProperties = new HashMap<>(properties.length / 2);
-        for (int i = 0; i < properties.length; i++) {
-            msgProperties.put(properties[i], this.propertyResolver.resolve(properties[++i]));
-        }
 
         final var invokings = new HashMap<String, Method>();
         final var reflected = new ReflectedType<>(type);
@@ -123,7 +112,7 @@ final class DefaultInvocableScanner {
 
         LOGGER.atTrace().log("Registering {} on {}", msgTypes::toString, type::getCanonicalName);
 
-        return new InvocableTypeDefinition(msgTypes, msgProperties, type, Map.copyOf(invokings), annotation.scope(),
+        return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings), annotation.scope(),
                 annotation.invocation());
     }
 }

@@ -12,8 +12,14 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
 /**
- * Specifies the class should be invoked on a JMS message according to the type,
- * i.e., {@linkplain Message#getJMSType()}.
+ * Specifies an annotated class should be invoked on a JMS message according to
+ * the JMS type, i.e., {@linkplain Message#getJMSType()}.
+ * <p>
+ * Regular expression is supported.
+ * <p>
+ * The library looks for the first match without a defined order. Overlapping
+ * regular expressions from multiple {@linkplain ForJmsType}'s might result in
+ * un-deterministic behavior.
  * 
  * @author Lei Yang
  * @see Invoking
@@ -22,34 +28,16 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
 @Target({ ElementType.TYPE })
 public @interface ForJmsType {
     /**
-     * Specifies the JMS types, for which the class should be invoked.
+     * Specifies the JMS types for which the class should be invoked.
      * <p>
-     * The matching is done via {@linkplain String#matches(String)}.
+     * The matching is done via {@linkplain String#matches(String)} where the
+     * <code>this</code> object is from {@linkplain Message#getJMSType()} and the
+     * argument is the value specified here which could be a regular expression.
      * <p>
-     * When multiple values are specified, a single matching value would trigger
-     * invocation.
+     * When multiple values are specified, any single value could trigger
+     * invocation. I.e., multiple types are considered logical <code>||</code>.
      */
     String[] value();
-
-    /**
-     * Specifies the property names and values in pairs to match the incoming
-     * message. The values must be in pairs. Un-paired values will trigger an
-     * exception.
-     * <p>
-     * Multiple properties are treated as logical <code>||</code> between them. If
-     * incoming message does not have a property, it is considered a no-match.
-     * <p>
-     * Only properties from {@linkplain Message#getPropertyNames()} are considered.
-     * <p>
-     * Property matching applies after type matching. I.e., type matching and
-     * property matching are logical <code>&&</code>.
-     * <p>
-     * The matching is done via {@linkplain String#matches(String)}.
-     * <p>
-     * Spring property placeholder is supported on values but not on names.
-     * 
-     */
-    String[] properties() default {};
 
     /**
      * Specifies how to instantiate the invocation instance.
