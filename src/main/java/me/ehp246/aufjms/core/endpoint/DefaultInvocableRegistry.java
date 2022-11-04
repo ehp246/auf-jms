@@ -8,9 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import me.ehp246.aufjms.api.endpoint.InvocableType;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeRegistry;
@@ -25,8 +22,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @since 1.0
  */
 final class DefaultInvocableRegistry implements InvocableTypeRegistry {
-    private final static Logger LOGGER = LogManager.getLogger();
-
+    private final Map<String, InvocableTypeDefinition> cached = new ConcurrentHashMap<>();
     private final Map<String, InvocableTypeDefinition> registeredInvokables = new ConcurrentHashMap<>();
     private final Map<Class<?>, Map<String, Method>> registeredMethods = new ConcurrentHashMap<>();
 
@@ -56,9 +52,9 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
     public InvocableType resolve(final JmsMsg msg) {
         final var msgType = OneUtil.toString(Objects.requireNonNull(msg).type(), "");
 
-        final var definition = registeredInvokables.entrySet().stream().filter(e -> msgType.matches(e.getKey()))
-                .findAny()
-                .map(Map.Entry::getValue).orElse(null);
+        final var definition = this.cached.computeIfAbsent(msgType, key -> registeredInvokables.entrySet().stream()
+                .filter(e -> msgType.matches(e.getKey())).findAny().map(Map.Entry::getValue).orElse(null));
+
 
         if (definition == null) {
             return null;
@@ -70,7 +66,6 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
         final var method = registeredMethods.get(definition.type()).get(invoking);
 
         if (method == null) {
-            LOGGER.atTrace().log("Method {} not found", invoking);
             return null;
         }
 
