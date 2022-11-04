@@ -36,8 +36,11 @@ public @interface ForJmsType {
      * <p>
      * When multiple values are specified, any single value could trigger
      * invocation. I.e., multiple types are considered logical <code>||</code>.
+     * <p>
+     * If no value is specified, the class' simple name, i.e.,
+     * {@linkplain Class#getSimpleName()}, is used as the default.
      */
-    String[] value();
+    String[] value() default {};
 
     /**
      * Specifies how to instantiate the invocation instance.

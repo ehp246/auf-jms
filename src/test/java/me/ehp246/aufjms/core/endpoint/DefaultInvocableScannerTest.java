@@ -91,7 +91,7 @@ class DefaultInvocableScannerTest {
         final var expected = UUID.randomUUID().toString();
         final var registery = new DefaultInvocableScanner(
                 new MockEnvironment().withProperty("number", expected)::resolvePlaceholders)
-                        .registeryFrom(Set.of(Cases10.Case01.class.getPackageName()));
+                        .registeryFrom(Set.of(Cases10.class.getPackageName()));
 
         Assertions.assertEquals(Cases10.Case01.class,
                 registery.resolve(new MockJmsMsg("Case" + expected)).instanceType());
@@ -101,7 +101,16 @@ class DefaultInvocableScannerTest {
     void type_07() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> new DefaultInvocableScanner(new MockEnvironment()::resolveRequiredPlaceholders)
-                        .registeryFrom(Set.of(Cases10.Case01.class.getPackageName())));
+                        .registeryFrom(Set.of(Cases10.class.getPackageName())));
+    }
+
+    @Test
+    void type_08() {
+        final var registery = new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(Set.of(Case01.class.getPackageName()));
+
+        Assertions.assertEquals(me.ehp246.aufjms.core.endpoint.invokableresolvercase.case01.Case02.class,
+                registery.resolve(new MockJmsMsg("Case02")).instanceType());
     }
 
     @Test

@@ -74,7 +74,10 @@ final class DefaultInvocableScanner {
             throw new IllegalArgumentException("Un-instantiable type " + type.getName());
         }
 
-        final var msgTypes = Arrays.asList(annotation.value()).stream().map(this.propertyResolver::resolve)
+        final var msgTypes = Arrays
+                .asList(annotation.value().length == 0 ? new String[] { type.getSimpleName() } : annotation.value())
+                .stream()
+                .map(this.propertyResolver::resolve)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
                 .map(entry -> {
                     if (entry.getValue() > 1) {
