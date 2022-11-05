@@ -11,6 +11,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.mockito.Mockito;
 
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -20,6 +21,8 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 public class MockJmsMsg implements JmsMsg, MsgContext {
+    private final TextMessage message = Mockito.mock(TextMessage.class);
+    private final Session session = Mockito.mock(Session.class);
     private final String type;
     private final String correlId = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(UUID.randomUUID().toString());
@@ -58,7 +61,6 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
 
     @Override
     public String text() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -88,8 +90,7 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
 
     @Override
     public TextMessage message() {
-        // TODO Auto-generated method stub
-        return null;
+        return message;
     }
 
     @Override
@@ -128,7 +129,7 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
 
     @Override
     public Session session() {
-        return null;
+        return this.session;
     }
 
     @Override

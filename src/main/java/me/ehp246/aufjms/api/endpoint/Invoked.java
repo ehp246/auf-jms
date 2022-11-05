@@ -23,8 +23,7 @@ public sealed interface Invoked permits Completed, Failed {
 
     static Invoked invoke(final BoundInvocable bound) {
         try {
-            final var returned = bound.invocable().method().invoke(bound.invocable().instance(),
-                    bound.arguments().toArray());
+            final var returned = bound.invocable().method().invoke(bound.invocable().instance(), bound.arguments());
             return new Completed() {
 
                 @Override

@@ -1,7 +1,5 @@
 package me.ehp246.aufjms.api.endpoint;
 
-import java.util.List;
-
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -14,9 +12,8 @@ public interface BoundInvocable {
     JmsMsg msg();
 
     /**
-     * Should never be {@code null}.
-     * 
-     * @return
+     * Resolved argument values ready for invocation. Should never be
+     * <code>null</code>.
      */
-    List<Object> arguments();
+    Object[] arguments();
 }

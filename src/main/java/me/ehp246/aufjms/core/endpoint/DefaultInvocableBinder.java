@@ -1,12 +1,12 @@
 package me.ehp246.aufjms.core.endpoint;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +44,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
     private static final Set<Class<? extends Annotation>> HEADER_ANNOTATIONS = Set
             .copyOf(HEADER_VALUE_SUPPLIERS.keySet());
 
+    private final Map<Method, Parsed> parsed = new ConcurrentHashMap<>();
     private final FromJson fromJson;
 
     public DefaultInvocableBinder(final FromJson fromJson) {
@@ -57,111 +58,106 @@ public final class DefaultInvocableBinder implements InvocableBinder {
 
         method.setAccessible(true);
 
-        if (method.getParameterCount() == 0) {
-            return new BoundInvocableRecord(target, ctx.msg());
+        final var parsed = this.parsed.computeIfAbsent(method, this::parse);
+
+        final var payloadArgs = fromJson.apply(ctx.msg().text(), parsed.getPayloadReceivers()).iterator();
+
+        final var parameterCount = method.getParameterCount();
+        final var arguments = new Object[parameterCount];
+        for (int i = 0; i < parameterCount; i++) {
+            final var argFn = parsed.getCtxReceiver(i);
+            arguments[i] = argFn != null ? argFn.apply(ctx) : payloadArgs.next();
         }
 
-        final var parameters = method.getParameters();
-        final var arguments = new Object[parameters.length];
-
-        final var boundMarkers = bindContextArgs(parameters, ctx, arguments);
-
-        final var receivers = new ArrayList<FromJson.To>();
-        for (int i = 0; i < boundMarkers.length; i++) {
-            if (boundMarkers[i]) {
-                continue;
-            }
-
-            final var ref = Integer.valueOf(i);
-            receivers.add(new FromJson.To() {
-
-                @Override
-                public void receive(final Object value) {
-                    arguments[ref] = value;
-                }
-
-                @Override
-                public Class<?> type() {
-                    return parameters[ref].getType();
-                }
-
-                @Override
-                public List<? extends Annotation> annotations() {
-                    return List.of(parameters[ref].getAnnotations());
-                }
-            });
-        }
-
-        if (receivers.size() > 0) {
-            fromJson.apply(ctx.msg().text(), receivers);
-        }
-
-        return new BoundInvocableRecord(target, Arrays.asList(arguments), ctx.msg());
+        return new BoundInvocableRecord(target, arguments, ctx.msg());
     }
 
-    /**
-     * Fills in the context arguments at the index position. Returns indices of
-     * positions that have been filled.
-     *
-     * @param parameters
-     * @param mq
-     * @param arguments
-     * @return
-     */
-    private boolean[] bindContextArgs(final Parameter[] parameters, final MsgContext ctx, final Object[] arguments) {
-        final boolean[] markers = new boolean[parameters.length];
+    private Parsed parse(final Method method) {
+        final var parameters = method.getParameters();
+        final var parsed = new Parsed();
 
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
-            final var msg = ctx.msg();
-
-            // Bind by type
             final var type = parameter.getType();
+
+            /*
+             * Binding in priorities. Type first.
+             */
             if (type.isAssignableFrom(JmsMsg.class)) {
-                arguments[i] = msg;
-                markers[i] = true;
+                parsed.addCtxParameter(MsgContext::msg);
+                continue;
             } else if (type.isAssignableFrom(TextMessage.class)) {
-                arguments[i] = msg.message();
-                markers[i] = true;
+                parsed.addCtxParameter(ctx -> ctx.msg().message());
+                continue;
             } else if (type.isAssignableFrom(MsgContext.class)) {
-                arguments[i] = ctx;
-                markers[i] = true;
+                parsed.addCtxParameter(ctx -> ctx);
+                continue;
             } else if (type.isAssignableFrom(FromJson.class)) {
-                arguments[i] = fromJson;
-                markers[i] = true;
+                parsed.addCtxParameter(ctx -> fromJson);
+                continue;
             } else if (type.isAssignableFrom(Session.class)) {
-                arguments[i] = ctx.session();
-                markers[i] = true;
+                parsed.addCtxParameter(MsgContext::session);
+                continue;
             }
 
-            // Bind Headers
+            /*
+             * Bind headers.
+             */
             final var annotations = parameter.getAnnotations();
-            var found = Stream.of(annotations)
+            final var header = Stream.of(annotations)
                     .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
-            if (found.isPresent()) {
-                arguments[i] = HEADER_VALUE_SUPPLIERS.get(found.get().annotationType()).apply(msg);
-                markers[i] = true;
+            if (header.isPresent()) {
+                final var fn = HEADER_VALUE_SUPPLIERS.get(header.get().annotationType());
+                parsed.addCtxParameter(ctx -> fn.apply(ctx.msg()));
+                continue;
             }
 
-            // Bind Properties
-            found = Stream.of(annotations).filter(annotation -> annotation.annotationType() == OfProperty.class)
-                    .findAny();
-            if (found.isPresent()) {
+            // Bind properties
+            final var prop = Stream.of(annotations).filter(ann -> ann.annotationType() == OfProperty.class).findAny()
+                    .map(ann -> (OfProperty) ann);
+            if (prop.isPresent()) {
                 if (Map.class.isAssignableFrom(type)) {
-                    arguments[i] = propertyMap(msg);
+                    parsed.addCtxParameter(ctx -> ctx.msg().propertyNames().stream().collect(Collectors.toMap(Function.identity(),
+                            name -> JMSSupplier.invoke(() -> ctx.msg().message().getObjectProperty(name)))));
                 } else {
-                    arguments[i] = msg.property(((OfProperty) found.get()).value(), type);
+                    final var name = prop.get().value();
+                    parsed.addCtxParameter(ctx -> ctx.msg().property(name, type));
                 }
-                markers[i] = true;
+                continue;
             }
+
+            // Bind payload.
+            parsed.addPayloadParameter(new FromJson.To(parameter.getType(), List.of(parameter.getAnnotations())));
         }
 
-        return markers;
+        return parsed;
     }
 
-    private static Map<String, Object> propertyMap(final JmsMsg msg) {
-        final var message = msg.message();
-        return msg.propertyNames().stream().collect(Collectors.toMap(Function.identity(),
-                name -> JMSSupplier.invoke(() -> message.getObjectProperty(name))));
+    static class Parsed {
+        /**
+         * This is a simple list.
+         */
+        private final List<FromJson.To> payloadReceivers = new ArrayList<>();
+        /**
+         * <code>null</code> indicates a payload argument.
+         */
+        private final List<Function<MsgContext, Object>> ctxReceivers = new ArrayList<>();
+
+        void addPayloadParameter(final FromJson.To to) {
+            payloadReceivers.add(to);
+            ctxReceivers.add(null);
+        }
+
+        void addCtxParameter(final Function<MsgContext, Object> fn) {
+            ctxReceivers.add(fn);
+        }
+
+        List<FromJson.To> getPayloadReceivers() {
+            return this.payloadReceivers;
+        }
+
+        Function<MsgContext, Object> getCtxReceiver(final int i) {
+            return this.ctxReceivers.get(i);
+        }
     }
 }

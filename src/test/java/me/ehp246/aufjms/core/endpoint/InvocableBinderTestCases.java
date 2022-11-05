@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.jms.Message;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
@@ -17,7 +18,7 @@ import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 
-class InvocableBinderTestCases {
+interface InvocableBinderTestCases {
     static class ArgCase01 {
         public void m01() {
 
@@ -163,5 +164,14 @@ class InvocableBinderTestCases {
         public boolean m(@OfRedelivered boolean redelieverd) {
             return redelieverd;
         }
+    }
+
+    static class PerfCase {
+        public Object[] m01(final TextMessage textMessage, @OfType final String type, @OfCorrelationId final String id,
+                @OfProperty("prop1") final String prop1, final Integer body, final JmsMsg msg,
+                final FromJson fromJson, final MsgContext ctx) {
+            return new Object[] { type, id, prop1, body };
+        }
+
     }
 }

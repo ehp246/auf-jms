@@ -146,7 +146,7 @@ class BodyTest {
         asTypeCase01.ping((PersonName) expected);
 
         final var text = ((TextMessage) listener.takeReceived()).getText();
-        final var actual = (Person)(fromJson.apply(text, List.of(() -> Person.class)).get(0));
+        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
 
         Assertions.assertEquals(firstName, actual.firstName());
         Assertions.assertEquals(lastName, actual.lastName());
@@ -160,7 +160,7 @@ class BodyTest {
         asTypeCase01.ping((PersonDob) expected);
 
         final var text = ((TextMessage) listener.takeReceived()).getText();
-        final var actual = (Person) (fromJson.apply(text, List.of(() -> Person.class)).get(0));
+        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
 
         Assertions.assertEquals(null, actual.firstName());
         Assertions.assertEquals(null, actual.lastName());
