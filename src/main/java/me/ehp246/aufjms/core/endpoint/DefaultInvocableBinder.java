@@ -56,8 +56,6 @@ public final class DefaultInvocableBinder implements InvocableBinder {
     public BoundInvocable bind(final Invocable target, final MsgContext ctx) {
         final var method = target.method();
 
-        method.setAccessible(true);
-
         final var parsed = this.parsed.computeIfAbsent(method, this::parse);
 
         final var payloadArgs = fromJson.apply(ctx.msg().text(), parsed.getPayloadReceivers()).iterator();
@@ -65,14 +63,16 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         final var parameterCount = method.getParameterCount();
         final var arguments = new Object[parameterCount];
         for (int i = 0; i < parameterCount; i++) {
-            final var argFn = parsed.getCtxReceiver(i);
-            arguments[i] = argFn != null ? argFn.apply(ctx) : payloadArgs.next();
+            final var ctxArgFn = parsed.getCtxReceiver(i);
+            arguments[i] = ctxArgFn != null ? ctxArgFn.apply(ctx) : payloadArgs.next();
         }
 
         return new BoundInvocableRecord(target, arguments, ctx.msg());
     }
 
     private Parsed parse(final Method method) {
+        method.setAccessible(true);
+
         final var parameters = method.getParameters();
         final var parsed = new Parsed();
 
