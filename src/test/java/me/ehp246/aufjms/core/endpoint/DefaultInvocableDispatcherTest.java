@@ -44,7 +44,7 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class InvocableDispatcherTest {
+class DefaultInvocableDispatcherTest {
     private final static int LOOP = 1_000_000;
     private final TextMessage message = new MockTextMessage();
     private final JmsMsg msg = TextJmsMsg.from(message);
@@ -96,7 +96,7 @@ class InvocableDispatcherTest {
         final var expected = new RuntimeException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class,
-                () -> new InvocableDispatcher(binder, failed(bound, expected), null, null).dispatch(invocable, msgCtx));
+                () -> new DefaultInvocableDispatcher(binder, failed(bound, expected), null, null).dispatch(invocable, msgCtx));
 
         Assertions.assertEquals(actual, expected, "should be the thrown from invocable");
     }
@@ -106,7 +106,7 @@ class InvocableDispatcherTest {
         final var ref = new Failed[1];
         final var expected = new RuntimeException();
 
-        new InvocableDispatcher(binder, failed(bound, expected), List.of((InvocationListener.OnFailed) m -> {
+        new DefaultInvocableDispatcher(binder, failed(bound, expected), List.of((InvocationListener.OnFailed) m -> {
             ref[0] = m;
         }), null).dispatch(invocable, msgCtx);
 
@@ -120,7 +120,7 @@ class InvocableDispatcherTest {
     void failed_03() throws JMSException {
         final var expected = new NullPointerException();
 
-        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InvocableDispatcher(binder, b -> Mockito.mock(Failed.class),
+        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new DefaultInvocableDispatcher(binder, b -> Mockito.mock(Failed.class),
                 List.of((InvocationListener.OnFailed) m -> {
                     throw expected;
                 }), null).dispatch(invocable, msgCtx), "should allow the listener to throw back to the broker");
@@ -133,7 +133,7 @@ class InvocableDispatcherTest {
         final var ref = new Failed[1];
         final var expected = new RuntimeException();
 
-        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InvocableDispatcher(binder, failed(bound, expected),
+        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new DefaultInvocableDispatcher(binder, failed(bound, expected),
                 List.of((InvocationListener.OnFailed) m -> {
                     ref[0] = m;
                     throw (RuntimeException) (m.thrown());
@@ -151,7 +151,7 @@ class InvocableDispatcherTest {
 
         AufJmsContext.set(session);
 
-        new InvocableDispatcher((i, m) -> {
+        new DefaultInvocableDispatcher((i, m) -> {
             threadRef[0] = Thread.currentThread();
             sessionRef[0] = AufJmsContext.getSession();
             return Mockito.mock(BoundInvocable.class);
@@ -184,7 +184,7 @@ class InvocableDispatcherTest {
 
         AufJmsContext.set(session);
 
-        new InvocableDispatcher((i, m) -> {
+        new DefaultInvocableDispatcher((i, m) -> {
             threadRef[1] = Thread.currentThread();
             sessionRef[1] = AufJmsContext.getSession();
             return Mockito.mock(BoundInvocable.class);
@@ -221,7 +221,7 @@ class InvocableDispatcherTest {
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
 
-        new InvocableDispatcher(binder, b -> completed, List.of((InvocationListener.OnCompleted) c -> {
+        new DefaultInvocableDispatcher(binder, b -> completed, List.of((InvocationListener.OnCompleted) c -> {
             completedRef[0] = c;
             completedThread[0] = Thread.currentThread();
         }), executor).dispatch(invocable, msgCtx);
@@ -237,7 +237,7 @@ class InvocableDispatcherTest {
     void completed_02() throws JMSException {
         final var expected = new RuntimeException("Completed");
 
-        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new InvocableDispatcher(binder, b -> Mockito.mock(Completed.class),
+        final var actual = Assertions.assertThrows(RuntimeException.class, () -> new DefaultInvocableDispatcher(binder, b -> Mockito.mock(Completed.class),
                 List.of((InvocationListener.OnCompleted) c -> {
                     throw expected;
                 }), null).dispatch(invocable, msgCtx));
@@ -251,7 +251,7 @@ class InvocableDispatcherTest {
 
         Mockito.doThrow(new IllegalStateException("Don't close me")).when(invocable).close();
 
-        new InvocableDispatcher(binder, invoker, List.of(completed), null).dispatch(invocable, msgCtx);
+        new DefaultInvocableDispatcher(binder, invoker, List.of(completed), null).dispatch(invocable, msgCtx);
 
         Mockito.verify(invocable, times(1)).close();
         // Exception from the close should be suppressed.
@@ -260,7 +260,7 @@ class InvocableDispatcherTest {
 
     @Test
     void close_01() throws Exception {
-        new InvocableDispatcher(binder, invoker, null, null).dispatch(invocable, msgCtx);
+        new DefaultInvocableDispatcher(binder, invoker, null, null).dispatch(invocable, msgCtx);
 
         // Should close on completed invocation
         Mockito.verify(invocable, times(1)).close();
@@ -269,7 +269,7 @@ class InvocableDispatcherTest {
     @Test
     void close_02() throws Exception {
         Assertions.assertThrows(RuntimeException.class,
-                () -> new InvocableDispatcher(binder, failed(bound, new RuntimeException()), null, null)
+                () -> new DefaultInvocableDispatcher(binder, failed(bound, new RuntimeException()), null, null)
                         .dispatch(invocable, msgCtx));
 
         // Should close on failed invocation
@@ -279,7 +279,7 @@ class InvocableDispatcherTest {
     @Test
     void close_03() throws Exception {
         Assertions.assertThrows(RuntimeException.class,
-                () -> new InvocableDispatcher((i, m) -> null, b -> null, null, null).dispatch(invocable, msgCtx));
+                () -> new DefaultInvocableDispatcher((i, m) -> null, b -> null, null, null).dispatch(invocable, msgCtx));
 
         // Should close on wrong data
         Mockito.verify(invocable, times(1)).close();
@@ -288,7 +288,7 @@ class InvocableDispatcherTest {
     @Test
     void close_04() throws Exception {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new InvocableDispatcher((i, m) -> {
+                () -> new DefaultInvocableDispatcher((i, m) -> {
                     throw new IllegalArgumentException();
                 }, invoker, null, null).dispatch(invocable, msgCtx));
 
@@ -300,7 +300,7 @@ class InvocableDispatcherTest {
     @EnabledIfSystemProperty(named = "me.ehp246.perf", matches = "true")
     void perf_01() {
         final var binder = new DefaultInvocableBinder(new JsonByJackson(TestUtil.OBJECT_MAPPER));
-        final var dispatcher = new InvocableDispatcher(binder, Invoked::invoke, null, null);
+        final var dispatcher = new DefaultInvocableDispatcher(binder, Invoked::invoke, null, null);
         final var msg = new MockJmsMsg();
         final var ctx = new MsgContext() {
 

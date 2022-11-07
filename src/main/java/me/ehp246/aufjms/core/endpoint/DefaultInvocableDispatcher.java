@@ -12,6 +12,7 @@ import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
+import me.ehp246.aufjms.api.endpoint.InvocableDispatcher;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
@@ -25,7 +26,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class InvocableDispatcher {
+final class DefaultInvocableDispatcher implements InvocableDispatcher {
     private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
 
     private final Executor executor;
@@ -34,7 +35,7 @@ final class InvocableDispatcher {
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
-    InvocableDispatcher(final InvocableBinder binder, final BoundInvoker invoker,
+    DefaultInvocableDispatcher(final InvocableBinder binder, final BoundInvoker invoker,
             @Nullable final List<InvocationListener> listeners, @Nullable final Executor executor) {
         super();
         this.binder = binder;
@@ -51,6 +52,7 @@ final class InvocableDispatcher {
         }
     }
 
+    @Override
     public void dispatch(final Invocable invocable, final MsgContext msgCtx) {
         final var runnable = newRunnable(invocable, msgCtx);
 
@@ -98,12 +100,12 @@ final class InvocableDispatcher {
 
                     if (outcome instanceof Failed failed) {
 
-                        if (InvocableDispatcher.this.failed.size() == 0) {
+                        if (DefaultInvocableDispatcher.this.failed.size() == 0) {
                             throw failed.thrown();
                         }
 
                         try {
-                            for (final var listener : InvocableDispatcher.this.failed) {
+                            for (final var listener : DefaultInvocableDispatcher.this.failed) {
                                 listener.onFailed(failed);
                             }
 
@@ -124,7 +126,7 @@ final class InvocableDispatcher {
                     final var completed = (Completed) outcome;
 
                     try {
-                        InvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
+                        DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
                     } catch (Exception e) {
                         LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());
 
