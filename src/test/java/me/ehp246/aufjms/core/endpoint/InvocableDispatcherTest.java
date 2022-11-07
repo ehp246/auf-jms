@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import javax.jms.JMSException;
 import javax.jms.Session;
@@ -14,6 +15,8 @@ import javax.jms.TextMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
@@ -22,19 +25,27 @@ import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.InvocationListener.OnCompleted;
+import me.ehp246.aufjms.api.endpoint.Invoked;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
+import me.ehp246.aufjms.provider.jackson.JsonByJackson;
+import me.ehp246.aufjms.util.MockJmsMsg;
 import me.ehp246.aufjms.util.MockTextMessage;
+import me.ehp246.test.TestUtil;
+import me.ehp246.test.TimingExtension;
 
 /**
  * @author Lei Yang
  *
  */
+@ExtendWith(TimingExtension.class)
 class InvocableDispatcherTest {
+    private final static int LOOP = 1_000_000;
     private final TextMessage message = new MockTextMessage();
     private final JmsMsg msg = TextJmsMsg.from(message);
     private final Session session = Mockito.mock(Session.class);
@@ -285,4 +296,27 @@ class InvocableDispatcherTest {
         Mockito.verify(invocable, times(1)).close();
     }
 
+    @Test
+    @EnabledIfSystemProperty(named = "me.ehp246.perf", matches = "true")
+    void perf_01() {
+        final var binder = new DefaultInvocableBinder(new JsonByJackson(TestUtil.OBJECT_MAPPER));
+        final var dispatcher = new InvocableDispatcher(binder, Invoked::invoke, null, null);
+        final var msg = new MockJmsMsg();
+        final var ctx = new MsgContext() {
+
+            @Override
+            public Session session() {
+                return session;
+            }
+
+            @Override
+            public JmsMsg msg() {
+                return msg;
+            }
+        };
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.PerfCase(),
+                new ReflectedType<>(InvocableBinderTestCases.PerfCase.class).findMethods("m01").get(0));
+
+        IntStream.range(0, LOOP).forEach(i -> dispatcher.dispatch(invocable, ctx));
+    }
 }

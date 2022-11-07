@@ -97,13 +97,10 @@ final class InvocableDispatcher {
                     assert (outcome != null);
 
                     if (outcome instanceof Failed failed) {
-                        LOGGER.atTrace().log("Invocation failed");
 
                         if (InvocableDispatcher.this.failed.size() == 0) {
                             throw failed.thrown();
                         }
-
-                        LOGGER.atTrace().log("Invoking Failed interceptor");
 
                         try {
                             for (final var listener : InvocableDispatcher.this.failed) {
@@ -114,7 +111,6 @@ final class InvocableDispatcher {
                              * If none throws any exception, skip further execution and acknowledge the
                              * message.
                              */
-                            LOGGER.atTrace().log("Failed interceptor consumed the message");
                             return;
                         } catch (Exception e) {
                             LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
@@ -126,8 +122,6 @@ final class InvocableDispatcher {
                     assert (outcome instanceof Completed);
 
                     final var completed = (Completed) outcome;
-
-                    LOGGER.atTrace().log("Invocation completed");
 
                     try {
                         InvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
