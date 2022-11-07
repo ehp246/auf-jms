@@ -508,11 +508,13 @@ class ParsedMethodDispatchBuilderTest {
     @Test
     void property_m01_12() {
         final var captor = TestUtil.newCaptor(PropertyCases.Case01.class);
+        final var expected = UUID.randomUUID().toString();
+        captor.proxy().m01(expected);
 
-        captor.proxy().m01("");
+        final var properties = parser.parse(captor.invocation().method(), config)
+                .apply(null, captor.invocation().args().toArray()).properties();
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
-                .apply(null, captor.invocation().args().toArray()), "should require a property name");
+        Assertions.assertEquals(expected, properties.get("name"));
     }
 
     @Test
