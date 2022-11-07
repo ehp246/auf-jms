@@ -16,4 +16,6 @@ public interface BoundInvocable {
      * <code>null</code>.
      */
     Object[] arguments();
+
+    Invoked invoke();
 }
