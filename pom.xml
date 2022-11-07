@@ -270,7 +270,7 @@
 				<version>${maven-surefire-plugin.version}</version>
 				<configuration>
 					<systemPropertyVariables>
-						<me.ehp246.aufjms.dispatchLogger>true</me.ehp246.aufjms.dispatchLogger>
+						<me.ehp246.aufjms.dispatcher-logger.enabled>true</me.ehp246.aufjms.dispatcher-logger.enabled>
 					</systemPropertyVariables>
 					</configuration>
 			</plugin>
