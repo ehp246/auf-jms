@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic.OnDlTopicMsg;
+import me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic.OnDlqMsg;
 import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.FailMsg;
 
 /**
@@ -31,7 +31,7 @@ class FailedInvocationTest {
     private FailMsg onMsg;
 
     @Autowired
-    private OnDlTopicMsg onDlqMsg;
+    private OnDlqMsg onDlqMsg;
 
     @Test
     void test_01() throws InterruptedException, ExecutionException {
@@ -46,6 +46,7 @@ class FailedInvocationTest {
         Assertions.assertEquals(1, failed.bound().msg().deliveryCount());
     }
 
+    @Test
     void dltopic_01() throws InterruptedException, ExecutionException {
         final var id = UUID.randomUUID().toString();
 

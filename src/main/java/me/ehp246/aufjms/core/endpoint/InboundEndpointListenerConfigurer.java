@@ -31,7 +31,6 @@ import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -87,10 +86,6 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                         container.setSubscriptionDurable(sub.durable());
                         container.setSubscriptionShared(sub.shared());
                     }
-
-                    container.setDestinationResolver((session, name, topic) -> JMSSupplier
-                            .invoke(() -> on instanceof AtTopic ? session.createTopic(on.name())
-                                    : session.createQueue(on.name())));
 
                     container.setupMessageListener(new SessionAwareMessageListener<Message>() {
                         private final static Logger logger = LogManager.getLogger(InboundEndpoint.class);
