@@ -38,7 +38,7 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
         this.type = type;
     }
 
-    public MockJmsMsg withProperty(final String key, final String value) {
+    public MockJmsMsg withProperty(final String key, final Object value) {
         this.properties.put(key, value);
         return this;
     }

@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +47,13 @@ public final class OneUtil {
 
     public static boolean hasValue(final String value) {
         return value != null && !value.isBlank();
+    }
+
+    public static String getIfBlank(final String value, final Supplier<String> supplier) {
+        if (value == null || value.isBlank())
+            return supplier.get();
+        else
+            return value;
     }
 
     public static Stream<String> streamValues(final Collection<String> values) {

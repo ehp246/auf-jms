@@ -479,7 +479,7 @@ class DefaultInvocableBinderTest {
             @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
-                return (T) Boolean.TRUE;
+                return (T) Boolean.valueOf(name.equals("prop1"));
             }
 
         };
@@ -490,7 +490,7 @@ class DefaultInvocableBinderTest {
 
         final var returned = (Boolean) ((Completed) outcome).returned();
 
-        Assertions.assertEquals(true, returned);
+        Assertions.assertEquals(true, returned, "should pass in the parameter name");
 
         Assertions.assertEquals(1, bound.arguments().length);
         Assertions.assertEquals(true, bound.arguments()[0]);

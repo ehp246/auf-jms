@@ -29,6 +29,7 @@ import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  *
@@ -101,7 +102,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             }
 
             /*
-             * Bind headers.
+             * Headers.
              */
             final var annotations = parameter.getAnnotations();
             final var header = Stream.of(annotations)
@@ -112,7 +113,9 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                 continue;
             }
 
-            // Bind properties
+            /*
+             * Properties
+             */
             final var prop = Stream.of(annotations).filter(ann -> ann.annotationType() == OfProperty.class).findAny()
                     .map(ann -> (OfProperty) ann);
             if (prop.isPresent()) {
@@ -120,13 +123,15 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     parsed.addCtxParameter(ctx -> ctx.msg().propertyNames().stream().collect(Collectors.toMap(Function.identity(),
                             name -> JMSSupplier.invoke(() -> ctx.msg().message().getObjectProperty(name)))));
                 } else {
-                    final var name = prop.get().value();
+                    final var name = OneUtil.getIfBlank(prop.get().value(), parameter::getName);
                     parsed.addCtxParameter(ctx -> ctx.msg().property(name, type));
                 }
                 continue;
             }
 
-            // Bind payload.
+            /*
+             * Payload
+             */
             parsed.addPayloadParameter(new FromJson.To(parameter.getType(), List.of(parameter.getAnnotations())));
         }
 

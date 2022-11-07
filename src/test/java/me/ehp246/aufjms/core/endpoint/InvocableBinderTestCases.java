@@ -134,8 +134,8 @@ interface InvocableBinderTestCases {
             return new Object[] { value1, value2 };
         }
 
-        public Boolean m01(@OfProperty final Boolean value) {
-            return value;
+        public Boolean m01(@OfProperty final Boolean prop1) {
+            return prop1;
         }
 
         public PropertyEnum m01(@OfProperty("prop1") final PropertyEnum value) {
