@@ -19,7 +19,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.Invoked;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 
@@ -77,7 +76,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
                     container
                             .setupMessageListener(new DefaultInboundMessageListener(
-                                    new DefaultInvocableDispatcher(binder, Invoked::invoke,
+                                    new DefaultInvocableDispatcher(binder,
                                             Arrays.asList(
                                                     new ReplyInvoked(
                                                             dispathFnProvider.get(endpoint.connectionFactory())),

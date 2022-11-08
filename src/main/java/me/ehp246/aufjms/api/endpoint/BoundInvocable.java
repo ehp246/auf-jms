@@ -1,5 +1,9 @@
 package me.ehp246.aufjms.api.endpoint;
 
+import java.lang.reflect.InvocationTargetException;
+
+import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -17,5 +21,47 @@ public interface BoundInvocable {
      */
     Object[] arguments();
 
-    Invoked invoke();
+    default Invoked invoke() {
+        try {
+            final var returned = this.invocable().method().invoke(this.invocable().instance(), this.arguments());
+            return new Completed() {
+
+                @Override
+                public BoundInvocable bound() {
+                    return BoundInvocable.this;
+                }
+
+                @Override
+                public Object returned() {
+                    return returned;
+                }
+            };
+        } catch (InvocationTargetException e1) {
+            return new Failed() {
+
+                @Override
+                public BoundInvocable bound() {
+                    return BoundInvocable.this;
+                }
+
+                @Override
+                public Throwable thrown() {
+                    return e1.getCause();
+                }
+            };
+        } catch (Exception e2) {
+            return new Failed() {
+
+                @Override
+                public BoundInvocable bound() {
+                    return BoundInvocable.this;
+                }
+
+                @Override
+                public Throwable thrown() {
+                    return e2;
+                }
+            };
+        }
+    }
 }

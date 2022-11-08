@@ -21,7 +21,6 @@ import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
-import me.ehp246.aufjms.api.endpoint.Invoked;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
 import me.ehp246.aufjms.util.MockTextMessage;
@@ -42,7 +41,7 @@ class DefaultInboundMessageListenerTest {
         Configurator.setLevel(LogManager.getLogger(InboundEndpoint.class).getName(), Level.INFO);
 
         final var binder = new DefaultInvocableBinder(new JsonByJackson(TestUtil.OBJECT_MAPPER));
-        final var dispatcher = new DefaultInvocableDispatcher(binder, Invoked::invoke, null, null);
+        final var dispatcher = new DefaultInvocableDispatcher(binder, null, null);
         final var factory = new AutowireCapableInvocableFactory(new DefaultListableBeanFactory(),
                 new DefaultInvocableRegistry().register(
                         List.of(new InvocableTypeDefinition(Set.of("PerfCase"),

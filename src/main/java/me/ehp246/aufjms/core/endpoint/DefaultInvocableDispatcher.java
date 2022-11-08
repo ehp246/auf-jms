@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.Nullable;
 
-import me.ehp246.aufjms.api.endpoint.BoundInvoker;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
@@ -31,16 +30,14 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
     private final Executor executor;
     private final InvocableBinder binder;
-    private final BoundInvoker invoker;
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
-    DefaultInvocableDispatcher(final InvocableBinder binder, final BoundInvoker invoker,
-            @Nullable final List<InvocationListener> listeners, @Nullable final Executor executor) {
+    DefaultInvocableDispatcher(final InvocableBinder binder, @Nullable final List<InvocationListener> listeners,
+            @Nullable final Executor executor) {
         super();
         this.binder = binder;
         this.executor = executor;
-        this.invoker = invoker;
         for (final var listener : listeners == null ? List.of() : listeners) {
             // null tolerating
             if (listener instanceof InvocationListener.OnCompleted completed) {
@@ -94,7 +91,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                     assert (bound != null);
 
-                    final var outcome = invoker.apply(bound);
+                    final var outcome = bound.invoke();
 
                     assert (outcome != null);
 
