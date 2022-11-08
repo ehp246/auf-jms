@@ -49,7 +49,8 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
             AufJmsContext.set(session);
             Log4jContext.set(msg);
 
-            LOGGER.atTrace().log("Consuming {}", msg::id);
+            LOGGER.atDebug().log("Consuming {}", msg::id);
+            LOGGER.atTrace().log("Consuming {}", msg::text);
 
             final var invocable = invocableFactory.get(msg);
 
@@ -62,11 +63,11 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
                 }
             }
 
-            LOGGER.atTrace().log("Dispatching {}", () -> invocable.method().toString());
+            LOGGER.atDebug().log("Dispatching {}", () -> invocable.method().toString());
 
             dispatcher.dispatch(invocable, msg);
 
-            LOGGER.atTrace().log("Consumed {}", msg::id);
+            LOGGER.atDebug().log("Consumed {}", msg::id);
         } catch (Exception e) {
             LOGGER.atError().withThrowable(e).log("Message failed: {}", e::getMessage);
 
