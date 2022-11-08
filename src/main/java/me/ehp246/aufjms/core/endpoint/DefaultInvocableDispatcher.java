@@ -51,7 +51,63 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
     @Override
     public void dispatch(final Invocable invocable, final JmsMsg msg) {
-        final var runnable = newRunnable(invocable, msg);
+        /*
+         * The runnable returned is expected to handle all execution and exception. The
+         * caller simply invokes this runnable without further processing.
+         */
+        final var runnable = (Runnable) () -> {
+            try {
+                final var bound = binder.bind(invocable, msg);
+
+                assert (bound != null);
+
+                final var outcome = bound.invoke();
+
+                assert (outcome != null);
+
+                if (outcome instanceof Failed failed) {
+
+                    if (DefaultInvocableDispatcher.this.failed.size() == 0) {
+                        throw failed.thrown();
+                    }
+
+                    try {
+                        for (final var listener : DefaultInvocableDispatcher.this.failed) {
+                            listener.onFailed(failed);
+                        }
+
+                        /*
+                         * If none throws any exception, skip further execution and acknowledge the
+                         * message.
+                         */
+                        return;
+                    } catch (Exception e) {
+                        LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
+
+                        throw e;
+                    }
+                }
+
+                assert (outcome instanceof Completed);
+
+                final var completed = (Completed) outcome;
+
+                try {
+                    DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
+                } catch (Exception e) {
+                    LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());
+
+                    throw e;
+                }
+            } catch (Throwable e) {
+                throw OneUtil.ensureRuntime(e);
+            } finally {
+                try (invocable) {
+                } catch (Exception e) {
+                    LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
+                }
+            }
+        };
 
         if (executor == null || invocable.invocationModel() == InvocationModel.INLINE) {
 
@@ -71,72 +127,4 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
             });
         }
     };
-
-    /**
-     * The runnable returned is expected to handle all execution and exception. The
-     * caller simply invokes this runnable without further processing.
-     * 
-     * @param target
-     * @param msg
-     * 
-     * @return
-     */
-    private Runnable newRunnable(final Invocable target, final JmsMsg msg) {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final var bound = binder.bind(target, msg);
-
-                    assert (bound != null);
-
-                    final var outcome = bound.invoke();
-
-                    assert (outcome != null);
-
-                    if (outcome instanceof Failed failed) {
-
-                        if (DefaultInvocableDispatcher.this.failed.size() == 0) {
-                            throw failed.thrown();
-                        }
-
-                        try {
-                            for (final var listener : DefaultInvocableDispatcher.this.failed) {
-                                listener.onFailed(failed);
-                            }
-
-                            /*
-                             * If none throws any exception, skip further execution and acknowledge the
-                             * message.
-                             */
-                            return;
-                        } catch (Exception e) {
-                            LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
-
-                            throw e;
-                        }
-                    }
-
-                    assert (outcome instanceof Completed);
-
-                    final var completed = (Completed) outcome;
-
-                    try {
-                        DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
-                    } catch (Exception e) {
-                        LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());
-
-                        throw e;
-                    }
-                } catch (Throwable e) {
-                    throw OneUtil.ensureRuntime(e);
-                } finally {
-                    try (target) {
-                    } catch (Exception e) {
-                        LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
-                    }
-                }
-            };
-        };
-    }
 }
