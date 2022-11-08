@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.jms.Message;
-import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
@@ -14,7 +13,6 @@ import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.FromJson;
 
@@ -32,8 +30,8 @@ interface InvocableBinderTestCases {
             return new Object[] { msg, message };
         }
 
-        public MsgContext m01(final MsgContext msgCtx, final FromJson fromJson) {
-            return msgCtx;
+        public JmsMsg m01(final JmsMsg msg, final FromJson fromJson) {
+            return msg;
         }
 
         public Object[] m01(final List<Integer> integers, final JmsMsg msg) {
@@ -54,12 +52,8 @@ interface InvocableBinderTestCases {
             return new Object[] { msg, message };
         }
 
-        public MsgContext m01(final MsgContext msgCtx) {
-            return msgCtx;
-        }
-
-        public Object[] m01(final Session session, final FromJson fromJson) {
-            return new Object[] { session, fromJson };
+        public Object[] m01(final JmsMsg msg, final FromJson fromJson) {
+            return new Object[] { msg, fromJson };
         }
 
         public Object[] m01(final List<Integer> integers, final Message message) {
@@ -169,7 +163,7 @@ interface InvocableBinderTestCases {
     static class PerfCase {
         public Object[] m01(final TextMessage textMessage, @OfType final String type, @OfCorrelationId final String id,
                 @OfProperty("prop1") final String prop1, final Integer body, final JmsMsg msg,
-                final FromJson fromJson, final MsgContext ctx) {
+                final FromJson fromJson) {
             return new Object[] { type, id, prop1, body };
         }
 

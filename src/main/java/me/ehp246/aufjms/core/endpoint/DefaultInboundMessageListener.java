@@ -13,11 +13,9 @@ import org.springframework.lang.Nullable;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableDispatcher;
 import me.ehp246.aufjms.api.endpoint.MsgConsumer;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.endpoint.MsgInvocableFactory;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
-import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -65,23 +63,9 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
                 }
             }
 
-            final var msgCtx = new MsgContext() {
-
-                @Override
-                public JmsMsg msg() {
-                    return msg;
-                }
-
-                @Override
-                public Session session() {
-                    return session;
-                }
-
-            };
-
             logger.atTrace().log("Dispatching {}", () -> invocable.method().toString());
 
-            dispatcher.dispatch(invocable, msgCtx);
+            dispatcher.dispatch(invocable, msg);
 
             logger.atTrace().log("Consumed {}", msg::correlationId);
         } catch (Exception e) {

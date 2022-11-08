@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.api.endpoint;
 
+import me.ehp246.aufjms.api.jms.JmsMsg;
+
 /**
  * 
  * @author Lei Yang
@@ -7,5 +9,5 @@ package me.ehp246.aufjms.api.endpoint;
  */
 @FunctionalInterface
 public interface InvocableBinder {
-    BoundInvocable bind(Invocable invocable, MsgContext msgCtx);
+    BoundInvocable bind(Invocable invocable, JmsMsg msg);
 }

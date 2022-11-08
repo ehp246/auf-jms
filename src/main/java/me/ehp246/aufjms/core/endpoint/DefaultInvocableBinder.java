@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
@@ -24,7 +23,6 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
@@ -54,21 +52,21 @@ public final class DefaultInvocableBinder implements InvocableBinder {
     }
 
     @Override
-    public BoundInvocable bind(final Invocable target, final MsgContext ctx) {
+    public BoundInvocable bind(final Invocable target, final JmsMsg msg) {
         final var method = target.method();
 
         final var parsed = this.parsed.computeIfAbsent(method, this::parse);
 
-        final var payloadArgs = fromJson.apply(ctx.msg().text(), parsed.getPayloadReceivers()).iterator();
+        final var payloadArgs = fromJson.apply(msg.text(), parsed.getPayloadReceivers()).iterator();
 
         final var parameterCount = method.getParameterCount();
         final var arguments = new Object[parameterCount];
         for (int i = 0; i < parameterCount; i++) {
             final var ctxArgFn = parsed.getCtxReceiver(i);
-            arguments[i] = ctxArgFn != null ? ctxArgFn.apply(ctx) : payloadArgs.next();
+            arguments[i] = ctxArgFn != null ? ctxArgFn.apply(msg) : payloadArgs.next();
         }
 
-        return new BoundInvocableRecord(target, arguments, ctx.msg());
+        return new BoundInvocableRecord(target, arguments, msg);
     }
 
     private Parsed parse(final Method method) {
@@ -85,19 +83,13 @@ public final class DefaultInvocableBinder implements InvocableBinder {
              * Binding in priorities. Type first.
              */
             if (type.isAssignableFrom(JmsMsg.class)) {
-                parsed.addCtxParameter(MsgContext::msg);
+                parsed.addCtxParameter(msg -> msg);
                 continue;
             } else if (type.isAssignableFrom(TextMessage.class)) {
-                parsed.addCtxParameter(ctx -> ctx.msg().message());
-                continue;
-            } else if (type.isAssignableFrom(MsgContext.class)) {
-                parsed.addCtxParameter(ctx -> ctx);
+                parsed.addCtxParameter(msg -> msg.message());
                 continue;
             } else if (type.isAssignableFrom(FromJson.class)) {
-                parsed.addCtxParameter(ctx -> fromJson);
-                continue;
-            } else if (type.isAssignableFrom(Session.class)) {
-                parsed.addCtxParameter(MsgContext::session);
+                parsed.addCtxParameter(msg -> fromJson);
                 continue;
             }
 
@@ -109,7 +101,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     .filter(annotation -> HEADER_ANNOTATIONS.contains(annotation.annotationType())).findAny();
             if (header.isPresent()) {
                 final var fn = HEADER_VALUE_SUPPLIERS.get(header.get().annotationType());
-                parsed.addCtxParameter(ctx -> fn.apply(ctx.msg()));
+                parsed.addCtxParameter(msg -> fn.apply(msg));
                 continue;
             }
 
@@ -120,12 +112,13 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     .map(ann -> (OfProperty) ann);
             if (prop.isPresent()) {
                 if (Map.class.isAssignableFrom(type)) {
-                    parsed.addCtxParameter(ctx -> ctx.msg().propertyNames().stream().collect(Collectors.toMap(Function.identity(),
-                            name -> JMSSupplier.invoke(() -> ctx.msg().message().getObjectProperty(name)))));
+                    parsed.addCtxParameter(
+                            msg -> msg.propertyNames().stream().collect(Collectors.toMap(Function.identity(),
+                                    name -> JMSSupplier.invoke(() -> msg.message().getObjectProperty(name)))));
                 } else {
                     final var name = OneUtil.getIfBlank(prop.get().value(),
                             () -> OneUtil.firstUpper(parameter.getName()));
-                    parsed.addCtxParameter(ctx -> ctx.msg().property(name, type));
+                    parsed.addCtxParameter(msg -> msg.property(name, type));
                 }
                 continue;
             }
@@ -147,14 +140,14 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /**
          * <code>null</code> indicates a payload argument.
          */
-        private final List<Function<MsgContext, Object>> ctxReceivers = new ArrayList<>();
+        private final List<Function<JmsMsg, Object>> ctxReceivers = new ArrayList<>();
 
         void addPayloadParameter(final FromJson.To to) {
             payloadReceivers.add(to);
             ctxReceivers.add(null);
         }
 
-        void addCtxParameter(final Function<MsgContext, Object> fn) {
+        void addCtxParameter(final Function<JmsMsg, Object> fn) {
             ctxReceivers.add(fn);
         }
 
@@ -162,7 +155,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             return this.payloadReceivers;
         }
 
-        Function<MsgContext, Object> getCtxReceiver(final int i) {
+        Function<JmsMsg, Object> getCtxReceiver(final int i) {
             return this.ctxReceivers.get(i);
         }
     }

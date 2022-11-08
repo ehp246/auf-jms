@@ -13,14 +13,13 @@ import javax.jms.TextMessage;
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
 import org.mockito.Mockito;
 
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockJmsMsg implements JmsMsg, MsgContext {
+public class MockJmsMsg implements JmsMsg {
     private final TextMessage message = Mockito.mock(TextMessage.class);
     private final Session session = Mockito.mock(Session.class);
     private final String type;
@@ -120,16 +119,6 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     public Set<String> propertyNames() {
         // TODO Auto-generated method stub
         return null;
-    }
-
-    @Override
-    public JmsMsg msg() {
-        return this;
-    }
-
-    @Override
-    public Session session() {
-        return this.session;
     }
 
     @Override

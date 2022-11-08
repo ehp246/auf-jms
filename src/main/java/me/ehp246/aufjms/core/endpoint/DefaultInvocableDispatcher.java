@@ -16,8 +16,8 @@ import me.ehp246.aufjms.api.endpoint.InvocationListener;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -50,8 +50,8 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
     }
 
     @Override
-    public void dispatch(final Invocable invocable, final MsgContext msgCtx) {
-        final var runnable = newRunnable(invocable, msgCtx);
+    public void dispatch(final Invocable invocable, final JmsMsg msg) {
+        final var runnable = newRunnable(invocable, msg);
 
         if (executor == null || invocable.invocationModel() == InvocationModel.INLINE) {
 
@@ -60,8 +60,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
         } else {
             executor.execute(() -> {
                 try {
-                    AufJmsContext.set(msgCtx.session());
-                    Log4jContext.set(msgCtx.msg());
+                    Log4jContext.set(msg);
 
                     runnable.run();
 
@@ -82,12 +81,12 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
      * 
      * @return
      */
-    private Runnable newRunnable(final Invocable target, final MsgContext msgCtx) {
+    private Runnable newRunnable(final Invocable target, final JmsMsg msg) {
         return new Runnable() {
             @Override
             public void run() {
                 try {
-                    final var bound = binder.bind(target, msgCtx);
+                    final var bound = binder.bind(target, msg);
 
                     assert (bound != null);
 
