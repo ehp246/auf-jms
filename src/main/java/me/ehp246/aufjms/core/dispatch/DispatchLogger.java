@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 
 /**
  * @author Lei Yang
@@ -14,7 +13,7 @@ import me.ehp246.aufjms.core.configuration.AufJmsConstants;
  */
 public final class DispatchLogger implements DispatchListener.OnDispatch, DispatchListener.PreSend,
         DispatchListener.PostSend, DispatchListener.OnException {
-    private final static Logger LOGGER = LogManager.getLogger(AufJmsConstants.DISPATCH_LOGTER);
+    private final static Logger LOGGER = LogManager.getLogger();
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {

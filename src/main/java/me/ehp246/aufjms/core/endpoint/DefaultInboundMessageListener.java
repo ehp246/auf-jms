@@ -24,7 +24,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  *
  */
 final class DefaultInboundMessageListener implements SessionAwareMessageListener<Message> {
-    private final static Logger logger = LogManager.getLogger(InboundEndpoint.class);
+    private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
 
     private final InvocableDispatcher dispatcher;
     private final MsgInvocableFactory invocableFactory;
@@ -45,12 +45,11 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
         }
 
         final var msg = TextJmsMsg.from(textMessage);
-
         try {
             AufJmsContext.set(session);
             Log4jContext.set(msg);
 
-            logger.atTrace().log("Consuming {}", msg::correlationId);
+            LOGGER.atTrace().log("Consuming {}", msg::id);
 
             final var invocable = invocableFactory.get(msg);
 
@@ -63,13 +62,13 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
                 }
             }
 
-            logger.atTrace().log("Dispatching {}", () -> invocable.method().toString());
+            LOGGER.atTrace().log("Dispatching {}", () -> invocable.method().toString());
 
             dispatcher.dispatch(invocable, msg);
 
-            logger.atTrace().log("Consumed {}", msg::correlationId);
+            LOGGER.atTrace().log("Consumed {}", msg::id);
         } catch (Exception e) {
-            logger.atError().withThrowable(e).log("Message failed: {}", e.getMessage());
+            LOGGER.atError().withThrowable(e).log("Message failed: {}", e::getMessage);
 
             throw e;
         } finally {
