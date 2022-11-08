@@ -123,7 +123,8 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     parsed.addCtxParameter(ctx -> ctx.msg().propertyNames().stream().collect(Collectors.toMap(Function.identity(),
                             name -> JMSSupplier.invoke(() -> ctx.msg().message().getObjectProperty(name)))));
                 } else {
-                    final var name = OneUtil.getIfBlank(prop.get().value(), parameter::getName);
+                    final var name = OneUtil.getIfBlank(prop.get().value(),
+                            () -> OneUtil.firstUpper(parameter.getName()));
                     parsed.addCtxParameter(ctx -> ctx.msg().property(name, type));
                 }
                 continue;

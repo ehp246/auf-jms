@@ -26,22 +26,21 @@ import javax.jms.Message;
  * {@linkplain Message#getObjectProperty(String)}. No type checking, conversion
  * or validation will be done.
  * <p>
- * Properties only, no headers.
+ * When the value is not specified, the property name is inferred from the
+ * parameter name with the first letter capitalized. For this to work properly,
+ * '<code>-parameters</code>' compiler option is probably desired.
+ * <p>
+ * Only JMS properties are supported, no headers.
  * 
  * @author Lei Yang
  * @since 1.0
+ * @see Parameter#getName()
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.PARAMETER })
 public @interface OfProperty {
     /**
      * The name of the property.
-     * <p>
-     * A blank value indicates to use the parameter name as the property name. For
-     * this to work properly, <code>-parameters</code> compiler option is probably
-     * required.
-     * 
-     * @see Parameter#getName()
      */
     String value() default "";
 }

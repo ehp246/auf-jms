@@ -479,7 +479,7 @@ class DefaultInvocableBinderTest {
             @SuppressWarnings("unchecked")
             @Override
             public <T> T property(String name, Class<T> type) {
-                return (T) Boolean.valueOf(name.equals("prop1"));
+                return (T) Boolean.valueOf(name.equals("Prop1"));
             }
 
         };

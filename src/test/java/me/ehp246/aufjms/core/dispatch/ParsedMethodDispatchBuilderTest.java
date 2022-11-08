@@ -514,7 +514,7 @@ class ParsedMethodDispatchBuilderTest {
         final var properties = parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).properties();
 
-        Assertions.assertEquals(expected, properties.get("name"));
+        Assertions.assertEquals(expected, properties.get("Name"));
     }
 
     @Test
