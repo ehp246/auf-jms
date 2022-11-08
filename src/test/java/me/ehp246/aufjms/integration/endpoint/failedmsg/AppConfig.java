@@ -10,11 +10,12 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
+import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From.Sub;
 import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic.OnDlTopicMsg;
+import me.ehp246.aufjms.integration.endpoint.failedmsg.dltopic.OnDlqMsg;
 import me.ehp246.aufjms.integration.endpoint.failedmsg.failed.FailMsg;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 
@@ -27,7 +28,7 @@ import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 @EnableForJms({
         @Inbound(value = @From("q1"), scan = FailMsg.class, invocationListener = "consumer1"),
         @Inbound(value = @From("q2"), scan = FailMsg.class, invocationListener = "consumer2"),
-        @Inbound(value = @From(value = "dltopic", type = DestinationType.TOPIC), scan = OnDlTopicMsg.class) })
+        @Inbound(value = @From(value = "dlq", type = DestinationType.TOPIC, sub = @Sub("s1")), scan = OnDlqMsg.class) })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     public CompletableFuture<Failed> conRef1 = new CompletableFuture<>();

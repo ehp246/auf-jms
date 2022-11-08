@@ -11,15 +11,9 @@ import java.util.List;
 public interface FromJson {
     List<?> apply(String json, List<To> receivers);
 
-    interface To {
-        Class<?> type();
-
-        default List<? extends Annotation> annotations() {
-            return List.of();
-        }
-
-        default <T> void receive(final T value) {
-
+    record To(Class<?> type, List<? extends Annotation> annotations) {
+        public To(Class<?> type) {
+            this(type, List.of());
         }
     }
 }

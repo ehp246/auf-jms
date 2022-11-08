@@ -7,9 +7,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
+ * Specifies which method should be invoked on a {@linkplain ForJmsType} class.
  * 
  * @author Lei Yang
  * @since 1.0
+ * @see ForJmsType
  */
 @Retention(RUNTIME)
 @Target({ METHOD })

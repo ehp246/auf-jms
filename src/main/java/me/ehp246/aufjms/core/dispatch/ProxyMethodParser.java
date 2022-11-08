@@ -98,8 +98,10 @@ final class ProxyMethodParser {
         final var propTypes = new ArrayList<Class<?>>();
         reflected.allParametersWith(OfProperty.class).stream().forEach(p -> {
             propArgs.add(p.index());
-            propNames.add(p.parameter().getAnnotation(OfProperty.class).value());
-            propTypes.add(p.parameter().getType());
+            final var parameter = p.parameter();
+            propNames.add(OneUtil.getIfBlank(parameter.getAnnotation(OfProperty.class).value(),
+                    () -> OneUtil.firstUpper(parameter.getName())));
+            propTypes.add(parameter.getType());
         });
 
         final var propertyArgs = new int[propArgs.size()];

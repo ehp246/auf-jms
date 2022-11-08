@@ -84,9 +84,7 @@ public final class JsonByJackson implements FromJson, ToJson {
 
     private Object receiveOne(final String json, final FromJson.To receiver)
             throws JsonMappingException, JsonProcessingException {
-        final var value = json != null && !json.isBlank() ? readOne(json, receiver) : null;
-        receiver.receive(value);
-        return value;
+        return json != null && !json.isBlank() ? readOne(json, receiver) : null;
     }
 
     private Object readOne(final String json, final To receiver) throws JsonMappingException, JsonProcessingException {

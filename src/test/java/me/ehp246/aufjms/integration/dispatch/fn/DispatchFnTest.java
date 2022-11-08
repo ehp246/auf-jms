@@ -19,8 +19,8 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
+import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.aufjms.integration.dispatch.fn.BodyAsType.PersonDob;
 import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
 import me.ehp246.aufjms.util.TestQueueListener;
@@ -31,7 +31,7 @@ import me.ehp246.aufjms.util.TestQueueListener;
  */
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class,
         EmbeddedArtemisConfig.class }, webEnvironment = WebEnvironment.NONE, properties = {
-                AufJmsConstants.DISPATCH_LOGTER + "=true" })
+                "me.ehp246.aufjms.dispatch-logger.enabled=true" })
 class DispatchFnTest {
     private static final At TO = At.toQueue(TestQueueListener.DESTINATION_NAME);
 
@@ -43,6 +43,8 @@ class DispatchFnTest {
     private ToJson toJson;
     @Autowired
     private JmsDispatchFn fn;
+    @Autowired
+    private DispatchLogger logger;
 
     @BeforeEach
     void reset() {
@@ -184,5 +186,10 @@ class DispatchFnTest {
     @Test
     void defaultFn_01() {
         Assertions.assertEquals(true, fn != null);
+    }
+
+    @Test
+    void dispatchLogger_01() {
+        Assertions.assertEquals(true, logger != null);
     }
 }

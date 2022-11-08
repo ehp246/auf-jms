@@ -1,6 +1,8 @@
 package me.ehp246.aufjms.util;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -9,18 +11,21 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
+import org.mockito.Mockito;
 
-import me.ehp246.aufjms.api.endpoint.MsgContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-public class MockJmsMsg implements JmsMsg, MsgContext {
+public class MockJmsMsg implements JmsMsg {
+    private final TextMessage message = Mockito.mock(TextMessage.class);
+    private final Session session = Mockito.mock(Session.class);
     private final String type;
     private final String correlId = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(UUID.randomUUID().toString());
+    private final Map<String, Object> properties = new HashMap<>();
 
     public MockJmsMsg() {
         super();
@@ -30,6 +35,11 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     public MockJmsMsg(String type) {
         super();
         this.type = type;
+    }
+
+    public MockJmsMsg withProperty(final String key, final Object value) {
+        this.properties.put(key, value);
+        return this;
     }
 
     @Override
@@ -50,7 +60,6 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
 
     @Override
     public String text() {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -72,16 +81,15 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T property(String name, Class<T> type) {
-        // TODO Auto-generated method stub
-        return null;
+        return (T) this.properties.get(name);
     }
 
     @Override
     public TextMessage message() {
-        // TODO Auto-generated method stub
-        return null;
+        return message;
     }
 
     @Override
@@ -110,16 +118,6 @@ public class MockJmsMsg implements JmsMsg, MsgContext {
     @Override
     public Set<String> propertyNames() {
         // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public JmsMsg msg() {
-        return this;
-    }
-
-    @Override
-    public Session session() {
         return null;
     }
 

@@ -14,5 +14,9 @@ public interface InvocableTypeRegistry {
 
     List<InvocableTypeDefinition> registered();
 
+    /**
+     * 
+     * @return <code>null</code> if no match found.
+     */
     InvocableType resolve(JmsMsg msg);
 }

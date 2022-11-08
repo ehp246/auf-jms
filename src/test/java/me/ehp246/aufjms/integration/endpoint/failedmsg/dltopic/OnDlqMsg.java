@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @Service
 @ForJmsType(value = ".*", scope = InstanceScope.BEAN)
-public class OnDlTopicMsg {
+public class OnDlqMsg {
     public final CompletableFuture<JmsMsg> msgRef = new CompletableFuture<>();
 
     @Invoking
