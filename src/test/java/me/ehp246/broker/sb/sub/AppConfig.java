@@ -19,8 +19,8 @@ import me.ehp246.broker.sb.sub.localevent.LocalEvent;
 @EnableByJms
 @EnableForJms({
         @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub("sub1")), autoStartup = "false"),
-        @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub("sub1")), autoStartup = "false"),
-        @Inbound(value = @From(value = "030d1654-9f4b-4ef6-aad7-47aaae1ee5c9", type = DestinationType.TOPIC, sub = @Sub("sub1$$D")), scan = LocalEvent.class) })
+        @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub("sub2$$D")), autoStartup = "false"),
+        @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub(value = "sub1", shared = false, durable = false)), autoStartup = "true", scan = LocalEvent.class) })
 @Import({ SimpleServiceBusConfig.class })
 @SpringBootApplication
 class AppConfig {

@@ -66,6 +66,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                     container.setAutoStartup(endpoint.autoStartup());
                     container.setMessageSelector(from.selector());
                     container.setDestinationName(on.name());
+                    container.setPubSubDomain(on instanceof AtTopic);
 
                     if (on instanceof AtTopic) {
                         final var sub = from.sub();
