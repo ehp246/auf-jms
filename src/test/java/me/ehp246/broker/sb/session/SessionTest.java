@@ -1,8 +1,5 @@
 package me.ehp246.broker.sb.session;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessagePostProcessor;
 import org.springframework.test.context.ActiveProfiles;
+
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 
 /**
  * @author Lei Yang
@@ -35,7 +35,7 @@ class SessionTest {
     void sendTemplate() {
         template.convertAndSend("auf-jms.session", "", new MessagePostProcessor() {
             @Override
-            public Message postProcessMessage(Message jmsMessage) throws JMSException {
+            public Message postProcessMessage(final Message jmsMessage) throws JMSException {
                 jmsMessage.setStringProperty("JMSXGroupID", "GroupId1");
                 return jmsMessage;
             }

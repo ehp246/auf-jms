@@ -6,10 +6,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -18,6 +14,9 @@ import org.mockito.Mockito;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -295,7 +294,7 @@ class DefaultInvocableBinderTest {
 
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 return (T) map.get(name);
             }
 
@@ -324,7 +323,7 @@ class DefaultInvocableBinderTest {
 
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 return (T) map.get(name);
             }
 
@@ -357,7 +356,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
 
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 return (T) map.get(name);
             }
 
@@ -395,7 +394,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 return (T) Boolean.valueOf(name.equals("Prop1"));
             }
 
@@ -418,7 +417,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 if (!type.isEnum()) {
                     throw new IllegalArgumentException();
                 }
@@ -443,7 +442,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Long.valueOf(123);
                 }
@@ -467,7 +466,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Integer.valueOf(123);
                 }
@@ -490,7 +489,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg() {
             @SuppressWarnings("unchecked")
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 if (name.equals(JmsNames.DELIVERY_COUNT)) {
                     return (T) Integer.valueOf(123);
                 }
@@ -600,7 +599,7 @@ class DefaultInvocableBinderTest {
         /*
          * 14:56:20.063 [INFO ] [{}] [main] TimingExtension - Method [perf_01] took
          * 31,530 ms.
-         * 
+         *
          */
         IntStream.range(0, count).forEach(i -> binder.bind(invocable, msg));
     }

@@ -7,7 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 /**
  * When applied to a parameter of a {@linkplain ByJms} interface, it specifies
@@ -19,7 +19,7 @@ import javax.jms.Message;
  * {@linkplain Message#getJMSCorrelationID()}.
  * <p>
  * Only {@linkplain String} value is supported. {@code null} is supported.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */

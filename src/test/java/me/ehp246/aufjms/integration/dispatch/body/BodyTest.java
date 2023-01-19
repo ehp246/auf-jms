@@ -4,9 +4,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyAsTypeCase01;
 import me.ehp246.aufjms.integration.dispatch.body.AppConfig.BodyCase01;

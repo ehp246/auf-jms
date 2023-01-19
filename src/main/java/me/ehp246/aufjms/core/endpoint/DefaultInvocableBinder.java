@@ -11,8 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jms.TextMessage;
-
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
@@ -86,7 +85,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                 parsed.addCtxParameter(msg -> msg);
                 continue;
             } else if (type.isAssignableFrom(TextMessage.class)) {
-                parsed.addCtxParameter(msg -> msg.message());
+                parsed.addCtxParameter(JmsMsg::message);
                 continue;
             } else if (type.isAssignableFrom(FromJson.class)) {
                 parsed.addCtxParameter(msg -> fromJson);

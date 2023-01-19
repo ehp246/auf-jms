@@ -6,13 +6,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.jms.Destination;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.apache.activemq.artemis.jms.client.ActiveMQQueue;
 import org.mockito.Mockito;
 
+import jakarta.jms.Destination;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
@@ -32,7 +31,7 @@ public class MockJmsMsg implements JmsMsg {
         type = null;
     }
 
-    public MockJmsMsg(String type) {
+    public MockJmsMsg(final String type) {
         super();
         this.type = type;
     }
@@ -83,7 +82,7 @@ public class MockJmsMsg implements JmsMsg {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T property(String name, Class<T> type) {
+    public <T> T property(final String name, final Class<T> type) {
         return (T) this.properties.get(name);
     }
 

@@ -2,8 +2,7 @@ package me.ehp246.aufjms.integration.endpoint.bean;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.PreDestroy;
-
+import jakarta.annotation.PreDestroy;
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 
@@ -15,7 +14,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
 class OnMsg {
     private final CompletableFuture<Boolean> closeFuture;
 
-    OnMsg(CompletableFuture<Boolean> closeFuture) {
+    OnMsg(final CompletableFuture<Boolean> closeFuture) {
         super();
         this.closeFuture = closeFuture;
     }

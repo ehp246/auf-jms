@@ -8,10 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +15,9 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.endpoint.BoundInvocable;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocableBinder;
@@ -47,7 +46,7 @@ class DefaultInvocableDispatcherTest {
     private final JmsMsg msg = TextJmsMsg.from(message);
     private final Session session = Mockito.mock(Session.class);
     private final Invocable invocable = Mockito.mock(Invocable.class);
-    private static InvocableBinder bindToComplete(Completed completed) {
+    private static InvocableBinder bindToComplete(final Completed completed) {
         final var bound = Mockito.mock(BoundInvocable.class);
         Mockito.when(bound.invoke()).thenReturn(completed);
 
@@ -169,7 +168,7 @@ class DefaultInvocableDispatcherTest {
         final var sessionRef = new Session[3];
 
         final var executor = Executors.newSingleThreadExecutor();
-        threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
+        threadRef[0] = executor.submit(Thread::currentThread).get();
 
         // Should not show up in the executor
         AufJmsContext.set(session);
@@ -205,7 +204,7 @@ class DefaultInvocableDispatcherTest {
         final var completedRef = new Completed[1];
 
         final var executor = Executors.newSingleThreadExecutor();
-        threadRef[0] = executor.submit(() -> Thread.currentThread()).get();
+        threadRef[0] = executor.submit(Thread::currentThread).get();
 
         new DefaultInvocableDispatcher(bindToComplete(completed), List.of((InvocationListener.OnCompleted) c -> {
             completedRef[0] = c;

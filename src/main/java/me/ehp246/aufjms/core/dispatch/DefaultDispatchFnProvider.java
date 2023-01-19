@@ -10,17 +10,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import jakarta.jms.Connection;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSRuntimeException;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
@@ -59,16 +58,16 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         this.toJson = Objects.requireNonNull(jsonFn);
 
         for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
-            if (listener instanceof DispatchListener.OnDispatch onDispatch) {
+            if (listener instanceof final DispatchListener.OnDispatch onDispatch) {
                 onDispatchs.add(onDispatch);
             }
-            if (listener instanceof DispatchListener.PreSend preSend) {
+            if (listener instanceof final DispatchListener.PreSend preSend) {
                 preSends.add(preSend);
             }
-            if (listener instanceof DispatchListener.PostSend postSend) {
+            if (listener instanceof final DispatchListener.PostSend postSend) {
                 postSends.add(postSend);
             }
-            if (listener instanceof DispatchListener.OnException onEx) {
+            if (listener instanceof final DispatchListener.OnException onEx) {
                 onExs.add(onEx);
             }
         }
@@ -80,7 +79,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         if (connectionFactoryName != null) {
             try {
                 connection = cfProvider.get(connectionFactoryName).createConnection();
-            } catch (JMSException e) {
+            } catch (final JMSException e) {
                 LOGGER.atError().withThrowable(e).log("Failed to create connection on factory '{}': {}",
                         connectionFactoryName, e.getMessage());
                 throw new JMSRuntimeException(e.getErrorCode(), e.getMessage(), e);
@@ -176,12 +175,12 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         for (final var listener : DefaultDispatchFnProvider.this.onExs) {
                             listener.onException(dispatch, msg, e);
                         }
-                    } catch (RuntimeException ex) {
+                    } catch (final RuntimeException ex) {
                         throw ex;
                     }
 
                     // Re-throw anything unchecked.
-                    if (e instanceof RuntimeException re) {
+                    if (e instanceof final RuntimeException re) {
                         throw re;
                     }
 
@@ -194,7 +193,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     if (producer != null) {
                         try {
                             producer.close();
-                        } catch (JMSException e) {
+                        } catch (final JMSException e) {
                             LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored", e);
                         }
                     }
@@ -205,7 +204,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     if (connection != null && session != null) {
                         try {
                             session.close();
-                        } catch (JMSException e) {
+                        } catch (final JMSException e) {
                             LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored.", e);
                         }
                     }
@@ -213,13 +212,13 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
             }
 
-            private String toText(JmsDispatch dispatch) {
+            private String toText(final JmsDispatch dispatch) {
                 final var body = dispatch.body();
                 if (body == null) {
                     return null;
                 }
 
-                if (body instanceof BodyPublisher publisher) {
+                if (body instanceof final BodyPublisher publisher) {
                     return publisher.get();
                 }
 
@@ -228,7 +227,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         };
     }
 
-    private static Destination toJMSDestintation(Session session, At to) throws JMSException {
+    private static Destination toJMSDestintation(final Session session, final At to) throws JMSException {
         if (to == null || !OneUtil.hasValue(to.name())) {
             return null;
         }
@@ -241,7 +240,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         closeable.stream().forEach(t -> {
             try {
                 t.close();
-            } catch (JMSException e) {
+            } catch (final JMSException e) {
                 LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored", e);
             }
         });

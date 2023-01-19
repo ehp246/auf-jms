@@ -6,7 +6,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 /**
  * Specifies the value for {@linkplain Message#setJMSType(String)}.
@@ -18,7 +18,7 @@ import javax.jms.Message;
  * When applied to a parameter, the specified value is ignored.
  * <p>
  * When applied to a method, Spring property placeholder is supported.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */

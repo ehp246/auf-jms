@@ -1,15 +1,14 @@
 package me.ehp246.aufjms.core.endpoint;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.lang.Nullable;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InvocableDispatcher;
 import me.ehp246.aufjms.api.endpoint.MsgConsumer;
@@ -39,8 +38,8 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
     }
 
     @Override
-    public void onMessage(Message message, Session session) throws JMSException {
-        if (!(message instanceof TextMessage textMessage)) {
+    public void onMessage(final Message message, final Session session) throws JMSException {
+        if (!(message instanceof final TextMessage textMessage)) {
             throw new IllegalArgumentException("Un-supported message type");
         }
 
@@ -68,7 +67,7 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
             dispatcher.dispatch(invocable, msg);
 
             LOGGER.atDebug().log("Consumed {}", msg::id);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOGGER.atError().withThrowable(e).log("Message failed: {}", e::getMessage);
 
             throw e;

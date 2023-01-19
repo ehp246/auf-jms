@@ -5,16 +5,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.jms.Destination;
-import javax.jms.TextMessage;
-
+import jakarta.jms.Destination;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 
 /**
  * Utility to un-pack a JMS message. All read calls are delayed and on-demand.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */
@@ -94,7 +93,7 @@ public final class TextJmsMsg implements JmsMsg {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public <T> T property(String name, Class<T> type) {
+    public <T> T property(final String name, final Class<T> type) {
         if (type == String.class) {
             return (T) JMSSupplier.invoke(() -> message.getStringProperty(name));
         }

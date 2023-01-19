@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Queue;
-import javax.jms.TextMessage;
+import jakarta.jms.Destination;
+import jakarta.jms.JMSException;
+import jakarta.jms.Queue;
+import jakarta.jms.TextMessage;
 
 public class MockTextMessage implements TextMessage {
 	private String messageId = UUID.randomUUID().toString();
@@ -20,13 +20,13 @@ public class MockTextMessage implements TextMessage {
 	private String text;
     private Destination destination = (Queue) () -> "mock";
 	private long timestamp = Instant.now().toEpochMilli();
-	private Map<String, String> property = new HashMap<>();
+	private final Map<String, String> property = new HashMap<>();
 
 	public MockTextMessage() {
 		super();
 	}
 
-	public MockTextMessage(String type) {
+	public MockTextMessage(final String type) {
 		super();
 		this.type = type;
 	}
@@ -37,7 +37,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSMessageID(String id) throws JMSException {
+	public void setJMSMessageID(final String id) throws JMSException {
 		this.messageId = id;
 	}
 
@@ -47,7 +47,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSTimestamp(long timestamp) throws JMSException {
+	public void setJMSTimestamp(final long timestamp) throws JMSException {
 		this.timestamp = timestamp;
 	}
 
@@ -57,11 +57,11 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSCorrelationIDAsBytes(byte[] correlationID) throws JMSException {
+	public void setJMSCorrelationIDAsBytes(final byte[] correlationID) throws JMSException {
 	}
 
 	@Override
-	public void setJMSCorrelationID(String correlationID) throws JMSException {
+	public void setJMSCorrelationID(final String correlationID) throws JMSException {
 		this.correlId = correlationID;
 	}
 
@@ -76,7 +76,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSReplyTo(Destination replyTo) throws JMSException {
+	public void setJMSReplyTo(final Destination replyTo) throws JMSException {
 		this.replyTo = replyTo;
 	}
 
@@ -86,7 +86,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSDestination(Destination destination) throws JMSException {
+	public void setJMSDestination(final Destination destination) throws JMSException {
 		this.destination = destination;
 	}
 
@@ -96,7 +96,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSDeliveryMode(int deliveryMode) throws JMSException {
+	public void setJMSDeliveryMode(final int deliveryMode) throws JMSException {
 	}
 
 	@Override
@@ -105,7 +105,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSRedelivered(boolean redelivered) throws JMSException {
+	public void setJMSRedelivered(final boolean redelivered) throws JMSException {
 	}
 
 	@Override
@@ -114,11 +114,11 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSType(String type) throws JMSException {
+	public void setJMSType(final String type) throws JMSException {
 		this.type = type;
 	}
 
-	public MockTextMessage withJMSType(String type) {
+	public MockTextMessage withJMSType(final String type) {
 		this.type = type;
 		return this;
 	}
@@ -129,7 +129,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSExpiration(long expiration) throws JMSException {
+	public void setJMSExpiration(final long expiration) throws JMSException {
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setJMSPriority(int priority) throws JMSException {
+	public void setJMSPriority(final int priority) throws JMSException {
 	}
 
 	@Override
@@ -147,52 +147,52 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public boolean propertyExists(String name) throws JMSException {
+	public boolean propertyExists(final String name) throws JMSException {
 		return this.property.containsKey(name);
 	}
 
 	@Override
-	public boolean getBooleanProperty(String name) throws JMSException {
+	public boolean getBooleanProperty(final String name) throws JMSException {
 		return Boolean.parseBoolean(this.property.get(name));
 	}
 
 	@Override
-	public byte getByteProperty(String name) throws JMSException {
+	public byte getByteProperty(final String name) throws JMSException {
 		return 0;
 	}
 
 	@Override
-	public short getShortProperty(String name) throws JMSException {
+	public short getShortProperty(final String name) throws JMSException {
 		return 0;
 	}
 
 	@Override
-	public int getIntProperty(String name) throws JMSException {
+	public int getIntProperty(final String name) throws JMSException {
 		return 0;
 	}
 
 	@Override
-	public long getLongProperty(String name) throws JMSException {
+	public long getLongProperty(final String name) throws JMSException {
 		return Long.parseLong(this.property.get(name));
 	}
 
 	@Override
-	public float getFloatProperty(String name) throws JMSException {
+	public float getFloatProperty(final String name) throws JMSException {
 		return 0;
 	}
 
 	@Override
-	public double getDoubleProperty(String name) throws JMSException {
+	public double getDoubleProperty(final String name) throws JMSException {
 		return 0;
 	}
 
 	@Override
-	public String getStringProperty(String name) throws JMSException {
+	public String getStringProperty(final String name) throws JMSException {
 		return property.get(name);
 	}
 
 	@Override
-	public Object getObjectProperty(String name) throws JMSException {
+	public Object getObjectProperty(final String name) throws JMSException {
 		return null;
 	}
 
@@ -202,46 +202,46 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setBooleanProperty(String name, boolean value) throws JMSException {
+	public void setBooleanProperty(final String name, final boolean value) throws JMSException {
 	}
 
 	@Override
-	public void setByteProperty(String name, byte value) throws JMSException {
+	public void setByteProperty(final String name, final byte value) throws JMSException {
 	}
 
 	@Override
-	public void setShortProperty(String name, short value) throws JMSException {
+	public void setShortProperty(final String name, final short value) throws JMSException {
 	}
 
 	@Override
-	public void setIntProperty(String name, int value) throws JMSException {
+	public void setIntProperty(final String name, final int value) throws JMSException {
 
 	}
 
 	@Override
-	public void setLongProperty(String name, long value) throws JMSException {
+	public void setLongProperty(final String name, final long value) throws JMSException {
 	}
 
 	@Override
-	public void setFloatProperty(String name, float value) throws JMSException {
+	public void setFloatProperty(final String name, final float value) throws JMSException {
 	}
 
 	@Override
-	public void setDoubleProperty(String name, double value) throws JMSException {
+	public void setDoubleProperty(final String name, final double value) throws JMSException {
 	}
 
 	@Override
-	public void setStringProperty(String name, String value) throws JMSException {
+	public void setStringProperty(final String name, final String value) throws JMSException {
 		this.property.put(name, value);
 	}
 
-	public MockTextMessage withStringProperty(String name, String value) {
+	public MockTextMessage withStringProperty(final String name, final String value) {
 		this.property.put(name, value);
 		return this;
 	}
 
 	@Override
-	public void setObjectProperty(String name, Object value) throws JMSException {
+	public void setObjectProperty(final String name, final Object value) throws JMSException {
 	}
 
 	@Override
@@ -253,11 +253,11 @@ public class MockTextMessage implements TextMessage {
 	}
 
 	@Override
-	public void setText(String string) throws JMSException {
+	public void setText(final String string) throws JMSException {
 		this.text = string;
 	}
 
-	public MockTextMessage withText(String string) {
+	public MockTextMessage withText(final String string) {
 		this.text = string;
 		return this;
 	}
@@ -274,19 +274,19 @@ public class MockTextMessage implements TextMessage {
     }
 
     @Override
-    public void setJMSDeliveryTime(long deliveryTime) throws JMSException {
+    public void setJMSDeliveryTime(final long deliveryTime) throws JMSException {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public <T> T getBody(Class<T> c) throws JMSException {
+    public <T> T getBody(final Class<T> c) throws JMSException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean isBodyAssignableTo(Class c) throws JMSException {
+    public boolean isBodyAssignableTo(final Class c) throws JMSException {
         // TODO Auto-generated method stub
         return false;
     }

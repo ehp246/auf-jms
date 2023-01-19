@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Parameter;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 
 /**
  * Specifies the binding point for a JMS property. The annotation can be applied
@@ -31,7 +31,7 @@ import javax.jms.Message;
  * '<code>-parameters</code>' compiler option is probably desired.
  * <p>
  * Only JMS properties are supported, no headers.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  * @see Parameter#getName()

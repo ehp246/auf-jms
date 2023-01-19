@@ -1,11 +1,11 @@
 package me.ehp246.aufjms.api.jms;
 
-import javax.jms.Session;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import jakarta.jms.Session;
 
 /**
  * @author Lei Yang

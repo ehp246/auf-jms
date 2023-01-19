@@ -4,10 +4,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 import me.ehp246.aufjms.util.TestQueueListener;
 
 /**
@@ -39,7 +38,7 @@ class TypeTest {
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
 
             @Override
-            public Message createMessage(Session session) throws JMSException {
+            public Message createMessage(final Session session) throws JMSException {
                 final var msg = session.createTextMessage();
                 msg.setJMSType("Add");
                 msg.setText("" + i);
@@ -56,7 +55,7 @@ class TypeTest {
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
 
             @Override
-            public Message createMessage(Session session) throws JMSException {
+            public Message createMessage(final Session session) throws JMSException {
                 final var msg = session.createTextMessage();
                 msg.setJMSType(id);
                 return msg;

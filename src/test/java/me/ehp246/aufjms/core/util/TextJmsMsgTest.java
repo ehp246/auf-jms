@@ -1,11 +1,11 @@
 package me.ehp246.aufjms.core.util;
 
-import javax.jms.JMSException;
-import javax.jms.TextMessage;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import jakarta.jms.JMSException;
+import jakarta.jms.TextMessage;
 
 /**
  * @author Lei Yang

@@ -2,13 +2,12 @@ package me.ehp246.aufjms.util;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jms.annotation.JmsListener;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -23,7 +22,7 @@ public class TestQueueListener {
     private CompletableFuture<Message> received;
 
     @JmsListener(destination = TestQueueListener.DESTINATION_NAME)
-    public void receive(Message message) throws JMSException {
+    public void receive(final Message message) throws JMSException {
         if (received == null) {
             logger.atInfo().log("Ignoring {} {} {}", message.getJMSType(), message.getJMSCorrelationID(),
                     message.getJMSDestination().toString());

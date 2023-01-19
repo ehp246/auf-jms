@@ -7,8 +7,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
-import javax.jms.JMSException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import jakarta.jms.JMSException;
 import me.ehp246.broker.sb.dlq.dlq.LetterCollection;
 import me.ehp246.broker.sb.replyto.reply.OnEchoInstant;
 
@@ -112,7 +111,7 @@ class SbTest {
 //        toDlq.throwIt(instant);
 //        toDlq.throwIt(instant);
 //        toDlq.throwIt(instant);
-        
+
         Assertions.assertEquals(true, instant.equals(letters.take()));
     }
 }

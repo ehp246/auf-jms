@@ -3,9 +3,8 @@ package me.ehp246.aufjms.core.endpoint;
 import java.util.List;
 import java.util.Map;
 
-import javax.jms.Message;
-import javax.jms.TextMessage;
-
+import jakarta.jms.Message;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
@@ -67,19 +66,19 @@ interface InvocableBinderTestCases {
     }
 
     static class DeliveryCountCase01 {
-        public long m01(@OfDeliveryCount Long count) {
+        public long m01(@OfDeliveryCount final Long count) {
             return count;
         }
 
-        public int m01(@OfDeliveryCount Integer count) {
+        public int m01(@OfDeliveryCount final Integer count) {
             return count;
         }
 
-        public int m01(@OfDeliveryCount int count) {
+        public int m01(@OfDeliveryCount final int count) {
             return count;
         }
 
-        public Integer m02(@OfDeliveryCount Integer count) {
+        public Integer m02(@OfDeliveryCount final Integer count) {
             return count;
         }
     }
@@ -142,11 +141,11 @@ interface InvocableBinderTestCases {
     }
 
     static class GroupCase {
-        public Group m01(@OfGroupId String id, @OfGroupSeq int seq) {
+        public Group m01(@OfGroupId final String id, @OfGroupSeq final int seq) {
             return new Group(id, seq);
         }
 
-        public Group m01(@OfGroupId String id, @OfGroupSeq Integer seq) {
+        public Group m01(@OfGroupId final String id, @OfGroupSeq final Integer seq) {
             return new Group(id, seq.intValue());
         }
 
@@ -155,7 +154,7 @@ interface InvocableBinderTestCases {
     }
 
     static class RedeliveredCase {
-        public boolean m(@OfRedelivered boolean redelieverd) {
+        public boolean m(@OfRedelivered final boolean redelieverd) {
             return redelieverd;
         }
     }

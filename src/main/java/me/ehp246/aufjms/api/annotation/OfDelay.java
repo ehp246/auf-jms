@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.time.Duration;
 
-import javax.jms.MessageProducer;
+import jakarta.jms.MessageProducer;
 
 /**
  * Specifies the argument to be passed to
@@ -26,10 +26,10 @@ import javax.jms.MessageProducer;
  * When applied to method, Spring property placeholder is supported.
  * <p>
  * Only applicable to {@linkplain ByJms} interfaces.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
- * 
+ *
  */
 @Documented
 @Retention(RUNTIME)

@@ -8,10 +8,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Queue;
 
-import javax.jms.Connection;
-import javax.jms.MessageProducer;
-import javax.jms.Topic;
-
+import jakarta.jms.Connection;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
@@ -33,7 +32,7 @@ public @interface ByJms {
      * Specifies an optional bean name by which the proxy interface can be injected.
      * <p>
      * The default name is {@link Class#getSimpleName()}.
-     * 
+     *
      * @return the bean name of the proxy interface.
      */
     String name() default "";

@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.jms.Session;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
@@ -15,6 +13,7 @@ import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
 
+import jakarta.jms.Session;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
@@ -96,7 +95,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
     }
 
     private DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final String cfName) {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+        final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(this.cfProvider.get(cfName));
         factory.setSessionTransacted(true);
         factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);

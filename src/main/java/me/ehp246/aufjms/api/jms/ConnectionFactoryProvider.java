@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.jms;
 
-import javax.jms.ConnectionFactory;
+import jakarta.jms.ConnectionFactory;
 
 /**
  * @author Lei Yang

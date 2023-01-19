@@ -3,14 +3,14 @@ package me.ehp246.aufjms.api.jms;
 import java.time.Instant;
 import java.util.Set;
 
-import javax.jms.Destination;
-import javax.jms.TextMessage;
+import jakarta.jms.Destination;
+import jakarta.jms.TextMessage;
 
 /**
  * Custom version of JMS Message which does not throw.
  * <p>
  * The interface is also meant to enforce read-only policy.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */

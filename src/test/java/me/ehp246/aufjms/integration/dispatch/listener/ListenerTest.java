@@ -3,13 +3,12 @@ package me.ehp246.aufjms.integration.dispatch.listener;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import javax.jms.JMSException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import jakarta.jms.JMSException;
 import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.integration.dispatch.listener.AppConfig.BodyCase01;
 
@@ -27,7 +26,7 @@ class ListenerTest {
     @Test
     void body_01() throws InterruptedException, ExecutionException {
         case01.ping();
-        
+
         Assertions.assertEquals(null, appConfig.onDispatchRef.get().dispatch().body());
         Assertions.assertEquals(null, appConfig.preRef.get().dispatch().body());
         Assertions.assertEquals(appConfig.postRef.get().dispatch().body(),

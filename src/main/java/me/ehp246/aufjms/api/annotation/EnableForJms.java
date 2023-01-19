@@ -7,12 +7,10 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Import;
 
+import jakarta.jms.JMSException;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;

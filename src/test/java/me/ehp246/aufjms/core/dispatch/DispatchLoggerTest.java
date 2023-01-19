@@ -3,11 +3,10 @@ package me.ehp246.aufjms.core.dispatch;
 import java.time.Instant;
 import java.util.Set;
 
-import javax.jms.Destination;
-import javax.jms.TextMessage;
-
 import org.junit.jupiter.api.Test;
 
+import jakarta.jms.Destination;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -111,7 +110,7 @@ class DispatchLoggerTest {
             }
 
             @Override
-            public <T> T property(String name, Class<T> type) {
+            public <T> T property(final String name, final Class<T> type) {
                 // TODO Auto-generated method stub
                 return null;
             }

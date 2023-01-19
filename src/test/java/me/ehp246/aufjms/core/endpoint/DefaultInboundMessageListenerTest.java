@@ -5,9 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -17,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Session;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
@@ -58,7 +57,7 @@ class DefaultInboundMessageListenerTest {
         IntStream.range(0, LOOP).forEach(i -> {
             try {
                 listener.onMessage(msg, session);
-            } catch (JMSException e) {
+            } catch (final JMSException e) {
                 throw new RuntimeException(e);
             }
         });

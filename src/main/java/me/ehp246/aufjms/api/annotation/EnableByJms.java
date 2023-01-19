@@ -6,11 +6,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.Connection;
-import javax.jms.MessageProducer;
-
 import org.springframework.context.annotation.Import;
 
+import jakarta.jms.Connection;
+import jakarta.jms.MessageProducer;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
