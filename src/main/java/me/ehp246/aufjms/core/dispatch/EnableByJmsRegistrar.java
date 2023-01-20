@@ -2,6 +2,8 @@ package me.ehp246.aufjms.core.dispatch;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +19,7 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.core.reflection.EnabledScanner;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar {
     private final static Logger LOGGER = LogManager.getLogger(EnableByJmsRegistrar.class);
@@ -25,29 +28,27 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
         final var enableMap = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
 
-        LOGGER.atTrace().log("Registering {} as '{}'", EnableByJmsConfig.class.getCanonicalName(),
-                EnableByJmsConfig.class.getSimpleName());
+        registry.registerBeanDefinition(beanName(EnableByJmsConfig.class), getAppConfigBeanDefinition(enableMap));
 
-        registry.registerBeanDefinition(EnableByJmsConfig.class.getSimpleName(), getAppConfigBeanDefinition(enableMap));
+        LOGGER.atTrace().log("Scanning for {}", ByJms.class::getCanonicalName);
 
-        LOGGER.atTrace().log("Scanning for {}", ByJms.class.getCanonicalName());
+        for (final var found : new EnabledScanner(EnableByJms.class, ByJms.class, metadata).perform()
+                .collect(Collectors.toList())) {
+            LOGGER.atTrace().log("Registering {}", found::getBeanClassName);
 
-        new EnabledScanner(EnableByJms.class, ByJms.class, metadata).perform().forEach(beanDefinition -> {
             final Class<?> proxyInterface;
             try {
-                proxyInterface = Class.forName(beanDefinition.getBeanClassName());
+                proxyInterface = Class.forName(found.getBeanClassName());
             } catch (final ClassNotFoundException ignored) {
                 // Class scanning started this. Should not happen.
                 throw new RuntimeException("Class scanning started this. Should not happen.");
             }
 
-            LOGGER.atTrace().log("Defining {}", beanDefinition.getBeanClassName());
+            final var beanName = Optional.ofNullable(proxyInterface.getAnnotation(ByJms.class).name())
+                    .filter(OneUtil::hasValue).orElseGet(() -> beanName(proxyInterface));
 
-            final var name = proxyInterface.getAnnotation(ByJms.class).name();
-
-            registry.registerBeanDefinition(name.equals("") ? proxyInterface.getSimpleName() : name,
-                    this.getProxyBeanDefinition(proxyInterface));
-        });
+            registry.registerBeanDefinition(beanName, this.getProxyBeanDefinition(proxyInterface));
+        }
 
         final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
 
@@ -57,12 +58,15 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         }
 
         for (var i = 0; i < fns.length; i++) {
-            final var fnBeanName = JmsDispatchFn.class.getSimpleName() + "-" + i;
-
-            LOGGER.atTrace().log("Defining '{}' on '{}'", fnBeanName, fns[i]);
-
-            registry.registerBeanDefinition(fnBeanName, getFnBeanDefinition(fns[i]));
+            registry.registerBeanDefinition("dispatchFn-" + i, getFnBeanDefinition(fns[i]));
         }
+    }
+
+    private String beanName(final Class<?> type) {
+        final char c[] = type.getSimpleName().toCharArray();
+        c[0] = Character.toLowerCase(c[0]);
+
+        return new String(c);
     }
 
     private BeanDefinition getAppConfigBeanDefinition(final Map<String, Object> map) {
@@ -72,14 +76,14 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         args.addGenericArgumentValue(map.get("delay"));
         args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
 
-        final var proxyBeanDefinition = new GenericBeanDefinition();
-        proxyBeanDefinition.setBeanClass(EnableByJmsConfig.class);
-        proxyBeanDefinition.setConstructorArgumentValues(args);
+        final var beanDefinition = new GenericBeanDefinition();
+        beanDefinition.setBeanClass(EnableByJmsConfig.class);
+        beanDefinition.setConstructorArgumentValues(args);
 
-        proxyBeanDefinition.setFactoryBeanName(EnableByJmsBeanFactory.class.getName());
-        proxyBeanDefinition.setFactoryMethodName("enableByJmsConfig");
+        beanDefinition.setFactoryBeanName(EnableByJmsBeanFactory.class.getName());
+        beanDefinition.setFactoryMethodName("enableByJmsConfig");
 
-        return proxyBeanDefinition;
+        return beanDefinition;
     }
 
     private BeanDefinition getFnBeanDefinition(final String name) {

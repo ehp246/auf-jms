@@ -42,7 +42,7 @@ class EnableByJmsRegistrarTest {
                 AnnotationMetadata.introspect(RegistrarAppConfigs.DispatchFnConfig02.class), registry);
 
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-0").getBeanClassName());
+                registry.getBeanDefinition("dispatchFn-0").getBeanClassName());
 
         Assertions.assertEquals(1, Arrays.asList(registry.getBeanDefinitionNames()).stream().filter(
                 name -> registry.getBeanDefinition(name).getBeanClassName().equals(JmsDispatchFn.class.getName()))
@@ -56,9 +56,9 @@ class EnableByJmsRegistrarTest {
                 AnnotationMetadata.introspect(RegistrarAppConfigs.DispatchFnConfig03.class), registry);
 
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-0").getBeanClassName());
+                registry.getBeanDefinition("dispatchFn-0").getBeanClassName());
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-1").getBeanClassName());
+                registry.getBeanDefinition("dispatchFn-1").getBeanClassName());
 
         Assertions.assertEquals(2, Arrays.asList(registry.getBeanDefinitionNames()).stream().filter(
                 name -> registry.getBeanDefinition(name).getBeanClassName().equals(JmsDispatchFn.class.getName()))

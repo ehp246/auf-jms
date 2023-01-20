@@ -38,6 +38,8 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 /**
  * @author Lei Yang
  * @since 1.0
+ * @see EnableByJmsRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata,
+ *      org.springframework.beans.factory.support.BeanDefinitionRegistry)
  */
 public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, AutoCloseable {
     private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);

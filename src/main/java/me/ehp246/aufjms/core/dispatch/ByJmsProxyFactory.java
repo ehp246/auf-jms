@@ -27,6 +27,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  * @author Lei Yang
  * @since 1.0
+ * @see EnableByJmsRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata,
+ *      org.springframework.beans.factory.support.BeanDefinitionRegistry)
  */
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
@@ -80,7 +82,7 @@ public final class ByJmsProxyFactory {
                     private final int hashCode = new Object().hashCode();
 
                     @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
                         if (method.getName().equals("toString")) {
                             return ByJmsProxyFactory.this.toString();
                         }
