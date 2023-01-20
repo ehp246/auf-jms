@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.util.EmbeddedArtemisConfig;
+import me.ehp246.test.EmbeddedArtemisConfig;
 
 /**
  * @author Lei Yang

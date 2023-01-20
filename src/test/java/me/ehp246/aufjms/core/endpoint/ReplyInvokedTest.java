@@ -17,7 +17,7 @@ import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
-import me.ehp246.aufjms.util.MockTextMessage;
+import me.ehp246.test.mock.MockTextMessage;
 
 /**
  * @author Lei Yang

@@ -21,7 +21,7 @@ import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case03.ErrorCa
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case04.ErrorCase04;
 import me.ehp246.aufjms.core.endpoint.invokableresolvercase.error.case05.ErrorCase05;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
-import me.ehp246.aufjms.util.MockJmsMsg;
+import me.ehp246.test.mock.MockJmsMsg;
 
 /**
  * @author Lei Yang

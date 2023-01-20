@@ -37,7 +37,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.util.MockDispatch;
+import me.ehp246.test.mock.MockDispatch;
 
 /**
  * @author Lei Yang

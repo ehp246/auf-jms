@@ -29,10 +29,10 @@ import me.ehp246.aufjms.core.endpoint.InvocableBinderTestCases.PropertyCase01.Pr
 import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByJackson;
-import me.ehp246.aufjms.util.MockJmsMsg;
-import me.ehp246.aufjms.util.MockTextMessage;
 import me.ehp246.test.TestUtil;
 import me.ehp246.test.TimingExtension;
+import me.ehp246.test.mock.MockJmsMsg;
+import me.ehp246.test.mock.MockTextMessage;
 
 /**
  * @author Lei Yang
