@@ -35,7 +35,7 @@ public class TopicTest {
     @Test
     public void sub_02() {
         final var abstractMessageListenerContainer = (AbstractMessageListenerContainer) (appCtx
-                .getBean(JmsListenerEndpointRegistry.class).getListenerContainer("InboundEndpoint-1"));
+                .getBean(JmsListenerEndpointRegistry.class).getListenerContainer("inboundEndpoint-1"));
 
         Assertions.assertEquals(true, abstractMessageListenerContainer.isPubSubDomain());
 

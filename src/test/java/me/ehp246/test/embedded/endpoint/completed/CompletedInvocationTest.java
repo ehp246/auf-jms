@@ -28,7 +28,7 @@ class CompletedInvocationTest {
     void completed_01() throws InterruptedException, ExecutionException {
         final var id = UUID.randomUUID().toString();
         q1.send(id);
-        
+
         final var completed = AppConfig.comp1Ref.get();
 
         Assertions.assertEquals(id, completed.bound().msg().correlationId());
@@ -41,7 +41,7 @@ class CompletedInvocationTest {
         final var appCtx = new AnnotationConfigApplicationContext(AppConfig.class);
 
         Assertions.assertEquals(null,
-                appCtx.getBean("InboundEndpoint-0", InboundEndpoint.class).invocationListener());
+                appCtx.getBean("inboundEndpoint-0", InboundEndpoint.class).invocationListener());
 
         appCtx.close();
     }

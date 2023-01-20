@@ -29,7 +29,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
         final var enableMap = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
 
-        registry.registerBeanDefinition(beanName(EnableByJmsConfig.class), getAppConfigBeanDefinition(enableMap));
+        register(registry, beanName(EnableByJmsConfig.class), getAppConfigBeanDefinition(enableMap));
 
         LOGGER.atTrace().log("Scanning for {}", ByJms.class::getCanonicalName);
 
@@ -49,12 +49,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
                     .filter(OneUtil::hasValue).orElseGet(() -> beanName(proxyInterface));
             final var proxyBeanDefinition = this.getProxyBeanDefinition(proxyInterface);
 
-            if (registry.containsBeanDefinition(beanName)) {
-                throw new BeanDefinitionOverrideException(beanName, proxyBeanDefinition,
-                        registry.getBeanDefinition(beanName));
-            }
-
-            registry.registerBeanDefinition(beanName, proxyBeanDefinition);
+            register(registry, beanName, proxyBeanDefinition);
         }
 
         final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
@@ -65,8 +60,17 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         }
 
         for (var i = 0; i < fns.length; i++) {
-            registry.registerBeanDefinition("dispatchFn-" + i, getFnBeanDefinition(fns[i]));
+            register(registry, "dispatchFn-" + i, getFnBeanDefinition(fns[i]));
         }
+    }
+
+    private void register(final BeanDefinitionRegistry registry, final String beanName,
+            final BeanDefinition newDefinition) {
+        if (registry.containsBeanDefinition(beanName)) {
+            throw new BeanDefinitionOverrideException(beanName, newDefinition, registry.getBeanDefinition(beanName));
+        }
+
+        registry.registerBeanDefinition(beanName, newDefinition);
     }
 
     private String beanName(final Class<?> type) {
