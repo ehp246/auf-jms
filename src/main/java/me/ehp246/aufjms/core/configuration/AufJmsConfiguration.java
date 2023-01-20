@@ -1,12 +1,11 @@
 package me.ehp246.aufjms.core.configuration;
 
-import javax.jms.ConnectionFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import jakarta.jms.ConnectionFactory;
 import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.spi.PropertyResolver;

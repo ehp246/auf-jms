@@ -1,12 +1,12 @@
 package me.ehp246.aufjms.core.configuration;
 
-import javax.jms.ConnectionFactory;
-
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.env.PropertyResolver;
+
+import jakarta.jms.ConnectionFactory;
 
 /**
  * @author Lei Yang

@@ -7,12 +7,12 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Import;
 
+import jakarta.jms.Connection;
+import jakarta.jms.JMSException;
+import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.api.endpoint.Invocable;
 import me.ehp246.aufjms.api.endpoint.InvocationListener;
@@ -20,6 +20,7 @@ import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
 import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
@@ -29,6 +30,9 @@ import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
 
 /**
+ * Enables the server-side capabilities of Auf JMS. E.g., declaring
+ * {@linkplain Inbound} endpoints. Scanning and registration of
+ * {@linkplain ForJmsType} classes for the endpoints.
  *
  * @author Lei Yang
  * @since 1.0
@@ -51,9 +55,8 @@ public @interface EnableForJms {
      * to be expected and acknowledged to the broker without triggering the
      * dead-lettering process.
      * <p>
-     * If no bean name is specified, i.e., the value is an empty string, an
-     * un-matched message will result an {@linkplain UnknownTypeException} thus
-     * trigger the dead-lettering process.
+     * If the value is an empty string, an un-matched message will result an
+     * {@linkplain UnknownTypeException} thus trigger the dead-lettering process.
      * <p>
      * The setting applies to all {@linkplain InboundEndpoint}'s.
      * <p>
@@ -61,19 +64,33 @@ public @interface EnableForJms {
      */
     String defaultConsumer() default "44fc3968-7eba-47a3-a7b4-54e2b365d027";
 
-    @Retention(RUNTIME)
+    @Target({})
     @interface Inbound {
         /**
          * Destination of the incoming messages.
          */
         From value();
 
+        /**
+         * Specifies the packages to scan for {@linkplain ForJmsType} classes for this
+         * endpoint.
+         * <p>
+         * By default, the package and the sub-packages of the annotated class will be
+         * scanned.
+         */
         Class<?>[] scan() default {};
 
+        /**
+         * Not implemented.
+         */
         String concurrency() default "0";
 
         /**
          * The bean name of the endpoint. Must be unique if specified.
+         * <p>
+         * The default name would be in the form of <code>'inboundEndpoint-${n}'</code>
+         * where <code>'n'</code> is the index from {@linkplain EnableForJms#value()}
+         * starting at <code>0</code>.
          * <p>
          * Does not support Spring property placeholder.
          */
@@ -86,6 +103,10 @@ public @interface EnableForJms {
          */
         String autoStartup() default "true";
 
+        /**
+         * Specifies the name to pass to {@linkplain ConnectionFactoryProvider} to
+         * eventually retrieve a {@linkplain Connection}.
+         */
         String connectionFactory() default "";
 
         /**
@@ -97,9 +118,6 @@ public @interface EnableForJms {
          * {@linkplain EnableForJms.Inbound} completes normally, the
          * {@linkplain InvocationListener.OnCompleted#onCompleted(Completed)} will be
          * invoked.
-         * <p>
-         * If a {@linkplain RuntimeException} happens from the bean, the
-         * {@linkplain Message} will follow broker's dead-lettering process.
          * <p>
          * If the execution of a {@linkplain ForJmsType} object on this
          * {@linkplain EnableForJms.Inbound} throws an exception, the
@@ -118,10 +136,14 @@ public @interface EnableForJms {
          * to {@linkplain Message#getJMSType()} matching, i.e.,
          * {@linkplain UnknownTypeException}.
          * <p>
+         * If a {@linkplain RuntimeException} happens from the bean during execution,
+         * the {@linkplain Message} will follow broker's dead-lettering process.
+         * <p>
          * Supports Spring property placeholder.
          */
         String invocationListener() default "";
 
+        @Target({})
         @interface From {
             /**
              * Defines the destination name.
@@ -133,23 +155,27 @@ public @interface EnableForJms {
             DestinationType type() default DestinationType.QUEUE;
 
             /**
-             * Specifies the JMS message selector expression (or null if none) for this
-             * listener.
+             * Specifies the JMS message selector expression (or <code>null</code> if none)
+             * for this listener.
              * <p>
              * Default is none.
              * <p>
              * See the JMS specification for a detailed definition of selector expressions.
              * <p>
              * Supports Spring property placeholder.
+             *
+             * @see <a href=
+             *      'https://jakarta.ee/specifications/messaging/3.0/jakarta-messaging-spec-3.0.html#message-selection'>Selector</a>
              */
             String selector() default "";
 
 
             Sub sub() default @Sub;
 
+            @Target({})
             @interface Sub {
                 /**
-                 * Defines the subscription name to be used with a Topic consumer.
+                 * Defines the subscription name to be used with a {@linkplain Topic} consumer.
                  * <p>
                  * Only applicable when {@linkplain From#type()} is
                  * {@linkplain DestinationType#TOPIC}.

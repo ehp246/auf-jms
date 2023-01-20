@@ -2,7 +2,7 @@ package me.ehp246.aufjms.api.jms;
 
 import java.util.Objects;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 
 /**
  * @author Lei Yang
@@ -17,7 +17,7 @@ public final class AufJmsContext {
         super();
     }
 
-    public static void set(Session session) {
+    public static void set(final Session session) {
         Objects.requireNonNull(session);
 
         if (CONTEXT.threadLocalSession.get() != null) {
@@ -32,7 +32,7 @@ public final class AufJmsContext {
 
     /**
      * Remove the session from the thread if one is present.
-     * 
+     *
      * @return session that is removed. Could be <code>null</code>.
      */
     public static Session clearSession() {

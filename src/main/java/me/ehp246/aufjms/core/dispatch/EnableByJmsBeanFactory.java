@@ -11,11 +11,13 @@ import me.ehp246.aufjms.core.util.OneUtil;
 /**
  * @author Lei Yang
  * @since 1.0
+ * @see EnableByJmsRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata,
+ *      org.springframework.beans.factory.support.BeanDefinitionRegistry)
  */
 public final class EnableByJmsBeanFactory {
     private final PropertyResolver propertyResolver;
 
-    public EnableByJmsBeanFactory(PropertyResolver propertyResolver) {
+    public EnableByJmsBeanFactory(final PropertyResolver propertyResolver) {
         super();
         this.propertyResolver = propertyResolver;
     }

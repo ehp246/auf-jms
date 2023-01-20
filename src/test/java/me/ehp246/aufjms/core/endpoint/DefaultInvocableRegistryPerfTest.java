@@ -16,8 +16,8 @@ import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocableTypeDefinition;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
-import me.ehp246.aufjms.util.MockJmsMsg;
 import me.ehp246.test.TimingExtension;
+import me.ehp246.test.mock.MockJmsMsg;
 
 /**
  * @author Lei Yang

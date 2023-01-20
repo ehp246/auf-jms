@@ -1,7 +1,6 @@
 package me.ehp246.aufjms.api.dispatch;
 
-import javax.jms.TextMessage;
-
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.OnDispatch;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.OnException;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.PostSend;
@@ -11,7 +10,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 /**
  * Defines life-cycle events supported by
  * {@linkplain JmsDispatchFn#send(JmsDispatch)}.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */

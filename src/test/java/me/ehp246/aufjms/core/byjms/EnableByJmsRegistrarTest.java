@@ -18,7 +18,7 @@ class EnableByJmsRegistrarTest {
     @Test
     void scan_03() {
         final var registry = new SimpleBeanDefinitionRegistry();
-        new EnableByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(RegistrarAppConfigs.Config03.class),
+        new EnableByJmsRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(AppConfigs.Config03.class),
                 registry);
 
         Assertions.assertEquals("8c9abb70-7ed0-40ec-9c2d-eb408a2feb09", registry.getBeanDefinitionNames()[0]);
@@ -28,7 +28,7 @@ class EnableByJmsRegistrarTest {
     void dispatchFn_01() {
         final var registry = new SimpleBeanDefinitionRegistry();
         new EnableByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.DispatchFnConfig01.class), registry);
+                AnnotationMetadata.introspect(AppConfigs.DispatchFnConfig01.class), registry);
 
         Assertions.assertEquals(0, Arrays.asList(registry.getBeanDefinitionNames()).stream().filter(
                 name -> registry.getBeanDefinition(name).getBeanClassName().equals(JmsDispatchFn.class.getName()))
@@ -39,10 +39,10 @@ class EnableByJmsRegistrarTest {
     void dispatchFn_02() {
         final var registry = new SimpleBeanDefinitionRegistry();
         new EnableByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.DispatchFnConfig02.class), registry);
+                AnnotationMetadata.introspect(AppConfigs.DispatchFnConfig02.class), registry);
 
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-0").getBeanClassName());
+                registry.getBeanDefinition("jmsDispatchFn-0").getBeanClassName());
 
         Assertions.assertEquals(1, Arrays.asList(registry.getBeanDefinitionNames()).stream().filter(
                 name -> registry.getBeanDefinition(name).getBeanClassName().equals(JmsDispatchFn.class.getName()))
@@ -53,12 +53,12 @@ class EnableByJmsRegistrarTest {
     void dispatchFn_03() {
         final var registry = new SimpleBeanDefinitionRegistry();
         new EnableByJmsRegistrar().registerBeanDefinitions(
-                AnnotationMetadata.introspect(RegistrarAppConfigs.DispatchFnConfig03.class), registry);
+                AnnotationMetadata.introspect(AppConfigs.DispatchFnConfig03.class), registry);
 
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-0").getBeanClassName());
+                registry.getBeanDefinition("jmsDispatchFn-0").getBeanClassName());
         Assertions.assertEquals(JmsDispatchFn.class.getName(),
-                registry.getBeanDefinition("JmsDispatchFn-1").getBeanClassName());
+                registry.getBeanDefinition("jmsDispatchFn-1").getBeanClassName());
 
         Assertions.assertEquals(2, Arrays.asList(registry.getBeanDefinitionNames()).stream().filter(
                 name -> registry.getBeanDefinition(name).getBeanClassName().equals(JmsDispatchFn.class.getName()))

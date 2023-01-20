@@ -8,10 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.time.Duration;
 
-import javax.jms.JMSProducer;
+import jakarta.jms.JMSProducer;
 
 /**
- * Specifies the value for {@linkplain JMSProducer#setTimeToLive(long)}.
+ * Specifies the binding point of the value for
+ * {@linkplain JMSProducer#setTimeToLive(long)}.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>
@@ -23,7 +24,7 @@ import javax.jms.JMSProducer;
  * When applied to a method, Spring property placeholder is supported.
  * <p>
  * Only applicable on {@linkplain ByJms} interfaces.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */

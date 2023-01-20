@@ -6,8 +6,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.jms.Message;
-
+import jakarta.jms.Message;
 import me.ehp246.aufjms.api.endpoint.InstanceScope;
 import me.ehp246.aufjms.api.endpoint.InvocationModel;
 
@@ -20,7 +19,7 @@ import me.ehp246.aufjms.api.endpoint.InvocationModel;
  * The library looks for the first match without a defined order. Overlapping
  * regular expressions from multiple {@linkplain ForJmsType}'s might result in
  * un-deterministic behavior.
- * 
+ *
  * @author Lei Yang
  * @see Invoking
  */
@@ -43,10 +42,14 @@ public @interface ForJmsType {
     String[] value() default {};
 
     /**
-     * Specifies how to instantiate the invocation instance.
-     * 
+     * Specifies how to instantiate the class instance.
+     *
+     * @see InstanceScope
      */
     InstanceScope scope() default InstanceScope.MESSAGE;
 
+    /**
+     * Not implemented.
+     */
     InvocationModel invocation() default InvocationModel.DEFAULT;
 }

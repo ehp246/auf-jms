@@ -13,8 +13,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSRuntimeException;
 
 /**
  * @author Lei Yang
@@ -50,10 +50,11 @@ public final class OneUtil {
     }
 
     public static String getIfBlank(final String value, final Supplier<String> supplier) {
-        if (value == null || value.isBlank())
+        if (value == null || value.isBlank()) {
             return supplier.get();
-        else
+        } else {
             return value;
+        }
     }
 
     public static Stream<String> streamValues(final Collection<String> values) {
@@ -107,16 +108,16 @@ public final class OneUtil {
                 .filter(anno -> anno.annotationType() == type);
     }
 
-    public static RuntimeException ensureRuntime(Throwable thrown) {
+    public static RuntimeException ensureRuntime(final Throwable thrown) {
         if (thrown == null) {
             return null;
         }
 
-        if (thrown instanceof RuntimeException runtime) {
+        if (thrown instanceof final RuntimeException runtime) {
             return runtime;
         }
 
-        if (thrown instanceof JMSException jmsE) {
+        if (thrown instanceof final JMSException jmsE) {
             return new JMSRuntimeException(jmsE.getMessage(), jmsE.getErrorCode(), jmsE);
         }
 

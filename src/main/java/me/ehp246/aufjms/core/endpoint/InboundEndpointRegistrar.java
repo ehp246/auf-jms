@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -18,7 +19,7 @@ import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */
@@ -26,7 +27,8 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
 
     @SuppressWarnings("unchecked")
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+    public void registerBeanDefinitions(final AnnotationMetadata importingClassMetadata,
+            final BeanDefinitionRegistry registry) {
         final var enablerAttributes = importingClassMetadata
                 .getAnnotationAttributes(EnableForJms.class.getCanonicalName());
         if (enablerAttributes == null) {
@@ -51,7 +53,8 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
             }
 
             final var beanName = Optional.of(inbound.get("name").toString()).filter(OneUtil::hasValue)
-                    .orElse(InboundEndpoint.class.getSimpleName() + "-" + i);
+                    .orElse("inboundEndpoint-" + i);
+
             final var constructorArgumentValues = new ConstructorArgumentValues();
             constructorArgumentValues.addGenericArgumentValue(inbound);
             constructorArgumentValues.addGenericArgumentValue(scanThese);
@@ -60,11 +63,16 @@ public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegis
 
             beanDefinition.setConstructorArgumentValues(constructorArgumentValues);
 
+            if (registry.containsBeanDefinition(beanName)) {
+                throw new BeanDefinitionOverrideException(beanName, beanDefinition,
+                        registry.getBeanDefinition(beanName));
+            }
+
             registry.registerBeanDefinition(beanName, beanDefinition);
         }
     }
 
-    private GenericBeanDefinition newBeanDefinition(Map<String, Object> annotationAttributes) {
+    private GenericBeanDefinition newBeanDefinition(final Map<String, Object> annotationAttributes) {
         final var beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(InboundEndpoint.class);
         beanDefinition.setFactoryBeanName(InboundEndpointFactory.class.getName());

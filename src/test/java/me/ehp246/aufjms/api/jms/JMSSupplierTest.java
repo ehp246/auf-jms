@@ -1,10 +1,10 @@
 package me.ehp246.aufjms.api.jms;
 
-import javax.jms.JMSException;
-import javax.jms.JMSRuntimeException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import jakarta.jms.JMSException;
+import jakarta.jms.JMSRuntimeException;
 
 /**
  * @author Lei Yang

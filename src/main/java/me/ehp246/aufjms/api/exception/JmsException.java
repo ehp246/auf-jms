@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.exception;
 
-import javax.jms.JMSException;
+import jakarta.jms.JMSException;
 
 /**
  * @author Lei Yang

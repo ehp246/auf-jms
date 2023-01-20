@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies the value for {@code JMSXGroupID}.
+ * Specifies the binding point of the value for {@code JMSXGroupID}.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>
@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * specified value on annotation is ignored. {@code null} is accepted.
  * <p>
  * When applied to a method, Spring property placeholder is supported.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */
