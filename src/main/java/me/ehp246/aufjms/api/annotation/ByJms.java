@@ -34,7 +34,8 @@ public @interface ByJms {
     /**
      * Specifies a bean name by which the interface can be injected.
      * <p>
-     * The default name is {@link Class#getSimpleName()}.
+     * The default name is {@link Class#getSimpleName()} with the first letter in
+     * lower-case.
      *
      * @return the bean name of the proxy interface.
      */

@@ -69,9 +69,9 @@ public @interface EnableByJms {
      * The values are passed to {@linkplain ConnectionFactoryProvider#get(String)}
      * to create the beans.
      * <p>
-     * The bean name is of the form <code>JmsDistpchFn-${index}</code> where the
-     * index starts at 0. E.g., {@code JmsDispatchFn-0}, {@code JmsDispatchFn-1},
-     * and etc.
+     * The bean name is of the form <code>'jmsDispatchFn-${index}'</code> where the
+     * index starts at <code>0</code>. E.g., {@code jmsDispatchFn-0},
+     * {@code jmsDispatchFn-1}, and etc.
      * <p>
      * Does not support Spring property placeholder.
      */

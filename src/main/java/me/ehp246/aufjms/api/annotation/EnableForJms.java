@@ -88,6 +88,10 @@ public @interface EnableForJms {
         /**
          * The bean name of the endpoint. Must be unique if specified.
          * <p>
+         * The default name would be in the form of <code>'inboundEndpoint-${n}'</code>
+         * where <code>'n'</code> is the index from {@linkplain EnableForJms#value()}
+         * starting at <code>0</code>.
+         * <p>
          * Does not support Spring property placeholder.
          */
         String name() default "";

@@ -60,7 +60,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         }
 
         for (var i = 0; i < fns.length; i++) {
-            register(registry, "dispatchFn-" + i, getFnBeanDefinition(fns[i]));
+            register(registry, "jmsDispatchFn-" + i, getFnBeanDefinition(fns[i]));
         }
     }
 
