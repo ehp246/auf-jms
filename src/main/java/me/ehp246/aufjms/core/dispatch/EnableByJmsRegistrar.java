@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -46,8 +47,14 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
 
             final var beanName = Optional.ofNullable(proxyInterface.getAnnotation(ByJms.class).name())
                     .filter(OneUtil::hasValue).orElseGet(() -> beanName(proxyInterface));
+            final var proxyBeanDefinition = this.getProxyBeanDefinition(proxyInterface);
 
-            registry.registerBeanDefinition(beanName, this.getProxyBeanDefinition(proxyInterface));
+            if (registry.containsBeanDefinition(beanName)) {
+                throw new BeanDefinitionOverrideException(beanName, proxyBeanDefinition,
+                        registry.getBeanDefinition(beanName));
+            }
+
+            registry.registerBeanDefinition(beanName, proxyBeanDefinition);
         }
 
         final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());

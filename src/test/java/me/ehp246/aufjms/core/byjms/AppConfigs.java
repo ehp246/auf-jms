@@ -8,31 +8,31 @@ import me.ehp246.aufjms.core.byjms.registrar.case02.RegistrarCase02;
  * @author Lei Yang
  *
  */
-class RegistrarAppConfigs {
+class AppConfigs {
     @EnableByJms
-    public static class Config01 {
+    static class Config01 {
 
     }
 
     @EnableByJms(scan = { RegistrarCase01.class })
-    public static class Config02 {
+    static class Config02 {
 
     }
 
     @EnableByJms(scan = { RegistrarCase02.class })
-    public static class Config03 {
+    static class Config03 {
 
     }
 
     @EnableByJms(scan = {
             RegistrarCase01.class }, ttl = "PT0.11S")
-    public static class TtlConfig01 {
+    static class TtlConfig01 {
 
     }
 
     @EnableByJms(scan = {
             RegistrarCase02.class }, ttl = "PT0.112S")
-    public static class TtlConfig02 {
+    static class TtlConfig02 {
 
     }
 
