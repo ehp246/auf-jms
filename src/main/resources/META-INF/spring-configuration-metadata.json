@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "me.ehp246.aufjms.dispatchlogger.enabled",
+    "type": "java.lang.String",
+    "description": "Set to 'true' to enable logging on out-going messages."
+  }
+]}

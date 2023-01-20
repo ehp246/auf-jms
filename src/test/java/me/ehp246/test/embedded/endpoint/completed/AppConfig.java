@@ -10,8 +10,8 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.OnCompleted;
-import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
+import me.ehp246.aufjms.api.inbound.InvocationListener.OnCompleted;
+import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.test.EmbeddedArtemisConfig;
 
 /**

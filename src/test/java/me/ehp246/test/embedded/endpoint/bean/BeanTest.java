@@ -10,8 +10,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 
-import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.core.endpoint.NoopConsumer;
+import me.ehp246.aufjms.api.inbound.InboundEndpoint;
+import me.ehp246.aufjms.core.inbound.NoopConsumer;
 import me.ehp246.test.embedded.endpoint.bean.AppConfigs.AppConfig03;
 
 /**

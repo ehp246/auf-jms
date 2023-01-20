@@ -2,7 +2,7 @@ package me.ehp246.test.mock;
 
 import java.lang.reflect.Method;
 
-import me.ehp246.aufjms.api.endpoint.Invocable;
+import me.ehp246.aufjms.api.inbound.Invocable;
 
 /**
  * @author Lei Yang

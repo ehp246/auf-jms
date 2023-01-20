@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 
 /**
  * @author Lei Yang

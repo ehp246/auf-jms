@@ -12,22 +12,23 @@ import org.springframework.context.annotation.Import;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import jakarta.jms.Topic;
-import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
-import me.ehp246.aufjms.api.endpoint.Invocable;
-import me.ehp246.aufjms.api.endpoint.InvocationListener;
-import me.ehp246.aufjms.api.endpoint.Invoked.Completed;
-import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
-import me.ehp246.aufjms.api.endpoint.MsgConsumer;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
+import me.ehp246.aufjms.api.inbound.InboundEndpoint;
+import me.ehp246.aufjms.api.inbound.Invocable;
+import me.ehp246.aufjms.api.inbound.InvocationListener;
+import me.ehp246.aufjms.api.inbound.MsgConsumer;
+import me.ehp246.aufjms.api.inbound.Invoked.Completed;
+import me.ehp246.aufjms.api.inbound.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
-import me.ehp246.aufjms.core.endpoint.DefaultInvocableBinder;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointFactory;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.endpoint.InboundEndpointRegistrar;
+import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
+import me.ehp246.aufjms.core.inbound.InboundEndpointFactory;
+import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
+import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 
 /**
  * Enables the server-side capabilities of Auf JMS. E.g., declaring

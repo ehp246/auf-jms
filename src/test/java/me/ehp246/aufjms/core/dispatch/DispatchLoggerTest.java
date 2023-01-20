@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.jms.Destination;
 import jakarta.jms.TextMessage;
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**

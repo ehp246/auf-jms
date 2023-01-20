@@ -6,7 +6,7 @@ import java.util.concurrent.ExecutionException;
 import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
-import me.ehp246.aufjms.api.endpoint.InstanceScope;
+import me.ehp246.aufjms.api.inbound.InstanceScope;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**

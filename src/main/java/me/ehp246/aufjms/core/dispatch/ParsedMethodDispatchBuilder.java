@@ -7,9 +7,9 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
-import me.ehp246.aufjms.api.dispatch.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.jms.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
 

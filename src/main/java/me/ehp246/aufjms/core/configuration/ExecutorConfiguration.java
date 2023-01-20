@@ -2,7 +2,7 @@ package me.ehp246.aufjms.core.configuration;
 
 import org.springframework.context.annotation.Bean;
 
-import me.ehp246.aufjms.api.endpoint.ExecutorProvider;
+import me.ehp246.aufjms.api.inbound.ExecutorProvider;
 
 /**
  *
