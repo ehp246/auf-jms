@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 
-import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 
 /**
  * @author Lei Yang

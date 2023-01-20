@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
-import me.ehp246.aufjms.api.endpoint.InstanceScope;
+import me.ehp246.aufjms.api.inbound.InstanceScope;
 
 /**
  * @author Lei Yang

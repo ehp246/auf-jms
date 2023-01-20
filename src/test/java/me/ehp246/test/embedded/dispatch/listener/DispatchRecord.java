@@ -1,6 +1,6 @@
 package me.ehp246.test.embedded.dispatch.listener;
 
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**

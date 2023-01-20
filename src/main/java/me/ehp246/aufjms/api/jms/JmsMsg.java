@@ -7,12 +7,13 @@ import jakarta.jms.Destination;
 import jakarta.jms.TextMessage;
 
 /**
- * Custom version of JMS Message which does not throw.
+ * The abstraction of an JMS message without the <code>throws</code>.
  * <p>
  * The interface is also meant to enforce read-only policy.
  *
  * @author Lei Yang
  * @since 1.0
+ * @see JmsDispatch
  */
 public interface JmsMsg {
     String id();

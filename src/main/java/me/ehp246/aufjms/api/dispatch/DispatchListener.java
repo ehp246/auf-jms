@@ -5,6 +5,7 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener.OnDispatch;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.OnException;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.PostSend;
 import me.ehp246.aufjms.api.dispatch.DispatchListener.PreSend;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**

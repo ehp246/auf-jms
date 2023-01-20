@@ -2,6 +2,7 @@ package me.ehp246.aufjms.api.dispatch;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSProducer;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**

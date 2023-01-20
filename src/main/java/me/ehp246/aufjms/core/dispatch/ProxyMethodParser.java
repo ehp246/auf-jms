@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.dispatch.JmsDispatch.BodyAs;
+import me.ehp246.aufjms.api.jms.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
 import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;

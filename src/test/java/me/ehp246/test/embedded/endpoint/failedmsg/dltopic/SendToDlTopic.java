@@ -2,9 +2,9 @@ package me.ehp246.test.embedded.endpoint.failedmsg.dltopic;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
+import me.ehp246.aufjms.api.inbound.InvocationListener.OnFailed;
+import me.ehp246.aufjms.api.inbound.Invoked.Failed;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
-import me.ehp246.aufjms.api.endpoint.InvocationListener.OnFailed;
-import me.ehp246.aufjms.api.endpoint.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**

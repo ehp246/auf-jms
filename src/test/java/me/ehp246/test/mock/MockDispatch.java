@@ -4,9 +4,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
-import me.ehp246.aufjms.api.dispatch.JmsDispatch;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.test.TestQueueListener;
 
 /**

@@ -17,7 +17,7 @@ import org.springframework.jms.core.MessageCreator;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
-import me.ehp246.aufjms.api.endpoint.InboundEndpoint;
+import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.test.TestQueueListener;
 
 /**

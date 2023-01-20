@@ -7,8 +7,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import jakarta.jms.Message;
-import me.ehp246.aufjms.api.endpoint.InstanceScope;
-import me.ehp246.aufjms.api.endpoint.InvocationModel;
+import me.ehp246.aufjms.api.inbound.InstanceScope;
+import me.ehp246.aufjms.api.inbound.InvocationModel;
 
 /**
  * Specifies an annotated class should be invoked on a JMS message according to
