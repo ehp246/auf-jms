@@ -30,7 +30,7 @@ import jakarta.jms.Message;
  * parameter name with the first letter capitalized. For this to work properly,
  * '<code>-parameters</code>' compiler option is probably desired.
  * <p>
- * Only JMS properties are supported, no headers.
+ * Only application properties are supported, no JMS headers.
  *
  * @author Lei Yang
  * @since 1.0

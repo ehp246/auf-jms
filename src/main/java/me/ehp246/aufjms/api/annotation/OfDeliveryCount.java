@@ -7,16 +7,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Specifies the injection point for the value of JMS header 'JMSXDeliveryCount'
- * on a {@linkplain ForJmsType} object.
+ * Specifies the binding point of the value of JMS header
+ * <code>JMSXDeliveryCount</code> on a {@linkplain ForJmsType} object.
  * <p>
  * The injection point should be of {@code int} type.
  * <p>
  * Ignored on {@linkplain ByJms} interfaces.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
- * 
+ *
  */
 @Retention(RUNTIME)
 @Target({ ElementType.PARAMETER })

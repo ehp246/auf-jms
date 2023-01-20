@@ -14,10 +14,6 @@ import jakarta.jms.Message;
  * the argument value should be used for
  * {@linkplain Message#setJMSCorrelationID(String)}.
  * <p>
- * When applied to a parameter of a {@linkplain Invoking} method, it specifies
- * the injection point for the value of
- * {@linkplain Message#getJMSCorrelationID()}.
- * <p>
  * Only {@linkplain String} value is supported. {@code null} is supported.
  *
  * @author Lei Yang

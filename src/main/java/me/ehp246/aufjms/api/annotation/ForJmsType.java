@@ -42,10 +42,14 @@ public @interface ForJmsType {
     String[] value() default {};
 
     /**
-     * Specifies how to instantiate the invocation instance.
+     * Specifies how to instantiate the class instance.
      *
+     * @see InstanceScope
      */
     InstanceScope scope() default InstanceScope.MESSAGE;
 
+    /**
+     * Not implemented.
+     */
     InvocationModel invocation() default InvocationModel.DEFAULT;
 }

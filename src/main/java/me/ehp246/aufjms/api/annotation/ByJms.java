@@ -15,6 +15,9 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
+ * Indicates that the annotated interface should be implemented by Auf JMS as a
+ * message producer/client proxy and made available for injection.
+ *
  * @author Lei Yang
  * @since 1.0
  */
@@ -29,7 +32,7 @@ public @interface ByJms {
     To value();
 
     /**
-     * Specifies an optional bean name by which the proxy interface can be injected.
+     * Specifies a bean name by which the interface can be injected.
      * <p>
      * The default name is {@link Class#getSimpleName()}.
      *
@@ -39,10 +42,14 @@ public @interface ByJms {
 
     /**
      * Specifies a value for {@linkplain MessageProducer#setTimeToLive(long)} that
-     * applies to all out-bound messages from the application.
+     * applies to out-bound messages.
      * <p>
-     * The value can be overridden by higher-priority sources from
-     * {@linkplain ByJms} proxies. The default is no TTL.
+     * The value overwrites {@linkplain EnableByJms#ttl()}.
+     * <p>
+     * The value can be overridden by higher-priority sources, e.g.,
+     * {@linkplain OfTtl}.
+     * <p>
+     * The default is to follow {@linkplain EnableByJms#ttl()}.
      * <p>
      * Supports Spring property placeholder.
      */
@@ -50,11 +57,11 @@ public @interface ByJms {
 
     /**
      * Specifies a value for {@linkplain MessageProducer#setDeliveryDelay(long)}
-     * that applies to all out-bound messages from the application.
+     * that applies to out-bound messages.
      * <p>
      * This value overwrites {@linkplain EnableByJms#delay()}.
      * <p>
-     * The default is no delay.
+     * The default is to follow {@linkplain EnableByJms#delay()}.
      * <p>
      * Supports Spring property placeholder.
      */
@@ -63,12 +70,14 @@ public @interface ByJms {
     To replyTo() default @To("");
 
     /**
-     * Specifies the connection factory name with which the interface retrieves a
+     * Specifies the connection factory name by which the interface retrieves a
      * {@linkplain Connection} from
      * {@linkplain ConnectionFactoryProvider#get(String)}.
+     *
      */
     String connectionFactory() default "";
 
+    @Target({})
     @interface To {
         /**
          * Specifies the destination name for the proxy interface.

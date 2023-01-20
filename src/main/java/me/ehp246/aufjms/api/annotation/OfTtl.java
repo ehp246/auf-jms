@@ -11,7 +11,8 @@ import java.time.Duration;
 import jakarta.jms.JMSProducer;
 
 /**
- * Specifies the value for {@linkplain JMSProducer#setTimeToLive(long)}.
+ * Specifies the binding point of the value for
+ * {@linkplain JMSProducer#setTimeToLive(long)}.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>

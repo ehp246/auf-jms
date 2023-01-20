@@ -18,7 +18,11 @@ import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 
 /**
- * Enables {@link ByJms}-annotated proxy interfaces scanning.
+ * Enables client-side capabilities of Auf JMS. E.g.,
+ * {@linkplain ByJms}-annotated interfaces scanning and registration
+ * <p>
+ * By default, the package and the sub-packages of the annotated class will be
+ * scanned.
  *
  * @author Lei Yang
  * @since 1.0
@@ -63,7 +67,7 @@ public @interface EnableByJms {
      * {@linkplain Connection} retrieved from the named connection factories.
      * <p>
      * The values are passed to {@linkplain ConnectionFactoryProvider#get(String)}
-     * as connection name to create the bean.
+     * to create the beans.
      * <p>
      * The bean name is of the form <code>JmsDistpchFn-${index}</code> where the
      * index starts at 0. E.g., {@code JmsDispatchFn-0}, {@code JmsDispatchFn-1},
