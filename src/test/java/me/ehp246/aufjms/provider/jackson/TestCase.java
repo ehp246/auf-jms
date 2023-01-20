@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Lei Yang
  *
  */
-class JsonByJacksonTestCases {
+class TestCase {
     interface PersonName {
         @JsonProperty
         String firstName();

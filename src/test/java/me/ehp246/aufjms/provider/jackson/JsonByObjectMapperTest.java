@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import me.ehp246.aufjms.api.spi.JacksonConfig;
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.Person;
-import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonDob;
-import me.ehp246.aufjms.provider.jackson.JsonByJacksonTestCases.PersonName;
+import me.ehp246.aufjms.provider.jackson.TestCase.Person;
+import me.ehp246.aufjms.provider.jackson.TestCase.PersonDob;
+import me.ehp246.aufjms.provider.jackson.TestCase.PersonName;
 
 class JsonByObjectMapperTest {
     private final JsonByObjectMapper jackson = new JsonByObjectMapper(new JacksonConfig().objectMapper());
