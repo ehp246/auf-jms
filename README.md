@@ -9,7 +9,7 @@ Auf JMS is aimed at <a href='https://spring.io/'>Spring</a>-based applications t
 
 Assuming you have a Spring Boot application ready, add dependency:
 
-* [Auf REST](https://mvnrepository.com/artifact/me.ehp246/auf-jms)
+* [Auf JMS](https://mvnrepository.com/artifact/me.ehp246/auf-jms)
 
 ### On client applications
 
@@ -34,12 +34,12 @@ public interface TaskInbox {
 }
 ```
 
-At this point, you have a JMS client that when invoked will send a message
+At this point, you have a JMS client proxy that when invoked will send a message
 * to a queue named by Spring property `app.task.inbox`
 * with the message type of `RunJob`
 * with the message body of `job` serialized in JSON
 
-The client won't do anything by itself, so the next step is to...
+The proxy won't do anything by itself, so the next step is to...
 
 **Inject and enjoy.**
 
@@ -69,11 +69,10 @@ public interface TaskStatus {
 The latest version requires the following to run:
 * <a href='https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core'>Log4j 2</a>
 * <a href='https://mvnrepository.com/artifact/com.fasterxml.jackson'>Jackson 2</a>: Core and Databind
-* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring 6</a>: Bean, Context
+* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring 6</a>
 * <a href='https://openjdk.org/projects/jdk/17/'>JDK 17</a>
-### Servers
-To use the server-side features provided by `@EnableForJms`:
-* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring 6</a>: JMS
 
+In addition to the above, the server-side features provided by `@EnableForJms` requires:
+* <a href='https://mvnrepository.com/artifact/org.springframework/spring-jms'>Spring JMS: 6</a>
 ## Release
 The release binaries can be found on [Maven Central](https://mvnrepository.com/artifact/me.ehp246/auf-jms).
