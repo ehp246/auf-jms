@@ -74,5 +74,11 @@ The latest version requires the following to run:
 
 In addition to the above, the server-side features provided by `@EnableForJms` requires:
 * <a href='https://mvnrepository.com/artifact/org.springframework/spring-jms'>Spring JMS: 6</a>
+
+Note the latest Auf REST, Spring 6 and Spring Boot 3 are built on <a href='https://jakarta.ee/specifications/messaging/3.0/apidocs/'>Jakarta Messaging API</a>.
+
 ## Release
 The release binaries can be found on [Maven Central](https://mvnrepository.com/artifact/me.ehp246/auf-jms).
+
+### Version 1
+The version 1 releases are on <a href='https://javaee.github.io/jms-spec/pages/JMS20FinalRelease'>JMS 2.0</a> and Spring 5.
