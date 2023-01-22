@@ -11,7 +11,7 @@ Assuming you have a Spring Boot application ready, add dependency:
 
 * [Auf JMS](https://mvnrepository.com/artifact/me.ehp246/auf-jms)
 
-### On client applications
+### Client Application
 
 **Enable by `@EnableByJms`.**
 
@@ -54,7 +54,6 @@ public class AppService {
 ```
 
 <br>
-The following are a few more examples.
 
 **To send to a topic**
 
@@ -62,6 +61,30 @@ The following are a few more examples.
 @ByJms(@To(value = "${app.task.status}", type = DestinationType.TOPIC))
 public interface TaskStatus {
     void updateJobStatus(@OfProperty String jobId, Status status);
+}
+```
+
+### Server Application
+
+**Enable by `@EnableForJms`.**
+
+```java
+@EnableForJms(value = @Inbound(@From("${app.task.inbox}")))
+@SpringBootApplication
+class ServerApplication {
+    public static void main(final String[] args) {
+        SpringApplication.run(ClientApplication.class, args);
+    }
+}
+```
+
+**Implement business logic by JMS type**
+```java
+@ForJmsType
+class RunJob {
+    public void invoke(Job job) {
+        //Do the work
+    }
 }
 ```
 
