@@ -1,4 +1,4 @@
-package me.ehp246.test.asb.sub.localevent;
+package me.ehp246.test.asb.sub;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -18,14 +18,15 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @Service
 @ForJmsType(value = ".*", scope = InstanceScope.BEAN)
-public class LocalEvent {
-    private final static Logger logger = LogManager.getLogger(LocalEvent.class);
+public class OnMsg {
+    private final static Logger logger = LogManager.getLogger(OnMsg.class);
 
     private final CompletableFuture<JmsMsg> ref = new CompletableFuture<>();
 
     @Invoking
     public void perform(final JmsMsg msg) {
         logger.atDebug().log("Id: {}", msg.correlationId());
+        ref.complete(msg);
     }
 
     public JmsMsg take() throws InterruptedException, ExecutionException {
