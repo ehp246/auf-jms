@@ -26,10 +26,10 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
+import me.ehp246.aufjms.core.inbound.AnnotatedInboundEndpointRegistrar;
 import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
 import me.ehp246.aufjms.core.inbound.InboundEndpointFactory;
 import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 
 /**
  * Enables the server-side capabilities of Auf JMS.
@@ -43,12 +43,12 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
+@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class, InboundEndpointFactory.class,
         InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
     /**
-     * Specifies the destinations to listen to incoming messages and their
-     * associated actions.
+     * Specifies the destinations to listen for incoming messages and their
+     * configurations.
      */
     Inbound[] value();
 

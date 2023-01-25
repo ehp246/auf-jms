@@ -19,11 +19,12 @@ import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
+ * Registers the {@linkplain EnableForJms.Inbound}'s.
  *
  * @author Lei Yang
  * @since 1.0
  */
-public final class InboundEndpointRegistrar implements ImportBeanDefinitionRegistrar {
+public final class AnnotatedInboundEndpointRegistrar implements ImportBeanDefinitionRegistrar {
 
     @SuppressWarnings("unchecked")
     @Override

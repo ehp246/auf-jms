@@ -20,7 +20,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  * @author Lei Yang
  * @since 1.0
- * @see InboundEndpointRegistrar
+ * @see AnnotatedInboundEndpointRegistrar
  * @see EnableForJms
  */
 public final class InboundEndpointFactory {

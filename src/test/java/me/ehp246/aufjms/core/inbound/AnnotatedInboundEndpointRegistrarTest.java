@@ -7,7 +7,6 @@ import org.springframework.beans.factory.support.SimpleBeanDefinitionRegistry;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
-import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 import me.ehp246.aufjms.core.inbound.TestCases.Config01;
 import me.ehp246.aufjms.core.inbound.TestCases.Config02;
 import me.ehp246.aufjms.core.inbound.TestCases.Config03;
@@ -17,12 +16,12 @@ import me.ehp246.aufjms.core.inbound.TestCases.Config04;
  * @author Lei Yang
  *
  */
-class InboundEndpointRegistrarTest {
+class AnnotatedInboundEndpointRegistrarTest {
     @Test
     void name_01() {
         final var registry = new SimpleBeanDefinitionRegistry();
 
-        new InboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config01.class),
+        new AnnotatedInboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config01.class),
                 registry);
 
         Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
@@ -33,7 +32,7 @@ class InboundEndpointRegistrarTest {
     void name_02() {
         final var registry = new SimpleBeanDefinitionRegistry();
 
-        new InboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config02.class), registry);
+        new AnnotatedInboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config02.class), registry);
 
         Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
                 registry.getBeanDefinition("inboundEndpoint-0").getBeanClassName());
@@ -43,12 +42,16 @@ class InboundEndpointRegistrarTest {
     void name_03() {
         final var registry = new SimpleBeanDefinitionRegistry();
 
-        new InboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config03.class), registry);
+        new AnnotatedInboundEndpointRegistrar().registerBeanDefinitions(AnnotationMetadata.introspect(Config03.class), registry);
 
         Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
                 registry.getBeanDefinition("inboundEndpoint-0").getBeanClassName());
+
         Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
                 registry.getBeanDefinition("atEndpoint.2").getBeanClassName());
+
+        Assertions.assertEquals(InboundEndpoint.class.getCanonicalName(),
+                registry.getBeanDefinition("inboundEndpoint-2").getBeanClassName());
     }
 
     @Test
@@ -56,7 +59,7 @@ class InboundEndpointRegistrarTest {
         final var registry = new SimpleBeanDefinitionRegistry();
 
         Assertions.assertThrows(BeanDefinitionOverrideException.class,
-                () -> new InboundEndpointRegistrar()
+                () -> new AnnotatedInboundEndpointRegistrar()
                         .registerBeanDefinitions(AnnotationMetadata.introspect(Config04.class), registry));
     }
 }
