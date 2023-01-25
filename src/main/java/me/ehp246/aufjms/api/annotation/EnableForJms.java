@@ -13,14 +13,15 @@ import org.springframework.context.annotation.Import;
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
+import jakarta.jms.Queue;
 import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocationListener;
-import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
+import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
@@ -153,6 +154,10 @@ public @interface EnableForJms {
              */
             String value();
 
+            /**
+             * Specifies the {@linkplain From#value()} is a {@linkplain Queue} or
+             * {@linkplain Topic}.
+             */
             DestinationType type() default DestinationType.QUEUE;
 
             /**
@@ -171,33 +176,39 @@ public @interface EnableForJms {
             String selector() default "";
 
 
-            Sub sub() default @Sub;
+            /**
+             * Specifies the subscription configuration.
+             * <p>
+             * Only applicable when {@linkplain From#type()} is
+             * {@linkplain DestinationType#TOPIC}.
+             *
+             * @see <a href=
+             *      'https://jakarta.ee/specifications/messaging/3.0/apidocs/jakarta/jms/topicsubscriber'>TopicSubscriber</a>
+             */
+            Sub sub() default @Sub(name = "");
 
             @Target({})
             @interface Sub {
                 /**
-                 * Defines the subscription name to be used with a {@linkplain Topic} consumer.
+                 * Specifies the subscription name to be used with a {@linkplain Topic}
+                 * consumer.
                  * <p>
-                 * Only applicable when {@linkplain From#type()} is
-                 * {@linkplain DestinationType#TOPIC}.
+                 * Only applicable when {@linkplain From.Sub#shared()} and/or
+                 * {@linkplain From.Sub#durable()} is <code>true</code>.
                  * <p>
                  * Supports Spring property placeholder.
                  */
-                String value() default "";
+                String name();
 
                 /**
                  * Specifies whether the subscription should be shared or not.
-                 * <p>
-                 * Defaults to <code>true</code>.
                  */
-                boolean shared() default true;
+                boolean shared() default false;
 
                 /**
                  * Specifies whether the subscription should be durable or not.
-                 * <p>
-                 * Defaults to <code>true</code>.
                  */
-                boolean durable() default true;
+                boolean durable() default false;
             }
         }
     }

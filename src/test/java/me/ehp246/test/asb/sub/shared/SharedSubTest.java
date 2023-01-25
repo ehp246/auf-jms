@@ -1,4 +1,4 @@
-package me.ehp246.test.asb.sub;
+package me.ehp246.test.asb.sub.shared;
 
 import java.util.concurrent.ExecutionException;
 
@@ -16,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = { AppConfig.class }, webEnvironment = WebEnvironment.NONE)
 @EnabledIfSystemProperty(named = "me.ehp246.aufjms", matches = "true")
 @ActiveProfiles("local")
-class SubTest {
+class SharedSubTest {
     @Autowired
     private ToEchoTopic echoTopic;
     @Autowired

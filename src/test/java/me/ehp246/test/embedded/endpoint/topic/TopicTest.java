@@ -28,8 +28,8 @@ public class TopicTest {
                 abstractMessageListenerContainer.getSubscriptionName());
 
         Assertions.assertEquals(true, abstractMessageListenerContainer.isPubSubDomain());
-        Assertions.assertEquals(true, abstractMessageListenerContainer.isSubscriptionDurable());
-        Assertions.assertEquals(true, abstractMessageListenerContainer.isSubscriptionShared());
+        Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionDurable());
+        Assertions.assertEquals(false, abstractMessageListenerContainer.isSubscriptionShared());
     }
 
     @Test

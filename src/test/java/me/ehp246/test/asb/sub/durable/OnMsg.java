@@ -1,4 +1,4 @@
-package me.ehp246.test.asb.sub;
+package me.ehp246.test.asb.sub.durable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

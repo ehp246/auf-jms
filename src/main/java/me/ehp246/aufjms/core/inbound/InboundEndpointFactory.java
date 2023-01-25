@@ -49,7 +49,7 @@ public final class InboundEndpointFactory {
         final InboundEndpoint.From from = new InboundEndpointRecord.From(
                 atType == DestinationType.TOPIC ? At.toTopic(atName) : At.toQueue(atName),
                 propertyResolver.resolve(fromAttribute.get("selector").toString()),
-                new InboundEndpointRecord.Sub(propertyResolver.resolve(subAttribute.get("value").toString()),
+                new InboundEndpointRecord.Sub(propertyResolver.resolve(subAttribute.get("name").toString()),
                         (Boolean) (subAttribute.get("shared")), (Boolean) (subAttribute.get("durable"))));
 
         final int concurrency = Integer
