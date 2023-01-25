@@ -88,6 +88,14 @@ public @interface EnableForJms {
         Class<?>[] scan() default {};
 
         /**
+         * Registers the specified {@linkplain ForJmsType}-annotated classes
+         * individually.
+         * <p>
+         * Registering classes are collected before the scanned.
+         */
+        Class<?>[] register() default {};
+
+        /**
          * Not implemented.
          */
         String concurrency() default "0";

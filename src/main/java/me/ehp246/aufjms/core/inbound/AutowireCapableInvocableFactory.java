@@ -7,19 +7,19 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 import me.ehp246.aufjms.api.inbound.Invocable;
+import me.ehp246.aufjms.api.inbound.InvocableFactory;
 import me.ehp246.aufjms.api.inbound.InvocableTypeRegistry;
 import me.ehp246.aufjms.api.inbound.InvocationModel;
-import me.ehp246.aufjms.api.inbound.MsgInvocableFactory;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 
 /**
- * Resolves an Executable instance by the given registry to a bean/object
- * created by the given bean factory.
+ * Creates {@linkplain Invocable} instance by
+ * {@linkplain AutowireCapableBeanFactory}.
  *
  * @author Lei Yang
  *
  */
-final class AutowireCapableInvocableFactory implements MsgInvocableFactory {
+final class AutowireCapableInvocableFactory implements InvocableFactory {
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final InvocableTypeRegistry registry;
 
@@ -62,8 +62,9 @@ final class AutowireCapableInvocableFactory implements MsgInvocableFactory {
 
             @Override
             public void close() throws Exception {
-                if (registered.scope() == InstanceScope.BEAN)
+                if (registered.scope() == InstanceScope.BEAN) {
                     return;
+                }
                 autowireCapableBeanFactory.destroyBean(instance);
             }
         };

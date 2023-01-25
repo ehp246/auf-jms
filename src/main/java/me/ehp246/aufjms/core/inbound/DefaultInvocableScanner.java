@@ -4,11 +4,14 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,13 +36,17 @@ final class DefaultInvocableScanner {
 
     private final PropertyResolver propertyResolver;
 
-    public DefaultInvocableScanner(PropertyResolver propertyResolver) {
+    public DefaultInvocableScanner(final PropertyResolver propertyResolver) {
         super();
         this.propertyResolver = propertyResolver;
     }
 
-    public DefaultInvocableRegistry registeryFrom(final Set<String> scanPackages) {
-        return new DefaultInvocableRegistry().register(perform(scanPackages).stream());
+    public DefaultInvocableRegistry registeryFrom(final Class<?>[] classes, final Set<String> scanPackages) {
+        // Registering first, then scanning
+        final var all = Stream.concat(Optional.ofNullable(classes).map(List::of).orElseGet(List::of).stream()
+                .map(this::newDefinition).collect(Collectors.toSet()).stream(), perform(scanPackages).stream());
+
+        return new DefaultInvocableRegistry().register(all);
     }
 
     private Set<InvocableTypeDefinition> perform(final Set<String> scanPackages) {
@@ -76,8 +83,7 @@ final class DefaultInvocableScanner {
 
         final var msgTypes = Arrays
                 .asList(annotation.value().length == 0 ? new String[] { type.getSimpleName() } : annotation.value())
-                .stream()
-                .map(this.propertyResolver::resolve)
+                .stream().map(this.propertyResolver::resolve)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
                 .map(entry -> {
                     if (entry.getValue() > 1) {

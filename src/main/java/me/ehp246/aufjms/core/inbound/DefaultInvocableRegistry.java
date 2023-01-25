@@ -1,11 +1,10 @@
 package me.ehp246.aufjms.core.inbound;
 
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import me.ehp246.aufjms.api.inbound.InvocableType;
@@ -44,8 +43,8 @@ final class DefaultInvocableRegistry implements InvocableTypeRegistry {
     }
 
     @Override
-    public List<InvocableTypeDefinition> registered() {
-        return this.registeredInvokables.values().stream().collect(Collectors.toList());
+    public Map<String, InvocableTypeDefinition> registered() {
+        return Collections.unmodifiableMap(this.registeredInvokables);
     }
 
     @Override

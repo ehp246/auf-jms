@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpoint;
@@ -35,16 +36,19 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
     private final InvocableBinder binder;
     private final ConnectionFactoryProvider cfProvider;
     private final JmsDispatchFnProvider dispathFnProvider;
+    private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider,
             final Set<InboundEndpoint> endpoints, final ExecutorProvider executorProvider, final InvocableBinder binder,
-            final JmsDispatchFnProvider dispathFnProvider) {
+            final JmsDispatchFnProvider dispathFnProvider,
+            final AutowireCapableBeanFactory autowireCapableBeanFactory) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
         this.endpoints = endpoints;
         this.executorProvider = executorProvider;
         this.binder = binder;
         this.dispathFnProvider = dispathFnProvider;
+        this.autowireCapableBeanFactory = autowireCapableBeanFactory;
     }
 
     @Override
@@ -83,7 +87,9 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                                                             dispathFnProvider.get(endpoint.connectionFactory())),
                                                     endpoint.invocationListener()),
                                             executorProvider.get(endpoint.concurrency())),
-                                    endpoint.invocableFactory(), endpoint.defaultConsumer()));
+                                    new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
+                                            endpoint.typeRegistry()),
+                                    endpoint.defaultConsumer()));
                 }
 
                 @Override

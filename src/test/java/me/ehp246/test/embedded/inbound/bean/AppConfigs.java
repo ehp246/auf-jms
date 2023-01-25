@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
-import me.ehp246.aufjms.api.inbound.MsgInvocableFactory;
+import me.ehp246.aufjms.api.inbound.InvocableTypeRegistry;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.test.EmbeddedArtemisConfig;
 import me.ehp246.test.mock.MockFrom;
@@ -38,7 +38,7 @@ class AppConfigs {
                 }
 
                 @Override
-                public MsgInvocableFactory invocableFactory() {
+                public InvocableTypeRegistry typeRegistry() {
                     return null;
                 }
 
@@ -66,7 +66,7 @@ class AppConfigs {
                 }
 
                 @Override
-                public MsgInvocableFactory invocableFactory() {
+                public InvocableTypeRegistry typeRegistry() {
                     return null;
                 }
 
