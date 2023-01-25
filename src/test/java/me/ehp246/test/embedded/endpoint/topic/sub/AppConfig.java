@@ -11,7 +11,6 @@ import me.ehp246.aufjms.api.annotation.EnableByJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound;
 import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From;
-import me.ehp246.aufjms.api.annotation.EnableForJms.Inbound.From.Sub;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.test.EmbeddedArtemisConfig;
 
@@ -22,7 +21,7 @@ import me.ehp246.test.EmbeddedArtemisConfig;
 @ComponentScan
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From(value = "TOPIC", type = DestinationType.TOPIC, sub = @Sub(shared = false, durable = false))) })
+        @Inbound(value = @From(value = "TOPIC", type = DestinationType.TOPIC)) })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     @Bean

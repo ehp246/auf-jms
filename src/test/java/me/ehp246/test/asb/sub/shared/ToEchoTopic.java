@@ -1,4 +1,4 @@
-package me.ehp246.test.asb.sub;
+package me.ehp246.test.asb.sub.shared;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;

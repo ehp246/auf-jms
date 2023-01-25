@@ -22,7 +22,7 @@ import me.ehp246.test.TestTopicListener;
 @EnableJms
 @EnableForJms({
         @Inbound(value = @From(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC, sub = @Sub(name = TestTopicListener.SUBSCRIPTION_NAME)), name = "sub1"),
-        @Inbound(value = @From(value = "T2", type = DestinationType.TOPIC, sub = @Sub(shared = false, durable = false))),
+        @Inbound(value = @From(value = "T2", type = DestinationType.TOPIC)),
         @Inbound(value = @From(TestTopicListener.DESTINATION_NAME), name = "sub3"),
         @Inbound(value = @From(value = TestTopicListener.DESTINATION_NAME, type = DestinationType.TOPIC, sub = @Sub(durable = true, shared = true, name = "${sub-name}")), name = "sub4") })
 @Import(EmbeddedArtemisConfig.class)
