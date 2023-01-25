@@ -35,6 +35,8 @@ import jakarta.jms.Message;
  * @author Lei Yang
  * @since 1.0
  * @see Parameter#getName()
+ * @see <a href='https://openjdk.org/jeps/118'>JEP 118: Access to Parameter
+ *      Names at Runtime</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.PARAMETER })
