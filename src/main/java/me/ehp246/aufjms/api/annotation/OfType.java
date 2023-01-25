@@ -10,7 +10,9 @@ import jakarta.jms.Message;
 
 /**
  * Specifies the binding point of the value for
- * {@linkplain Message#setJMSType(String)}.
+ * {@linkplain Message#setJMSType(String)}. The annotation can be applied on
+ * both the client side, i.e., {@linkplain ByJms} interfaces, and the server
+ * side, i.e., {@linkplain ForJmsType} classes.
  * <p>
  * Can be applied to a parameter or a method on a {@linkplain ByJms} interface.
  * <p>

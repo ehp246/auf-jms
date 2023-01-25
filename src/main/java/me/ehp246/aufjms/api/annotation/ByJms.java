@@ -8,6 +8,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Queue;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Topic;
@@ -16,7 +18,7 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
  * Indicates that the annotated interface should be implemented by Auf JMS as a
- * message producer/client proxy and made available for injection.
+ * message producer and made available for injection.
  *
  * @author Lei Yang
  * @since 1.0
@@ -34,10 +36,11 @@ public @interface ByJms {
     /**
      * Specifies a bean name by which the interface can be injected.
      * <p>
-     * The default name is {@link Class#getSimpleName()} with the first letter in
+     * The default is from {@link Class#getSimpleName()} with the first letter in
      * lower-case.
      *
      * @return the bean name of the proxy interface.
+     * @see {@linkplain Qualifier}
      */
     String name() default "";
 
@@ -68,16 +71,21 @@ public @interface ByJms {
      */
     String delay() default "";
 
+    /**
+     * Specifies the return destination for out-bound messages.
+     */
     To replyTo() default @To("");
 
     /**
      * Specifies the connection factory name by which the interface retrieves a
      * {@linkplain Connection} from
      * {@linkplain ConnectionFactoryProvider#get(String)}.
-     *
      */
     String connectionFactory() default "";
 
+    /**
+     * Defines a destination.
+     */
     @Target({})
     @interface To {
         /**

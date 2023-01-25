@@ -52,7 +52,8 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
         final var listenerContainerFactory = jmsListenerContainerFactory(null);
 
         for (final var endpoint : this.endpoints) {
-            LOGGER.atTrace().log("Registering '{}' endpoint on '{}'", endpoint.name(), endpoint.from().on());
+            LOGGER.atTrace().log("Registering '{}' on '{}', '{}'", endpoint::name, endpoint.from()::on,
+                    endpoint.from()::sub);
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
                 @Override

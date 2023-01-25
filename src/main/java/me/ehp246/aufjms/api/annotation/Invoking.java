@@ -8,7 +8,9 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies which method should be invoked on a {@linkplain ForJmsType} class.
- * 
+ * <p>
+ * The annotated method must be <code>public</code>.
+ *
  * @author Lei Yang
  * @since 1.0
  * @see ForJmsType

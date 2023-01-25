@@ -10,15 +10,14 @@ import jakarta.jms.Message;
 
 /**
  * Specifies the binding point of the value of
- * {@linkplain Message#getJMSRedelivered()} on a {@linkplain ForJmsType} object.
+ * {@linkplain Message#getJMSRedelivered()}.
  * <p>
  * The injection point should be of {@code int} type.
  * <p>
- * Not applicable to {@linkplain ByJms} interfaces.
+ * Only applicable on {@linkplain ForJmsType}.
  *
  * @author Lei Yang
  * @since 1.0
- *
  */
 @Retention(RUNTIME)
 @Target({ ElementType.PARAMETER })

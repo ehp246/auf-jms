@@ -32,9 +32,10 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
 import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 
 /**
- * Enables the server-side capabilities of Auf JMS. E.g., declaring
- * {@linkplain Inbound} endpoints. Scanning and registration of
- * {@linkplain ForJmsType} classes for the endpoints.
+ * Enables the server-side capabilities of Auf JMS.
+ * <p>
+ * Mostly to declare {@linkplain Inbound} endpoints and scanning and
+ * registration of {@linkplain ForJmsType} classes for the endpoints.
  *
  * @author Lei Yang
  * @since 1.0
@@ -45,6 +46,10 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 @Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
         InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
+    /**
+     * Specifies the destinations to listen to incoming messages and their
+     * associated actions.
+     */
     Inbound[] value();
 
     /**

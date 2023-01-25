@@ -32,5 +32,13 @@ import jakarta.jms.JMSProducer;
 @Retention(RUNTIME)
 @Target({ ElementType.METHOD, ElementType.PARAMETER })
 public @interface OfTtl {
+    /**
+     * TTL in duration.
+     * <p>
+     * Default is no TTL/expiration.
+     *
+     * @see <a href='https://en.wikipedia.org/wiki/ISO_8601#Durations'>ISO
+     *      Durations</a>
+     */
     String value() default "PT0S";
 }

@@ -14,6 +14,9 @@ import java.lang.annotation.Target;
  * specified value on annotation is ignored. {@code null} is accepted.
  * <p>
  * When applied to a method, Spring property placeholder is supported.
+ * <p>
+ * When applied to a parameter of a method on {@linkplain ForJmsType} class, it
+ * binds the parameter to the incoming message's value.
  *
  * @author Lei Yang
  * @since 1.0
