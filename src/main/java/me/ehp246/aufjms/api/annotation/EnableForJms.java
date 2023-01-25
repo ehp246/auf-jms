@@ -90,8 +90,6 @@ public @interface EnableForJms {
         /**
          * Registers the specified {@linkplain ForJmsType}-annotated classes
          * individually.
-         * <p>
-         * Registering classes are collected before the scanned.
          */
         Class<?>[] register() default {};
 
