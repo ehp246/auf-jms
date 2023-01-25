@@ -17,7 +17,7 @@ import me.ehp246.test.asb.SimpleServiceBusConfig;
  */
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub("simple-sub")), autoStartup = "false") })
+        @Inbound(value = @From(value = "auf-jms.echo.event", type = DestinationType.TOPIC, sub = @Sub(name = "simple-sub")), autoStartup = "false") })
 @Import({ SimpleServiceBusConfig.class })
 @SpringBootApplication
 class AppConfig {

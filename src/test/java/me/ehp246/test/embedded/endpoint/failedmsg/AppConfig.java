@@ -28,7 +28,7 @@ import me.ehp246.test.embedded.endpoint.failedmsg.failed.FailMsg;
 @EnableForJms({
         @Inbound(value = @From("q1"), scan = FailMsg.class, invocationListener = "consumer1"),
         @Inbound(value = @From("q2"), scan = FailMsg.class, invocationListener = "consumer2"),
-        @Inbound(value = @From(value = "dlq", type = DestinationType.TOPIC, sub = @Sub("s1")), scan = OnDlqMsg.class) })
+        @Inbound(value = @From(value = "dlq", type = DestinationType.TOPIC, sub = @Sub(name = "s1")), scan = OnDlqMsg.class) })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
     public CompletableFuture<Failed> conRef1 = new CompletableFuture<>();

@@ -18,9 +18,9 @@ import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocationListener;
-import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
+import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
@@ -171,33 +171,33 @@ public @interface EnableForJms {
             String selector() default "";
 
 
+            /**
+             * Specifies the subscription configuration.
+             * <p>
+             * Only applicable when {@linkplain EnableForJms.Inbound#type()} is
+             * {@linkplain DestinationType#TOPIC}.
+             */
             Sub sub() default @Sub;
 
             @Target({})
             @interface Sub {
                 /**
-                 * Defines the subscription name to be used with a {@linkplain Topic} consumer.
-                 * <p>
-                 * Only applicable when {@linkplain From#type()} is
-                 * {@linkplain DestinationType#TOPIC}.
+                 * Specifies the subscription name to be used with a {@linkplain Topic}
+                 * consumer.
                  * <p>
                  * Supports Spring property placeholder.
                  */
-                String value() default "";
+                String name() default "";
 
                 /**
                  * Specifies whether the subscription should be shared or not.
-                 * <p>
-                 * Defaults to <code>true</code>.
                  */
-                boolean shared() default true;
+                boolean shared() default false;
 
                 /**
                  * Specifies whether the subscription should be durable or not.
-                 * <p>
-                 * Defaults to <code>true</code>.
                  */
-                boolean durable() default true;
+                boolean durable() default false;
             }
         }
     }
