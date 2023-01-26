@@ -65,7 +65,7 @@ public final class AufJmsConfiguration {
     @Bean("ca50e6fd-0737-4cf2-ad54-77a2620c4735")
     public JsonByObjectMapper jsonByObjectMapper(
             @Autowired(required = false) @Qualifier(AufJmsConstants.AUF_JMS_OBJECT_MAPPER) final ObjectMapper aufRestMapper,
-            @Autowired(required = false) final ObjectMapper defaultObjectMapper) {
+            @Autowired(required = false) @Qualifier("objectMapper") final ObjectMapper defaultObjectMapper) {
         if (aufRestMapper != null) {
             return new JsonByObjectMapper(aufRestMapper);
         }
