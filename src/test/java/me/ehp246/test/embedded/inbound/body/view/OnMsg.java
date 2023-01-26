@@ -15,7 +15,7 @@ import me.ehp246.test.embedded.inbound.body.view.AppConfig.Received;
  * @author Lei Yang
  *
  */
-class OnSend {
+class OnMsg {
     @ForJmsType
     static class Default {
         @Autowired
