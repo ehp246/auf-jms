@@ -8,8 +8,8 @@ import java.util.function.Function;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
-import me.ehp246.aufjms.api.jms.JmsDispatch.BodyAs;
 import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -30,11 +30,12 @@ final class ParsedMethodDispatchBuilder {
     private final String[] propertyNames;
     private final Class<?>[] propertyTypes;
     private final int bodyIndex;
-    private final BodyAs bodyAs;
+    private final BodyOf<?> bodyOf;
 
     ParsedMethodDispatchBuilder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
-            BodyAs bodyAs, final int[] propertyArgs, final Class<?>[] propertyTypes, String[] propertyNames,
+            final BodyOf<?> bodyAs, final int[] propertyArgs, final Class<?>[] propertyTypes,
+            final String[] propertyNames,
             final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,
             final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn) {
         this.reflected = reflected;
@@ -49,7 +50,7 @@ final class ParsedMethodDispatchBuilder {
         this.propertyNames = propertyNames;
         this.propertyTypes = propertyTypes;
         this.bodyIndex = bodyIndex;
-        this.bodyAs = bodyAs;
+        this.bodyOf = bodyAs;
     }
 
     @SuppressWarnings("unchecked")
@@ -112,8 +113,8 @@ final class ParsedMethodDispatchBuilder {
             }
 
             @Override
-            public BodyAs bodyAs() {
-                return bodyAs;
+            public BodyOf<?> bodyOf() {
+                return bodyOf;
             }
 
             @Override

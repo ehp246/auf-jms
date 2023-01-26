@@ -11,6 +11,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
 
@@ -29,26 +30,21 @@ public final class JsonByObjectMapper implements FromJson, ToJson {
     }
 
     @Override
-    public String apply(final List<ToJson.From> values) {
+    public String apply(final Object value, final BodyOf<?> valueInfo) {
+        if (value == null) {
+            return null;
+        }
+
+        final var type = valueInfo == null ? value.getClass() : valueInfo.first();
+        final var view = valueInfo == null ? null : valueInfo.view();
+
         try {
-            String json = null;
-            if (values == null) {
-                json = null;
-            } else if (values.size() == 1) {
-                final var target = values.get(0);
-                json = this.objectMapper.writerFor(target.type()).writeValueAsString(target.value());
-            } else if (values.size() > 1) {
-                // Use wrapping array for multi-parameter only.
-                final var list = new ArrayList<String>(values.size());
-                for (int i = 0; i < values.size(); i++) {
-                    final var target = values.get(i);
-                    list.add(this.objectMapper.writerFor(target.type()).writeValueAsString(target.value()));
-                }
-                json = this.objectMapper.writeValueAsString(list);
+            if (view == null) {
+                return this.objectMapper.writerFor(type).writeValueAsString(value);
+            } else {
+                return this.objectMapper.writerFor(type).withView(view).writeValueAsString(value);
             }
-            return json;
-        } catch (final Exception e) {
-            LOGGER.atError().log("Failed to serialize: {}", e.getMessage());
+        } catch (final JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }

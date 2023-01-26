@@ -37,6 +37,7 @@ import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.test.mock.MockDispatch;
 
 /**
@@ -46,6 +47,8 @@ import me.ehp246.test.mock.MockDispatch;
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("resource")
 class DefaultDispatchFnProviderTest {
+    private final static ToJson toNullJson = (value, info) -> null;
+
     @Mock
     private ConnectionFactory cf;
     @Mock
@@ -101,7 +104,7 @@ class DefaultDispatchFnProviderTest {
     void listener_01() {
         final var dispatch = new MockDispatch();
 
-        new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(dispatch);
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch);
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
@@ -119,7 +122,7 @@ class DefaultDispatchFnProviderTest {
         final var dispatch = new MockDispatch();
 
         final var thrown = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(dispatch));
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch));
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(0)).preSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
@@ -138,7 +141,7 @@ class DefaultDispatchFnProviderTest {
         final var dispatch = new MockDispatch();
 
         Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(dispatch));
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch));
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
@@ -151,7 +154,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void listener_04() {
         Assertions.assertThrows(NullPointerException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, listeners).get("").send(null));
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(null));
 
         // Null should be checked very early on.
         Mockito.verify(onDispatch, times(0)).onDispatch(null);
@@ -169,7 +172,7 @@ class DefaultDispatchFnProviderTest {
 
         final var expected = new MockDispatch();
 
-        new DefaultDispatchFnProvider(cfProvder, v -> null, List.of(listener)).get("").send(expected);
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener)).get("").send(expected);
 
         // Null should be checked very early on.
         Mockito.verify(listener, times(1)).onDispatch(expected);
@@ -183,7 +186,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void send_01() throws JMSException {
-        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
+        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("");
 
         final var jmsMsg = dispatchFn.send(new MockDispatch());
 
@@ -200,7 +203,7 @@ class DefaultDispatchFnProviderTest {
 
         Mockito.doThrow(jmsException).when(this.producer).setTimeToLive(ArgumentMatchers.anyLong());
 
-        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
+        final var dispatchFn = new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("");
 
         final var actual = Assertions.assertThrows(RuntimeException.class, () -> dispatchFn.send(new MockDispatch()));
 
@@ -215,7 +218,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void ex_02() throws JMSException {
         // Should allow to create.
-        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+        final var fn = new DefaultDispatchFnProvider(name -> null, toNullJson, null).get(null);
 
         // Should throw without connection and context session.
         Assertions.assertThrows(NullPointerException.class, () -> fn.send(null));
@@ -233,7 +236,7 @@ class DefaultDispatchFnProviderTest {
             throw expected;
         };
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, onException)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
         final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
 
@@ -254,7 +257,7 @@ class DefaultDispatchFnProviderTest {
             throw expected;
         };
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, onException)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
         final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
 
@@ -275,7 +278,7 @@ class DefaultDispatchFnProviderTest {
             throw expected;
         };
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, onException)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
         final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
 
@@ -300,7 +303,7 @@ class DefaultDispatchFnProviderTest {
             throw expected;
         };
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, values -> null, List.of(listener, postSend)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, postSend)).get("");
 
         final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
 
@@ -312,7 +315,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -326,7 +329,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void ttl_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -340,7 +343,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -354,7 +357,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void delay_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -371,7 +374,7 @@ class DefaultDispatchFnProviderTest {
         final var i = Integer.valueOf(2);
         final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
 
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public Map<String, Object> properties() {
@@ -386,7 +389,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void correlationId_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -401,7 +404,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void correlationId_02() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -416,7 +419,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void cfname_01() {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("");
 
         verify(cfProvder, times(1)).get("");
     }
@@ -428,7 +431,7 @@ class DefaultDispatchFnProviderTest {
         when(cfpMock.get("")).thenReturn(null);
 
         Assertions.assertThrows(Exception.class,
-                () -> new DefaultDispatchFnProvider(cfpMock, values -> null, null).get(""));
+                () -> new DefaultDispatchFnProvider(cfpMock, toNullJson, null).get(""));
     }
 
     @Test
@@ -437,7 +440,7 @@ class DefaultDispatchFnProviderTest {
         final var cfpMock = Mockito.mock(ConnectionFactoryProvider.class);
         when(cfpMock.get("")).thenReturn(this.cf);
 
-        final var fnProvider = new DefaultDispatchFnProvider(cfpMock, values -> null, null);
+        final var fnProvider = new DefaultDispatchFnProvider(cfpMock, toNullJson, null);
 
         fnProvider.get("");
 
@@ -451,7 +454,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void conn_01() {
         // Should allow to create.
-        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+        final var fn = new DefaultDispatchFnProvider(name -> null, toNullJson, null).get(null);
 
         // Should throw without connection and context session.
         Assertions.assertThrows(IllegalStateException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)));
@@ -461,7 +464,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void context_01() throws JMSException {
         // Should allow to create.
-        final var fn = new DefaultDispatchFnProvider(name -> null, values -> null, null).get(null);
+        final var fn = new DefaultDispatchFnProvider(name -> null, toNullJson, null).get(null);
 
         final var mockSession = Mockito.mock(Session.class);
         Mockito.when(mockSession.createProducer(null)).thenReturn(this.producer);
@@ -481,7 +484,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void context_02() throws JMSException {
         // Should create one with a connection.
-        final var fn = new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("");
 
         final var ctxSession = Mockito.mock(Session.class);
         AufJmsContext.set(ctxSession);
@@ -500,7 +503,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void group_01() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -515,7 +518,7 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     void group_02() throws JMSException {
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -531,7 +534,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void group_03() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -547,7 +550,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     void group_04() throws JMSException {
         final var id = UUID.randomUUID().toString();
-        new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+        new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -569,7 +572,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void group_05() {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {
@@ -582,7 +585,7 @@ class DefaultDispatchFnProviderTest {
     @MockitoSettings(strictness = Strictness.WARN)
     void group_06() {
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, values -> null, null).get("").send(new MockDispatch() {
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {

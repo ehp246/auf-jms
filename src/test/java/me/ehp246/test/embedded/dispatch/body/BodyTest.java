@@ -18,9 +18,11 @@ import me.ehp246.test.TestQueueListener;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyAsTypeCase01;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyCase01;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyPublisherCase01;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.Person;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.PersonDob;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.PersonName;
+import me.ehp246.test.embedded.dispatch.body.AppConfig.ViewCase01;
+import me.ehp246.test.embedded.dispatch.body.Payload.Account.Request;
+import me.ehp246.test.embedded.dispatch.body.Payload.Person;
+import me.ehp246.test.embedded.dispatch.body.Payload.PersonDob;
+import me.ehp246.test.embedded.dispatch.body.Payload.PersonName;
 
 /**
  * @author Lei Yang
@@ -38,6 +40,8 @@ class BodyTest {
     private BodyPublisherCase01 pubCase01;
     @Autowired
     private BodyAsTypeCase01 asTypeCase01;
+    @Autowired
+    private ViewCase01 viewCase01;
 
     @Test
     void destination_01() {
@@ -158,5 +162,28 @@ class BodyTest {
         Assertions.assertEquals(null, actual.firstName());
         Assertions.assertEquals(null, actual.lastName());
         Assertions.assertEquals(now.toString(), actual.dob().toString());
+    }
+
+    @Test
+    void view_01() throws JMSException {
+        final var request = new Request(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        this.viewCase01.pingWithId(request);
+
+        final var text = ((TextMessage) listener.take()).getText();
+
+        Assertions.assertEquals(false, text.contains(request.password()));
+    }
+
+    @Test
+    void view_02() throws JMSException {
+        final var request = new Request(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        this.viewCase01.pingWithAll(request);
+
+        final var text = ((TextMessage) listener.take()).getText();
+
+        Assertions.assertEquals(true, text.contains(request.id()));
+        Assertions.assertEquals(true, text.contains(request.password()));
     }
 }

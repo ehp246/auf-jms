@@ -1,7 +1,6 @@
 package me.ehp246.test.embedded.dispatch.fn;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import org.jgroups.util.UUID;
@@ -16,7 +15,9 @@ import jakarta.jms.JMSException;
 import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.aufjms.api.spi.ToJson;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
@@ -76,8 +77,7 @@ class DispatchFnTest {
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(id, message.getJMSCorrelationID());
 
-        Assertions.assertEquals(toJson.apply(List.of(new ToJson.From(body))), message.getBody(String.class),
-                "should be encoded in JSON");
+        Assertions.assertEquals(toJson.apply(body, null), message.getBody(String.class), "should be encoded in JSON");
     }
 
     @Test
@@ -134,8 +134,8 @@ class DispatchFnTest {
             }
 
             @Override
-            public BodyAs bodyAs() {
-                return BodyAs.of(PersonDob.class);
+            public BodyOf<?> bodyOf() {
+                return BodyOfBuilder.of(PersonDob.class);
             }
 
         });

@@ -4,8 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+
+import com.fasterxml.jackson.annotation.JsonView;
 
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
@@ -15,7 +18,7 @@ import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
-import me.ehp246.aufjms.api.jms.JmsDispatch.BodyAs;
+import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
 import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
@@ -30,7 +33,7 @@ final class ProxyMethodParser {
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
     private final PropertyResolver propertyResolver;
 
-    ProxyMethodParser(PropertyResolver propertyResolver) {
+    ProxyMethodParser(final PropertyResolver propertyResolver) {
         this.propertyResolver = propertyResolver;
     }
 
@@ -115,9 +118,13 @@ final class ProxyMethodParser {
 
         final var bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
                 .orElse(-1);
-        final BodyAs bodyAs = bodyIndex == -1 ? null : reflected.getParameter(bodyIndex)::getType;
+        final var bodyOf = Optional.ofNullable(bodyIndex == -1 ? null : reflected.getParameter(bodyIndex))
+                .map(parameter -> new BodyOf<>(Optional.ofNullable(parameter.getAnnotation(JsonView.class))
+                        .map(JsonView::value).filter(OneUtil::hasValue).map(views -> views[0]).orElse(null),
+                        parameter.getType()))
+                .orElse(null);
 
-        return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyAs, propertyArgs,
+        return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf, propertyArgs,
                 propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 }

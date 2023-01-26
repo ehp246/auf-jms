@@ -152,7 +152,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
                     }
 
-                    message.setText(toText(dispatch));
+                    message.setText(toPayload(dispatch));
 
                     producer.setDeliveryDelay(
                             Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0));
@@ -214,7 +214,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
             }
 
-            private String toText(final JmsDispatch dispatch) {
+            private String toPayload(final JmsDispatch dispatch) {
                 final var body = dispatch.body();
                 if (body == null) {
                     return null;
@@ -224,7 +224,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     return publisher.get();
                 }
 
-                return toJson.apply(List.of(new ToJson.From(body, dispatch.bodyAs().type())));
+                return toJson.apply(body, dispatch.bodyOf());
             }
         };
     }

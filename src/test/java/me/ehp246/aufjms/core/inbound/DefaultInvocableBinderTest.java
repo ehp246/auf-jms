@@ -23,8 +23,6 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.FromJson;
 import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
-import me.ehp246.aufjms.core.inbound.InvocableRecord;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.ArgCase01;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.GroupCase.Group;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.PropertyCase01.PropertyEnum;
@@ -104,7 +102,7 @@ class DefaultInvocableBinderTest {
         final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01", List.class,
                 JmsMsg.class);
 
-        Mockito.when(msg.text()).thenReturn(toJson.from(List.of(1, 2, 3)));
+        Mockito.when(msg.text()).thenReturn(toJson.apply(List.of(1, 2, 3), null));
 
         final var bound = binder.bind(new InvocableRecord(arg01, method), msg);
 

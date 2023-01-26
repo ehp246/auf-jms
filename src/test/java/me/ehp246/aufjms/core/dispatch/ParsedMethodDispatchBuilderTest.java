@@ -646,10 +646,10 @@ class ParsedMethodDispatchBuilderTest {
         final var actual = parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).body();
         final var actualAs = parser.parse(captor.invocation().method(), config)
-                .apply(null, captor.invocation().args().toArray()).bodyAs();
+                .apply(null, captor.invocation().args().toArray()).bodyOf();
 
         Assertions.assertEquals(expected, actual);
-        Assertions.assertEquals(TemporalAccessor.class, actualAs.type());
+        Assertions.assertEquals(TemporalAccessor.class, actualAs.first());
     }
 
     @Test

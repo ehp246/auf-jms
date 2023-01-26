@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
  * <p>
  * A {@link JmsDispatch} is meant to be dispatched/sent by a
  * {@link JmsDispatchFn}.
- * 
+ *
  * @author Lei Yang
  * @since 1.0
  */
@@ -30,12 +30,8 @@ public interface JmsDispatch {
         return null;
     }
 
-    default BodyAs bodyAs() {
-        if (body() == null) {
-            return null;
-        }
-
-        return () -> body().getClass();
+    default BodyOf<?> bodyOf() {
+        return null;
     }
 
     default At replyTo() {
@@ -72,43 +68,43 @@ public interface JmsDispatch {
 
     /**
      * Single body value. Generated correlation id.
-     * 
+     *
      * @param to
      * @param type
      * @return
      */
-    static JmsDispatch toDispatch(At to, String type) {
+    static JmsDispatch toDispatch(final At to, final String type) {
         return toDispatch(to, type, null, UUID.randomUUID().toString());
     }
 
     /**
      * Single body value. Generated correlation id.
-     * 
+     *
      * @param to
      * @param type
      * @param body
      * @return
      */
-    static JmsDispatch toDispatch(At to, String type, Object body) {
+    static JmsDispatch toDispatch(final At to, final String type, final Object body) {
         return toDispatch(to, type, body, UUID.randomUUID().toString());
     }
 
     /**
      * Single body value. Generated correlation id.
-     * 
+     *
      * @param to
      * @param type
      * @param body
      * @param id
      * @return
      */
-    static JmsDispatch toDispatch(At to, String type, Object body, String id) {
+    static JmsDispatch toDispatch(final At to, final String type, final Object body, final String id) {
         return toDispatch(to, type, body, id, null);
     }
 
     /**
      * Single body value. Generated correlation id.
-     * 
+     *
      * @param to
      * @param type
      * @param body
@@ -116,7 +112,7 @@ public interface JmsDispatch {
      * @param properties
      * @return
      */
-    static JmsDispatch toDispatch(At to, String type, Object body, String id, Map<String, Object> properties) {
+    static JmsDispatch toDispatch(final At to, final String type, final Object body, final String id, final Map<String, Object> properties) {
         return new JmsDispatch() {
             @Override
             public At to() {
@@ -143,13 +139,5 @@ public interface JmsDispatch {
                 return properties;
             }
         };
-    }
-
-    interface BodyAs {
-        Class<?> type();
-
-        static BodyAs of(Class<?> type) {
-            return () -> type;
-        }
     }
 }

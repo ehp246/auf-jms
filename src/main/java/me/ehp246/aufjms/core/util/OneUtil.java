@@ -49,6 +49,10 @@ public final class OneUtil {
         return value != null && !value.isBlank();
     }
 
+    public static boolean hasValue(final Object[] value) {
+        return value != null && value.length > 0;
+    }
+
     public static String getIfBlank(final String value, final Supplier<String> supplier) {
         if (value == null || value.isBlank()) {
             return supplier.get();
