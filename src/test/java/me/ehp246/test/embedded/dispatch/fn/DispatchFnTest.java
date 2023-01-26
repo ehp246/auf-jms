@@ -56,7 +56,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, null));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(null, message.getJMSType());
         Assertions.assertEquals(true, message.getJMSCorrelationID() != null);
@@ -71,7 +71,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, body, id));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(id, message.getJMSCorrelationID());
@@ -88,7 +88,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, (BodyPublisher) body::toString));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(body.toString(), message.getBody(String.class), "should be as-is");
@@ -112,7 +112,7 @@ class DispatchFnTest {
             }
         });
 
-        Assertions.assertEquals(expected, listener.takeReceived().getBody(String.class));
+        Assertions.assertEquals(expected, listener.take().getBody(String.class));
     }
 
     @Test
@@ -141,7 +141,7 @@ class DispatchFnTest {
         });
 
         Assertions.assertEquals("{\"dob\":\"" + expected.dob().toString() + "\"}",
-                listener.takeReceived().getBody(String.class));
+                listener.take().getBody(String.class));
     }
 
     @Test
@@ -151,7 +151,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of("p1", "v-1", "p2", "v-2")));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals("v-1", message.getStringProperty("p1"));
@@ -165,7 +165,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, null));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
     }
@@ -177,7 +177,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of()));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
     }

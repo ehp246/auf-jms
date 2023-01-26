@@ -186,7 +186,6 @@ public @interface EnableForJms {
              */
             String selector() default "";
 
-
             /**
              * Specifies the subscription configuration.
              * <p>

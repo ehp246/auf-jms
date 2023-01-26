@@ -35,7 +35,7 @@ class TypeTest {
     void type_01() throws JMSException {
         case01.ping();
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals("Ping", received.getJMSType());
     }
@@ -46,20 +46,20 @@ class TypeTest {
 
         case01.ping(type);
 
-        Assertions.assertEquals(type, listener.takeReceived().getJMSType());
+        Assertions.assertEquals(type, listener.take().getJMSType());
     }
 
     @Test
     void type_03() throws JMSException {
         case01.ping(null);
 
-        Assertions.assertEquals(null, listener.takeReceived().getJMSType());
+        Assertions.assertEquals(null, listener.take().getJMSType());
     }
 
     @Test
     void type_04() throws JMSException {
         case01.ping("");
 
-        Assertions.assertEquals("", listener.takeReceived().getJMSType());
+        Assertions.assertEquals("", listener.take().getJMSType());
     }
 }
