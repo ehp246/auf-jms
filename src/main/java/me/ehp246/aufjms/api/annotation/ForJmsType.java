@@ -17,9 +17,10 @@ import me.ehp246.aufjms.api.inbound.InvocationModel;
  * The method that is to be invoked is determined by the following lookup
  * process:
  * <ul>
- * <li>a <code>public</code> method annotated by {@linkplain Invoking}. If not
- * found, then...
- * <li>a <code>public</code> method named <code>invoke</code>.
+ * <li>Only <code>public</code> methods declared directly on the class are
+ * considered. No inherited.
+ * <li>a method annotated by {@linkplain Invoking}. Or...
+ * <li>a method named '<code>invoke</code>'.
  * </ul>
  * The signature and the declaration order are not considered. The first found
  * is accepted. If no method is found, it's an exception.

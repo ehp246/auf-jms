@@ -10,6 +10,8 @@ import java.util.Queue;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Topic;
@@ -19,6 +21,8 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 /**
  * Indicates that the annotated interface should be implemented by Auf JMS as a
  * message producer and made available for injection.
+ * <p>
+ * Serializing by {@linkplain JsonView} is supported on the body.
  *
  * @author Lei Yang
  * @since 1.0
