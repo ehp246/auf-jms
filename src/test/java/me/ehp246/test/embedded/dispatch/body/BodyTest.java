@@ -1,7 +1,6 @@
 package me.ehp246.test.embedded.dispatch.body;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import org.jgroups.util.UUID;
@@ -12,7 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.TextMessage;
-import me.ehp246.aufjms.api.spi.FromJson;
+import me.ehp246.aufjms.api.jms.FromJson;
+import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.test.EmbeddedArtemisConfig;
 import me.ehp246.test.TestQueueListener;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyAsTypeCase01;
@@ -143,7 +143,7 @@ class BodyTest {
         asTypeCase01.ping((PersonName) expected);
 
         final var text = ((TextMessage) listener.take()).getText();
-        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
+        final var actual = fromJson.apply(text, BodyOfBuilder.of(Person.class));
 
         Assertions.assertEquals(firstName, actual.firstName());
         Assertions.assertEquals(lastName, actual.lastName());
@@ -157,7 +157,7 @@ class BodyTest {
         asTypeCase01.ping((PersonDob) expected);
 
         final var text = ((TextMessage) listener.take()).getText();
-        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
+        final var actual = fromJson.apply(text, BodyOfBuilder.of(Person.class));
 
         Assertions.assertEquals(null, actual.firstName());
         Assertions.assertEquals(null, actual.lastName());

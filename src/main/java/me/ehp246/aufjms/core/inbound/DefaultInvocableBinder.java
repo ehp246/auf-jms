@@ -5,11 +5,14 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
@@ -22,10 +25,12 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocableBinder;
+import me.ehp246.aufjms.api.jms.BodyOf;
+import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JMSSupplier;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
-import me.ehp246.aufjms.api.spi.FromJson;
+import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -56,13 +61,15 @@ public final class DefaultInvocableBinder implements InvocableBinder {
 
         final var parsed = this.parsed.computeIfAbsent(method, this::parse);
 
-        final var payloadArgs = fromJson.apply(msg.text(), parsed.getPayloadReceivers()).iterator();
+        final var payloadArgs = fromJson.apply(msg.text(), parsed.getPayloadReceiver());
 
         final var parameterCount = method.getParameterCount();
+
+        // Bind the arguments.
         final var arguments = new Object[parameterCount];
         for (int i = 0; i < parameterCount; i++) {
             final var ctxArgFn = parsed.getCtxReceiver(i);
-            arguments[i] = ctxArgFn != null ? ctxArgFn.apply(msg) : payloadArgs.next();
+            arguments[i] = ctxArgFn != null ? ctxArgFn.apply(msg) : payloadArgs;
         }
 
         return new BoundInvocableRecord(target, arguments, msg);
@@ -125,24 +132,23 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             /*
              * Payload
              */
-            parsed.addPayloadParameter(new FromJson.To(parameter.getType(), List.of(parameter.getAnnotations())));
+            final var view = Optional.ofNullable(parameter.getAnnotation(JsonView.class)).map(JsonView::value)
+                    .map(OneUtil::firstOrNull).orElse(null);
+            parsed.addPayloadParameter(BodyOfBuilder.ofView(view, parameter.getType()));
         }
 
         return parsed;
     }
 
     static class Parsed {
-        /**
-         * This is a simple list.
-         */
-        private final List<FromJson.To> payloadReceivers = new ArrayList<>();
+        private BodyOf<?> payloadReceiver;
         /**
          * <code>null</code> indicates a payload argument.
          */
         private final List<Function<JmsMsg, Object>> ctxReceivers = new ArrayList<>();
 
-        void addPayloadParameter(final FromJson.To to) {
-            payloadReceivers.add(to);
+        void addPayloadParameter(final BodyOf<?> bodyOf) {
+            payloadReceiver = bodyOf;
             ctxReceivers.add(null);
         }
 
@@ -150,8 +156,8 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             ctxReceivers.add(fn);
         }
 
-        List<FromJson.To> getPayloadReceivers() {
-            return this.payloadReceivers;
+        BodyOf<?> getPayloadReceiver() {
+            return this.payloadReceiver;
         }
 
         Function<JmsMsg, Object> getCtxReceiver(final int i) {

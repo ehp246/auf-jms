@@ -1,19 +1,18 @@
 package me.ehp246.aufjms.provider.jackson;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.ehp246.aufjms.api.jms.BodyOf;
-import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.api.jms.FromJson;
+import me.ehp246.aufjms.api.jms.ToJson;
 
 /**
  * @author Lei Yang
@@ -49,40 +48,39 @@ public final class JsonByObjectMapper implements FromJson, ToJson {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public List<?> apply(final String body, final List<To> receivers) {
-        if (receivers == null || receivers.size() == 0) {
-            return List.of();
+    public <T> T apply(final String json, BodyOf<T> descriptor) {
+        descriptor = descriptor == null ? (BodyOf<T>) new BodyOf<>(Object.class) : descriptor;
+
+        if (json == null || json.isBlank()) {
+            return null;
         }
 
+        final var type = Objects.requireNonNull(descriptor.reifying().get(0));
+        final var reifying = descriptor.reifying();
+
+        final var reader = Optional.ofNullable(descriptor.view()).map(view -> objectMapper.readerWithView(view))
+                .orElseGet(objectMapper::reader);
         try {
-            // Single parameter
-            if (receivers.size() == 1) {
-                // List.of does not take null.
-                return Arrays.asList(new Object[] { receiveOne(body, receivers.get(0)) });
+            if (reifying.size() == 1) {
+                return reader.forType(type).readValue(json);
+            } else {
+                final var typeFactory = objectMapper.getTypeFactory();
+                final var types = new ArrayList<Class<?>>(reifying);
+
+                final var size = types.size();
+                var javaType = typeFactory.constructParametricType(types.get(size - 2), types.get(size - 1));
+                for (int i = size - 3; i >= 0; i--) {
+                    javaType = typeFactory.constructParametricType(types.get(i), javaType);
+                }
+
+                return reader.forType(javaType).readValue(json);
             }
-
-            // Multiple parameters
-            final var jsons = objectMapper.readValue(body, String[].class);
-            final var values = new ArrayList<Object>();
-
-            for (int i = 0; i < receivers.size(); i++) {
-                values.add(receiveOne(jsons[i], receivers.get(i)));
-            }
-
-            return values;
         } catch (final JsonProcessingException e) {
-            LOGGER.error("Failed to read from {}", body, e);
+            LOGGER.atTrace().withThrowable(e).log("Failed to de-serialize: {}", e::getMessage);
+
             throw new RuntimeException(e);
         }
-    }
-
-    private Object receiveOne(final String json, final FromJson.To receiver)
-            throws JsonMappingException, JsonProcessingException {
-        return json != null && !json.isBlank() ? readOne(json, receiver) : null;
-    }
-
-    private Object readOne(final String json, final To receiver) throws JsonMappingException, JsonProcessingException {
-        return objectMapper.readValue(json, receiver.type());
     }
 }

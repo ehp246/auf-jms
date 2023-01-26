@@ -31,7 +31,7 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
-import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 

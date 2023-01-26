@@ -53,6 +53,10 @@ public final class OneUtil {
         return value != null && value.length > 0;
     }
 
+    public static <T> T firstOrNull(final T[] value) {
+        return value != null && value.length > 0 ? value[0] : null;
+    }
+
     public static String getIfBlank(final String value, final Supplier<String> supplier) {
         if (value == null || value.isBlank()) {
             return supplier.get();

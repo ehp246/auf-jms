@@ -1,6 +1,4 @@
-package me.ehp246.aufjms.api.spi;
-
-import me.ehp246.aufjms.api.jms.BodyOf;
+package me.ehp246.aufjms.api.jms;
 
 /**
  * @author Lei Yang
