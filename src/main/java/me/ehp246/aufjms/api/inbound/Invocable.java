@@ -20,12 +20,12 @@ public interface Invocable extends AutoCloseable {
 
     /**
      * The {@linkplain AutoCloseable} will be invoked by
-     * {@linkplain InboundEndpoint} after the {@linkplain Invoking} method completes
-     * normally or fails throwing an exception.
+     * {@linkplain InboundEndpoint} after the {@linkplain Invoking} method returns
+     * normally or aborts by throwing an exception.
      * <p>
-     * The API is intended for best-effort clean-up purpose. Exception will be
-     * logged and suppressed so that it does not impact further execution of the
-     * {@linkplain ForJmsType}.
+     * The API is intended for best-effort clean-up purpose. Exception from
+     * {@linkplain Invocable#close()} execution will be logged and suppressed so
+     * that it does not impact further execution of the {@linkplain ForJmsType}.
      */
     @Override
     default void close() throws Exception {

@@ -131,6 +131,24 @@ class DefaultInvocableBinderTest {
     }
 
     @Test
+    void m01_01() throws Exception {
+        final var mq = new MockJmsMsg() {
+            @Override
+            public String text() {
+                throw new UnsupportedOperationException("m01() has no body parameter. Should not call here.");
+            }
+        };
+
+        final var outcome = binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
+                new ReflectedType<InvocableBinderTestCases.MethodCase01>(InvocableBinderTestCases.MethodCase01.class)
+                        .findMethod("m01")),
+                mq).invoke();
+
+        Assertions.assertEquals(true, outcome instanceof Completed);
+        Assertions.assertEquals(null, ((Completed) outcome).returned());
+    }
+
+    @Test
     void method_02() throws Exception {
         final var reflectingType = new ReflectedType<InvocableBinderTestCases.MethodCase01>(
                 InvocableBinderTestCases.MethodCase01.class);
@@ -589,7 +607,7 @@ class DefaultInvocableBinderTest {
     }
 
     @Test
-    @EnabledIfSystemProperty(named = "me.ehp246.perf", matches = "true")
+    @EnabledIfSystemProperty(named = "me.ehp246", matches = "true")
     void perf_01() {
         final var msg = new MockJmsMsg(UUID.randomUUID().toString()).withProperty("prop1",
                 UUID.randomUUID().toString());

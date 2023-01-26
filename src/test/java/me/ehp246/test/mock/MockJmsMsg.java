@@ -25,6 +25,7 @@ public class MockJmsMsg implements JmsMsg {
     private final String correlId = UUID.randomUUID().toString();
     private final Destination destination = new ActiveMQQueue(UUID.randomUUID().toString());
     private final Map<String, Object> properties = new HashMap<>();
+    private String text;
 
     public MockJmsMsg() {
         super();
@@ -38,6 +39,11 @@ public class MockJmsMsg implements JmsMsg {
 
     public MockJmsMsg withProperty(final String key, final Object value) {
         this.properties.put(key, value);
+        return this;
+    }
+
+    public MockJmsMsg withText(final String text) {
+        this.text = text;
         return this;
     }
 
@@ -59,7 +65,7 @@ public class MockJmsMsg implements JmsMsg {
 
     @Override
     public String text() {
-        return null;
+        return this.text;
     }
 
     @Override
