@@ -1,13 +1,18 @@
 package me.ehp246.aufjms.api.jms;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
- * Provides typing information to process request and response body.
+ * Provides typing information to serialize and de-serialize JSON payload.
+ * <p>
+ * Supports {@linkplain Collection} types, e.g., {@linkplain Set} and
+ * {@linkplain List}. Not {@linkplain Map}.
  *
  * @author Lei Yang
  * @since 2.0
