@@ -4,7 +4,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
 
 /**
  * @author Lei Yang
- * @since 2.0
+ * @since 2.1
  */
 @FunctionalInterface
 public interface ProxyInvocationBinder {

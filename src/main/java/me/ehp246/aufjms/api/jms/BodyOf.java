@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  * {@linkplain List}. Not {@linkplain Map}.
  *
  * @author Lei Yang
- * @since 2.0
+ * @since 2.1
  */
 public final class BodyOf<T> {
     public static final BodyOf<Map<String, Object>> MAP = new BodyOf<Map<String, Object>>(null, Map.class);
