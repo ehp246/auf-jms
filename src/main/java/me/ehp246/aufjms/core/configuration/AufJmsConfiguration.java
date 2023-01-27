@@ -4,9 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.ClassUtils;
@@ -63,15 +62,16 @@ public final class AufJmsConfiguration {
     }
 
     @Bean("ca50e6fd-0737-4cf2-ad54-77a2620c4735")
-    public JsonByObjectMapper jsonByObjectMapper(
-            @Autowired(required = false) @Qualifier(AufJmsConstants.AUF_JMS_OBJECT_MAPPER) final ObjectMapper aufRestMapper,
-            @Autowired(required = false) @Qualifier("objectMapper") final ObjectMapper defaultObjectMapper) {
-        if (aufRestMapper != null) {
-            return new JsonByObjectMapper(aufRestMapper);
+    public JsonByObjectMapper jsonByObjectMapper(final ApplicationContext appCtx) {
+        final var aufJmsObjectMapper = appCtx.getBeansOfType(ObjectMapper.class).get(AufJmsConstants.AUF_JMS_OBJECT_MAPPER);
+        if (aufJmsObjectMapper != null) {
+            return new JsonByObjectMapper(aufJmsObjectMapper);
         }
 
-        if (defaultObjectMapper != null) {
-            return new JsonByObjectMapper(defaultObjectMapper);
+        try {
+            return new JsonByObjectMapper(appCtx.getBean(ObjectMapper.class));
+        } catch (final Exception e) {
+            // Can not find a default. Creating private.
         }
 
         final ObjectMapper newMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
