@@ -1,6 +1,7 @@
 package me.ehp246.test.embedded.dispatch.body;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
@@ -19,7 +20,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.spi.JmsView;
 import me.ehp246.test.TestQueueListener;
 import me.ehp246.test.embedded.dispatch.body.Payload.Account;
@@ -55,7 +55,7 @@ class AppConfig {
 
     @ByJms(@To(TestQueueListener.DESTINATION_NAME))
     interface BodyPublisherCase01 {
-        void send(BodyPublisher pub);
+        void send(Supplier<String> pub);
 
         void send(String text);
     }

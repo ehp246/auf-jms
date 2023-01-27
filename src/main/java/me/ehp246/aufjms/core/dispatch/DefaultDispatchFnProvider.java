@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +21,6 @@ import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
@@ -220,8 +220,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     return null;
                 }
 
-                if (body instanceof final BodyPublisher publisher) {
-                    return publisher.get();
+                if (body instanceof final Supplier<?> supplier) {
+                    return Optional.ofNullable(supplier.get()).map(Object::toString).orElse(null);
                 }
 
                 return toJson.apply(body, dispatch.bodyOf());

@@ -2,6 +2,7 @@ package me.ehp246.test.embedded.dispatch.fn;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -12,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import jakarta.jms.JMSException;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.BodyOf;
@@ -86,7 +86,7 @@ class DispatchFnTest {
         final var type = UUID.randomUUID().toString();
         final var body = UUID.randomUUID();
 
-        fn.send(JmsDispatch.toDispatch(TO, type, (BodyPublisher) body::toString));
+        fn.send(JmsDispatch.toDispatch(TO, type, (Supplier<String>) body::toString));
 
         final var message = listener.take();
 
@@ -108,7 +108,7 @@ class DispatchFnTest {
 
             @Override
             public Object body() {
-                return (BodyPublisher) expected::toString;
+                return (Supplier<String>) expected::toString;
             }
         });
 

@@ -122,6 +122,13 @@ class BodyTest {
     }
 
     @Test
+    void bodyPublisher_03() throws JMSException {
+        pubCase01.send(() -> null);
+
+        Assertions.assertEquals(null, listener.take().getBody(String.class));
+    }
+
+    @Test
     void bodyAsType_01() throws JMSException {
         final var firstName = UUID.randomUUID().toString();
         final var lastName = UUID.randomUUID().toString();
