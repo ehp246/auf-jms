@@ -71,7 +71,7 @@ public @interface ByJms {
      * lower-case.
      *
      * @return the bean name of the proxy interface.
-     * @see {@linkplain Qualifier}
+     * @see Qualifier
      */
     String name() default "";
 
