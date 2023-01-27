@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
  * {@linkplain int} and {@linkplain Integer} types are supported.
  * <p>
  * In case of {@linkplain Integer}, {@code null} is not supported.
+ * <p>
+ * Can be applied on both {@linkplain ByJms} and {@linkplain ForJmsType}.
  *
  * @author Lei Yang
  * @since 1.0

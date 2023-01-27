@@ -2,6 +2,7 @@ package me.ehp246.test.embedded.dispatch.listener;
 
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.jms.JMSException;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.test.embedded.dispatch.listener.AppConfig.BodyCase01;
 
 /**
@@ -44,7 +44,7 @@ class ListenerTest {
 
     @Test
     void body_03() throws InterruptedException, ExecutionException {
-        final BodyPublisher expected = "1"::toString;
+        final Supplier<String> expected = "1"::toString;
 
         case01.ping(expected);
 
@@ -54,7 +54,7 @@ class ListenerTest {
 
     @Test
     void body_04() throws InterruptedException, ExecutionException, JMSException {
-        final BodyPublisher expected = "1"::toString;
+        final Supplier<String> expected = "1"::toString;
 
         case01.ping(expected);
 

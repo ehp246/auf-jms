@@ -18,8 +18,9 @@ import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 
 /**
- * Enables client-side capabilities of Auf JMS. E.g.,
- * {@linkplain ByJms}-annotated interfaces scanning and registration
+ * Enables client-side capabilities of Auf JMS.
+ * <p>
+ * E.g., {@linkplain ByJms}-annotated interfaces scanning and registration.
  * <p>
  * By default, the package and the sub-packages of the annotated class will be
  * scanned.

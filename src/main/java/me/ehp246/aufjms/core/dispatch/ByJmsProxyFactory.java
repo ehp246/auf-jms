@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,12 +34,12 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Method, ParsedMethodDispatchBuilder> cache = new ConcurrentHashMap<>();
+    private final Map<Method, ProxyInvocationBinder> cache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
-    private final ProxyMethodParser methodParser;
+    private final DefaultProxyMethodParser methodParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final PropertyResolver propertyResolver) {
@@ -46,7 +47,7 @@ public final class ByJmsProxyFactory {
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
-        this.methodParser = new ProxyMethodParser(propertyResolver);
+        this.methodParser = new DefaultProxyMethodParser(propertyResolver);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,7 +78,7 @@ public final class ByJmsProxyFactory {
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
                 new InvocationHandler() {
                     private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo, ttl, delay,
-                            byJms.connectionFactory());
+                            byJms.connectionFactory(), List.of(byJms.properties()));
                     private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
                     private final int hashCode = new Object().hashCode();
 

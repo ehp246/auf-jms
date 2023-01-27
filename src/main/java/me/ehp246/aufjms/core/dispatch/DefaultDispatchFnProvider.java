@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +21,6 @@ import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
@@ -31,7 +31,7 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
-import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -152,7 +152,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
                     }
 
-                    message.setText(toText(dispatch));
+                    message.setText(toPayload(dispatch));
 
                     producer.setDeliveryDelay(
                             Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0));
@@ -214,17 +214,17 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
             }
 
-            private String toText(final JmsDispatch dispatch) {
+            private String toPayload(final JmsDispatch dispatch) {
                 final var body = dispatch.body();
                 if (body == null) {
                     return null;
                 }
 
-                if (body instanceof final BodyPublisher publisher) {
-                    return publisher.get();
+                if (body instanceof final Supplier<?> supplier) {
+                    return Optional.ofNullable(supplier.get()).map(Object::toString).orElse(null);
                 }
 
-                return toJson.apply(List.of(new ToJson.From(body, dispatch.bodyAs().type())));
+                return toJson.apply(body, dispatch.bodyOf());
             }
         };
     }

@@ -12,7 +12,7 @@ import java.time.Duration;
 import jakarta.jms.MessageProducer;
 
 /**
- * Specifies the argument to be passed to
+ * Specifies the argument value should be passed to
  * {@linkplain MessageProducer#setDeliveryDelay(long)}.
  * <p>
  * If applied to multiple parameters, only the first is accepted.
@@ -29,7 +29,6 @@ import jakarta.jms.MessageProducer;
  *
  * @author Lei Yang
  * @since 1.0
- *
  */
 @Documented
 @Retention(RUNTIME)

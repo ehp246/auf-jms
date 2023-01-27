@@ -19,11 +19,11 @@ public class TestQueueListener {
 
     public static final String DESTINATION_NAME = "11603dc2-0791-4887-85ad-0a3720376b9b";
 
-    private CompletableFuture<Message> received;
+    private CompletableFuture<Message> received = new CompletableFuture<>();
 
     @JmsListener(destination = TestQueueListener.DESTINATION_NAME)
     public void receive(final Message message) throws JMSException {
-        if (received == null) {
+        if (received.isDone()) {
             logger.atInfo().log("Ignoring {} {} {}", message.getJMSType(), message.getJMSCorrelationID(),
                     message.getJMSDestination().toString());
             return;
@@ -31,14 +31,14 @@ public class TestQueueListener {
         received.complete(message);
     }
 
-    public void reset() {
+    public synchronized void reset() {
         this.received = new CompletableFuture<>();
     }
 
-    public Message takeReceived() {
+    public synchronized Message take() {
         return OneUtil.orThrow(() -> {
             final var message = this.received.get();
-            this.received = null;
+            this.reset();
             return message;
         });
     }

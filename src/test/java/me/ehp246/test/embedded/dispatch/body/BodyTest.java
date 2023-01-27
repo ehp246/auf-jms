@@ -1,27 +1,28 @@
 package me.ehp246.test.embedded.dispatch.body;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.TextMessage;
-import me.ehp246.aufjms.api.spi.FromJson;
+import me.ehp246.aufjms.api.jms.FromJson;
+import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.test.EmbeddedArtemisConfig;
 import me.ehp246.test.TestQueueListener;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyAsTypeCase01;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyCase01;
 import me.ehp246.test.embedded.dispatch.body.AppConfig.BodyPublisherCase01;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.Person;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.PersonDob;
-import me.ehp246.test.embedded.dispatch.body.JsonAsType.PersonName;
+import me.ehp246.test.embedded.dispatch.body.AppConfig.ViewCase01;
+import me.ehp246.test.embedded.dispatch.body.Payload.Account.Request;
+import me.ehp246.test.embedded.dispatch.body.Payload.Person;
+import me.ehp246.test.embedded.dispatch.body.Payload.PersonDob;
+import me.ehp246.test.embedded.dispatch.body.Payload.PersonName;
 
 /**
  * @author Lei Yang
@@ -39,17 +40,14 @@ class BodyTest {
     private BodyPublisherCase01 pubCase01;
     @Autowired
     private BodyAsTypeCase01 asTypeCase01;
-
-    @BeforeEach
-    void reset() {
-        listener.reset();
-    }
+    @Autowired
+    private ViewCase01 viewCase01;
 
     @Test
     void destination_01() {
         case01.ping();
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals(true, received != null);
         Assertions.assertEquals(true, received instanceof TextMessage);
@@ -59,7 +57,7 @@ class BodyTest {
     void correlId_01() throws JMSException {
         case01.ping();
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals(true, received.getJMSCorrelationID() != null);
     }
@@ -68,7 +66,7 @@ class BodyTest {
     void replyTo_01() throws JMSException {
         case01.ping();
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals(null, received.getJMSReplyTo());
     }
@@ -77,7 +75,7 @@ class BodyTest {
     void body_01() throws JMSException {
         case01.ping();
 
-        final var received = (TextMessage) listener.takeReceived();
+        final var received = (TextMessage) listener.take();
 
         Assertions.assertEquals(null, received.getText());
     }
@@ -87,7 +85,7 @@ class BodyTest {
         final var now = Instant.now();
         case01.ping(Map.of("now", now));
 
-        final var received = (TextMessage) listener.takeReceived();
+        final var received = (TextMessage) listener.take();
 
         Assertions.assertEquals(true, received.getText().contains(now.toString()));
     }
@@ -97,7 +95,7 @@ class BodyTest {
         final var now = Instant.now();
         case01.ping(Map.of("now", now), -1);
 
-        final var received = (TextMessage) listener.takeReceived();
+        final var received = (TextMessage) listener.take();
 
         final var text = received.getText();
         Assertions.assertEquals(true, text.contains(now.toString()));
@@ -111,7 +109,7 @@ class BodyTest {
 
         pubCase01.send(expected::toString);
 
-        Assertions.assertEquals(expected, listener.takeReceived().getBody(String.class));
+        Assertions.assertEquals(expected, listener.take().getBody(String.class));
     }
 
     @Test
@@ -120,7 +118,14 @@ class BodyTest {
 
         pubCase01.send(expected);
 
-        Assertions.assertEquals("\"" + expected + "\"", listener.takeReceived().getBody(String.class));
+        Assertions.assertEquals("\"" + expected + "\"", listener.take().getBody(String.class));
+    }
+
+    @Test
+    void bodyPublisher_03() throws JMSException {
+        pubCase01.send(() -> null);
+
+        Assertions.assertEquals(null, listener.take().getBody(String.class));
     }
 
     @Test
@@ -132,7 +137,7 @@ class BodyTest {
         asTypeCase01.ping(new Person(firstName, lastName, now));
 
         Assertions.assertEquals("{\"firstName\":\"" + firstName + "\",\"lastName\":\"" + lastName + "\",\"dob\":\""
-                + now.toString() + "\"}", ((TextMessage) listener.takeReceived()).getText());
+                + now.toString() + "\"}", ((TextMessage) listener.take()).getText());
     }
 
     @Test
@@ -144,8 +149,8 @@ class BodyTest {
         final var expected = new Person(firstName, lastName, now);
         asTypeCase01.ping((PersonName) expected);
 
-        final var text = ((TextMessage) listener.takeReceived()).getText();
-        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
+        final var text = ((TextMessage) listener.take()).getText();
+        final var actual = fromJson.apply(text, BodyOfBuilder.of(Person.class));
 
         Assertions.assertEquals(firstName, actual.firstName());
         Assertions.assertEquals(lastName, actual.lastName());
@@ -158,11 +163,34 @@ class BodyTest {
         final var expected = new Person(null, null, now);
         asTypeCase01.ping((PersonDob) expected);
 
-        final var text = ((TextMessage) listener.takeReceived()).getText();
-        final var actual = (Person) (fromJson.apply(text, List.of(new FromJson.To(Person.class))).get(0));
+        final var text = ((TextMessage) listener.take()).getText();
+        final var actual = fromJson.apply(text, BodyOfBuilder.of(Person.class));
 
         Assertions.assertEquals(null, actual.firstName());
         Assertions.assertEquals(null, actual.lastName());
         Assertions.assertEquals(now.toString(), actual.dob().toString());
+    }
+
+    @Test
+    void view_01() throws JMSException {
+        final var request = new Request(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        this.viewCase01.pingWithId(request);
+
+        final var text = ((TextMessage) listener.take()).getText();
+
+        Assertions.assertEquals(false, text.contains(request.password()));
+    }
+
+    @Test
+    void view_02() throws JMSException {
+        final var request = new Request(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        this.viewCase01.pingWithAll(request);
+
+        final var text = ((TextMessage) listener.take()).getText();
+
+        Assertions.assertEquals(true, text.contains(request.id()));
+        Assertions.assertEquals(true, text.contains(request.password()));
     }
 }

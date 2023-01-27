@@ -1,8 +1,8 @@
 package me.ehp246.test.embedded.dispatch.fn;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -13,11 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import jakarta.jms.JMSException;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
-import me.ehp246.aufjms.api.spi.ToJson;
+import me.ehp246.aufjms.api.jms.ToJson;
+import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.test.EmbeddedArtemisConfig;
@@ -56,7 +57,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, null));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(null, message.getJMSType());
         Assertions.assertEquals(true, message.getJMSCorrelationID() != null);
@@ -71,13 +72,12 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, body, id));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(id, message.getJMSCorrelationID());
 
-        Assertions.assertEquals(toJson.apply(List.of(new ToJson.From(body))), message.getBody(String.class),
-                "should be encoded in JSON");
+        Assertions.assertEquals(toJson.apply(body, null), message.getBody(String.class), "should be encoded in JSON");
     }
 
     @Test
@@ -86,9 +86,9 @@ class DispatchFnTest {
         final var type = UUID.randomUUID().toString();
         final var body = UUID.randomUUID();
 
-        fn.send(JmsDispatch.toDispatch(TO, type, (BodyPublisher) body::toString));
+        fn.send(JmsDispatch.toDispatch(TO, type, (Supplier<String>) body::toString));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals(body.toString(), message.getBody(String.class), "should be as-is");
@@ -108,11 +108,11 @@ class DispatchFnTest {
 
             @Override
             public Object body() {
-                return (BodyPublisher) expected::toString;
+                return (Supplier<String>) expected::toString;
             }
         });
 
-        Assertions.assertEquals(expected, listener.takeReceived().getBody(String.class));
+        Assertions.assertEquals(expected, listener.take().getBody(String.class));
     }
 
     @Test
@@ -134,14 +134,14 @@ class DispatchFnTest {
             }
 
             @Override
-            public BodyAs bodyAs() {
-                return BodyAs.of(PersonDob.class);
+            public BodyOf<?> bodyOf() {
+                return BodyOfBuilder.of(PersonDob.class);
             }
 
         });
 
         Assertions.assertEquals("{\"dob\":\"" + expected.dob().toString() + "\"}",
-                listener.takeReceived().getBody(String.class));
+                listener.take().getBody(String.class));
     }
 
     @Test
@@ -151,7 +151,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of("p1", "v-1", "p2", "v-2")));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
         Assertions.assertEquals("v-1", message.getStringProperty("p1"));
@@ -165,7 +165,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, null));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
     }
@@ -177,7 +177,7 @@ class DispatchFnTest {
 
         fn.send(JmsDispatch.toDispatch(TO, type, null, null, Map.of()));
 
-        final var message = listener.takeReceived();
+        final var message = listener.take();
 
         Assertions.assertEquals(type, message.getJMSType());
     }

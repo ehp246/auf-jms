@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
 import me.ehp246.aufjms.api.inbound.MsgConsumer;
-import me.ehp246.aufjms.api.inbound.MsgInvocableFactory;
+import me.ehp246.aufjms.api.inbound.InvocableFactory;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -26,10 +26,10 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
     private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
 
     private final InvocableDispatcher dispatcher;
-    private final MsgInvocableFactory invocableFactory;
+    private final InvocableFactory invocableFactory;
     private final MsgConsumer defaultConsumer;
 
-    DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final MsgInvocableFactory invocableFactory,
+    DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final InvocableFactory invocableFactory,
             @Nullable final MsgConsumer defaultConsumer) {
         super();
         this.dispatcher = dispatcher;

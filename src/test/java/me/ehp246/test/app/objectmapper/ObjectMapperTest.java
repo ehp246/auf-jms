@@ -44,12 +44,50 @@ class ObjectMapperTest {
     }
 
     @Test
+    void provided_03() {
+        appCtx = new AnnotationConfigApplicationContext();
+
+        appCtx.register(AppConfig.Config05.class);
+        appCtx.refresh();
+
+        Assertions.assertEquals(true, appCtx.getBean(JsonByObjectMapper.class) != null);
+    }
+
+    @Test
+    void provided_04() {
+        appCtx = new AnnotationConfigApplicationContext();
+
+        appCtx.register(AppConfig.Config06.class);
+        appCtx.refresh();
+
+        Assertions.assertEquals(true, appCtx.getBean(JsonByObjectMapper.class) != null);
+    }
+
+    @Test
+    void provided_05() {
+        appCtx = new AnnotationConfigApplicationContext();
+
+        appCtx.register(AppConfig.Config08.class);
+        appCtx.refresh();
+    }
+
+    @Test
     void primary_01() {
         appCtx = new AnnotationConfigApplicationContext();
         appCtx.register(AppConfig.Config02.class);
         appCtx.refresh();
 
         Assertions.assertEquals(Jackson.OBJECT_MAPPER, appCtx.getBean(ObjectMapper.class));
+    }
+
+    @Test
+    void primary_02() {
+        appCtx = new AnnotationConfigApplicationContext();
+
+        appCtx.register(AppConfig.Config07.class);
+        appCtx.refresh();
+
+        Assertions.assertDoesNotThrow(() -> appCtx.getBean(JsonByObjectMapper.class));
     }
 
     @Test

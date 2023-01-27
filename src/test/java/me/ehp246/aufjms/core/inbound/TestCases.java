@@ -18,7 +18,8 @@ class TestCases {
     }
 
     @EnableForJms({ @Inbound(@From(value = "queue.1")),
-            @Inbound(value = @From("queue.2"), concurrency = "executor.2", name = "atEndpoint.2") })
+            @Inbound(value = @From("queue.2"), concurrency = "executor.2", name = "atEndpoint.2"),
+            @Inbound(@From(value = "queue.3")) })
     static class Config03 {
     }
 

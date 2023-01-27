@@ -14,6 +14,7 @@ import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.jms.JMSException;
 import me.ehp246.test.asb.dlq.dlq.LetterCollection;
@@ -25,6 +26,7 @@ import me.ehp246.test.asb.replyto.reply.OnEchoInstant;
  */
 @SpringBootTest(classes = { AppConfig.class }, webEnvironment = WebEnvironment.NONE)
 @EnabledIfSystemProperty(named = "me.ehp246.aufjms", matches = "true")
+@ActiveProfiles("local")
 class SbTest {
     @Autowired
     private Echo echo;

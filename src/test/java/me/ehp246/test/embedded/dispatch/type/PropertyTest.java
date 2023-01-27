@@ -36,7 +36,7 @@ class PropertyTest {
         final var id = UUID.randomUUID().toString();
         case01.ping(id, 10);
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals(id, received.getStringProperty("JMSXGroupID"));
         Assertions.assertEquals(10, received.getIntProperty("JMSXGroupSeq"));
@@ -46,7 +46,7 @@ class PropertyTest {
     void property_02() throws JMSException {
         case01.ping(Map.<String, Object>of("K1", "1", "K2", Integer.valueOf(3)));
 
-        final var received = listener.takeReceived();
+        final var received = listener.take();
 
         Assertions.assertEquals("1", received.getStringProperty("K1"));
         Assertions.assertEquals(3, received.getIntProperty("K2"));

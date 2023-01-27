@@ -12,11 +12,10 @@ import java.lang.annotation.Target;
  * <p>
  * The injection point should be of {@code int} type.
  * <p>
- * Ignored on {@linkplain ByJms} interfaces.
+ * Only applicable to {@linkplain ForJmsType}.
  *
  * @author Lei Yang
  * @since 1.0
- *
  */
 @Retention(RUNTIME)
 @Target({ ElementType.PARAMETER })

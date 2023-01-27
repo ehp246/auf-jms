@@ -8,6 +8,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Queue;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Topic;
@@ -16,7 +20,9 @@ import me.ehp246.aufjms.api.jms.DestinationType;
 
 /**
  * Indicates that the annotated interface should be implemented by Auf JMS as a
- * message producer/client proxy and made available for injection.
+ * message producer and made available for injection.
+ * <p>
+ * Serializing by {@linkplain JsonView} is supported on the body.
  *
  * @author Lei Yang
  * @since 1.0
@@ -32,12 +38,40 @@ public @interface ByJms {
     To value();
 
     /**
+     * Specifies property name/value pairs for out-going messages.
+     * <p>
+     * E.g.,
+     * <p>
+     * <code>
+     *     { "AppName", "AufJms", "AppVersion", "1.0", ... }
+     * </code>
+     * <p>
+     * Must be specified in pairs. Missing value will trigger an exception.
+     * <p>
+     * E.g., the following is missing value for property '{@code appVersion}' and
+     * will result an exception.
+     * <p>
+     * <code>
+     *     { "AppVersion" }
+     * </code>
+     * <p>
+     * If the same property is defined by a {@linkplain OfProperty} parameter, the
+     * argument takes the precedence and is accepted. The value defined here is
+     * ignored.
+     * <p>
+     * Spring property placeholder is supported on values but not on names.
+     *
+     */
+    String[] properties() default {};
+
+    /**
      * Specifies a bean name by which the interface can be injected.
      * <p>
-     * The default name is {@link Class#getSimpleName()} with the first letter in
+     * The default is from {@link Class#getSimpleName()} with the first letter in
      * lower-case.
      *
      * @return the bean name of the proxy interface.
+     * @see {@linkplain Qualifier}
      */
     String name() default "";
 
@@ -68,16 +102,21 @@ public @interface ByJms {
      */
     String delay() default "";
 
+    /**
+     * Specifies the return destination for out-bound messages.
+     */
     To replyTo() default @To("");
 
     /**
      * Specifies the connection factory name by which the interface retrieves a
      * {@linkplain Connection} from
      * {@linkplain ConnectionFactoryProvider#get(String)}.
-     *
      */
     String connectionFactory() default "";
 
+    /**
+     * Defines a destination.
+     */
     @Target({})
     @interface To {
         /**

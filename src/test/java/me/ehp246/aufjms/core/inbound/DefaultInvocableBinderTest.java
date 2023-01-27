@@ -19,12 +19,10 @@ import jakarta.jms.Message;
 import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
+import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
-import me.ehp246.aufjms.api.spi.FromJson;
-import me.ehp246.aufjms.api.spi.ToJson;
-import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
-import me.ehp246.aufjms.core.inbound.InvocableRecord;
+import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.ArgCase01;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.GroupCase.Group;
 import me.ehp246.aufjms.core.inbound.InvocableBinderTestCases.PropertyCase01.PropertyEnum;
@@ -104,7 +102,7 @@ class DefaultInvocableBinderTest {
         final var method = new ReflectedType<>(InvocableBinderTestCases.ArgCase01.class).findMethod("m01", List.class,
                 JmsMsg.class);
 
-        Mockito.when(msg.text()).thenReturn(toJson.from(List.of(1, 2, 3)));
+        Mockito.when(msg.text()).thenReturn(toJson.apply(List.of(1, 2, 3), null));
 
         final var bound = binder.bind(new InvocableRecord(arg01, method), msg);
 
@@ -123,6 +121,24 @@ class DefaultInvocableBinderTest {
     @Test
     void method_01() throws Exception {
         final var mq = Mockito.mock(JmsMsg.class);
+        final var outcome = binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
+                new ReflectedType<InvocableBinderTestCases.MethodCase01>(InvocableBinderTestCases.MethodCase01.class)
+                        .findMethod("m01")),
+                mq).invoke();
+
+        Assertions.assertEquals(true, outcome instanceof Completed);
+        Assertions.assertEquals(null, ((Completed) outcome).returned());
+    }
+
+    @Test
+    void m01_01() throws Exception {
+        final var mq = new MockJmsMsg() {
+            @Override
+            public String text() {
+                throw new UnsupportedOperationException("m01() has no body parameter. Should not call here.");
+            }
+        };
+
         final var outcome = binder.bind(new InvocableRecord(new InvocableBinderTestCases.MethodCase01(),
                 new ReflectedType<InvocableBinderTestCases.MethodCase01>(InvocableBinderTestCases.MethodCase01.class)
                         .findMethod("m01")),
@@ -591,7 +607,7 @@ class DefaultInvocableBinderTest {
     }
 
     @Test
-    @EnabledIfSystemProperty(named = "me.ehp246.perf", matches = "true")
+    @EnabledIfSystemProperty(named = "me.ehp246", matches = "true")
     void perf_01() {
         final var msg = new MockJmsMsg(UUID.randomUUID().toString()).withProperty("prop1",
                 UUID.randomUUID().toString());

@@ -26,15 +26,16 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.configuration.ExecutorConfiguration;
+import me.ehp246.aufjms.core.inbound.AnnotatedInboundEndpointRegistrar;
 import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
 import me.ehp246.aufjms.core.inbound.InboundEndpointFactory;
 import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
-import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 
 /**
- * Enables the server-side capabilities of Auf JMS. E.g., declaring
- * {@linkplain Inbound} endpoints. Scanning and registration of
- * {@linkplain ForJmsType} classes for the endpoints.
+ * Enables the server-side capabilities of Auf JMS.
+ * <p>
+ * Mostly to declare {@linkplain Inbound} endpoints and scanning and
+ * registration of {@linkplain ForJmsType} classes for the endpoints.
  *
  * @author Lei Yang
  * @since 1.0
@@ -42,9 +43,13 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointRegistrar;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, InboundEndpointRegistrar.class, InboundEndpointFactory.class,
+@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class, InboundEndpointFactory.class,
         InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
+    /**
+     * Specifies the destinations to listen for incoming messages and their
+     * configurations.
+     */
     Inbound[] value();
 
     /**
@@ -81,6 +86,12 @@ public @interface EnableForJms {
          * scanned.
          */
         Class<?>[] scan() default {};
+
+        /**
+         * Registers the specified {@linkplain ForJmsType}-annotated classes
+         * individually.
+         */
+        Class<?>[] register() default {};
 
         /**
          * Not implemented.
@@ -174,7 +185,6 @@ public @interface EnableForJms {
              *      'https://jakarta.ee/specifications/messaging/3.0/jakarta-messaging-spec-3.0.html#message-selection'>Selector</a>
              */
             String selector() default "";
-
 
             /**
              * Specifies the subscription configuration.

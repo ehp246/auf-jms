@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.jms.At;
 public interface InboundEndpoint {
     From from();
 
-    MsgInvocableFactory invocableFactory();
+    InvocableTypeRegistry typeRegistry();
 
     default String name() {
         return null;

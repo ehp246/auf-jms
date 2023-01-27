@@ -2,6 +2,7 @@ package me.ehp246.test.embedded.dispatch.listener;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -9,7 +10,6 @@ import org.springframework.context.annotation.Import;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
-import me.ehp246.aufjms.api.dispatch.BodyPublisher;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -33,7 +33,7 @@ class AppConfig {
 
         void ping(Map<String, String> map);
 
-        void ping(BodyPublisher pub);
+        void ping(Supplier<String> pub);
     }
 
     @Bean
@@ -41,7 +41,7 @@ class AppConfig {
         return new DispatchListener.OnDispatch() {
 
             @Override
-            public void onDispatch(JmsDispatch dispatch) {
+            public void onDispatch(final JmsDispatch dispatch) {
                 onDispatchRef = new CompletableFuture<>();
                 onDispatchRef.complete(new DispatchRecord(dispatch, null, null));
             }
@@ -52,7 +52,7 @@ class AppConfig {
     DispatchListener preSend() {
         return new DispatchListener.PreSend() {
             @Override
-            public void preSend(JmsDispatch dispatch, JmsMsg msg) {
+            public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
                 preRef = new CompletableFuture<>();
                 preRef.complete(new DispatchRecord(dispatch, msg, null));
             }
@@ -63,7 +63,7 @@ class AppConfig {
     DispatchListener postSend() {
         return new DispatchListener.PostSend() {
             @Override
-            public void postSend(JmsDispatch dispatch, JmsMsg msg) {
+            public void postSend(final JmsDispatch dispatch, final JmsMsg msg) {
                 postRef = new CompletableFuture<>();
                 postRef.complete(new DispatchRecord(dispatch, msg, null));
             }
@@ -74,7 +74,7 @@ class AppConfig {
     DispatchListener onException() {
         return new DispatchListener.OnException() {
             @Override
-            public void onException(JmsDispatch dispatch, JmsMsg msg, Exception e) {
+            public void onException(final JmsDispatch dispatch, final JmsMsg msg, final Exception e) {
                 exRef = new CompletableFuture<>();
                 exRef.complete(new DispatchRecord(dispatch, msg, e));
             }

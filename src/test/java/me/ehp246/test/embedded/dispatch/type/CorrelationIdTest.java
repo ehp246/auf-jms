@@ -34,20 +34,20 @@ class CorrelationIdTest {
     void correlationId_01() throws JMSException {
         case01.ping();
 
-        Assertions.assertEquals(36, listener.takeReceived().getJMSCorrelationID().length());
+        Assertions.assertEquals(36, listener.take().getJMSCorrelationID().length());
     }
 
     @Test
     void correlationId_02() throws JMSException {
         case01.ping("");
 
-        Assertions.assertEquals("", listener.takeReceived().getJMSCorrelationID());
+        Assertions.assertEquals("", listener.take().getJMSCorrelationID());
     }
 
     @Test
     void correlationId_03() throws JMSException {
         case01.ping(null);
 
-        Assertions.assertEquals(null, listener.takeReceived().getJMSCorrelationID());
+        Assertions.assertEquals(null, listener.take().getJMSCorrelationID());
     }
 }
