@@ -27,8 +27,8 @@ import jakarta.jms.Message;
  * or validation will be done.
  * <p>
  * When the value is not specified, the property name is inferred from the
- * parameter name. For this to work properly, '<code>-parameters</code>'
- * compiler option is probably desired.
+ * parameter name with the first letter capitalized. For this to work properly,
+ * '<code>-parameters</code>' compiler option is probably desired.
  * <p>
  * Only application properties are supported, no JMS headers.
  *

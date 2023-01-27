@@ -48,7 +48,7 @@ class PropertyTest {
         final var message = listener.take();
 
         Assertions.assertEquals(2, Collections.list(message.getPropertyNames()).size());
-        Assertions.assertEquals(expected, message.getStringProperty("appName"));
+        Assertions.assertEquals(expected, message.getStringProperty("AppName"));
     }
 
     @SuppressWarnings("unchecked")
@@ -65,15 +65,18 @@ class PropertyTest {
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     void test_04() throws JMSException {
-        final var expected = UUID.randomUUID().toString();
+        final var expected0 = UUID.randomUUID().toString();
+        final var expected1 = expected0;
 
-        case01.ping(UUID.randomUUID().toString(), expected);
+        case01.ping(expected0, expected1);
 
         final var message = listener.take();
 
-        Assertions.assertEquals(2, Collections.list(message.getPropertyNames()).size());
-        Assertions.assertEquals(null, message.getStringProperty("appName"));
+        Assertions.assertEquals(3, Collections.list(message.getPropertyNames()).size());
+        Assertions.assertEquals(expected0, message.getStringProperty("AppName"));
+        Assertions.assertEquals(expected1, message.getStringProperty("appName"));
     }
 
     @SuppressWarnings("unchecked")
@@ -108,8 +111,9 @@ class PropertyTest {
 
         final var message = listener.take();
 
-        Assertions.assertEquals(3, Collections.list(message.getPropertyNames()).size());
-        Assertions.assertEquals(expected, message.getStringProperty("appName"));
+        Assertions.assertEquals(4, Collections.list(message.getPropertyNames()).size());
+        Assertions.assertEquals(expected, message.getStringProperty("AppName"));
+        Assertions.assertEquals("AufJms", message.getStringProperty("appName"));
         Assertions.assertEquals("AufJms.2.0", message.getStringProperty("appVersion"));
     }
 

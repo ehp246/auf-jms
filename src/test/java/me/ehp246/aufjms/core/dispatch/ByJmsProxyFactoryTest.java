@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.bymsg;
+package me.ehp246.aufjms.core.dispatch;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
 
 class ByJmsProxyFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;
@@ -36,12 +35,18 @@ class ByJmsProxyFactoryTest {
     }
 
     @Test
+    void property_01() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                factory.newByJmsProxy(TestCases.PropertyCase01.class)::ping);
+    }
+
+    @Test
     void connection_01() {
         final var disp = new JmsDispatch[1];
         final var dispatchFn = new JmsDispatchFn() {
 
             @Override
-            public JmsMsg send(JmsDispatch dispatch) {
+            public JmsMsg send(final JmsDispatch dispatch) {
                 disp[0] = dispatch;
                 return null;
             }

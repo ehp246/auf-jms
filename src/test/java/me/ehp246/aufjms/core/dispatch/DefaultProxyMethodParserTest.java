@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jgroups.util.UUID;
@@ -23,10 +24,11 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class DefaultProxyInvocationBinderTest {
+class DefaultProxyMethodParserTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
-            UUID.randomUUID().toString());
+            UUID.randomUUID().toString(), List.of());
+
     private final DefaultProxyMethodParser parser = new DefaultProxyMethodParser(
             new MockEnvironment().withProperty("id", "15df5c8b-adb4-4880-90d9-e370a7a97887")::resolvePlaceholders);
 
@@ -514,7 +516,7 @@ class DefaultProxyInvocationBinderTest {
         final var properties = parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).properties();
 
-        Assertions.assertEquals(expected, properties.get("name"));
+        Assertions.assertEquals(expected, properties.get("Name"));
     }
 
     @Test

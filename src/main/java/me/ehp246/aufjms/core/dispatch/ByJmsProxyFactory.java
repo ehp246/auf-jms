@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,7 +78,7 @@ public final class ByJmsProxyFactory {
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
                 new InvocationHandler() {
                     private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo, ttl, delay,
-                            byJms.connectionFactory());
+                            byJms.connectionFactory(), List.of(byJms.properties()));
                     private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
                     private final int hashCode = new Object().hashCode();
 

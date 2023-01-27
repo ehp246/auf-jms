@@ -3,7 +3,6 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +11,6 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
@@ -42,7 +40,6 @@ final class DefaultProxyMethodParser {
     }
 
     ProxyInvocationBinder parse(final Method method, final ByJmsProxyConfig config) {
-        final var byJms = method.getDeclaringClass().getAnnotation(ByJms.class);
         final var reflected = new ReflectedProxyMethod(method);
 
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
@@ -110,11 +107,11 @@ final class DefaultProxyMethodParser {
                 .orElse(null);
 
         return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf,
-                propArgs(reflected), propStatic(reflected, byJms), ttlFn, delayFn, groupIdFn, groupSeqFn);
+                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 
-    private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJms byJms) {
-        final var properties = Arrays.asList(byJms.properties());
+    private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {
+        final var properties = config.properties();
         if ((properties.size() & 1) != 0) {
             throw new IllegalArgumentException(
                     "Properties should be in name/value pairs on " + reflected.method().getDeclaringClass());
@@ -138,7 +135,8 @@ final class DefaultProxyMethodParser {
             final var parameter = p.parameter();
             propArgs.put(p.index(),
                     new DefaultProxyInvocationBinder.PropertyArg(
-                            OneUtil.getIfBlank(parameter.getAnnotation(OfProperty.class).value(), parameter::getName),
+                            OneUtil.getIfBlank(parameter.getAnnotation(OfProperty.class).value(),
+                                    () -> OneUtil.firstUpper(parameter.getName())),
                             parameter.getType()));
         }
         return propArgs;

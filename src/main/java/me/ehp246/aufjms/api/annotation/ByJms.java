@@ -43,7 +43,7 @@ public @interface ByJms {
      * E.g.,
      * <p>
      * <code>
-     *     { "appName", "AufJms", "appVersion", "1.0", ... }
+     *     { "AppName", "AufJms", "AppVersion", "1.0", ... }
      * </code>
      * <p>
      * Must be specified in pairs. Missing value will trigger an exception.
@@ -52,7 +52,7 @@ public @interface ByJms {
      * will result an exception.
      * <p>
      * <code>
-     *     { "appVersion" }
+     *     { "AppVersion" }
      * </code>
      * <p>
      * If the same property is defined by a {@linkplain OfProperty} parameter, the
