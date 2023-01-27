@@ -38,6 +38,33 @@ public @interface ByJms {
     To value();
 
     /**
+     * Specifies property name/value pairs for out-going messages.
+     * <p>
+     * E.g.,
+     * <p>
+     * <code>
+     *     { "appName", "AufJms", "appVersion", "1.0", ... }
+     * </code>
+     * <p>
+     * Must be specified in pairs. Missing value will trigger an exception.
+     * <p>
+     * E.g., the following is missing value for property '{@code appVersion}' and
+     * will result an exception.
+     * <p>
+     * <code>
+     *     { "appVersion" }
+     * </code>
+     * <p>
+     * If the same property is defined by a {@linkplain OfProperty} parameter, the
+     * argument takes the precedence and is accepted. The value defined here is
+     * ignored.
+     * <p>
+     * Spring property placeholder is supported on values but not on names.
+     *
+     */
+    String[] properties() default {};
+
+    /**
      * Specifies a bean name by which the interface can be injected.
      * <p>
      * The default is from {@link Class#getSimpleName()} with the first letter in

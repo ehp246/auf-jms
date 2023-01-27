@@ -17,7 +17,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class ParsedMethodDispatchBuilder {
+final class DefaultProxyInvocationBinder implements ProxyInvocationBinder {
     private final ReflectedProxyMethod reflected;
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;
@@ -26,17 +26,16 @@ final class ParsedMethodDispatchBuilder {
     private final Function<Object[], Integer> groupSeqFn;
     private final Function<Object[], Duration> ttlFn;
     private final Function<Object[], Duration> delayFn;
-    private final int[] propertyArgs;
-    private final String[] propertyNames;
-    private final Class<?>[] propertyTypes;
+    private final Map<Integer, PropertyArg> propArgs;
+    private final Map<String, String> propStatic;
     private final int bodyIndex;
     private final BodyOf<?> bodyOf;
 
-    ParsedMethodDispatchBuilder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
+    DefaultProxyInvocationBinder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
-            final BodyOf<?> bodyAs, final int[] propertyArgs, final Class<?>[] propertyTypes,
-            final String[] propertyNames,
-            final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,
+            final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs,
+            final Map<String, String> propStatic, final Function<Object[], Duration> ttlFn,
+            final Function<Object[], Duration> delayFn,
             final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn) {
         this.reflected = reflected;
         this.config = config;
@@ -46,13 +45,13 @@ final class ParsedMethodDispatchBuilder {
         this.delayFn = delayFn;
         this.groupIdFn = groupIdFn;
         this.groupSeqFn = groupSeqFn;
-        this.propertyArgs = propertyArgs;
-        this.propertyNames = propertyNames;
-        this.propertyTypes = propertyTypes;
+        this.propArgs = propArgs;
+        this.propStatic = propStatic;
         this.bodyIndex = bodyIndex;
         this.bodyOf = bodyAs;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public JmsDispatch apply(final Object target, final Object[] args) {
         final var to = config.to();
@@ -65,26 +64,29 @@ final class ParsedMethodDispatchBuilder {
         final var groupId = this.groupIdFn == null ? null : this.groupIdFn.apply(args);
         final var groupSeq = groupId == null || this.groupSeqFn == null ? 0 : this.groupSeqFn.apply(args);
 
-        final var properties = new HashMap<String, Object>();
-
-        for (var i = 0; i < propertyArgs.length; i++) {
-            final var argIndex = propertyArgs[i];
-            final var key = propertyNames[i];
+        // Static first
+        final var properties = new HashMap<String, Object>(propStatic);
+        // Then arguments
+        for (final var entry : propArgs.entrySet()) {
+            final var argIndex = entry.getKey();
+            final var propArg = entry.getValue();
+            final var propName = propArg.name;
+            final var propType = propArg.type();
             final var arg = args[argIndex];
 
             // Must have a property name for non-map values.
-            if (!OneUtil.hasValue(key) && !propertyTypes[i].isAssignableFrom(Map.class)) {
+            if (!OneUtil.hasValue(propName) && !propType.isAssignableFrom(Map.class)) {
                 throw new IllegalArgumentException(
                         "Un-defined property name on parameter " + reflected.getParameter(argIndex));
             }
 
-            if (propertyTypes[i].isAssignableFrom(Map.class)) {
+            if (propType.isAssignableFrom(Map.class)) {
                 // Skip null maps.
                 if (arg != null) {
                     properties.putAll(((Map<String, Object>) arg));
                 }
             } else {
-                properties.put(key, arg);
+                properties.put(propName, arg);
             }
         }
 
@@ -148,5 +150,8 @@ final class ParsedMethodDispatchBuilder {
             }
 
         };
+    }
+
+    public record PropertyArg(String name, Class<?> type) {
     }
 }

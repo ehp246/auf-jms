@@ -23,11 +23,11 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class ParsedMethodDispatchBuilderTest {
+class DefaultProxyInvocationBinderTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
             UUID.randomUUID().toString());
-    private final ProxyMethodParser parser = new ProxyMethodParser(
+    private final DefaultProxyMethodParser parser = new DefaultProxyMethodParser(
             new MockEnvironment().withProperty("id", "15df5c8b-adb4-4880-90d9-e370a7a97887")::resolvePlaceholders);
 
     @Test
@@ -211,7 +211,7 @@ class ParsedMethodDispatchBuilderTest {
                 .apply(null, captor.invocation().args().toArray()));
 
         Assertions.assertEquals("PT1.1S",
-                new ProxyMethodParser(v -> "PT1.1S").parse(captor.invocation().method(), config)
+                new DefaultProxyMethodParser(v -> "PT1.1S").parse(captor.invocation().method(), config)
                         .apply(null, captor.invocation().args().toArray()).ttl().toString());
     }
 
@@ -222,7 +222,7 @@ class ParsedMethodDispatchBuilderTest {
 
         captor.proxy().getTtl02();
 
-        final var ttl = new ProxyMethodParser(v -> {
+        final var ttl = new DefaultProxyMethodParser(v -> {
             value[0] = v;
             return "PT1S";
         }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray()).ttl()
@@ -364,7 +364,7 @@ class ParsedMethodDispatchBuilderTest {
 
         captor.proxy().m01();
         final var property = new String[1];
-        final var dispatch = new ProxyMethodParser(v -> {
+        final var dispatch = new DefaultProxyMethodParser(v -> {
             property[0] = v;
             return "PT0.1S";
         }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray());
@@ -514,7 +514,7 @@ class ParsedMethodDispatchBuilderTest {
         final var properties = parser.parse(captor.invocation().method(), config)
                 .apply(null, captor.invocation().args().toArray()).properties();
 
-        Assertions.assertEquals(expected, properties.get("Name"));
+        Assertions.assertEquals(expected, properties.get("name"));
     }
 
     @Test

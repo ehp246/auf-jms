@@ -3,13 +3,16 @@ package me.ehp246.aufjms.core.dispatch;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.time.Duration;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
@@ -20,6 +23,7 @@ import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.dispatch.DefaultProxyInvocationBinder.PropertyArg;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
 import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -28,16 +32,17 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class ProxyMethodParser {
+final class DefaultProxyMethodParser {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
     private final PropertyResolver propertyResolver;
 
-    ProxyMethodParser(final PropertyResolver propertyResolver) {
+    DefaultProxyMethodParser(final PropertyResolver propertyResolver) {
         this.propertyResolver = propertyResolver;
     }
 
-    ParsedMethodDispatchBuilder parse(final Method method, final ByJmsProxyConfig config) {
+    ProxyInvocationBinder parse(final Method method, final ByJmsProxyConfig config) {
+        final var byJms = method.getDeclaringClass().getAnnotation(ByJms.class);
         final var reflected = new ReflectedProxyMethod(method);
 
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
@@ -96,26 +101,6 @@ final class ProxyMethodParser {
                     "Un-supported GroupSeq type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
         }).orElse(null);
 
-        final var propArgs = new ArrayList<Integer>();
-        final var propNames = new ArrayList<String>();
-        final var propTypes = new ArrayList<Class<?>>();
-        reflected.allParametersWith(OfProperty.class).stream().forEach(p -> {
-            propArgs.add(p.index());
-            final var parameter = p.parameter();
-            propNames.add(OneUtil.getIfBlank(parameter.getAnnotation(OfProperty.class).value(),
-                    () -> OneUtil.firstUpper(parameter.getName())));
-            propTypes.add(parameter.getType());
-        });
-
-        final var propertyArgs = new int[propArgs.size()];
-        final var propertyNames = new String[propArgs.size()];
-        final var propertyTypes = new Class[propArgs.size()];
-        for (int i = 0; i < propArgs.size(); i++) {
-            propertyArgs[i] = propArgs.get(i);
-            propertyNames[i] = propNames.get(i);
-            propertyTypes[i] = propTypes.get(i);
-        }
-
         final var bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
                 .orElse(-1);
         final var bodyOf = Optional.ofNullable(bodyIndex == -1 ? null : reflected.getParameter(bodyIndex))
@@ -124,7 +109,38 @@ final class ProxyMethodParser {
                         parameter.getType()))
                 .orElse(null);
 
-        return new ParsedMethodDispatchBuilder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf, propertyArgs,
-                propertyTypes, propertyNames, ttlFn, delayFn, groupIdFn, groupSeqFn);
+        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf,
+                propArgs(reflected), propStatic(reflected, byJms), ttlFn, delayFn, groupIdFn, groupSeqFn);
+    }
+
+    private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJms byJms) {
+        final var properties = Arrays.asList(byJms.properties());
+        if ((properties.size() & 1) != 0) {
+            throw new IllegalArgumentException(
+                    "Properties should be in name/value pairs on " + reflected.method().getDeclaringClass());
+        }
+
+        final Map<String, String> propStatic = new HashMap<>();
+        for (int i = 0; i < properties.size(); i += 2) {
+            final var key = properties.get(i);
+            if (propStatic.containsKey(key)) {
+                throw new IllegalArgumentException(
+                        "Duplicate '" + properties.get(i) + " on " + reflected.method().getDeclaringClass());
+            }
+            propStatic.put(key, propertyResolver.resolve(properties.get(i + 1)));
+        }
+        return propStatic;
+    }
+
+    private Map<Integer, PropertyArg> propArgs(final ReflectedProxyMethod reflected) {
+        final Map<Integer, PropertyArg> propArgs = new HashMap<Integer, PropertyArg>();
+        for (final var p : reflected.allParametersWith(OfProperty.class)) {
+            final var parameter = p.parameter();
+            propArgs.put(p.index(),
+                    new DefaultProxyInvocationBinder.PropertyArg(
+                            OneUtil.getIfBlank(parameter.getAnnotation(OfProperty.class).value(), parameter::getName),
+                            parameter.getType()));
+        }
+        return propArgs;
     }
 }
