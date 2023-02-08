@@ -53,11 +53,14 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
-        final var listenerContainerFactory = jmsListenerContainerFactory(null);
-
         for (final var endpoint : this.endpoints) {
-            LOGGER.atTrace().log("Registering '{}' on '{}', '{}'", endpoint::name, endpoint.from()::on,
-                    endpoint.from()::sub);
+            LOGGER.atTrace().log("Registering '{}' on '{}', '{}'", endpoint::name, () -> endpoint.from().on(),
+                    () -> endpoint.from().sub());
+
+            final var factory = new DefaultJmsListenerContainerFactory();
+            factory.setConnectionFactory(this.cfProvider.get(endpoint.connectionFactory()));
+            factory.setSessionTransacted(endpoint.sessionMode() == Session.SESSION_TRANSACTED);
+            factory.setSessionAcknowledgeMode(endpoint.sessionMode());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
                 @Override
@@ -79,17 +82,13 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                         container.setSubscriptionShared(sub.shared());
                     }
 
-                    container
-                            .setupMessageListener(new DefaultInboundMessageListener(
-                                    new DefaultInvocableDispatcher(binder,
-                                            Arrays.asList(
-                                                    new ReplyInvoked(
-                                                            dispathFnProvider.get(endpoint.connectionFactory())),
-                                                    endpoint.invocationListener()),
-                                            executorProvider.get(endpoint.concurrency())),
-                                    new AutowireCapableInvocableFactory(autowireCapableBeanFactory,
-                                            endpoint.typeRegistry()),
-                                    endpoint.defaultConsumer()));
+                    container.setupMessageListener(new DefaultInboundMessageListener(
+                            new DefaultInvocableDispatcher(binder,
+                                    Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
+                                            endpoint.invocationListener()),
+                                    executorProvider.get(endpoint.concurrency())),
+                            new AutowireCapableInvocableFactory(autowireCapableBeanFactory, endpoint.typeRegistry()),
+                            endpoint.defaultConsumer()));
                 }
 
                 @Override
@@ -97,15 +96,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                     return endpoint.name();
                 }
 
-            }, listenerContainerFactory);
+            }, factory);
         }
-    }
-
-    private DefaultJmsListenerContainerFactory jmsListenerContainerFactory(final String cfName) {
-        final DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        factory.setConnectionFactory(this.cfProvider.get(cfName));
-        factory.setSessionTransacted(true);
-        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
-        return factory;
     }
 }

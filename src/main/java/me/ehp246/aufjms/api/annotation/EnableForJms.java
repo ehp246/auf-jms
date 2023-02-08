@@ -14,6 +14,7 @@ import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Queue;
+import jakarta.jms.Session;
 import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
@@ -115,6 +116,15 @@ public @interface EnableForJms {
          * Supports Spring property placeholder.
          */
         String autoStartup() default "true";
+
+        /**
+         * Defines the session mode for the endpoint.
+         * <p>
+         * Defaults to {@linkplain Session#SESSION_TRANSACTED}.
+         *
+         * @see Connection#createSession(int)
+         */
+        int sessionMode() default Session.SESSION_TRANSACTED;
 
         /**
          * Specifies the name to pass to {@linkplain ConnectionFactoryProvider} to

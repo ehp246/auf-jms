@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.jms.At;
  */
 record InboundEndpointRecord(InboundEndpoint.From from, InvocableTypeRegistry typeRegistry, int concurrency,
         String name, boolean autoStartup, String connectionFactory, InvocationListener invocationListener,
-        MsgConsumer defaultConsumer) implements InboundEndpoint {
+        MsgConsumer defaultConsumer, int sessionMode) implements InboundEndpoint {
 
     record From(At on, String selector, Sub sub) implements InboundEndpoint.From {
     }

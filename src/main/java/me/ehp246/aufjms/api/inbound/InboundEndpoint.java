@@ -1,8 +1,11 @@
 package me.ehp246.aufjms.api.inbound;
 
+import jakarta.jms.Connection;
+import jakarta.jms.Session;
 import me.ehp246.aufjms.api.jms.At;
 
 /**
+ * The definition of a Auf-JMS message listener.
  *
  * @author Lei Yang
  * @since 1.0
@@ -34,6 +37,17 @@ public interface InboundEndpoint {
 
     default MsgConsumer defaultConsumer() {
         return null;
+    }
+
+    /**
+     * Defines the session mode for the endpoint.
+     * <p>
+     * Defaults to {@linkplain Session#SESSION_TRANSACTED}.
+     *
+     * @see Connection#createSession(int)
+     */
+    default int sessionMode() {
+        return Session.SESSION_TRANSACTED;
     }
 
     interface From {

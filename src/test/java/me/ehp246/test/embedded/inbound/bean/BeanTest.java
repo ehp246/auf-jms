@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
+import org.springframework.jms.listener.DefaultMessageListenerContainer;
 
+import jakarta.jms.Session;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.core.inbound.NoopConsumer;
 import me.ehp246.test.embedded.inbound.bean.AppConfigs.AppConfig03;
@@ -31,14 +33,20 @@ class BeanTest {
         appCtx.register(AppConfigs.AppConfig01.class);
         appCtx.refresh();
 
-        Assertions.assertEquals(1, appCtx.getBeansOfType(InboundEndpoint.class).size());
+        Assertions.assertEquals(2, appCtx.getBeansOfType(InboundEndpoint.class).size());
 
         final var registry = appCtx.getBean(JmsListenerEndpointRegistry.class);
 
-        final var listenerContainer = registry.getListenerContainer(AppConfigs.AppConfig01.NAME);
+        final var container01 = (DefaultMessageListenerContainer) registry.getListenerContainer("endpoint01");
 
-        Assertions.assertEquals(true, listenerContainer.isAutoStartup());
-        Assertions.assertEquals(false, listenerContainer.isPubSubDomain());
+        Assertions.assertEquals(true, container01.isAutoStartup());
+        Assertions.assertEquals(false, container01.isPubSubDomain());
+        Assertions.assertEquals(true, container01.isSessionTransacted());
+
+        final var container02 = (DefaultMessageListenerContainer) registry.getListenerContainer("endpoint02");
+
+        Assertions.assertEquals(false, container02.isSessionTransacted());
+        Assertions.assertEquals(Session.DUPS_OK_ACKNOWLEDGE, container02.getSessionAcknowledgeMode());
     }
 
     @Test
@@ -78,5 +86,25 @@ class BeanTest {
         final var endpoint = appCtx.getBean(InboundEndpoint.class);
 
         Assertions.assertEquals(null, endpoint.defaultConsumer());
+    }
+
+    @Test
+    void session_01() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig05.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(0, endpoint.sessionMode());
+    }
+
+    @Test
+    void session_02() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig06.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(Session.CLIENT_ACKNOWLEDGE, endpoint.sessionMode());
     }
 }

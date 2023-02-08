@@ -73,6 +73,6 @@ public final class InboundEndpointFactory {
                 .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
 
         return new InboundEndpointRecord(from, registery, concurrency, beanName, autoStartup, connectionFactory,
-                invocationListener, defaultConsumer);
+                invocationListener, defaultConsumer, (int) inboundAttributes.get("sessionMode"));
     }
 }
