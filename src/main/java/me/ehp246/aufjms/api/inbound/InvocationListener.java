@@ -17,6 +17,6 @@ public sealed interface InvocationListener permits OnCompleted, OnFailed {
 
     @FunctionalInterface
     public non-sealed interface OnFailed extends InvocationListener {
-        void onFailed(Failed failed) throws Exception;
+        void onFailed(Failed failed) throws Throwable;
     }
 }

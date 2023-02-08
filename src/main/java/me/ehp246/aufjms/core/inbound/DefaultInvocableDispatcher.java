@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.Nullable;
 
-import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocableBinder;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
@@ -26,7 +25,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 final class DefaultInvocableDispatcher implements InvocableDispatcher {
-    private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
+    private final static Logger LOGGER = LogManager.getLogger(InvocableDispatcher.class);
 
     private final Executor executor;
     private final InvocableBinder binder;
@@ -40,10 +39,10 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
         this.executor = executor;
         for (final var listener : listeners == null ? List.of() : listeners) {
             // null tolerating
-            if (listener instanceof InvocationListener.OnCompleted completed) {
+            if (listener instanceof final InvocationListener.OnCompleted completed) {
                 this.completed.add(completed);
             }
-            if (listener instanceof InvocationListener.OnFailed failed) {
+            if (listener instanceof final InvocationListener.OnFailed failed) {
                 this.failed.add(failed);
             }
         }
@@ -65,8 +64,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                 assert (outcome != null);
 
-                if (outcome instanceof Failed failed) {
-
+                if (outcome instanceof final Failed failed) {
                     if (DefaultInvocableDispatcher.this.failed.size() == 0) {
                         throw failed.thrown();
                     }
@@ -81,8 +79,8 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                          * message.
                          */
                         return;
-                    } catch (Exception e) {
-                        LOGGER.atTrace().withThrowable(e).log("Failure interceptor threw: {}", e::getMessage);
+                    } catch (final Throwable e) {
+                        LOGGER.atTrace().log("Failure interceptor threw: {}", e::getMessage);
 
                         throw e;
                     }
@@ -94,16 +92,16 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                 try {
                     DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
-                } catch (Exception e) {
-                    LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e.getMessage());
+                } catch (final Exception e) {
+                    LOGGER.atTrace().log("Completed listener failed: {}", e::getMessage);
 
                     throw e;
                 }
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 throw OneUtil.ensureRuntime(e);
             } finally {
                 try (invocable) {
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
                 }
             }
