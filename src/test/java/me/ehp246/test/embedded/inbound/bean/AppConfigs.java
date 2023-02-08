@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
+import jakarta.jms.Session;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.annotation.EnableByJms;
@@ -44,9 +45,35 @@ class AppConfigs {
 
                 @Override
                 public String name() {
-                    return NAME;
+                    return "endpoint01";
                 }
 
+            };
+        }
+
+        @Bean
+        InboundEndpoint endpoint02() {
+            return new InboundEndpoint() {
+
+                @Override
+                public From from() {
+                    return new MockFrom(At.toTopic("t"));
+                }
+
+                @Override
+                public InvocableTypeRegistry typeRegistry() {
+                    return null;
+                }
+
+                @Override
+                public int sessionMode() {
+                    return Session.DUPS_OK_ACKNOWLEDGE;
+                }
+
+                @Override
+                public String name() {
+                    return "endpoint02";
+                }
             };
         }
     }
