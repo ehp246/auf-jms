@@ -130,4 +130,14 @@ class AppConfigs {
     @Import(EmbeddedArtemisConfig.class)
     static class AppConfig04 {
     }
+
+    @EnableForJms(@Inbound(@From("q1")))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig05 {
+    }
+
+    @EnableForJms(@Inbound(value = @From("q1"), sessionMode = Session.CLIENT_ACKNOWLEDGE))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig06 {
+    }
 }

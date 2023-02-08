@@ -87,4 +87,24 @@ class BeanTest {
 
         Assertions.assertEquals(null, endpoint.defaultConsumer());
     }
+
+    @Test
+    void session_01() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig05.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(0, endpoint.sessionMode());
+    }
+
+    @Test
+    void session_02() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig06.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(Session.CLIENT_ACKNOWLEDGE, endpoint.sessionMode());
+    }
 }
