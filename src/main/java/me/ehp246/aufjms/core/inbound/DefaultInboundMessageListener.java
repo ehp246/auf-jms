@@ -12,8 +12,8 @@ import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.exception.UnknownTypeException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
-import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.inbound.InvocableFactory;
+import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -48,8 +48,9 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
             AufJmsContext.set(session);
             Log4jContext.set(msg);
 
-            LOGGER.atDebug().log("Consuming {}", msg::id);
-            LOGGER.atTrace().log("Consuming {}", msg::text);
+            LOGGER.atDebug().log("Inbound from: {}, type: {}, correlation Id: {}", msg::destination, msg::type,
+                    msg::correlationId);
+            LOGGER.atTrace().log("Body: {}", msg::text);
 
             final var invocable = invocableFactory.get(msg);
 
@@ -62,11 +63,7 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
                 }
             }
 
-            LOGGER.atDebug().log("Dispatching {}", () -> invocable.method().toString());
-
             dispatcher.dispatch(invocable, msg);
-
-            LOGGER.atDebug().log("Consumed {}", msg::id);
         } catch (final Exception e) {
             LOGGER.atError().withThrowable(e).log("Message failed: {}", e::getMessage);
 

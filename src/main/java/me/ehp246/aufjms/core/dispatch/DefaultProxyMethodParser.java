@@ -48,8 +48,10 @@ final class DefaultProxyMethodParser {
                         .map(an -> (Function<Object[], String>) args -> an.value())
                         .orElseGet(() -> args -> OneUtil.firstUpper(method.getName())));
 
-        final var correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream().findFirst()
-                .map(p -> (Function<Object[], String>) args -> (String) args[p.index()]).orElse(null);
+        final var correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream().findFirst().map(p -> {
+            final var index = p.index();
+            return (Function<Object[], String>) args -> OneUtil.toString(args[index]);
+        }).orElse(null);
 
         final var ttlFn = reflected.allParametersWith(OfTtl.class).stream().findFirst()
                 .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])

@@ -17,16 +17,15 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {
-        LOGGER.atInfo().log("'{}', '{}', '{}'", dispatch::to, dispatch::type, dispatch::correlationId);
+        LOGGER.atInfo().log("Dispatch to: {}, type: {}, correlationId: {}", dispatch::to, dispatch::type,
+                dispatch::correlationId);
 
-        LOGGER.atDebug().log("'{}', '{}', '{}'", dispatch::replyTo, dispatch::ttl, dispatch::delay);
-
-        LOGGER.atTrace().log("'{}'", dispatch::properties);
+        LOGGER.atTrace().log("Properties: {}", dispatch::properties);
     }
 
     @Override
     public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        LOGGER.atTrace().log("'{}'", () -> msg == null ? "null" : msg.text());
+        LOGGER.atTrace().log("Body: {}", () -> msg == null ? "null" : msg.text());
     }
 
     @Override
