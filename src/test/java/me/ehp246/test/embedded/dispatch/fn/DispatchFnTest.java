@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,5 +191,14 @@ class DispatchFnTest {
     @Test
     void dispatchLogger_01() {
         Assertions.assertEquals(true, logger != null);
+    }
+
+    @Test
+    void loggerContext_01() {
+        final var fn = fnProvider.get("");
+
+        ThreadContext.put("id", UUID.randomUUID().toString());
+
+        fn.send(JmsDispatch.toDispatch(TO, "jmsType", Map.of("instant", Instant.now())));
     }
 }
