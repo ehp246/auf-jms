@@ -83,7 +83,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 connection = cfProvider.get(connectionFactoryName).createConnection();
             } catch (final JMSException e) {
                 LOGGER.atError().withThrowable(e).log("Failed to create connection on factory '{}': {}",
-                        connectionFactoryName, e.getMessage());
+                        connectionFactoryName::toString, e::getMessage);
                 throw new JMSRuntimeException(e.getErrorCode(), e.getMessage(), e);
             }
 
@@ -110,7 +110,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     }
 
                     /*
-                     * If connection is not set, look for one in the context. It is an error, if
+                     * If connection is not set, look for session in the context. It is an error if
                      * both are missing.
                      */
                     if (connection == null && AufJmsContext.getSession() == null) {
@@ -173,20 +173,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     return msg;
                 } catch (final Exception e) {
-                    try {
-                        for (final var listener : DefaultDispatchFnProvider.this.onExs) {
-                            listener.onException(dispatch, msg, e);
-                        }
-                    } catch (final RuntimeException ex) {
-                        throw ex;
+                    for (final var listener : DefaultDispatchFnProvider.this.onExs) {
+                        listener.onException(dispatch, msg, e);
                     }
 
-                    // Re-throw anything unchecked.
-                    if (e instanceof final RuntimeException re) {
-                        throw re;
-                    }
-
-                    // Wrap checked.
                     throw OneUtil.ensureRuntime(e);
                 } finally {
                     /*
@@ -195,19 +185,22 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     if (producer != null) {
                         try {
                             producer.close();
-                        } catch (final JMSException e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored", e);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored: {}",
+                                    e::getMessage);
                         }
                     }
 
                     /*
-                     * Session is created locally only when connection is null.
+                     * Session is created locally and needs to be closed only when connection is not
+                     * null.
                      */
                     if (connection != null && session != null) {
                         try {
                             session.close();
-                        } catch (final JMSException e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored.", e);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored: {}",
+                                    e::getMessage);
                         }
                     }
                 }
@@ -242,8 +235,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         closeable.stream().forEach(t -> {
             try {
                 t.close();
-            } catch (final JMSException e) {
-                LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored", e);
+            } catch (final Exception e) {
+                LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored: {}", e::getMessage);
             }
         });
         closeable.clear();
