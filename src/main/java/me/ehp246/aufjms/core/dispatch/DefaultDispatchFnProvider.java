@@ -24,6 +24,7 @@ import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
+import me.ehp246.aufjms.api.exception.JmsDispatchException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
@@ -174,10 +175,14 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     return msg;
                 } catch (final Exception e) {
                     for (final var listener : DefaultDispatchFnProvider.this.onExs) {
-                        listener.onException(dispatch, msg, e);
+                        try {
+                            listener.onException(dispatch, msg, e);
+                        } catch (final Exception e1) {
+                            LOGGER.atError().withThrowable(e1).log("Ignored: {}", e::getMessage);
+                        }
                     }
 
-                    throw OneUtil.ensureRuntime(e);
+                    throw new JmsDispatchException(e);
                 } finally {
                     /*
                      * Producer is always created.
@@ -186,8 +191,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         try {
                             producer.close();
                         } catch (final Exception e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored: {}",
-                                    e::getMessage);
+                            LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
                         }
                     }
 
@@ -199,8 +203,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         try {
                             session.close();
                         } catch (final Exception e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored: {}",
-                                    e::getMessage);
+                            LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
                         }
                     }
                 }
@@ -236,7 +239,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             try {
                 t.close();
             } catch (final Exception e) {
-                LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored: {}", e::getMessage);
+                LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
             }
         });
         closeable.clear();

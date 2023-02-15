@@ -26,13 +26,13 @@ import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
-import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Queue;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
+import me.ehp246.aufjms.api.exception.JmsDispatchException;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
@@ -121,8 +121,10 @@ class DefaultDispatchFnProviderTest {
 
         final var dispatch = new MockDispatch();
 
-        final var thrown = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch));
+        final var thrown = Assertions
+                .assertThrows(JmsDispatchException.class,
+                        () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
+                .getCause();
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(0)).preSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
@@ -130,7 +132,7 @@ class DefaultDispatchFnProviderTest {
         Mockito.verify(onException, times(2)).onException(Mockito.eq(dispatch), Mockito.eq(null),
                 Mockito.eq(jmsException));
 
-        Assertions.assertEquals(jmsException, thrown.getCause());
+        Assertions.assertEquals(jmsException, thrown);
     }
 
     @Test
@@ -140,8 +142,9 @@ class DefaultDispatchFnProviderTest {
 
         final var dispatch = new MockDispatch();
 
-        Assertions.assertThrows(JMSRuntimeException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch));
+        Assertions.assertThrows(JmsDispatchException.class,
+                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
+                .getCause();
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
         Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
@@ -238,7 +241,7 @@ class DefaultDispatchFnProviderTest {
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
-        final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
+        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchNullMessage),
                 Mockito.eq(expected));
@@ -259,7 +262,7 @@ class DefaultDispatchFnProviderTest {
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
-        final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
+        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
                 Mockito.eq(expected));
@@ -280,7 +283,7 @@ class DefaultDispatchFnProviderTest {
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
-        final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
+        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
                 Mockito.eq(expected));
@@ -293,24 +296,27 @@ class DefaultDispatchFnProviderTest {
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void ex_onexception_01() throws JMSException {
-        final var initialCause = new RuntimeException("postSend failed");
-        final var expected = new IllegalArgumentException();
+        final var expected = new RuntimeException("postSend failed");
+        final var ignored = new IllegalArgumentException();
         final var dispatch = new MockDispatch();
+        final var onExRef = new Exception[1];
         final DispatchListener.PostSend postSend = (d, m) -> {
-            throw initialCause;
+            throw expected;
         };
         final DispatchListener.OnException listener = (d, m, e) -> {
-            throw expected;
+            onExRef[0] = e;
+            throw ignored;
         };
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, postSend)).get("");
 
-        final var actual = Assertions.assertThrows(IllegalArgumentException.class, () -> fn.send(dispatch));
+        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(producer).close();
         Mockito.verify(session).close();
 
-        Assertions.assertEquals(expected, actual, "should be re-thrown as is");
+        Assertions.assertEquals(expected, onExRef[0]);
+        Assertions.assertEquals(expected, actual, "should be from the postSend with onException ignored");
     }
 
     @Test
@@ -457,7 +463,9 @@ class DefaultDispatchFnProviderTest {
         final var fn = new DefaultDispatchFnProvider(name -> null, toNullJson, null).get(null);
 
         // Should throw without connection and context session.
-        Assertions.assertThrows(IllegalStateException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)));
+        Assertions.assertEquals(IllegalStateException.class, Assertions
+                .assertThrows(JmsDispatchException.class, () -> fn.send(Mockito.mock(JmsDispatch.class))).getCause()
+                .getClass());
     }
 
     @Test
@@ -571,26 +579,30 @@ class DefaultDispatchFnProviderTest {
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void group_05() {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        final var actual = Assertions.assertThrows(JmsDispatchException.class,
                 () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {
                         return Map.of("JMSXGroupID", UUID.randomUUID().toString());
                     }
-                })).printStackTrace();
+                })).getCause();
+
+        Assertions.assertEquals(IllegalArgumentException.class, actual.getClass());
     }
 
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void group_06() {
-        Assertions.assertThrows(IllegalArgumentException.class,
+        final var actual = Assertions.assertThrows(JmsDispatchException.class,
                 () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {
                         return Map.of("JMSXGroupSeq", UUID.randomUUID().toString());
                     }
-                })).printStackTrace();
+                })).getCause();
+
+        Assertions.assertEquals(IllegalArgumentException.class, actual.getClass());
     }
 }
