@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import jakarta.jms.Connection;
-import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.MessageProducer;
@@ -24,7 +23,7 @@ import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.exception.JmsDispatchException;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
@@ -83,7 +82,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 connection = cfProvider.get(connectionFactoryName).createConnection();
             } catch (final JMSException e) {
                 LOGGER.atError().withThrowable(e).log("Failed to create connection on factory '{}': {}",
-                        connectionFactoryName, e.getMessage());
+                        connectionFactoryName::toString, e::getMessage);
                 throw new JMSRuntimeException(e.getErrorCode(), e.getMessage(), e);
             }
 
@@ -110,11 +109,15 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     }
 
                     /*
-                     * If connection is not set, look for one in the context. It is an error, if
+                     * If connection is not set, look for session in the context. It is an error if
                      * both are missing.
                      */
                     if (connection == null && AufJmsContext.getSession() == null) {
                         throw new IllegalStateException("No session available");
+                    }
+
+                    if (dispatch.to() == null || !OneUtil.hasValue(dispatch.to().name())) {
+                        throw new IllegalArgumentException("To must be specified");
                     }
 
                     /*
@@ -135,21 +138,31 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     message = session.createTextMessage();
                     msg = TextJmsMsg.from(message);
 
-                    // Fill the custom properties first so the framework ones won't get
-                    // overwritten.
+                    /*
+                     * Fill the custom properties first so the framework ones won't get
+                     */
                     for (final var entry : properties.orElseGet(HashMap<String, Object>::new).entrySet()) {
                         message.setObjectProperty(entry.getKey().toString(), entry.getValue());
                     }
 
+                    final var to = dispatch.to() instanceof AtQueue ? session.createQueue(dispatch.to().name())
+                            : session.createTopic(dispatch.to().name());
+
+                    message.setJMSDestination(to);
                     /*
                      * JMS headers
                      */
-                    message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
                     if (dispatch.groupId() != null && !dispatch.groupId().isBlank()) {
                         message.setStringProperty(JmsNames.GROUP_ID, dispatch.groupId());
                         message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
+                    }
+
+                    if (dispatch.replyTo() != null) {
+                        message.setJMSReplyTo(
+                                dispatch.replyTo() instanceof AtQueue ? session.createQueue(dispatch.replyTo().name())
+                                        : session.createTopic(dispatch.replyTo().name()));
                     }
 
                     message.setText(toPayload(dispatch));
@@ -164,30 +177,30 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         listener.preSend(dispatch, msg);
                     }
 
-                    producer.send(toJMSDestintation(session, dispatch.to()), message);
+                    producer.send(to, message);
 
-                    // Call listeners on postSend
+                    // Call listeners on postSend suppressing exceptions.
                     for (final var listener : DefaultDispatchFnProvider.this.postSends) {
-                        listener.postSend(dispatch, msg);
+                        try {
+                            listener.postSend(dispatch, msg);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Listener {} failed, ignoring: {}",
+                                    listener::toString, e::getMessage);
+                        }
                     }
 
                     return msg;
                 } catch (final Exception e) {
-                    try {
-                        for (final var listener : DefaultDispatchFnProvider.this.onExs) {
+                    for (final var listener : DefaultDispatchFnProvider.this.onExs) {
+                        try {
                             listener.onException(dispatch, msg, e);
+                        } catch (final Exception e1) {
+                            LOGGER.atError().withThrowable(e1).log("Listener {} failed, ignoring: {}",
+                                    listener::toString, e1::getMessage);
                         }
-                    } catch (final RuntimeException ex) {
-                        throw ex;
                     }
 
-                    // Re-throw anything unchecked.
-                    if (e instanceof final RuntimeException re) {
-                        throw re;
-                    }
-
-                    // Wrap checked.
-                    throw OneUtil.ensureRuntime(e);
+                    throw new JmsDispatchException(e);
                 } finally {
                     /*
                      * Producer is always created.
@@ -195,19 +208,20 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     if (producer != null) {
                         try {
                             producer.close();
-                        } catch (final JMSException e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close producer. Ignored", e);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
                         }
                     }
 
                     /*
-                     * Session is created locally only when connection is null.
+                     * Session is created locally and needs to be closed only when connection is not
+                     * null.
                      */
                     if (connection != null && session != null) {
                         try {
                             session.close();
-                        } catch (final JMSException e) {
-                            LOGGER.atError().withThrowable(e).log("Failed to close session. Ignored.", e);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
                         }
                     }
                 }
@@ -229,21 +243,13 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
         };
     }
 
-    private static Destination toJMSDestintation(final Session session, final At to) throws JMSException {
-        if (to == null || !OneUtil.hasValue(to.name())) {
-            return null;
-        }
-
-        return to instanceof AtQueue ? session.createQueue(to.name()) : session.createTopic(to.name());
-    }
-
     @Override
     public void close() {
         closeable.stream().forEach(t -> {
             try {
                 t.close();
-            } catch (final JMSException e) {
-                LOGGER.atError().withThrowable(e).log("Failed to close connection. Ignored", e);
+            } catch (final Exception e) {
+                LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
             }
         });
         closeable.clear();
