@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import jakarta.jms.Connection;
-import jakarta.jms.Destination;
 import jakarta.jms.JMSException;
 import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.MessageProducer;
@@ -25,7 +24,6 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.exception.JmsDispatchException;
-import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
@@ -118,6 +116,10 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         throw new IllegalStateException("No session available");
                     }
 
+                    if (dispatch.to() == null || !OneUtil.hasValue(dispatch.to().name())) {
+                        throw new IllegalArgumentException("To must be specified");
+                    }
+
                     /*
                      * Validation
                      */
@@ -134,23 +136,32 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     session = connection != null ? connection.createSession() : AufJmsContext.getSession();
                     producer = session.createProducer(null);
                     message = session.createTextMessage();
-                    msg = TextJmsMsg.from(message);
 
-                    // Fill the custom properties first so the framework ones won't get
-                    // overwritten.
+                    /*
+                     * Fill the custom properties first so the framework ones won't get
+                     */
                     for (final var entry : properties.orElseGet(HashMap<String, Object>::new).entrySet()) {
                         message.setObjectProperty(entry.getKey().toString(), entry.getValue());
                     }
 
+                    final var to = dispatch.to() instanceof AtQueue ? session.createQueue(dispatch.to().name())
+                            : session.createTopic(dispatch.to().name());
+
+                    message.setJMSDestination(to);
                     /*
                      * JMS headers
                      */
-                    message.setJMSReplyTo(toJMSDestintation(session, dispatch.replyTo()));
                     message.setJMSType(dispatch.type());
                     message.setJMSCorrelationID(dispatch.correlationId());
                     if (dispatch.groupId() != null && !dispatch.groupId().isBlank()) {
                         message.setStringProperty(JmsNames.GROUP_ID, dispatch.groupId());
                         message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
+                    }
+
+                    if (dispatch.replyTo() != null) {
+                        message.setJMSReplyTo(
+                                dispatch.replyTo() instanceof AtQueue ? session.createQueue(dispatch.replyTo().name())
+                                        : session.createTopic(dispatch.replyTo().name()));
                     }
 
                     message.setText(toPayload(dispatch));
@@ -160,12 +171,14 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     producer.setTimeToLive(
                             Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
+                    msg = TextJmsMsg.from(message);
+
                     // Call listeners on preSend
                     for (final var listener : DefaultDispatchFnProvider.this.preSends) {
                         listener.preSend(dispatch, msg);
                     }
 
-                    producer.send(toJMSDestintation(session, dispatch.to()), message);
+                    producer.send(to, message);
 
                     // Call listeners on postSend
                     for (final var listener : DefaultDispatchFnProvider.this.postSends) {
@@ -223,14 +236,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                 return toJson.apply(body, dispatch.bodyOf());
             }
         };
-    }
-
-    private static Destination toJMSDestintation(final Session session, final At to) throws JMSException {
-        if (to == null || !OneUtil.hasValue(to.name())) {
-            return null;
-        }
-
-        return to instanceof AtQueue ? session.createQueue(to.name()) : session.createTopic(to.name());
     }
 
     @Override
