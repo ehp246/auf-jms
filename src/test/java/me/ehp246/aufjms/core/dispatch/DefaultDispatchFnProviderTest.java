@@ -1,5 +1,6 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -142,8 +143,9 @@ class DefaultDispatchFnProviderTest {
 
         final var dispatch = new MockDispatch();
 
-        Assertions.assertThrows(JmsDispatchException.class,
-                () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
+        Assertions
+                .assertThrows(JmsDispatchException.class,
+                        () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
                 .getCause();
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
@@ -274,49 +276,54 @@ class DefaultDispatchFnProviderTest {
 
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
-    void ex_postsend_03() throws JMSException {
+    void ex_postsend_01() throws JMSException {
         final var expected = new IllegalArgumentException();
         final var dispatch = new MockDispatch();
-        final DispatchListener.PostSend listener = (d, m) -> {
+        final DispatchListener.PostSend postListener = (d, m) -> {
             throw expected;
         };
+        final DispatchListener.PostSend PostListener2 = Mockito.mock(DispatchListener.PostSend.class);
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson,
+                List.of(postListener, PostListener2, onException)).get("");
 
-        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
+        Assertions.assertDoesNotThrow(() -> fn.send(dispatch));
 
-        Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
-                Mockito.eq(expected));
+        Mockito.verify(PostListener2, times(1)).postSend(Mockito.any(), Mockito.any());
+        Mockito.verify(onException, never()).onException(Mockito.any(), Mockito.any(), Mockito.any());
+
         Mockito.verify(producer).close();
         Mockito.verify(session).close();
-
-        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void ex_onexception_01() throws JMSException {
-        final var expected = new RuntimeException("postSend failed");
+        final var expected = new RuntimeException("preSend failed");
         final var ignored = new IllegalArgumentException();
         final var dispatch = new MockDispatch();
         final var onExRef = new Exception[1];
-        final DispatchListener.PostSend postSend = (d, m) -> {
+        final DispatchListener.PreSend preSend = (d, m) -> {
             throw expected;
         };
-        final DispatchListener.OnException listener = (d, m, e) -> {
+        final DispatchListener.OnException onException1 = (d, m, e) -> {
             onExRef[0] = e;
             throw ignored;
         };
+        final var onException2 = Mockito.mock(DispatchListener.OnException.class);
 
-        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, postSend)).get("");
+        final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(onException1, preSend, onException2))
+                .get("");
 
-        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
+        Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch));
+
+        Assertions.assertEquals(expected, onExRef[0]);
+
+        // All listeners should be called.
+        Mockito.verify(onException2, times(1)).onException(Mockito.any(), Mockito.any(), Mockito.any());
 
         Mockito.verify(producer).close();
         Mockito.verify(session).close();
-
-        Assertions.assertEquals(expected, onExRef[0]);
-        Assertions.assertEquals(expected, actual, "should be from the postSend with onException ignored");
     }
 
     @Test
@@ -463,9 +470,9 @@ class DefaultDispatchFnProviderTest {
         final var fn = new DefaultDispatchFnProvider(name -> null, toNullJson, null).get(null);
 
         // Should throw without connection and context session.
-        Assertions.assertEquals(IllegalStateException.class, Assertions
-                .assertThrows(JmsDispatchException.class, () -> fn.send(Mockito.mock(JmsDispatch.class))).getCause()
-                .getClass());
+        Assertions.assertEquals(IllegalStateException.class,
+                Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)))
+                        .getCause().getClass());
     }
 
     @Test

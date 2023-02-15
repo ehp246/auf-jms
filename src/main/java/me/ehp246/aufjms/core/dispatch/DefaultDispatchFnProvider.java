@@ -136,6 +136,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     session = connection != null ? connection.createSession() : AufJmsContext.getSession();
                     producer = session.createProducer(null);
                     message = session.createTextMessage();
+                    msg = TextJmsMsg.from(message);
 
                     /*
                      * Fill the custom properties first so the framework ones won't get
@@ -171,8 +172,6 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                     producer.setTimeToLive(
                             Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
-                    msg = TextJmsMsg.from(message);
-
                     // Call listeners on preSend
                     for (final var listener : DefaultDispatchFnProvider.this.preSends) {
                         listener.preSend(dispatch, msg);
@@ -180,9 +179,14 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
 
                     producer.send(to, message);
 
-                    // Call listeners on postSend
+                    // Call listeners on postSend suppressing exceptions.
                     for (final var listener : DefaultDispatchFnProvider.this.postSends) {
-                        listener.postSend(dispatch, msg);
+                        try {
+                            listener.postSend(dispatch, msg);
+                        } catch (final Exception e) {
+                            LOGGER.atError().withThrowable(e).log("Listener {} failed, ignoring: {}",
+                                    listener::toString, e::getMessage);
+                        }
                     }
 
                     return msg;
@@ -191,7 +195,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         try {
                             listener.onException(dispatch, msg, e);
                         } catch (final Exception e1) {
-                            LOGGER.atError().withThrowable(e1).log("Ignored: {}", e::getMessage);
+                            LOGGER.atError().withThrowable(e1).log("Listener {} failed, ignoring: {}",
+                                    listener::toString, e1::getMessage);
                         }
                     }
 

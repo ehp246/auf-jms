@@ -45,6 +45,9 @@ public sealed interface DispatchListener permits OnDispatch, PreSend, PostSend, 
         /**
          * Invoked after the {@linkplain TextMessage} has been sent and before
          * {@linkplain JmsDispatchFn#send(JmsDispatch)} returns successfully.
+         * <p>
+         * {@linkplain Exception} thrown from a listener will be suppressed. All
+         * listeners will be invoked.
          */
         void postSend(JmsDispatch dispatch, JmsMsg msg);
     }
@@ -56,6 +59,9 @@ public sealed interface DispatchListener permits OnDispatch, PreSend, PostSend, 
          * to the caller interrupting {@linkplain JmsDispatchFn#send(JmsDispatch)}.
          * <p>
          * {@code msg} might be {@code null} depending on the cause.
+         * <p>
+         * {@linkplain Exception} thrown from a listener will be suppressed. All
+         * listeners will be invoked.
          */
         void onException(JmsDispatch dispatch, JmsMsg msg, Exception e);
     }
