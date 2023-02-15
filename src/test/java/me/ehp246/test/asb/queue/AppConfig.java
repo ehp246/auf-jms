@@ -14,7 +14,8 @@ import me.ehp246.aufjms.api.jms.DestinationType;
  *
  */
 @EnableByJms
-@EnableForJms({ @Inbound(value = @From("auf-jms.inbox"), name = "auf-jms.inbox", scan = InboundEndpointSwitch.class),
+@EnableForJms({
+        @Inbound(value = @From("auf-jms.inbox"), name = "auf-jms.inbox", scan = InboundEndpointSwitch.class, autoStartup = "false"),
         @Inbound(value = @From(value = "auf-jms.event", type = DestinationType.TOPIC), name = "auf-jms.event") })
 @SpringBootApplication
 class AppConfig {
