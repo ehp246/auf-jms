@@ -203,7 +203,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         }
                     }
 
-                    throw new JmsDispatchFailedException(e);
+                    throw new JmsDispatchFailedException(
+                            "Dispatch failed, correlationId=" + dispatch.correlationId() + ". " + e.getMessage(), e);
                 } finally {
                     /*
                      * Producer is always created.
