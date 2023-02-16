@@ -23,7 +23,7 @@ import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
-import me.ehp246.aufjms.api.exception.JmsDispatchException;
+import me.ehp246.aufjms.api.exception.JmsDispatchFailedException;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
@@ -31,6 +31,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.jms.ToJson;
+import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -98,6 +99,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
             @Override
             public JmsMsg send(final JmsDispatch dispatch) {
                 Objects.requireNonNull(dispatch);
+
+                Log4jContext.set(dispatch);
 
                 Session session = null;
                 MessageProducer producer = null;
@@ -200,7 +203,7 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                         }
                     }
 
-                    throw new JmsDispatchException(e);
+                    throw new JmsDispatchFailedException(e);
                 } finally {
                     /*
                      * Producer is always created.
@@ -224,6 +227,8 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, A
                             LOGGER.atError().withThrowable(e).log("Ignored: {}", e::getMessage);
                         }
                     }
+
+                    Log4jContext.clearMsg();
                 }
 
             }
