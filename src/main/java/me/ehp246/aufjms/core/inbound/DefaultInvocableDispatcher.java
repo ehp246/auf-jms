@@ -119,7 +119,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                     runnable.run();
 
                 } finally {
-                    Log4jContext.clear();
+                    Log4jContext.clearMsg();
                     AufJmsContext.clearSession();
                 }
             });

@@ -33,7 +33,7 @@ import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import jakarta.jms.Topic;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
-import me.ehp246.aufjms.api.exception.JmsDispatchException;
+import me.ehp246.aufjms.api.exception.JmsDispatchFailedException;
 import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
@@ -123,7 +123,7 @@ class DefaultDispatchFnProviderTest {
         final var dispatch = new MockDispatch();
 
         final var thrown = Assertions
-                .assertThrows(JmsDispatchException.class,
+                .assertThrows(JmsDispatchFailedException.class,
                         () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
                 .getCause();
 
@@ -144,7 +144,7 @@ class DefaultDispatchFnProviderTest {
         final var dispatch = new MockDispatch();
 
         Assertions
-                .assertThrows(JmsDispatchException.class,
+                .assertThrows(JmsDispatchFailedException.class,
                         () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, listeners).get("").send(dispatch))
                 .getCause();
 
@@ -243,7 +243,7 @@ class DefaultDispatchFnProviderTest {
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
-        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
+        final var actual = Assertions.assertThrows(JmsDispatchFailedException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchNullMessage),
                 Mockito.eq(expected));
@@ -264,7 +264,7 @@ class DefaultDispatchFnProviderTest {
 
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(listener, onException)).get("");
 
-        final var actual = Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch)).getCause();
+        final var actual = Assertions.assertThrows(JmsDispatchFailedException.class, () -> fn.send(dispatch)).getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
                 Mockito.eq(expected));
@@ -315,7 +315,7 @@ class DefaultDispatchFnProviderTest {
         final var fn = new DefaultDispatchFnProvider(cfProvder, toNullJson, List.of(onException1, preSend, onException2))
                 .get("");
 
-        Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(dispatch));
+        Assertions.assertThrows(JmsDispatchFailedException.class, () -> fn.send(dispatch));
 
         Assertions.assertEquals(expected, onExRef[0]);
 
@@ -471,7 +471,7 @@ class DefaultDispatchFnProviderTest {
 
         // Should throw without connection and context session.
         Assertions.assertEquals(IllegalStateException.class,
-                Assertions.assertThrows(JmsDispatchException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)))
+                Assertions.assertThrows(JmsDispatchFailedException.class, () -> fn.send(Mockito.mock(JmsDispatch.class)))
                         .getCause().getClass());
     }
 
@@ -586,7 +586,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void group_05() {
-        final var actual = Assertions.assertThrows(JmsDispatchException.class,
+        final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
                 () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override
@@ -601,7 +601,7 @@ class DefaultDispatchFnProviderTest {
     @Test
     @MockitoSettings(strictness = Strictness.WARN)
     void group_06() {
-        final var actual = Assertions.assertThrows(JmsDispatchException.class,
+        final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
                 () -> new DefaultDispatchFnProvider(cfProvder, toNullJson, null).get("").send(new MockDispatch() {
 
                     @Override

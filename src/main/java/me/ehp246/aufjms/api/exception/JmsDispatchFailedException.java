@@ -13,14 +13,14 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
  * @author Lei Yang
  * @since 2.0
  */
-public class JmsDispatchException extends RuntimeException {
+public class JmsDispatchFailedException extends RuntimeException {
     private static final long serialVersionUID = -6208402038575832238L;
 
-    public JmsDispatchException(final String message, final Throwable cause) {
+    public JmsDispatchFailedException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public JmsDispatchException(final Throwable cause) {
+    public JmsDispatchFailedException(final Throwable cause) {
         super(cause);
     }
 

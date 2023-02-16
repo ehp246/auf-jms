@@ -70,7 +70,7 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
             throw e;
         } finally {
             AufJmsContext.clearSession();
-            Log4jContext.clear();
+            Log4jContext.clearMsg();
         }
     }
 

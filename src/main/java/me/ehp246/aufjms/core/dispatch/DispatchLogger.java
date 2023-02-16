@@ -17,7 +17,7 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {
-        LOGGER.atInfo().log("Dispatch to: {}, type: {}, correlationId: {}", dispatch::to, dispatch::type,
+        LOGGER.atInfo().log("To={}, type={}, correlationId={}", dispatch::to, dispatch::type,
                 dispatch::correlationId);
 
         LOGGER.atTrace().log("Properties: {}", dispatch::properties);
@@ -25,11 +25,12 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
 
     @Override
     public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        LOGGER.atTrace().log("Body: {}", () -> msg == null ? "null" : msg.text());
+        LOGGER.atTrace().log("Body: {}", () -> msg == null ? "" : msg.text());
     }
 
     @Override
     public void postSend(final JmsDispatch dispatch, final JmsMsg msg) {
+        LOGGER.atTrace().log("Sent");
     }
 
     @Override
