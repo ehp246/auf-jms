@@ -17,24 +17,30 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {
-        LOGGER.atInfo().log("To={}, type={}, correlationId={}", dispatch::to, dispatch::type,
-                dispatch::correlationId);
-
-        LOGGER.atTrace().log("Properties: {}", dispatch::properties);
+        if (dispatch == null) {
+            return;
+        }
+        LOGGER.atInfo().log("CorrelationId={}, To={}, Type={}", dispatch::correlationId, dispatch::to, dispatch::type);
     }
 
     @Override
     public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        LOGGER.atTrace().log("Body: {}", () -> msg == null ? "" : msg.text());
+        if (dispatch == null) {
+            return;
+        }
+        LOGGER.atTrace().log("Properties={}", dispatch::properties);
+        LOGGER.atTrace().log("Body={}", () -> msg == null || msg.text() == null ? "" : msg.text());
     }
 
     @Override
     public void postSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        LOGGER.atTrace().log("Sent");
     }
 
     @Override
     public void onException(final JmsDispatch dispatch, final JmsMsg msg, final Exception e) {
-        LOGGER.atError().withThrowable(e).log("Failed: {}", e::getMessage);
+        if (e == null) {
+            return;
+        }
+        LOGGER.atTrace().log("Failed: {}", e::getMessage);
     }
 }
