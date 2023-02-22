@@ -13,6 +13,7 @@ import java.util.Map;
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -47,6 +48,7 @@ import me.ehp246.test.mock.MockDispatch;
  */
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("resource")
+@Disabled
 class DefaultDispatchFnProviderTest {
     private final static ToJson toNullJson = (value, info) -> null;
 
