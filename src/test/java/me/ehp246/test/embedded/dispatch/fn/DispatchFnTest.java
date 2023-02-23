@@ -211,9 +211,8 @@ class DispatchFnTest {
     void dispatchFn_01() throws Exception {
         final var type = UUID.randomUUID().toString();
 
-        try (final var dispatchFn = new DefaultDispatchFn(toJson, conFactoryProvider.get(null), null)) {
-            dispatchFn.send((JmsDispatch.toDispatch(TO, type)));
-        }
+        final var dispatchFn = new DefaultDispatchFn(conFactoryProvider.get(null), toJson, null);
+        dispatchFn.send((JmsDispatch.toDispatch(TO, type)));
 
         final var message = listener.take();
 

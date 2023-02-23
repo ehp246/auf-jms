@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
 import jakarta.jms.JMSContext;
-import jakarta.jms.JMSException;
 import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
@@ -36,24 +35,22 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 2.2
  */
-public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
+public final class DefaultDispatchFn implements JmsDispatchFn {
     private final Logger LOGGER = LogManager.getLogger(JmsDispatchFn.class.getName());
 
     private final ToJson toJson;
-    private final ConnectionFactory conFactory;
-    private final JMSContext jmsContext;
+    private final ConnectionFactory connectionFactory;
 
     private final List<DispatchListener.OnDispatch> onDispatchs = new ArrayList<>();
     private final List<DispatchListener.PreSend> preSends = new ArrayList<>();
     private final List<DispatchListener.PostSend> postSends = new ArrayList<>();
     private final List<DispatchListener.OnException> onExs = new ArrayList<>();
 
-    public DefaultDispatchFn(final ToJson toJson, final ConnectionFactory connectionFactory,
+    public DefaultDispatchFn(final ConnectionFactory connectionFactory, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
         super();
-        this.toJson = toJson;
-        this.conFactory = connectionFactory;
-        this.jmsContext = this.conFactory.createContext();
+        this.toJson = Objects.requireNonNull(toJson);
+        this.connectionFactory = Objects.requireNonNull(connectionFactory);
 
         for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
             if (listener instanceof final DispatchListener.OnDispatch onDispatch) {
@@ -77,6 +74,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
 
         Log4jContext.set(dispatch);
 
+        JMSContext jmsContext = null;
         TextMessage message = null;
         JmsMsg msg = null;
         try {
@@ -84,12 +82,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
                 listener.onDispatch(dispatch);
             }
 
-            /*
-             * If not set, look for one in the context. It is an error if both are missing.
-             */
-            if (this.jmsContext == null) {
-                throw new IllegalStateException("No JMSContext available");
-            }
+            jmsContext = this.connectionFactory.createContext();
 
             /*
              * Validation
@@ -135,9 +128,14 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
 
             producer.send(toJMSDestintation(jmsContext, dispatch.to()), message);
 
-            // Call listeners on postSend
+            // Call listeners on postSend suppressing exceptions.
             for (final var listener : this.postSends) {
-                listener.postSend(dispatch, msg);
+                try {
+                    listener.postSend(dispatch, msg);
+                } catch (final Exception e) {
+                    LOGGER.atTrace().withThrowable(e).log("Listener {} failed, ignoring: {}", listener::toString,
+                            e::getMessage);
+                }
             }
 
             return msg;
@@ -146,7 +144,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
                 try {
                     listener.onException(dispatch, msg, e);
                 } catch (final Exception e1) {
-                    LOGGER.atError().withThrowable(e1).log("Listener {} failed, ignoring: {}", listener::toString,
+                    LOGGER.atTrace().withThrowable(e1).log("Listener {} failed, ignoring: {}", listener::toString,
                             e1::getMessage);
                 }
             }
@@ -154,7 +152,15 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
             throw new JmsDispatchFailedException(
                     "Dispatch failed, CorrelationId=" + dispatch.correlationId() + ", " + e.getMessage(), e);
         } finally {
-            Log4jContext.clearMsg();
+            if (jmsContext != null) {
+                try {
+                    jmsContext.close();
+                } catch (final Exception e) {
+                    LOGGER.atTrace().withThrowable(e).log("JMSCOntext close failed, ignoring: {}", e::getMessage);
+                }
+            }
+
+            Log4jContext.clear(dispatch);
         }
     }
 
@@ -171,18 +177,11 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
         return toJson.apply(body, dispatch.bodyOf());
     }
 
-    private Destination toJMSDestintation(final JMSContext jmsContext, final At to) throws JMSException {
+    private Destination toJMSDestintation(final JMSContext jmsContext, final At to) {
         if (to == null || !OneUtil.hasValue(to.name())) {
             return null;
         }
 
         return to instanceof AtQueue ? jmsContext.createQueue(to.name()) : jmsContext.createTopic(to.name());
-    }
-
-    @Override
-    public void close() throws Exception {
-        if (this.jmsContext != null) {
-            this.jmsContext.close();
-        }
     }
 }

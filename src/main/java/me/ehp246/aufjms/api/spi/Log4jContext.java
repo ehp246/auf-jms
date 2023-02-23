@@ -46,7 +46,7 @@ public final class Log4jContext {
         }
     }
 
-    public static void clearDispatch() {
+    public static void clear(final JmsDispatch dispatch) {
         for (final var value : DispatchContextName.values()) {
             ThreadContext.remove(value.name());
         }

@@ -14,7 +14,7 @@ class Log4jContextTest {
     @Test
     void test() {
         Log4jContext.set((JmsDispatch) null);
-        Log4jContext.clearDispatch();
+        Log4jContext.clear(null);
 
         Log4jContext.set((JmsMsg) null);
         Log4jContext.clearMsg();
