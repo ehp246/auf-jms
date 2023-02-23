@@ -17,9 +17,11 @@ import jakarta.jms.JMSException;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.BodyOf;
+import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.aufjms.api.spi.BodyOfBuilder;
+import me.ehp246.aufjms.core.dispatch.DefaultDispatchFn;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.test.EmbeddedArtemisConfig;
@@ -35,6 +37,9 @@ import me.ehp246.test.embedded.dispatch.fn.BodyAsType.PersonDob;
                 "me.ehp246.aufjms.dispatch-logger.enabled=true" })
 class DispatchFnTest {
     private static final At TO = At.toQueue(TestQueueListener.DESTINATION_NAME);
+
+    @Autowired
+    private ConnectionFactoryProvider conFactoryProvider;
 
     @Autowired
     private TestQueueListener listener;
@@ -200,5 +205,17 @@ class DispatchFnTest {
         ThreadContext.put("id", UUID.randomUUID().toString());
 
         fn.send(JmsDispatch.toDispatch(TO, "jmsType", Map.of("instant", Instant.now())));
+    }
+
+    @Test
+    void dispatchFn_01() throws Exception {
+        final var type = UUID.randomUUID().toString();
+
+        final var dispatchFn = new DefaultDispatchFn(conFactoryProvider.get(null), toJson, null);
+        dispatchFn.send((JmsDispatch.toDispatch(TO, type)));
+
+        final var message = listener.take();
+
+        Assertions.assertEquals(type, message.getJMSType());
     }
 }

@@ -1,7 +1,6 @@
 package me.ehp246.test.mock;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 import me.ehp246.aufjms.api.jms.At;
@@ -35,8 +34,8 @@ public class MockDispatch implements JmsDispatch {
     }
 
     @Override
-    public List<?> body() {
-        return List.of();
+    public Object body() {
+        return null;
     }
 
     @Override
