@@ -35,11 +35,11 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  * @since 2.2
  */
-public final class DefaultDispatchFn implements JmsDispatchFn {
+public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
     private final Logger LOGGER = LogManager.getLogger(JmsDispatchFn.class.getName());
 
     private final ToJson toJson;
-    private final ConnectionFactory connectionFactory;
+    private final JMSContext jmsContext;
 
     private final List<DispatchListener.OnDispatch> onDispatchs = new ArrayList<>();
     private final List<DispatchListener.PreSend> preSends = new ArrayList<>();
@@ -48,9 +48,8 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
 
     public DefaultDispatchFn(final ConnectionFactory connectionFactory, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
-        super();
         this.toJson = Objects.requireNonNull(toJson);
-        this.connectionFactory = Objects.requireNonNull(connectionFactory);
+        this.jmsContext = Objects.requireNonNull(connectionFactory).createContext();
 
         for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
             if (listener instanceof final DispatchListener.OnDispatch onDispatch) {
@@ -74,7 +73,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
 
         Log4jContext.set(dispatch);
 
-        JMSContext jmsContext = null;
+        JMSContext localContext = null;
         TextMessage message = null;
         JmsMsg msg = null;
         try {
@@ -82,7 +81,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 listener.onDispatch(dispatch);
             }
 
-            jmsContext = this.connectionFactory.createContext();
+            localContext = this.jmsContext.createContext(JMSContext.AUTO_ACKNOWLEDGE);
 
             /*
              * Validation
@@ -94,7 +93,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                         throw new IllegalArgumentException("Un-allowed property name '" + key + "'");
                     });
 
-            message = jmsContext.createTextMessage();
+            message = localContext.createTextMessage();
             msg = TextJmsMsg.from(message);
 
             // Fill the custom properties first so the framework ones won't get
@@ -113,11 +112,11 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 message.setIntProperty(JmsNames.GROUP_SEQ, dispatch.groupSeq());
             }
 
-            message.setJMSReplyTo(toJMSDestintation(jmsContext, dispatch.replyTo()));
+            message.setJMSReplyTo(toJMSDestintation(localContext, dispatch.replyTo()));
 
             message.setText(toPayload(dispatch));
 
-            final var producer = jmsContext.createProducer()
+            final var producer = localContext.createProducer()
                     .setDeliveryDelay(Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
                     .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
 
@@ -126,7 +125,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 listener.preSend(dispatch, msg);
             }
 
-            producer.send(toJMSDestintation(jmsContext, dispatch.to()), message);
+            producer.send(toJMSDestintation(localContext, dispatch.to()), message);
 
             // Call listeners on postSend suppressing exceptions.
             for (final var listener : this.postSends) {
@@ -152,9 +151,9 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
             throw new JmsDispatchFailedException(
                     "Dispatch failed, CorrelationId=" + dispatch.correlationId() + ", " + e.getMessage(), e);
         } finally {
-            if (jmsContext != null) {
+            if (localContext != null) {
                 try {
-                    jmsContext.close();
+                    localContext.close();
                 } catch (final Exception e) {
                     LOGGER.atTrace().withThrowable(e).log("JMSCOntext close failed, ignoring: {}", e::getMessage);
                 }
@@ -183,5 +182,13 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
         }
 
         return to instanceof AtQueue ? jmsContext.createQueue(to.name()) : jmsContext.createTopic(to.name());
+    }
+
+    @Override
+    public void close() throws Exception {
+        try (this.jmsContext) {
+        } catch (final Exception e) {
+            LOGGER.atTrace().withThrowable(e).log("JMSCOntext close failed, ignoring: {}", e::getMessage);
+        }
     }
 }

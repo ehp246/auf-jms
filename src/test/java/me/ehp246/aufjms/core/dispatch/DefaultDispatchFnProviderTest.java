@@ -19,6 +19,7 @@ import me.ehp246.aufjms.api.jms.ToJson;
  * @author Lei Yang
  *
  */
+@SuppressWarnings("resource")
 class DefaultDispatchFnProviderTest {
     private final static ToJson toNullJson = (value, info) -> null;
 

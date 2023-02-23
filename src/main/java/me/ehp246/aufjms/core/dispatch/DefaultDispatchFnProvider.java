@@ -1,7 +1,13 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
@@ -15,10 +21,13 @@ import me.ehp246.aufjms.api.jms.ToJson;
  * @see EnableByJmsRegistrar#registerBeanDefinitions(org.springframework.core.type.AnnotationMetadata,
  *      org.springframework.beans.factory.support.BeanDefinitionRegistry)
  */
-public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
+public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider, AutoCloseable {
+    private final static Logger LOGGER = LogManager.getLogger(DefaultDispatchFnProvider.class);
+
     private final ConnectionFactoryProvider cfProvider;
     private final ToJson toJson;
     private final List<DispatchListener> dispatchListeners;
+    private final Set<Closeable> closeables = ConcurrentHashMap.newKeySet();
 
     public DefaultDispatchFnProvider(final ConnectionFactoryProvider cfProvider, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
@@ -31,5 +40,17 @@ public final class DefaultDispatchFnProvider implements JmsDispatchFnProvider {
     @Override
     public JmsDispatchFn get(final String connectionFactoryName) {
         return new DefaultDispatchFn(cfProvider.get(connectionFactoryName), toJson, this.dispatchListeners);
+    }
+
+    @Override
+    public void close() {
+        closeables.stream().forEach(t -> {
+            try {
+                t.close();
+            } catch (final Exception e) {
+                LOGGER.atTrace().withThrowable(e).log("Ignored: {}", e::getMessage);
+            }
+        });
+        closeables.clear();
     }
 }

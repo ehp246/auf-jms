@@ -35,6 +35,7 @@ import me.ehp246.test.mock.MockDispatch;
  * @author Lei Yang
  *
  */
+@SuppressWarnings("resource")
 class DefaultDispatchFnTest {
     private final static ToJson toNullJson = (value, info) -> null;
 
@@ -51,6 +52,7 @@ class DefaultDispatchFnTest {
     private MockSend mockSend() {
         final var cf = Mockito.mock(ConnectionFactory.class);
         final var jmsContext = Mockito.mock(JMSContext.class);
+        final var localContext = Mockito.mock(JMSContext.class);
         final var producer = Mockito.mock(JMSProducer.class);
         final var message = Mockito.mock(TextMessage.class);
         final var queue = Mockito.mock(Queue.class);
@@ -59,15 +61,17 @@ class DefaultDispatchFnTest {
 
         Mockito.when(cf.createContext()).thenReturn(jmsContext);
 
-        Mockito.when(jmsContext.createProducer()).thenReturn(producer);
-        Mockito.when(jmsContext.createTextMessage()).thenReturn(message);
-        Mockito.when(jmsContext.createQueue(Mockito.anyString())).thenReturn(queue);
+        Mockito.when(jmsContext.createContext(JMSContext.AUTO_ACKNOWLEDGE)).thenReturn(localContext);
+
+        Mockito.when(localContext.createProducer()).thenReturn(producer);
+        Mockito.when(localContext.createTextMessage()).thenReturn(message);
+        Mockito.when(localContext.createQueue(Mockito.anyString())).thenReturn(queue);
 
         Mockito.when(producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(producer);
         Mockito.when(producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(producer);
         Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
 
-        return new MockSend(cf, jmsContext, producer, message, queue, matchMessage);
+        return new MockSend(cf, jmsContext, producer, message, queue, matchMessage, localContext);
     }
 
     @Test
@@ -77,76 +81,46 @@ class DefaultDispatchFnTest {
 
         Mockito.doThrow(expected).when(cf).createContext();
 
-        final var thrown = Assertions.assertThrows(JmsDispatchFailedException.class,
-                () -> new DefaultDispatchFn(cf, toNullJson, listeners).send(new MockDispatch()));
+        final var thrown = Assertions.assertThrows(JMSRuntimeException.class,
+                () -> new DefaultDispatchFn(cf, toNullJson, listeners));
 
-        Assertions.assertEquals(expected, thrown.getCause());
+        Assertions.assertEquals(expected, thrown);
     }
 
     @Test
     void cleanup_01() {
-        final var cf = Mockito.mock(ConnectionFactory.class);
-        final var jmsContext = Mockito.mock(JMSContext.class);
-        final var producer = Mockito.mock(JMSProducer.class);
-        final var message = Mockito.mock(TextMessage.class);
-        final var queue = Mockito.mock(Queue.class);
+        final var mock = mockSend();
+        final var jmsMsg = new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(new MockDispatch());
 
-        Mockito.when(cf.createContext()).thenReturn(jmsContext);
-
-        Mockito.when(jmsContext.createProducer()).thenReturn(producer);
-        Mockito.when(jmsContext.createTextMessage()).thenReturn(message);
-        Mockito.when(jmsContext.createQueue(Mockito.anyString())).thenReturn(queue);
-
-        Mockito.when(producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
-
-        final var jmsMsg = new DefaultDispatchFn(cf, toNullJson, null).send(new MockDispatch());
-
-        Mockito.verify(producer).send(ArgumentMatchers.eq(queue), ArgumentMatchers.eq(jmsMsg.message()));
+        Mockito.verify(mock.producer).send(ArgumentMatchers.eq(mock.destination),
+                ArgumentMatchers.eq(jmsMsg.message()));
         // Should clean up everything.
-        Mockito.verify(jmsContext).close();
+        Mockito.verify(mock.localContext).close();
     }
 
     @Test
     void cleanup_02() {
         final var jmsException = new JMSRuntimeException("");
 
-        final var cf = Mockito.mock(ConnectionFactory.class);
-        final var jmsContext = Mockito.mock(JMSContext.class);
-        final var producer = Mockito.mock(JMSProducer.class);
-        final var message = Mockito.mock(TextMessage.class);
-        final var queue = Mockito.mock(Queue.class);
-
-        Mockito.when(cf.createContext()).thenReturn(jmsContext);
-
-        Mockito.when(jmsContext.createProducer()).thenReturn(producer);
-        Mockito.when(jmsContext.createTextMessage()).thenReturn(message);
-        Mockito.when(jmsContext.createQueue(Mockito.anyString())).thenReturn(queue);
-
-        Mockito.when(producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(producer);
-
-        Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
-
-        Mockito.doThrow(jmsException).when(producer).setTimeToLive(ArgumentMatchers.anyLong());
+        final var mock = mockSend();
+        Mockito.doThrow(jmsException).when(mock.producer).setTimeToLive(ArgumentMatchers.anyLong());
 
         final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
-                () -> new DefaultDispatchFn(cf, toNullJson, null).send(new MockDispatch()));
+                () -> new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(new MockDispatch()));
 
         Assertions.assertEquals(jmsException, actual.getCause());
 
         // Should clean up everything.
-        Mockito.verify(jmsContext).close();
+        Mockito.verify(mock.localContext).close();
     }
 
     @Test
-    void clieanup_03() {
-        final var mockProducer = mockSend();
+    void cleanup_03() {
+        final var mock = mockSend();
 
-        Mockito.doThrow(new JMSRuntimeException("")).when(mockProducer.jmsContext).close();
+        Mockito.doThrow(new IllegalStateException()).when(mock.jmsContext).close();
 
-        Assertions.assertDoesNotThrow(
-                () -> new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch()));
+        Assertions.assertDoesNotThrow(() -> new DefaultDispatchFn(mock.conFactory, toNullJson, null).close());
     }
 
     @Test
@@ -157,17 +131,17 @@ class DefaultDispatchFnTest {
             throw expected;
         };
 
-        final var cf = Mockito.mock(ConnectionFactory.class);
-        final var actual = Assertions
-                .assertThrows(JmsDispatchFailedException.class,
-                        () -> new DefaultDispatchFn(cf, toNullJson, List.of(listener, onException)).send(dispatch))
+        final var mock = mockSend();
+
+        final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
+                () -> new DefaultDispatchFn(mock.conFactory, toNullJson, List.of(listener, onException)).send(dispatch))
                 .getCause();
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(matchNullMessage),
                 Mockito.eq(expected));
 
         // Nothing should be created.
-        Mockito.verify(cf, times(0)).createContext();
+        Mockito.verify(mock.jmsContext, times(0)).createContext(Mockito.anyInt());
         Assertions.assertEquals(expected, actual);
     }
 
@@ -187,7 +161,7 @@ class DefaultDispatchFnTest {
 
         Mockito.verify(onException).onException(Mockito.eq(dispatch), Mockito.argThat(mockProducer.matchMessage()),
                 Mockito.eq(expected));
-        Mockito.verify(mockProducer.jmsContext()).close();
+        Mockito.verify(mockProducer.localContext).close();
 
         Assertions.assertEquals(expected, actual);
     }
@@ -212,7 +186,7 @@ class DefaultDispatchFnTest {
         // postSend should not interrupt the send.
         Mockito.verify(onException, never()).onException(Mockito.any(), Mockito.any(), Mockito.any());
 
-        Mockito.verify(mockProducer.jmsContext).close();
+        Mockito.verify(mockProducer.localContext).close();
     }
 
     @Test
@@ -244,37 +218,20 @@ class DefaultDispatchFnTest {
         // All listeners should be called.
         Mockito.verify(onException2, times(1)).onException(Mockito.any(), Mockito.any(), Mockito.any());
 
-        Mockito.verify(mockProducer.jmsContext).close();
+        Mockito.verify(mockProducer.localContext).close();
     }
 
     @Test
     void listener_01() {
-        final var cf = Mockito.mock(ConnectionFactory.class);
-        final var jmsContext = Mockito.mock(JMSContext.class);
-        final var producer = Mockito.mock(JMSProducer.class);
-        final var message = Mockito.mock(TextMessage.class);
-        final var queue = Mockito.mock(Queue.class);
-
-        final ArgumentMatcher<JmsMsg> matchMessage = msg -> msg.message() == message;
-
-        Mockito.when(cf.createContext()).thenReturn(jmsContext);
-
-        Mockito.when(jmsContext.createProducer()).thenReturn(producer);
-        Mockito.when(jmsContext.createTextMessage()).thenReturn(message);
-        Mockito.when(jmsContext.createQueue(Mockito.anyString())).thenReturn(queue);
-
-        Mockito.when(producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
-
         final var dispatch = new MockDispatch();
+        final var mock = mockSend();
 
-        new DefaultDispatchFn(cf, toNullJson, listeners).send(dispatch);
+        new DefaultDispatchFn(mock.conFactory, toNullJson, listeners).send(dispatch);
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
-        Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
-        Mockito.verify(postSend, times(2)).postSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
-        Mockito.verify(onException, times(0)).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
+        Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(mock.matchMessage));
+        Mockito.verify(postSend, times(2)).postSend(Mockito.eq(dispatch), Mockito.argThat(mock.matchMessage));
+        Mockito.verify(onException, times(0)).onException(Mockito.eq(dispatch), Mockito.argThat(mock.matchMessage),
                 Mockito.any(Exception.class));
     }
 
@@ -296,34 +253,20 @@ class DefaultDispatchFnTest {
     void listener_ex_send_03() throws JMSException {
         final var jmsException = new JMSRuntimeException("");
 
-        final var cf = Mockito.mock(ConnectionFactory.class);
-        final var jmsContext = Mockito.mock(JMSContext.class);
-        final var producer = Mockito.mock(JMSProducer.class);
-        final var message = Mockito.mock(TextMessage.class);
-        final var queue = Mockito.mock(Queue.class);
-        final ArgumentMatcher<JmsMsg> matchMessage = msg -> msg.message() == message;
+        final var mock = mockSend();
 
-        Mockito.when(cf.createContext()).thenReturn(jmsContext);
-
-        Mockito.when(jmsContext.createProducer()).thenReturn(producer);
-        Mockito.when(jmsContext.createTextMessage()).thenReturn(message);
-        Mockito.when(jmsContext.createQueue(Mockito.anyString())).thenReturn(queue);
-
-        Mockito.when(producer.setDeliveryDelay(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.setTimeToLive(ArgumentMatchers.anyLong())).thenReturn(producer);
-        Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
-
-        Mockito.doThrow(jmsException).when(producer).send(Mockito.any(Destination.class), Mockito.eq(message));
+        Mockito.doThrow(jmsException).when(mock.producer).send(Mockito.any(Destination.class),
+                Mockito.eq(mock.message));
 
         final var dispatch = new MockDispatch();
 
         Assertions.assertThrows(JmsDispatchFailedException.class,
-                () -> new DefaultDispatchFn(cf, toNullJson, listeners).send(dispatch)).getCause();
+                () -> new DefaultDispatchFn(mock.conFactory, toNullJson, listeners).send(dispatch)).getCause();
 
         Mockito.verify(onDispatch, times(2)).onDispatch(dispatch);
-        Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(matchMessage));
+        Mockito.verify(preSend, times(2)).preSend(Mockito.eq(dispatch), Mockito.argThat(mock.matchMessage));
         Mockito.verify(postSend, times(0)).postSend(Mockito.eq(dispatch), Mockito.any(JmsMsg.class));
-        Mockito.verify(onException, times(2)).onException(Mockito.eq(dispatch), Mockito.argThat(matchMessage),
+        Mockito.verify(onException, times(2)).onException(Mockito.eq(dispatch), Mockito.argThat(mock.matchMessage),
                 Mockito.eq(jmsException));
     }
 
@@ -580,6 +523,6 @@ class DefaultDispatchFnTest {
     }
 
     record MockSend(ConnectionFactory conFactory, JMSContext jmsContext, JMSProducer producer, TextMessage message,
-            Destination destination, ArgumentMatcher<JmsMsg> matchMessage) {
+            Destination destination, ArgumentMatcher<JmsMsg> matchMessage, JMSContext localContext) {
     }
 }

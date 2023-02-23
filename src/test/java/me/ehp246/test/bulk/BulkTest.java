@@ -8,8 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.jms.AufJmsContext;
-import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.test.TimingExtension;
 
 /**
@@ -23,28 +21,14 @@ class BulkTest {
     private final static int count = 3_000;
 
     @Autowired
-    private ConnectionFactoryProvider provider;
-    @Autowired
     private Proxy proxy;
 
     /**
-     * 14:44:39.168 15,177 ms.
+     * 14:44:39.168 4,438 ms.
      */
     @Test
     void send_01() {
         IntStream.range(0, count).forEach(proxy::bulkMsg);
-    }
-
-    /**
-     * 15:32:17.380 2,204 ms
-     */
-    @Test
-    void send_02() {
-        AufJmsContext.set(provider.get(null).createContext());
-
-        IntStream.range(0, count).forEach(proxy::bulkMsg);
-
-        AufJmsContext.clearJmsContext().close();
     }
 
     @Test
