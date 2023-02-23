@@ -39,7 +39,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
     private final Logger LOGGER = LogManager.getLogger(JmsDispatchFn.class.getName());
 
     private final ToJson toJson;
-    private final JMSContext jmsContext;
+    private final JMSContext rootContext;
 
     private final List<DispatchListener.OnDispatch> onDispatchs = new ArrayList<>();
     private final List<DispatchListener.PreSend> preSends = new ArrayList<>();
@@ -49,7 +49,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
     public DefaultDispatchFn(final ConnectionFactory connectionFactory, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
         this.toJson = Objects.requireNonNull(toJson);
-        this.jmsContext = Objects.requireNonNull(connectionFactory).createContext();
+        this.rootContext = Objects.requireNonNull(connectionFactory).createContext();
 
         for (final var listener : dispatchListeners == null ? List.of() : dispatchListeners) {
             if (listener instanceof final DispatchListener.OnDispatch onDispatch) {
@@ -81,7 +81,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
                 listener.onDispatch(dispatch);
             }
 
-            localContext = this.jmsContext.createContext(JMSContext.AUTO_ACKNOWLEDGE);
+            localContext = this.rootContext.createContext(JMSContext.AUTO_ACKNOWLEDGE);
 
             /*
              * Validation
@@ -186,7 +186,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        try (this.jmsContext) {
+        try (this.rootContext) {
         } catch (final Exception e) {
             LOGGER.atTrace().withThrowable(e).log("JMSCOntext close failed, ignoring: {}", e::getMessage);
         }

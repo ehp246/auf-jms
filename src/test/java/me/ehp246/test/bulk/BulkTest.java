@@ -24,7 +24,7 @@ class BulkTest {
     private Proxy proxy;
 
     /**
-     * 14:44:39.168 4,438 ms.
+     * 14:44:39.168 10,085 ms.
      */
     @Test
     void send_01() {
