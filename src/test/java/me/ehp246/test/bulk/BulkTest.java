@@ -42,7 +42,7 @@ class BulkTest {
      */
     @Test
     void send_02() throws Exception {
-        try (final var context = AufJmsContext.create().set(provider.get(null).createContext())) {
+        try (final var context = AufJmsContext.create().set(provider.get(null).createContext()).closeable()) {
             IntStream.range(0, count).forEach(proxy::bulkMsg);
         }
     }

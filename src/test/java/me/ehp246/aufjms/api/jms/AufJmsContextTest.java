@@ -49,6 +49,12 @@ class AufJmsContextTest {
     }
 
     @Test
+    void clear_01() {
+        Assertions.assertEquals(null,
+                AufJmsContext.create().set(Mockito.mock(JMSContext.class)).clear().getJmsContext());
+    }
+
+    @Test
     void jmsContext_01() {
         final var aufJmsContext = AufJmsContext.create();
 
@@ -68,7 +74,7 @@ class AufJmsContextTest {
         Mockito.doThrow(expected).when(context).close();
 
         final var actual = Assertions.assertThrows(JMSRuntimeException.class,
-                () -> AufJmsContext.create().set(context).close());
+                () -> AufJmsContext.create().set(context).closeable().close());
 
         Mockito.verify(context).close();
 
@@ -79,10 +85,14 @@ class AufJmsContextTest {
     void jmsContext_03() throws Exception {
         final var context = Mockito.mock(JMSContext.class);
 
-        AufJmsContext.create().set(context).close();
+        final var created = AufJmsContext.create().set(context);
+
+        created.closeable().close();
 
         Mockito.verify(context).close();
 
-        AufJmsContext.create().close();
+        Assertions.assertEquals(null, created.getJmsContext());
+
+        created.closeable().close();
     }
 }

@@ -9,7 +9,7 @@ import jakarta.jms.Session;
  * @author Lei Yang
  * @since 1.0
  */
-public final class AufJmsContext implements AutoCloseable {
+public final class AufJmsContext {
     private final static AufJmsContext CONTEXT = new AufJmsContext();
 
     private final ThreadLocal<Session> localSession = ThreadLocal.withInitial(() -> null);
@@ -67,13 +67,28 @@ public final class AufJmsContext implements AutoCloseable {
         return session;
     }
 
-    @Override
-    public void close() throws Exception {
-        final var jmsContext = localContext.get();
+    /**
+     * Clears all thread-specific data.
+     */
+    public AufJmsContext clear() {
         localContext.set(null);
+        return this;
+    }
 
-        if (jmsContext != null) {
-            jmsContext.close();
-        }
+    /**
+     * Creates an {@linkplain AutoCloseable} that clears all thread-specific data
+     * and closes {@linkplain JMSContext} if present.
+     */
+    public AutoCloseable closeable() {
+        return () -> {
+            final var jmsContext = this.getJmsContext();
+
+            // Clear early. In case of a later exception...
+            this.clear();
+
+            if (jmsContext != null) {
+                jmsContext.close();
+            }
+        };
     }
 }
