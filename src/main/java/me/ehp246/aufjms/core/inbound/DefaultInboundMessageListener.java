@@ -14,7 +14,6 @@ import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
 import me.ehp246.aufjms.api.inbound.InvocableFactory;
 import me.ehp246.aufjms.api.inbound.MsgConsumer;
-import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -45,7 +44,6 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
 
         final var msg = TextJmsMsg.from(textMessage);
         try {
-            AufJmsContext.set(session);
             Log4jContext.set(msg);
 
             LOGGER.atDebug().log("Inbound from: {}, type: {}, correlation Id: {}", msg::destination, msg::type,
@@ -69,7 +67,6 @@ final class DefaultInboundMessageListener implements SessionAwareMessageListener
 
             throw e;
         } finally {
-            AufJmsContext.clearSession();
             Log4jContext.clearMsg();
         }
     }

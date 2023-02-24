@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.jms.AufJmsContext;
+import me.ehp246.aufjms.api.jms.JmsDispatchContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.test.TimingExtension;
 
@@ -37,14 +37,14 @@ class BulkTest {
 
     /**
      * 15:32:17.380 2,204 ms
+     *
+     * @throws Exception
      */
     @Test
-    void send_02() {
-        AufJmsContext.set(provider.get(null).createContext());
-
-        IntStream.range(0, count).forEach(proxy::bulkMsg);
-
-        AufJmsContext.clearJmsContext().close();
+    void send_02() throws Exception {
+        try (final var closeable = JmsDispatchContext.set(provider.get(null).createContext())) {
+            IntStream.range(0, count).forEach(proxy::bulkMsg);
+        }
     }
 
     @Test

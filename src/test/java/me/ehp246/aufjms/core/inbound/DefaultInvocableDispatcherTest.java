@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,11 +24,7 @@ import me.ehp246.aufjms.api.inbound.InvocationListener;
 import me.ehp246.aufjms.api.inbound.InvocationListener.OnCompleted;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
-import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.core.inbound.DefaultInvocableBinder;
-import me.ehp246.aufjms.core.inbound.DefaultInvocableDispatcher;
-import me.ehp246.aufjms.core.inbound.InvocableRecord;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
@@ -74,11 +69,6 @@ class DefaultInvocableDispatcherTest {
         Mockito.when(bound.invoke()).thenReturn(failed);
 
         return (i, m) -> bound;
-    }
-
-    @BeforeEach
-    void setup() {
-        AufJmsContext.clearSession();
     }
 
     @Test
@@ -142,49 +132,35 @@ class DefaultInvocableDispatcherTest {
     void thread_01() throws JMSException {
         // Binder, listeners
         final var threadRef = new Thread[2];
-        final var sessionRef = new Session[2];
-
-        AufJmsContext.set(session);
 
         new DefaultInvocableDispatcher((i, m) -> {
             threadRef[0] = Thread.currentThread();
-            sessionRef[0] = AufJmsContext.getSession();
             final var bound = Mockito.mock(BoundInvocable.class);
             Mockito.when(bound.invoke()).thenReturn(Mockito.mock(Failed.class));
             return bound;
         }, List.of((InvocationListener.OnFailed) m -> {
             threadRef[1] = Thread.currentThread();
-            sessionRef[1] = AufJmsContext.getSession();
         }), null).dispatch(invocable, msg);
 
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binder, failed listener");
-
-        Assertions.assertEquals(session, sessionRef[0]);
-        Assertions.assertEquals(session, sessionRef[1]);
     }
 
     @Test
     void thread_02() throws InterruptedException, ExecutionException {
         // Executor, binder, listener
         final var threadRef = new Thread[3];
-        final var sessionRef = new Session[3];
 
         final var executor = Executors.newSingleThreadExecutor();
         threadRef[0] = executor.submit(Thread::currentThread).get();
 
-        // Should not show up in the executor
-        AufJmsContext.set(session);
-
         new DefaultInvocableDispatcher((i, m) -> {
             threadRef[1] = Thread.currentThread();
-            sessionRef[1] = AufJmsContext.getSession();
             final var bound = Mockito.mock(BoundInvocable.class);
             Mockito.when(bound.invoke()).thenReturn(Mockito.mock(Completed.class));
             return bound;
         }, List.of((InvocationListener.OnCompleted) m -> {
             threadRef[2] = Thread.currentThread();
-            sessionRef[2] = AufJmsContext.getSession();
         }), executor).dispatch(invocable, msg);
 
         executor.shutdown();
@@ -193,10 +169,6 @@ class DefaultInvocableDispatcherTest {
         Assertions.assertEquals(threadRef[0], threadRef[1],
                 "should be the same thread for binding, action, failed msg consumer");
         Assertions.assertEquals(threadRef[1], threadRef[2]);
-
-        // 0 not used
-        Assertions.assertEquals(null, sessionRef[1]);
-        Assertions.assertEquals(null, sessionRef[2]);
     }
 
     @Test
