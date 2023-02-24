@@ -5,13 +5,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import jakarta.jms.ConnectionFactory;
-import jakarta.jms.JMSException;
-import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.ToJson;
 
@@ -21,11 +18,6 @@ import me.ehp246.aufjms.api.jms.ToJson;
  */
 class DefaultDispatchFnProviderTest {
     private final static ToJson toNullJson = (value, info) -> null;
-
-    @BeforeEach
-    void beforeAll() throws JMSException {
-        AufJmsContext.clearSession();
-    }
 
     @Test
     void cfname_01() {

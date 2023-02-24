@@ -15,7 +15,6 @@ import me.ehp246.aufjms.api.inbound.InvocationListener;
 import me.ehp246.aufjms.api.inbound.InvocationModel;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
-import me.ehp246.aufjms.api.jms.AufJmsContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -120,7 +119,6 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                 } finally {
                     Log4jContext.clearMsg();
-                    AufJmsContext.clearSession();
                 }
             });
         }
