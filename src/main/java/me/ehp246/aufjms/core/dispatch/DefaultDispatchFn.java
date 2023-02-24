@@ -33,7 +33,6 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * @author Lei Yang
- * @since 2.2
  */
 public final class DefaultDispatchFn implements JmsDispatchFn {
     private final Logger LOGGER = LogManager.getLogger(JmsDispatchFn.class.getName());

@@ -37,14 +37,14 @@ class BulkTest {
 
     /**
      * 15:32:17.380 2,204 ms
+     *
+     * @throws Exception
      */
     @Test
-    void send_02() {
-        AufJmsContext.set(provider.get(null).createContext());
-
-        IntStream.range(0, count).forEach(proxy::bulkMsg);
-
-        AufJmsContext.clearJmsContext().close();
+    void send_02() throws Exception {
+        try (final var context = AufJmsContext.create().set(provider.get(null).createContext())) {
+            IntStream.range(0, count).forEach(proxy::bulkMsg);
+        }
     }
 
     @Test
