@@ -23,6 +23,7 @@ import jakarta.jms.JMSProducer;
 import jakarta.jms.JMSRuntimeException;
 import jakarta.jms.Queue;
 import jakarta.jms.TextMessage;
+import me.ehp246.aufjms.api.dispatch.DefaultDispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.exception.JmsDispatchFailedException;
 import me.ehp246.aufjms.api.jms.AtQueue;
@@ -47,6 +48,10 @@ class DefaultDispatchFnTest {
             preSend, postSend, onException);
 
     private final ArgumentMatcher<JmsMsg> matchNullMessage = msg -> msg == null;
+
+    record MockSend(ConnectionFactory connectionFactory, JMSContext jmsContext, JMSProducer producer, TextMessage message,
+            Destination destination, ArgumentMatcher<JmsMsg> matchMessage) {
+    }
 
     private MockSend mockSend() {
         final var cf = Mockito.mock(ConnectionFactory.class);
@@ -146,7 +151,7 @@ class DefaultDispatchFnTest {
         Mockito.doThrow(new JMSRuntimeException("")).when(mockProducer.jmsContext).close();
 
         Assertions.assertDoesNotThrow(
-                () -> new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch()));
+                () -> new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch()));
     }
 
     @Test
@@ -180,7 +185,7 @@ class DefaultDispatchFnTest {
         };
 
         final var mockProducer = this.mockSend();
-        final var fn = new DefaultDispatchFn(mockProducer.conFactory(), toNullJson, List.of(listener, onException));
+        final var fn = new DefaultDispatchFn(mockProducer.connectionFactory(), toNullJson, List.of(listener, onException));
 
         final var actual = Assertions.assertThrows(JmsDispatchFailedException.class, () -> fn.send(dispatch))
                 .getCause();
@@ -203,7 +208,7 @@ class DefaultDispatchFnTest {
 
         final var mockProducer = mockSend();
 
-        final var fn = new DefaultDispatchFn(mockProducer.conFactory, toNullJson,
+        final var fn = new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson,
                 List.of(postListener, PostListener2, onException));
 
         Assertions.assertDoesNotThrow(() -> fn.send(dispatch));
@@ -233,7 +238,7 @@ class DefaultDispatchFnTest {
         final var mockProducer = mockSend();
 
         final var actual = Assertions
-                .assertThrows(JmsDispatchFailedException.class, () -> new DefaultDispatchFn(mockProducer.conFactory,
+                .assertThrows(JmsDispatchFailedException.class, () -> new DefaultDispatchFn(mockProducer.connectionFactory,
                         toNullJson, List.of(onException1, preSend, onException2)).send(dispatch))
                 .getCause();
 
@@ -331,7 +336,7 @@ class DefaultDispatchFnTest {
     void ttl_01() {
         final var mockProducer = mockSend();
 
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -347,7 +352,7 @@ class DefaultDispatchFnTest {
     void ttl_02() {
         final var mockProducer = mockSend();
 
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public Duration ttl() {
@@ -363,7 +368,7 @@ class DefaultDispatchFnTest {
     void delay_01() throws JMSException {
         final var mockProducer = mockSend();
 
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -379,7 +384,7 @@ class DefaultDispatchFnTest {
     void delay_02() throws JMSException {
         final var mockProducer = mockSend();
 
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public Duration delay() {
@@ -397,7 +402,7 @@ class DefaultDispatchFnTest {
         final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
 
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public Map<String, Object> properties() {
@@ -413,7 +418,7 @@ class DefaultDispatchFnTest {
     @Test
     void correlationId_01() throws JMSException {
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -430,7 +435,7 @@ class DefaultDispatchFnTest {
         final var id = UUID.randomUUID().toString();
 
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String correlationId() {
@@ -445,7 +450,7 @@ class DefaultDispatchFnTest {
     @Test
     void group_01() throws JMSException {
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -462,7 +467,7 @@ class DefaultDispatchFnTest {
     @Test
     void group_02() throws JMSException {
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -481,7 +486,7 @@ class DefaultDispatchFnTest {
         final var id = UUID.randomUUID().toString();
 
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -499,7 +504,7 @@ class DefaultDispatchFnTest {
         final var id = UUID.randomUUID().toString();
 
         final var mockProducer = mockSend();
-        new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+        new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
             @Override
             public String groupId() {
@@ -521,7 +526,7 @@ class DefaultDispatchFnTest {
     void group_05() {
         final var mockProducer = mockSend();
         final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
-                () -> new DefaultDispatchFn(mockProducer.conFactory, toNullJson, null).send(new MockDispatch() {
+                () -> new DefaultDispatchFn(mockProducer.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {
@@ -536,7 +541,7 @@ class DefaultDispatchFnTest {
     void group_06() {
         final var mock = mockSend();
         final var actual = Assertions.assertThrows(JmsDispatchFailedException.class,
-                () -> new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(new MockDispatch() {
+                () -> new DefaultDispatchFn(mock.connectionFactory, toNullJson, null).send(new MockDispatch() {
 
                     @Override
                     public Map<String, Object> properties() {
@@ -551,7 +556,7 @@ class DefaultDispatchFnTest {
     void body_01() throws JMSException {
         final var mock = mockSend();
 
-        new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(
+        new DefaultDispatchFn(mock.connectionFactory, toNullJson, null).send(
                 JmsDispatch.toDispatch((AtQueue) () -> UUID.randomUUID().toString(), UUID.randomUUID().toString()));
 
         Mockito.verify(mock.message).setText(Mockito.eq(null));
@@ -562,7 +567,7 @@ class DefaultDispatchFnTest {
         final var mock = mockSend();
         final var bodySupplier = (Supplier<String>) UUID.randomUUID()::toString;
 
-        new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(JmsDispatch
+        new DefaultDispatchFn(mock.connectionFactory, toNullJson, null).send(JmsDispatch
                 .toDispatch((AtQueue) () -> UUID.randomUUID().toString(), UUID.randomUUID().toString(), bodySupplier));
 
         Mockito.verify(mock.message).setText(Mockito.eq(bodySupplier.get()));
@@ -573,13 +578,26 @@ class DefaultDispatchFnTest {
         final var mock = mockSend();
         final var bodySupplier = (Supplier<String>) () -> null;
 
-        new DefaultDispatchFn(mock.conFactory, toNullJson, null).send(JmsDispatch
+        new DefaultDispatchFn(mock.connectionFactory, toNullJson, null).send(JmsDispatch
                 .toDispatch((AtQueue) () -> UUID.randomUUID().toString(), UUID.randomUUID().toString(), bodySupplier));
 
         Mockito.verify(mock.message).setText(Mockito.eq(null));
     }
 
-    record MockSend(ConnectionFactory conFactory, JMSContext jmsContext, JMSProducer producer, TextMessage message,
-            Destination destination, ArgumentMatcher<JmsMsg> matchMessage) {
+    @Test
+    void jmsContext_01() {
+        Assertions.assertThrows(NullPointerException.class,
+                () -> new DefaultDispatchFn((JMSContext) null, toNullJson, listeners));
+    }
+
+    @Test
+    void jmsContext_02() {
+        final var mock = mockSend();
+
+        new DefaultDispatchFn(mock.jmsContext, toNullJson, listeners).send(new MockDispatch());
+
+        Mockito.verify(mock.jmsContext).createProducer();
+        Mockito.verify(mock.producer).send(Mockito.eq(mock.destination), Mockito.eq(mock.message));
+        Mockito.verify(mock.jmsContext, Mockito.never()).close();
     }
 }

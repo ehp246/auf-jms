@@ -3,6 +3,7 @@ package me.ehp246.aufjms.core.dispatch;
 import java.util.List;
 import java.util.Objects;
 
+import me.ehp246.aufjms.api.dispatch.DefaultDispatchFn;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;

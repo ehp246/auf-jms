@@ -1,4 +1,4 @@
-package me.ehp246.test.bulk;
+package me.ehp246.test.embedded.dispatch.bulk;
 
 import java.util.stream.IntStream;
 
@@ -8,8 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import me.ehp246.aufjms.api.jms.JmsDispatchContext;
+import me.ehp246.aufjms.api.dispatch.DefaultDispatchFn;
+import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
+import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.test.TimingExtension;
 
 /**
@@ -25,6 +28,8 @@ class BulkTest {
     @Autowired
     private ConnectionFactoryProvider provider;
     @Autowired
+    private ToJson toJson;
+    @Autowired
     private Proxy proxy;
 
     /**
@@ -37,18 +42,30 @@ class BulkTest {
 
     /**
      * 15:32:17.380 2,204 ms
-     *
-     * @throws Exception
      */
     @Test
     void send_02() throws Exception {
-        try (final var closeable = JmsDispatchContext.set(provider.get(null).createContext())) {
-            IntStream.range(0, count).forEach(proxy::bulkMsg);
-        }
+        final var jmseContext = provider.get(null).createContext();
+        final var fn = new DefaultDispatchFn(jmseContext, toJson, null);
+        final var dispatch = new BulkDispatch();
+
+        IntStream.range(0, count).forEach(i -> {
+            fn.send(dispatch.setBody(i + ""));
+        });
+
+        jmseContext.close();
     }
 
+    /**
+     * 15:06:19.844 15,574 ms.
+     */
     @Test
     void send_03() {
-        proxy.bulkMsg(IntStream.range(0, count));
+        final var fn = new DefaultDispatchFn(this.provider.get(null), toJson, null);
+        final AtQueue at = "inbox"::toString;
+
+        IntStream.range(0, count).forEach(i -> {
+            fn.send(JmsDispatch.toDispatch(at, "bulkMsg", i + ""));
+        });
     }
 }
