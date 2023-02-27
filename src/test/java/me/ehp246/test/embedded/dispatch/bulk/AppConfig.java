@@ -1,4 +1,4 @@
-package me.ehp246.test.bulk;
+package me.ehp246.test.embedded.dispatch.bulk;
 
 import org.springframework.context.annotation.Import;
 

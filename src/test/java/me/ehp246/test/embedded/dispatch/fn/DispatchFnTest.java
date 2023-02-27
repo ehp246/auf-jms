@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
 import jakarta.jms.JMSException;
+import me.ehp246.aufjms.api.dispatch.DefaultDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.BodyOf;
@@ -21,7 +22,6 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.aufjms.api.spi.BodyOfBuilder;
-import me.ehp246.aufjms.core.dispatch.DefaultDispatchFn;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.test.EmbeddedArtemisConfig;
