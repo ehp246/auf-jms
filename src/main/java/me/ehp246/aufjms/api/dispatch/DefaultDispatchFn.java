@@ -30,6 +30,14 @@ import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
+ * Light-weight class that implements {@linkplain JmsDispatchFn}.
+ * <p>
+ * A {@linkplain DefaultDispatchFn} can be created on either a
+ * {@linkplain ConnectionFactory} or a {@linkplain JMSContext}.
+ * <p>
+ * {@linkplain ConnectionFactory}-backed object is thread-safe while
+ * {@linkplain JMSContext}-based is not.
+ *
  * @author Lei Yang
  */
 public final class DefaultDispatchFn implements JmsDispatchFn {
@@ -44,6 +52,15 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
     private final List<DispatchListener.PostSend> postSends = new ArrayList<>();
     private final List<DispatchListener.OnException> onExs = new ArrayList<>();
 
+    /**
+     * Creates a {@linkplain DefaultDispatchFn} with the given
+     * {@linkplain ConnectionFactory}.
+     * <p>
+     * Unlike {@linkplain JMSContext}-backed {@linkplain DefaultDispatchFn}, the
+     * {@linkplain DefaultDispatchFn} backed-by a {@linkplain ConnectionFactory}
+     * creates and closes {@linkplain JMSContext} for each invocation on
+     * {@linkplain JmsDispatchFn#send(JmsDispatch)}. I.e., it is thread-safe.
+     */
     public DefaultDispatchFn(final ConnectionFactory connectionFactory, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
         super();
@@ -54,6 +71,19 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
         initListeners(dispatchListeners);
     }
 
+    /**
+     * Creates a {@linkplain DefaultDispatchFn} with the given
+     * {@linkplain JMSContext}.
+     * <p>
+     * Closing of the context is up to the caller. Once the context is closed, the
+     * {@linkplain DefaultDispatchFn} is no longer functional and should be
+     * discarded since the reference to the context can not be changed after
+     * construction.
+     * <p>
+     * {@linkplain JMSContext} is not thread-safe. {@linkplain DefaultDispatchFn}
+     * created on a context is not thread-safe either but it offers much better
+     * performance when sending messages in batch.
+     */
     public DefaultDispatchFn(final JMSContext jmsContex, final ToJson toJson,
             final List<DispatchListener> dispatchListeners) {
         super();
