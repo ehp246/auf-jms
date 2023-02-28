@@ -31,6 +31,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
 import me.ehp246.test.TestUtil;
 import me.ehp246.test.TimingExtension;
+import me.ehp246.test.mock.InvocableRecord;
 import me.ehp246.test.mock.MockJmsMsg;
 import me.ehp246.test.mock.MockTextMessage;
 

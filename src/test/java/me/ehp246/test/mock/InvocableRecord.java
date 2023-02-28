@@ -1,4 +1,4 @@
-package me.ehp246.aufjms.core.inbound;
+package me.ehp246.test.mock;
 
 import java.lang.reflect.Method;
 
@@ -9,9 +9,9 @@ import me.ehp246.aufjms.api.inbound.InvocationModel;
  * @author Lei Yang
  *
  */
-record InvocableRecord(Object instance, Method method, AutoCloseable closeable, InvocationModel invocationModel)
+public record InvocableRecord(Object instance, Method method, AutoCloseable closeable, InvocationModel invocationModel)
         implements Invocable {
-    InvocableRecord {
+    public InvocableRecord {
         // Instance could be null for static invocation.
         if (method == null) {
             throw new IllegalArgumentException("Method must be specified");
@@ -22,7 +22,7 @@ record InvocableRecord(Object instance, Method method, AutoCloseable closeable, 
         }
     }
 
-    InvocableRecord(Object instance, Method method) {
+    public InvocableRecord(final Object instance, final Method method) {
         this(instance, method, null, InvocationModel.DEFAULT);
     }
 
