@@ -1,5 +1,8 @@
 package me.ehp246.aufjms.api.jms;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.jms.JMSContext;
 
 /**
@@ -7,12 +10,23 @@ import jakarta.jms.JMSContext;
  */
 public final class JmsDispatchContext {
     private static final ThreadLocal<JMSContext> localContext = ThreadLocal.withInitial(() -> null);
+    private static final ThreadLocal<Map<String, Object>> localPropertyMap = ThreadLocal.withInitial(HashMap::new);
 
     private JmsDispatchContext() {
         super();
     }
 
-    public static AutoCloseable set(final JMSContext jmsContext) {
+    public static AutoCloseable setProperties(final Map<String, Object> map) {
+        localPropertyMap.set(map);
+
+        return JmsDispatchContext.closeable();
+    }
+
+    public static Map<String, Object> properties() {
+        return localPropertyMap.get();
+    }
+
+    public static AutoCloseable setJmsContext(final JMSContext jmsContext) {
         localContext.set(jmsContext);
 
         return JmsDispatchContext.closeable();
@@ -22,7 +36,7 @@ public final class JmsDispatchContext {
      * @return the current {@linkplain JMSContext} on the thread. <code>null</code>
      *         if there is none.
      */
-    public static JMSContext getJmsContext() {
+    public static JMSContext jmsContext() {
         return localContext.get();
     }
 
@@ -31,17 +45,20 @@ public final class JmsDispatchContext {
      */
     public static void remove() {
         localContext.remove();
+        localPropertyMap.remove();
+    }
+
+    public static void close() {
+        final var jmsContext = localContext.get();
+
+        remove();
+
+        if (jmsContext != null) {
+            jmsContext.close();
+        }
     }
 
     public static AutoCloseable closeable() {
-        return () -> {
-            final var jmsContext = localContext.get();
-
-            JmsDispatchContext.remove();
-
-            if (jmsContext != null) {
-                jmsContext.close();
-            }
-        };
+        return JmsDispatchContext::close;
     }
 }

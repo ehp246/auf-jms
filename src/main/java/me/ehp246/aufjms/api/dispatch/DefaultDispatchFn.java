@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +20,7 @@ import me.ehp246.aufjms.api.exception.JmsDispatchFailedException;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.jms.JmsDispatchContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.jms.ToJson;
@@ -134,23 +134,26 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
 
             localContext = this.jmsContext == null ? this.connectionFactory.createContext() : this.jmsContext;
 
-            /*
-             * Validation
-             */
-            final var properties = Optional.ofNullable(dispatch.properties());
-            properties.map(Map::keySet).map(Set::stream)
-                    .flatMap(keys -> keys.filter(key -> AufJmsConstants.RESERVED_PROPERTIES.contains(key)).findAny())
-                    .ifPresent(key -> {
-                        throw new IllegalArgumentException("Un-allowed property name '" + key + "'");
-                    });
-
             message = localContext.createTextMessage();
             msg = TextJmsMsg.from(message);
 
-            // Fill the custom properties first so the framework ones won't get
-            // overwritten.
-            for (final var entry : properties.orElseGet(HashMap<String, Object>::new).entrySet()) {
-                message.setObjectProperty(entry.getKey().toString(), entry.getValue());
+            /*
+             * Context properties, dispatch properties in ascending priority.
+             */
+            final Map<String, Object> properties = new HashMap<>(
+                    Optional.ofNullable(dispatch.properties()).orElseGet(Map::of));
+
+            for (final var entry : Optional.ofNullable(JmsDispatchContext.properties()).orElseGet(Map::of)
+                    .entrySet()) {
+                properties.putIfAbsent(entry.getKey(), entry.getValue());
+            }
+
+            for (final var entry : properties.entrySet()) {
+                final var key = entry.getKey();
+                if (AufJmsConstants.RESERVED_PROPERTIES.contains(key)) {
+                    throw new IllegalArgumentException("Un-supported property name '" + key + "'");
+                }
+                message.setObjectProperty(key, entry.getValue());
             }
 
             /*

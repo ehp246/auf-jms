@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.jgroups.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -28,6 +29,7 @@ import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.exception.JmsDispatchFailedException;
 import me.ehp246.aufjms.api.jms.AtQueue;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
+import me.ehp246.aufjms.api.jms.JmsDispatchContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.ToJson;
 import me.ehp246.test.mock.MockDispatch;
@@ -73,6 +75,11 @@ class DefaultDispatchFnTest {
         Mockito.when(producer.send(ArgumentMatchers.any(), ArgumentMatchers.<TextMessage>any())).thenReturn(producer);
 
         return new MockSend(cf, jmsContext, producer, message, queue, matchMessage);
+    }
+
+    @AfterEach
+    void clear() {
+        JmsDispatchContext.remove();
     }
 
     @Test
@@ -413,6 +420,28 @@ class DefaultDispatchFnTest {
 
         Mockito.verify(mockProducer.message, times(1)).setObjectProperty("key1", "value1");
         Mockito.verify(mockProducer.message, times(1)).setObjectProperty("key2", i);
+    }
+
+    @Test
+    void property_02() throws JMSException {
+        JmsDispatchContext.setProperties(Map.of("key1", UUID.randomUUID().toString(), "key3", "v3"));
+
+        final var i = Integer.valueOf(2);
+        final var properties = Map.<String, Object>of("key1", "value1", "key2", i);
+
+        final var mock = mockSend();
+        new DefaultDispatchFn(mock.connectionFactory, toNullJson, null).send(new MockDispatch() {
+
+            @Override
+            public Map<String, Object> properties() {
+                return properties;
+            }
+
+        });
+
+        Mockito.verify(mock.message, times(1)).setObjectProperty("key1", "value1");
+        Mockito.verify(mock.message, times(1)).setObjectProperty("key2", i);
+        Mockito.verify(mock.message, times(1)).setObjectProperty("key3", "v3");
     }
 
     @Test
