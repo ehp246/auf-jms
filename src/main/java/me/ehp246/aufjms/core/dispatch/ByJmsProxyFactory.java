@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
@@ -40,14 +41,16 @@ public final class ByJmsProxyFactory {
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
     private final DefaultProxyMethodParser methodParser;
+    private final ReturningDispatcheRepo returningDispatcheRepo;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
-            final PropertyResolver propertyResolver) {
+            final PropertyResolver propertyResolver, @Nullable final ReturningDispatcheRepo returningDispatcheRepo) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
         this.methodParser = new DefaultProxyMethodParser(propertyResolver);
+        this.returningDispatcheRepo = returningDispatcheRepo;
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +86,8 @@ public final class ByJmsProxyFactory {
                     private final int hashCode = new Object().hashCode();
 
                     @Override
-                    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+                    public Object invoke(final Object proxy, final Method method, final Object[] args)
+                            throws Throwable {
                         if (method.getName().equals("toString")) {
                             return ByJmsProxyFactory.this.toString();
                         }
@@ -104,7 +108,17 @@ public final class ByJmsProxyFactory {
                         final var jmsDispatch = cache.computeIfAbsent(method, m -> methodParser.parse(m, proxyConfig))
                                 .apply(proxy, args);
 
+                        // Return expected?
+                        final var pending = method.getReturnType() != null
+                                ? returningDispatcheRepo.add(jmsDispatch.correlationId(), null)
+                                : null;
+
                         dispatchFn.send(jmsDispatch);
+
+                        // Return expected?
+                        if (pending != null) {
+                            return pending.future().get();
+                        }
 
                         return null;
                     }
