@@ -35,13 +35,15 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Method, ProxyInvocationBinder> cache = new ConcurrentHashMap<>();
+    private final Map<Method, ProxyInvocationBinder> invocationBinderCache = new ConcurrentHashMap<>();
+    private final Map<Method, ProxyReturnBinder> returnBinderCache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
-    private final DefaultProxyMethodParser methodParser;
     private final ReturningDispatcheRepo returningDispatcheRepo;
+    private final DefaultProxyInvocationParser invocationParser;
+    private final DefaultProxyReturnParser returnParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final PropertyResolver propertyResolver, @Nullable final ReturningDispatcheRepo returningDispatcheRepo) {
@@ -49,8 +51,9 @@ public final class ByJmsProxyFactory {
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
-        this.methodParser = new DefaultProxyMethodParser(propertyResolver);
         this.returningDispatcheRepo = returningDispatcheRepo;
+        this.invocationParser = new DefaultProxyInvocationParser(propertyResolver);
+        this.returnParser = new DefaultProxyReturnParser();
     }
 
     @SuppressWarnings("unchecked")
@@ -105,22 +108,24 @@ public final class ByJmsProxyFactory {
                                     .bindTo(proxy).invokeWithArguments(args);
                         }
 
-                        final var jmsDispatch = cache.computeIfAbsent(method, m -> methodParser.parse(m, proxyConfig))
+                        final var jmsDispatch = invocationBinderCache
+                                .computeIfAbsent(method, m -> invocationParser.parse(m, proxyConfig))
                                 .apply(proxy, args);
 
                         // Return expected?
-                        final var pending = method.getReturnType() != null
-                                ? returningDispatcheRepo.add(jmsDispatch.correlationId(), null)
+                        final var pending = returnBinderCache.computeIfAbsent(method, m -> returnParser.parse(method));
+
+                        final var toBeReturned = (pending instanceof RemoteReturnBinder remoteBinder)
+                                ? returningDispatcheRepo.add(jmsDispatch.correlationId(), remoteBinder)
                                 : null;
 
                         dispatchFn.send(jmsDispatch);
 
-                        // Return expected?
-                        if (pending != null) {
-                            return pending.future().get();
+                        if (pending instanceof LocalReturnBinder localBinder) {
+                            return localBinder.apply();
+                        } else {
+                            return toBeReturned.future().get();
                         }
-
-                        return null;
                     }
                 });
     }

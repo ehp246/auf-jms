@@ -12,6 +12,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.mrbean.MrBeanModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 
+import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
+
 /**
  * @author Lei Yang
  *
@@ -21,6 +23,10 @@ public class Jackson {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule())
             .registerModule(new ParameterNamesModule());
+
+    public static JsonByObjectMapper jsonService() {
+        return new JsonByObjectMapper(OBJECT_MAPPER);
+    }
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -34,6 +40,7 @@ public class Jackson {
                 .setSerializationInclusion(Include.NON_NULL).registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).registerModule(new MrBeanModule())
                 .registerModule(new ParameterNamesModule());
+
         @Bean
         ObjectMapper objectMapper() {
             return OBJECT_MAPPER;

@@ -30,12 +30,12 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class DefaultProxyMethodParser {
+final class DefaultProxyInvocationParser {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
     private final PropertyResolver propertyResolver;
 
-    DefaultProxyMethodParser(final PropertyResolver propertyResolver) {
+    DefaultProxyInvocationParser(final PropertyResolver propertyResolver) {
         this.propertyResolver = propertyResolver;
     }
 

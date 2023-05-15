@@ -24,12 +24,12 @@ import me.ehp246.test.TimingExtension;
  *
  */
 @ExtendWith(TimingExtension.class)
-class DefaultProxyMethodParserTest {
+class DefaultProxyInvocationParserTest {
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
             At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(1), Duration.ofSeconds(1),
             UUID.randomUUID().toString(), List.of());
 
-    private final DefaultProxyMethodParser parser = new DefaultProxyMethodParser(
+    private final DefaultProxyInvocationParser parser = new DefaultProxyInvocationParser(
             new MockEnvironment().withProperty("id", "15df5c8b-adb4-4880-90d9-e370a7a97887")::resolvePlaceholders);
 
     @Test
@@ -213,7 +213,7 @@ class DefaultProxyMethodParserTest {
                 .apply(null, captor.invocation().args().toArray()));
 
         Assertions.assertEquals("PT1.1S",
-                new DefaultProxyMethodParser(v -> "PT1.1S").parse(captor.invocation().method(), config)
+                new DefaultProxyInvocationParser(v -> "PT1.1S").parse(captor.invocation().method(), config)
                         .apply(null, captor.invocation().args().toArray()).ttl().toString());
     }
 
@@ -224,7 +224,7 @@ class DefaultProxyMethodParserTest {
 
         captor.proxy().getTtl02();
 
-        final var ttl = new DefaultProxyMethodParser(v -> {
+        final var ttl = new DefaultProxyInvocationParser(v -> {
             value[0] = v;
             return "PT1S";
         }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray()).ttl()
@@ -366,7 +366,7 @@ class DefaultProxyMethodParserTest {
 
         captor.proxy().m01();
         final var property = new String[1];
-        final var dispatch = new DefaultProxyMethodParser(v -> {
+        final var dispatch = new DefaultProxyInvocationParser(v -> {
             property[0] = v;
             return "PT0.1S";
         }).parse(captor.invocation().method(), config).apply(null, captor.invocation().args().toArray());

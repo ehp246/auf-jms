@@ -47,7 +47,7 @@ public final class EnableByJmsBeanFactory {
             }
 
             @Override
-            public ReturningDispatch add(final String correlationId, final ProxyReturnBinder binder) {
+            public ReturningDispatch add(final String correlationId, final RemoteReturnBinder binder) {
                 return map.putIfAbsent(correlationId, new ReturningDispatch(binder, new CompletableFuture<Object>()));
             }
         };

@@ -11,11 +11,11 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 interface ReturningDispatcheRepo {
-    ReturningDispatch add(String correlationId, ProxyReturnBinder binder);
+    ReturningDispatch add(String correlationId, RemoteReturnBinder binder);
 
     ReturningDispatch take(String correlationId);
 
-    record ReturningDispatch(ProxyReturnBinder binder, CompletableFuture<Object> future) implements Invocable {
+    record ReturningDispatch(RemoteReturnBinder binder, CompletableFuture<Object> future) implements Invocable {
         private final static Method COMPLETE;
         static {
             try {

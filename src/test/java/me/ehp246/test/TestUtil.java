@@ -49,6 +49,7 @@ public class TestUtil {
 
     @SuppressWarnings("unchecked")
     public static <T> InvocationCaptor<T> newCaptor(final Class<T> t) {
+        final var returnRef = new Object[] { null };
         final var captured = new Invocation[1];
         final var proxy = (T) (Proxy.newProxyInstance(TestUtil.class.getClassLoader(), new Class[] { t },
                 (target, method, args) -> {
@@ -69,7 +70,7 @@ public class TestUtil {
                             return args == null ? List.of() : Arrays.asList(args);
                         }
                     };
-                    return null;
+                    return returnRef[0];
                 }));
 
         return new InvocationCaptor<T>() {
@@ -83,6 +84,11 @@ public class TestUtil {
             public Invocation invocation() {
                 return captured[0];
             }
+
+            @Override
+            public void setReturn(final Object r) {
+                returnRef[0] = r;
+            }
         };
     }
 
@@ -90,9 +96,11 @@ public class TestUtil {
         T proxy();
 
         Invocation invocation();
+
+        void setReturn(Object ret);
     }
 
-    public static Invocation toInvocation(Object proxy, Method method, Object[] args) {
+    public static Invocation toInvocation(final Object proxy, final Method method, final Object[] args) {
         return new Invocation() {
 
             @Override
