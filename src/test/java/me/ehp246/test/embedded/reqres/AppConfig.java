@@ -13,7 +13,7 @@ import me.ehp246.test.EmbeddedArtemisConfig;
  * @author Lei Yang
  *
  */
-@EnableByJms(replyAt = @ReplyAt("response.topic"))
+@EnableByJms(replyAt = @ReplyAt("${reply.topic}"))
 @EnableForJms(@Inbound(@From("inbox")))
 @Import({ EmbeddedArtemisConfig.class })
 class AppConfig {

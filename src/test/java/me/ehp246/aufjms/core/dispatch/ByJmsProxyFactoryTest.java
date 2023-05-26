@@ -9,6 +9,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.test.Jackson;
 
 class ByJmsProxyFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;
@@ -16,7 +17,8 @@ class ByJmsProxyFactoryTest {
     private final PropertyResolver propertyResolver = n -> n;
     private final EnableByJmsConfig config = new EnableByJmsConfig();
 
-    private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, propertyResolver);
+    private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, propertyResolver,
+            Jackson.jsonService(), new ReturningDispatchRepo());
 
     @Test
     void object_01() {

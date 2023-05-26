@@ -24,18 +24,6 @@ class AppConfigs {
 
     }
 
-    @EnableByJms(scan = {
-            RegistrarCase01.class }, ttl = "PT0.11S")
-    static class TtlConfig01 {
-
-    }
-
-    @EnableByJms(scan = {
-            RegistrarCase02.class }, ttl = "PT0.112S")
-    static class TtlConfig02 {
-
-    }
-
     @EnableByJms
     static class DispatchFnConfig01 {
     }
