@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -140,9 +139,7 @@ public final class ByJmsProxyFactory {
                             return localBinder.apply(jmsDispatch);
                         }
 
-                        return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch,
-                                jmsDispatch.replyTimeout() == null ? futureMsg.get()
-                                        : futureMsg.get(jmsDispatch.replyTimeout().toSeconds(), TimeUnit.SECONDS));
+                        return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
                     }
                 });
     }

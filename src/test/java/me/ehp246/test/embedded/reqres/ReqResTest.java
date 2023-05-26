@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import me.ehp246.aufjms.api.exception.JmsDispatchException;
 
 /**
  * @author Lei Yang
@@ -37,5 +38,12 @@ class ReqResTest {
     @Test
     void timeout_01() {
         Assertions.assertThrows(TimeoutException.class, () -> timeoutProxy.incThrowing(0));
+    }
+
+    @Test
+    void timeout_02() {
+        final var cause = Assertions.assertThrows(JmsDispatchException.class, () -> timeoutProxy.inc(0)).getCause();
+
+        Assertions.assertEquals(TimeoutException.class, cause.getClass());
     }
 }
