@@ -64,12 +64,13 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         }
 
         // Request/Response beans
-        final var returnsAt = (AnnotationAttributes) enablerAttributes.get("returnsAt");
+        final var replyAt = (AnnotationAttributes) enablerAttributes.get("replyAt");
 
-        if (!returnsAt.get("value").toString().isBlank()) {
+        if (!replyAt.get("value").toString().isBlank()) {
             // Map for returning dispatches.
-            register(registry, "twoWayDispatchRepo", getTwoWayDispatchesBeanDefinition());
-            // Inbound listener
+            register(registry, "returningDispatchRepo", getReturningMsgRepoBeanDefinition());
+            // Returning msg listener
+            register(registry, "returningDispatchListenerConfigurer", getReturningDispatchListenrBeanDefinition());
         }
     }
 
@@ -95,6 +96,9 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         args.addGenericArgumentValue(map.get("ttl"));
         args.addGenericArgumentValue(map.get("delay"));
         args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
+        final var replyAt = (AnnotationAttributes) map.get("replyAt");
+        args.addGenericArgumentValue(replyAt.get("value"));
+        args.addGenericArgumentValue(replyAt.get("type"));
 
         final var beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(EnableByJmsConfig.class);
@@ -132,12 +136,21 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         return proxyBeanDefinition;
     }
 
-    private BeanDefinition getTwoWayDispatchesBeanDefinition() {
+    private BeanDefinition getReturningMsgRepoBeanDefinition() {
         final var beanDefinition = new GenericBeanDefinition();
 
-        beanDefinition.setBeanClass(ReturningDispatcheRepo.class);
+        beanDefinition.setBeanClass(ReturningDispatchRepo.class);
         beanDefinition.setFactoryBeanName(EnableByJmsBeanFactory.class.getName());
-        beanDefinition.setFactoryMethodName("twoWayDispatchRepo");
+        beanDefinition.setFactoryMethodName("returningDispatchRepo");
+
+        return beanDefinition;
+    }
+
+    private BeanDefinition getReturningDispatchListenrBeanDefinition() {
+        final var beanDefinition = new GenericBeanDefinition();
+
+        beanDefinition.setBeanClass(ReturningDispatchListenerConfigurer.class);
+        beanDefinition.setFactoryBeanName(ReturningDispatchListenerConfigurer.class.getName());
 
         return beanDefinition;
     }

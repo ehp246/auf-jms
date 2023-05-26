@@ -102,6 +102,7 @@ public @interface ByJms {
      */
     String delay() default "";
 
+    String replyTimeout() default "";
     /**
      * Specifies the return destination for out-bound messages.
      */

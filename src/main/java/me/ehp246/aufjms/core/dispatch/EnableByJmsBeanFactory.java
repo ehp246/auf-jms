@@ -3,13 +3,11 @@ package me.ehp246.aufjms.core.dispatch;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 
-import me.ehp246.aufjms.api.annotation.EnableByJms.ReturnsAt;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
+import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig.ReplyAt;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
-import me.ehp246.aufjms.core.dispatch.ReturningDispatcheRepo.ReturningDispatch;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -27,29 +25,16 @@ public final class EnableByJmsBeanFactory {
     }
 
     public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
-            final List<String> dispatchFns, final ReturnsAt returnsAt) {
+            final List<String> dispatchFns, final String replyAtValue, final DestinationType replyAtType) {
         return new EnableByJmsConfig(scan,
                 Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
-                dispatchFns, returnsAt);
+                dispatchFns, new ReplyAt(replyAtValue, replyAtType));
     }
 
-    public ReturningDispatcheRepo returningDispatcheRepo() {
-        final var map = new ConcurrentHashMap<String, ReturningDispatch>();
-
-        return new ReturningDispatcheRepo() {
-
-            @Override
-            public ReturningDispatch take(final String correlationId) {
-                return map.remove(correlationId);
-            }
-
-            @Override
-            public ReturningDispatch add(final String correlationId, final RemoteReturnBinder binder) {
-                return map.putIfAbsent(correlationId, new ReturningDispatch(binder, new CompletableFuture<Object>()));
-            }
-        };
+    public ReturningDispatchRepo returningDispatchRepo() {
+        return new ReturningDispatchRepo();
     }
 }

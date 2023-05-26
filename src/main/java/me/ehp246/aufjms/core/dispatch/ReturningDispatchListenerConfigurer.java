@@ -1,39 +1,46 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpoint;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.jms.listener.MessageListenerContainer;
+import org.springframework.jms.listener.SessionAwareMessageListener;
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.core.inbound.DefaultInboundMessageListener;
-import me.ehp246.aufjms.core.inbound.DefaultInvocableDispatcher;
+import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-final class DefaultReturningDispatchListenerConfigurer implements JmsListenerConfigurer {
+final class ReturningDispatchListenerConfigurer implements JmsListenerConfigurer {
+    private final static Logger LOGGER = LogManager.getLogger();
+
     private final ConnectionFactoryProvider cfProvider;
     private final EnableByJmsConfig byJmsConfig;
-    private final ReturningDispatcheRepo returningDispatcheRepo;
+    private final ReturningDispatchRepo returningDispatchRepo;
 
-    public DefaultReturningDispatchListenerConfigurer(final ConnectionFactoryProvider cfProvider,
-            final EnableByJmsConfig byJmsConfig, final ReturningDispatcheRepo returningDispatcheRepo) {
+    public ReturningDispatchListenerConfigurer(final ConnectionFactoryProvider cfProvider,
+            final EnableByJmsConfig byJmsConfig, final ReturningDispatchRepo returningDispatchRepo) {
         super();
         this.cfProvider = cfProvider;
         this.byJmsConfig = byJmsConfig;
-        this.returningDispatcheRepo = returningDispatcheRepo;
+        this.returningDispatchRepo = returningDispatchRepo;
     }
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
-        final var returnsAt = byJmsConfig.returnsAt();
+        final var returnsAt = byJmsConfig.replyAt();
         if (returnsAt == null) {
             return;
         }
@@ -51,13 +58,27 @@ final class DefaultReturningDispatchListenerConfigurer implements JmsListenerCon
                 container.setDestinationName(returnsAt.value());
                 container.setPubSubDomain(returnsAt.type() == DestinationType.TOPIC);
 
-                container.setupMessageListener(new DefaultInboundMessageListener(
-                        new DefaultInvocableDispatcher(), msg -> returningDispatcheRepo.take(msg.correlationId())));
+                container.setupMessageListener(new SessionAwareMessageListener<Message>() {
+
+                    @Override
+                    public void onMessage(final Message message, final Session session) throws JMSException {
+                        if (!(message instanceof final TextMessage textMessage)) {
+                            throw new IllegalArgumentException("Un-supported message type");
+                        }
+
+                        final var msg = TextJmsMsg.from(textMessage);
+
+                        LOGGER.atDebug().log("Reply to correlation Id: {}, type: {}", msg::correlationId, msg::type);
+                        LOGGER.atTrace().log("Body: {}", msg::text);
+
+                        returningDispatchRepo.get(msg.correlationId()).complete(msg);
+                    }
+                });
             }
 
             @Override
             public String getId() {
-                return "";
+                return "ReturningMsgListener";
             }
 
         }, factory);

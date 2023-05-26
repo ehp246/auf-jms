@@ -102,6 +102,7 @@ final class DefaultProxyInvocationParser {
 
         final var bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
                 .orElse(-1);
+
         final var bodyOf = Optional.ofNullable(bodyIndex == -1 ? null : reflected.getParameter(bodyIndex))
                 .map(parameter -> new BodyOf<>(Optional.ofNullable(parameter.getAnnotation(JsonView.class))
                         .map(JsonView::value).filter(OneUtil::hasValue).map(views -> views[0]).orElse(null),

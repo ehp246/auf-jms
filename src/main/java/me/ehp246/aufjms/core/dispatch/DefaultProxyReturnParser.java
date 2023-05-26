@@ -25,6 +25,7 @@ final class DefaultProxyReturnParser {
             return (LocalReturnBinder) dispatch -> null;
         }
 
-        return (RemoteReturnBinder) (dispatch, msg) -> fromJson.apply(msg.text(), new BodyOf(returnType));
+        final var bodyOf = new BodyOf(returnType);
+        return (RemoteReturnBinder) (dispatch, msg) -> fromJson.apply(msg.text(), bodyOf);
     }
 }

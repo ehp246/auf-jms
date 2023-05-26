@@ -80,13 +80,13 @@ public @interface EnableByJms {
      */
     String[] dispatchFns() default {};
 
-    ReturnsAt returnsAt() default @ReturnsAt("");
+    ReplyAt replyAt() default @ReplyAt("");
 
     /**
      * Defines a destination where the response messages will arrive.
      */
     @Target({})
-    @interface ReturnsAt {
+    @interface ReplyAt {
         /**
          * Specifies the destination name for the responses.
          * <p>

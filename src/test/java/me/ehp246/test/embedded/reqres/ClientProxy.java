@@ -8,6 +8,8 @@ import me.ehp246.aufjms.api.annotation.ByJms.To;
  *
  */
 @ByJms(@To("inbox"))
-interface MathProxy {
+interface ClientProxy {
     int inc(int i);
+
+    Person swapName(Person person);
 }
