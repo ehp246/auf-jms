@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.exception.JmsDispatchException;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, properties = { "reply.timeout=PT0S" })
+@SpringBootTest(classes = { AppConfig.class }, properties = { "reply.timeout=PT1S", "reply.topic=reply.topic" })
 class ReqResTest {
     @Autowired
     private ClientProxy proxy;
@@ -42,7 +42,7 @@ class ReqResTest {
 
     @Test
     void timeout_02() {
-        final var cause = Assertions.assertThrows(JmsDispatchException.class, () -> timeoutProxy.inc(0)).getCause();
+        final var cause = Assertions.assertThrows(JmsDispatchException.class, () -> timeoutProxy.nonInc(0)).getCause();
 
         Assertions.assertEquals(TimeoutException.class, cause.getClass());
     }

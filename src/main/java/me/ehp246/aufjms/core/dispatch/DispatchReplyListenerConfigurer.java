@@ -15,35 +15,36 @@ import jakarta.jms.Message;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
+import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * @author Lei Yang
  *
  */
-final class ReturningDispatchListenerConfigurer implements JmsListenerConfigurer {
+final class DispatchReplyListenerConfigurer implements JmsListenerConfigurer {
     private final static Logger LOGGER = LogManager.getLogger();
 
     private final ConnectionFactoryProvider cfProvider;
     private final EnableByJmsConfig byJmsConfig;
-    private final ReturningDispatchRepo returningDispatchRepo;
+    private final DefaultReplyExpectedDispatchMap defaultReplyExpectedDispatchMap;
 
-    public ReturningDispatchListenerConfigurer(final ConnectionFactoryProvider cfProvider,
-            final EnableByJmsConfig byJmsConfig, final ReturningDispatchRepo returningDispatchRepo) {
+    public DispatchReplyListenerConfigurer(final ConnectionFactoryProvider cfProvider,
+            final EnableByJmsConfig byJmsConfig, final DefaultReplyExpectedDispatchMap defaultReplyExpectedDispatchMap) {
         super();
         this.cfProvider = cfProvider;
         this.byJmsConfig = byJmsConfig;
-        this.returningDispatchRepo = returningDispatchRepo;
+        this.defaultReplyExpectedDispatchMap = defaultReplyExpectedDispatchMap;
     }
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
-        final var returnsAt = byJmsConfig.replyAt();
-        if (returnsAt == null) {
+        final var dispatchReplyAt = byJmsConfig.dispatchReplyAt();
+        if (dispatchReplyAt == null) {
             return;
         }
+
         final var factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(this.cfProvider.get(""));
         factory.setSessionTransacted(true);
@@ -55,8 +56,8 @@ final class ReturningDispatchListenerConfigurer implements JmsListenerConfigurer
                 final var container = (AbstractMessageListenerContainer) listenerContainer;
 
                 container.setBeanName("");
-                container.setDestinationName(returnsAt.value());
-                container.setPubSubDomain(returnsAt.type() == DestinationType.TOPIC);
+                container.setDestinationName(dispatchReplyAt.name());
+                container.setPubSubDomain(dispatchReplyAt instanceof AtTopic);
 
                 container.setupMessageListener(new SessionAwareMessageListener<Message>() {
 
@@ -71,7 +72,7 @@ final class ReturningDispatchListenerConfigurer implements JmsListenerConfigurer
                         LOGGER.atDebug().log("Reply to correlation Id: {}, type: {}", msg::correlationId, msg::type);
                         LOGGER.atTrace().log("Body: {}", msg::text);
 
-                        returningDispatchRepo.get(msg.correlationId()).complete(msg);
+                        defaultReplyExpectedDispatchMap.get(msg.correlationId()).complete(msg);
                     }
                 });
             }

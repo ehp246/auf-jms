@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -19,7 +20,10 @@ import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
+import me.ehp246.aufjms.api.exception.JmsDispatchException;
 import me.ehp246.aufjms.api.jms.BodyOf;
+import me.ehp246.aufjms.api.jms.FromJson;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultProxyInvocationBinder.PropertyArg;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
@@ -30,23 +34,31 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class DefaultProxyInvocationParser {
+public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
             OfTtl.class, OfDelay.class, OfCorrelationId.class);
-    private final PropertyResolver propertyResolver;
 
-    DefaultProxyInvocationParser(final PropertyResolver propertyResolver) {
+    private final PropertyResolver propertyResolver;
+    private final FromJson fromJson;
+
+    DefaultDispatchMethodParser(final PropertyResolver propertyResolver, final FromJson fromJson) {
         this.propertyResolver = propertyResolver;
+        this.fromJson = fromJson;
     }
 
-    ProxyInvocationBinder parse(final Method method, final ByJmsProxyConfig config) {
+    @Override
+    public DispatchMethodBinder parse(final Method method, final ByJmsProxyConfig config) {
         final var reflected = new ReflectedProxyMethod(method);
 
+        return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected));
+    }
+
+    ProxyInvocationBinder parseInvocationBinder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
                 .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])
                 .orElseGet(() -> reflected.findOnMethodUp(OfType.class)
                         .map(an -> (Function<Object[], String>) args -> an.value())
-                        .orElseGet(() -> args -> OneUtil.firstUpper(method.getName())));
+                        .orElseGet(() -> args -> OneUtil.firstUpper(reflected.method().getName())));
 
         final var correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream().findFirst().map(p -> {
             final var index = p.index();
@@ -109,8 +121,31 @@ final class DefaultProxyInvocationParser {
                         parameter.getType()))
                 .orElse(null);
 
-        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf,
-                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
+        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex,
+                bodyOf, propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    ProxyReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected) {
+        if (reflected.returnsVoid()) {
+            return (LocalReturnBinder) dispatch -> null;
+        }
+
+        final var bodyOf = new BodyOf(reflected.method().getReturnType());
+        return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
+            final JmsMsg msg;
+            try {
+                msg = jmsDispatch.replyTimeout() == null ? replyFuture.get()
+                        : replyFuture.get(jmsDispatch.replyTimeout().toSeconds(), TimeUnit.SECONDS);
+            } catch (Exception e) {
+                if (reflected.isOnThrows(e.getClass())) {
+                    throw e;
+                }
+                throw new JmsDispatchException(e);
+            }
+
+            return fromJson.apply(msg.text(), bodyOf);
+        };
     }
 
     private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {

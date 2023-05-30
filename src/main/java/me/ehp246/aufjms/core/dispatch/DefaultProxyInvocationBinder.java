@@ -127,7 +127,7 @@ final class DefaultProxyInvocationBinder implements ProxyInvocationBinder {
 //
             @Override
             public Duration replyTimeout() {
-                return config.replyTimeout();
+                return config.dispatchReplyTimeout();
             }
 
             @Override

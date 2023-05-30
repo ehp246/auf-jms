@@ -63,14 +63,14 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
             }
         }
 
-        // Request/Response beans
-        final var replyAt = (AnnotationAttributes) enablerAttributes.get("dispatchReplyTo");
+        // Request/Reply beans
+        final var dispatchReplyTo = (AnnotationAttributes) enablerAttributes.get("dispatchReplyTo");
 
-        if (!replyAt.get("value").toString().isBlank()) {
+        if (!dispatchReplyTo.get("value").toString().isBlank()) {
             // Map for returning dispatches.
-            register(registry, "returningDispatchRepo", getReturningMsgRepoBeanDefinition());
+            register(registry, "replyExpectedDispatchMap", getReplyExpectedDispatchMapBeanDefinition());
             // Returning msg listener
-            register(registry, "returningDispatchListenerConfigurer", getReturningDispatchListenrBeanDefinition());
+            register(registry, "dispatchReplyListenerConfigurer", getDispatchReplyListenerConfigurerBeanDefinition());
         }
     }
 
@@ -136,21 +136,19 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         return proxyBeanDefinition;
     }
 
-    private BeanDefinition getReturningMsgRepoBeanDefinition() {
+    private BeanDefinition getReplyExpectedDispatchMapBeanDefinition() {
         final var beanDefinition = new GenericBeanDefinition();
 
-        beanDefinition.setBeanClass(ReturningDispatchRepo.class);
-        beanDefinition.setFactoryBeanName(EnableByJmsBeanFactory.class.getName());
-        beanDefinition.setFactoryMethodName("returningDispatchRepo");
+        beanDefinition.setBeanClass(DefaultReplyExpectedDispatchMap.class);
 
         return beanDefinition;
     }
 
-    private BeanDefinition getReturningDispatchListenrBeanDefinition() {
+    private BeanDefinition getDispatchReplyListenerConfigurerBeanDefinition() {
         final var beanDefinition = new GenericBeanDefinition();
 
-        beanDefinition.setBeanClass(ReturningDispatchListenerConfigurer.class);
-        beanDefinition.setFactoryBeanName(ReturningDispatchListenerConfigurer.class.getName());
+        beanDefinition.setBeanClass(DispatchReplyListenerConfigurer.class);
+        beanDefinition.setFactoryBeanName(DispatchReplyListenerConfigurer.class.getName());
 
         return beanDefinition;
     }

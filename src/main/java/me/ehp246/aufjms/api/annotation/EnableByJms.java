@@ -15,6 +15,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
+import me.ehp246.aufjms.core.dispatch.DefaultDispatchMethodParser;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 
@@ -32,7 +33,7 @@ import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, EnableByJmsBeanFactory.class,
-        ByJmsProxyFactory.class, })
+        ByJmsProxyFactory.class, DefaultDispatchMethodParser.class })
 public @interface EnableByJms {
     /**
      * Specifies the packages to scan for {@linkplain ByJms} interfaces.

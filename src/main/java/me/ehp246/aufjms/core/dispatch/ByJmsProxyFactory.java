@@ -23,7 +23,6 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -38,26 +37,23 @@ import me.ehp246.aufjms.core.util.OneUtil;
 public final class ByJmsProxyFactory {
     private final static Logger LOGGER = LogManager.getLogger();
 
-    private final Map<Method, ProxyInvocationBinder> invocationBinderCache = new ConcurrentHashMap<>();
-    private final Map<Method, ProxyReturnBinder> returnBinderCache = new ConcurrentHashMap<>();
+    private final Map<Method, DispatchMethodBinder> methodBinderCache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
-    private final ReturningDispatchRepo returningDispatchRepo;
-    private final DefaultProxyInvocationParser invocationParser;
-    private final DefaultProxyReturnParser returnParser;
+    private final ReplyExpectedDispatchMap replyExpectedDispatchMap;
+    private final DispatchMethodParser methodParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
-            final PropertyResolver propertyResolver, final FromJson fromJson,
-            @Nullable final ReturningDispatchRepo returningDispatchRepo) {
+            final PropertyResolver propertyResolver, final DispatchMethodParser methodParser,
+            @Nullable final ReplyExpectedDispatchMap replyExpectedDispatchMap) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
-        this.returningDispatchRepo = returningDispatchRepo;
-        this.invocationParser = new DefaultProxyInvocationParser(propertyResolver);
-        this.returnParser = new DefaultProxyReturnParser(fromJson);
+        this.replyExpectedDispatchMap = replyExpectedDispatchMap;
+        this.methodParser = methodParser;
     }
 
     @SuppressWarnings("unchecked")
@@ -74,14 +70,9 @@ public final class ByJmsProxyFactory {
         final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(toName) : At.toTopic(toName);
 
         final var replyToName = propertyResolver.resolve(byJms.replyTo().value());
-        final var replyAtName = enableByJmsConfig.replyAt().value();
-
         final var replyTo = OneUtil.hasValue(replyToName)
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
-                : OneUtil.hasValue(replyAtName)
-                        ? enableByJmsConfig.replyAt().type() == DestinationType.QUEUE ? At.toQueue(replyAtName)
-                                : At.toTopic(replyAtName)
-                        : null;
+                : enableByJmsConfig.dispatchReplyAt();
 
         final var replyTimeout = OneUtil.hasValue(byJms.replyTimeout())
                 ? Duration.parse(propertyResolver.resolve(byJms.replyTimeout()))
@@ -96,8 +87,7 @@ public final class ByJmsProxyFactory {
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
                 new InvocationHandler() {
                     private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo,
-                            replyTimeout, ttl, delay,
-                            byJms.connectionFactory(), List.of(byJms.properties()));
+                            replyTimeout, ttl, delay, byJms.connectionFactory(), List.of(byJms.properties()));
                     private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
                     private final int hashCode = new Object().hashCode();
 
@@ -121,16 +111,16 @@ public final class ByJmsProxyFactory {
                                     .bindTo(proxy).invokeWithArguments(args);
                         }
 
-                        final var jmsDispatch = invocationBinderCache
-                                .computeIfAbsent(method, m -> invocationParser.parse(m, proxyConfig))
-                                .apply(proxy, args);
+                        final var methodBinder = methodBinderCache.computeIfAbsent(method,
+                                m -> methodParser.parse(m, proxyConfig));
 
-                        final var returnBinder = returnBinderCache.computeIfAbsent(method,
-                                m -> returnParser.parse(method));
+                        final var jmsDispatch = methodBinder.invocationBinder().apply(proxy, args);
+
+                        final var returnBinder = methodBinder.returnBinder();
 
                         // Return msg expected?
                         final CompletableFuture<JmsMsg> futureMsg = (returnBinder instanceof RemoteReturnBinder)
-                                ? returningDispatchRepo.put(jmsDispatch.correlationId())
+                                ? replyExpectedDispatchMap.put(jmsDispatch.correlationId())
                                 : null;
 
                         dispatchFn.send(jmsDispatch);

@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,9 +18,25 @@ class ByJmsProxyFactoryTest {
     private final JmsDispatchFnProvider dispatchFnProvider = connection -> dispatchFn;
     private final PropertyResolver propertyResolver = n -> n;
     private final EnableByJmsConfig config = new EnableByJmsConfig();
+    private final DispatchMethodParser methodParser = new DefaultDispatchMethodParser(propertyResolver,
+            Jackson.jsonService());
+
+    private final ReplyExpectedDispatchMap dispatchMap = new ReplyExpectedDispatchMap() {
+
+        @Override
+        public CompletableFuture<JmsMsg> put(final String correlationId) {
+            return null;
+        }
+
+        @Override
+        public CompletableFuture<JmsMsg> get(final String correlationId) {
+            return null;
+        }
+
+    };
 
     private final ByJmsProxyFactory factory = new ByJmsProxyFactory(config, dispatchFnProvider, propertyResolver,
-            Jackson.jsonService(), new ReturningDispatchRepo());
+            methodParser, dispatchMap);
 
     @Test
     void object_01() {
@@ -57,7 +75,7 @@ class ByJmsProxyFactoryTest {
         new ByJmsProxyFactory(config, conection -> {
             con[0] = conection;
             return dispatchFn;
-        }, propertyResolver).newByJmsProxy(TestCases.Case01.class);
+        }, propertyResolver, methodParser, dispatchMap).newByJmsProxy(TestCases.Case01.class);
 
         Assertions.assertEquals("SB1", con[0], "should ask for the Fn by the connection name");
     }

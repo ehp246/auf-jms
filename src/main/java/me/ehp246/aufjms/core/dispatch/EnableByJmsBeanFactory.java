@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
-import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig.ReplyAt;
+import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -25,16 +25,16 @@ public final class EnableByJmsBeanFactory {
     }
 
     public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
-            final List<String> dispatchFns, final String replyAtValue, final DestinationType replyAtType) {
+            final List<String> dispatchFns, final String dispatchReplyToValue,
+            final DestinationType dispatchReplyToType) {
         return new EnableByJmsConfig(scan,
                 Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
-                dispatchFns, new ReplyAt(replyAtValue, replyAtType));
-    }
-
-    public ReturningDispatchRepo returningDispatchRepo() {
-        return new ReturningDispatchRepo();
+                dispatchFns,
+                Optional.ofNullable(propertyResolver.resolve(dispatchReplyToValue)).filter(OneUtil::hasValue).map(
+                        value -> dispatchReplyToType == DestinationType.TOPIC ? At.toTopic(value) : At.toQueue(value))
+                        .orElse(null));
     }
 }
