@@ -79,7 +79,7 @@ final class DispatchReplyListenerConfigurer implements JmsListenerConfigurer {
 
             @Override
             public String getId() {
-                return "ReturningMsgListener";
+                return DispatchReplyListenerConfigurer.class.getSimpleName();
             }
 
         }, factory);

@@ -53,7 +53,8 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected));
     }
 
-    ProxyInvocationBinder parseInvocationBinder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {
+    private InvocationDispatchBinder parseInvocationBinder(final ReflectedProxyMethod reflected,
+            final ByJmsProxyConfig config) {
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
                 .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])
                 .orElseGet(() -> reflected.findOnMethodUp(OfType.class)
@@ -126,7 +127,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    ProxyReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected) {
+    private InvocationReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected) {
         if (reflected.returnsVoid()) {
             return (LocalReturnBinder) dispatch -> null;
         }

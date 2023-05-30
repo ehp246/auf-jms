@@ -7,6 +7,6 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
  * @since 2.1
  */
 @FunctionalInterface
-public interface ProxyInvocationBinder {
+public interface InvocationDispatchBinder {
     JmsDispatch apply(final Object target, final Object[] args);
 }

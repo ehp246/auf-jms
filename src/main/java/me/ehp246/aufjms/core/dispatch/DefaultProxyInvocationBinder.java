@@ -17,7 +17,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-final class DefaultProxyInvocationBinder implements ProxyInvocationBinder {
+final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
     private final ReflectedProxyMethod reflected;
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;

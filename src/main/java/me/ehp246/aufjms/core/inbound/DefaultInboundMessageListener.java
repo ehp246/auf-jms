@@ -27,11 +27,6 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
     private final InvocableFactory invocableFactory;
     private final MsgConsumer defaultConsumer;
 
-    public DefaultInboundMessageListener(final InvocableDispatcher dispatcher,
-            final InvocableFactory invocableFactory) {
-        this(dispatcher, invocableFactory, null);
-    }
-
     public DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final InvocableFactory invocableFactory,
             @Nullable final MsgConsumer defaultConsumer) {
         super();

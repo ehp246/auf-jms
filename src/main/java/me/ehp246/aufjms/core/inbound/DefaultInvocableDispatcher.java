@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.Nullable;
 
-import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocableBinder;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
@@ -24,34 +23,13 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-public final class DefaultInvocableDispatcher implements InvocableDispatcher {
+final class DefaultInvocableDispatcher implements InvocableDispatcher {
     private final static Logger LOGGER = LogManager.getLogger(InvocableDispatcher.class);
 
     private final Executor executor;
     private final InvocableBinder binder;
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
-
-    public DefaultInvocableDispatcher() {
-        this((i, m) -> new BoundInvocable() {
-            private final Object[] args = new Object[] { m };
-
-            @Override
-            public Invocable invocable() {
-                return i;
-            }
-
-            @Override
-            public JmsMsg msg() {
-                return m;
-            }
-
-            @Override
-            public Object[] arguments() {
-                return args;
-            }
-        }, null, null);
-    }
 
     public DefaultInvocableDispatcher(final InvocableBinder binder, @Nullable final List<InvocationListener> listeners,
             @Nullable final Executor executor) {
