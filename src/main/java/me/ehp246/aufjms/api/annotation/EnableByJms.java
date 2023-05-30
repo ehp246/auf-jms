@@ -5,15 +5,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.util.Queue;
 
 import org.springframework.context.annotation.Import;
 
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;
+import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
@@ -80,25 +79,5 @@ public @interface EnableByJms {
      */
     String[] dispatchFns() default {};
 
-    ReplyAt replyAt() default @ReplyAt("");
-
-    /**
-     * Defines a destination where the response messages will arrive.
-     */
-    @Target({})
-    @interface ReplyAt {
-        /**
-         * Specifies the destination name for the responses.
-         * <p>
-         * Supports Spring property placeholder.
-         */
-        String value();
-
-        /**
-         * Specifies the destination type.
-         * <p>
-         * Defaults to {@linkplain Queue}.
-         */
-        DestinationType type() default DestinationType.TOPIC;
-    }
+    To dispatchReplyTo() default @To("");
 }
