@@ -64,7 +64,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         }
 
         // Request/Reply beans
-        final var dispatchReplyTo = (AnnotationAttributes) enablerAttributes.get("dispatchReplyTo");
+        final var dispatchReplyTo = (AnnotationAttributes) enablerAttributes.get("requestReplyTo");
 
         if (!dispatchReplyTo.get("value").toString().isBlank()) {
             // Map for returning dispatches.
@@ -96,7 +96,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         args.addGenericArgumentValue(map.get("ttl"));
         args.addGenericArgumentValue(map.get("delay"));
         args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
-        final var dispatchReplyTo = (AnnotationAttributes) map.get("dispatchReplyTo");
+        final var dispatchReplyTo = (AnnotationAttributes) map.get("requestReplyTo");
         args.addGenericArgumentValue(dispatchReplyTo.get("value"));
         args.addGenericArgumentValue(dispatchReplyTo.get("type"));
 

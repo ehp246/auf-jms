@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.annotation.ByJms.To;
  * @author Lei Yang
  *
  */
-@ByJms(value = @To("inbox"), replyTimeout = "${reply.timeout}")
+@ByJms(value = @To("inbox"), requstTimeout = "${reply.timeout}")
 interface ClientTimeoutProxy {
     int nonInc(int i);
 

@@ -102,7 +102,19 @@ public @interface ByJms {
      */
     String delay() default "";
 
-    String replyTimeout() default "";
+    /**
+     * Specifies how long to wait for a reply on the out-going request.
+     * <p>
+     * Default is no timeout. I.e., wait indefinitely.
+     * <p>
+     * Only applies for request/reply pattern.
+     * <p>
+     * Supports Spring property placeholder.
+     *
+     * @see {@linkplain EnableByJms#requestReplyTo()}
+     */
+    String requstTimeout() default "";
+
     /**
      * Specifies the return destination for out-bound messages.
      */

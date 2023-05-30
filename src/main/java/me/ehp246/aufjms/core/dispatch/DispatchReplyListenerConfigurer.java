@@ -40,7 +40,7 @@ final class DispatchReplyListenerConfigurer implements JmsListenerConfigurer {
 
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
-        final var dispatchReplyAt = byJmsConfig.dispatchReplyAt();
+        final var dispatchReplyAt = byJmsConfig.requestReplyAt();
         if (dispatchReplyAt == null) {
             return;
         }

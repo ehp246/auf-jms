@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.jms.At;
  * @since 1.0
  */
 public record EnableByJmsConfig(List<Class<?>> scan, Duration ttl, Duration delay, List<String> dispatchFns,
-        At dispatchReplyAt) {
+        At requestReplyAt) {
     public EnableByJmsConfig {
         scan = Collections.unmodifiableList(scan);
         dispatchFns = Collections.unmodifiableList(dispatchFns);

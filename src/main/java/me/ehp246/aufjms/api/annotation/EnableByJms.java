@@ -80,5 +80,15 @@ public @interface EnableByJms {
      */
     String[] dispatchFns() default {};
 
-    To dispatchReplyTo() default @To("");
+    /**
+     * Specifies the destination where the replies to out-going requests are
+     * expected to arrive.
+     * <p>
+     * Required to implement request/reply pattern.
+     *
+     * @see <a href=
+     *      'https://docs.oracle.com/cd/E19316-01/820-6424/aerby/index.html'>The
+     *      Request-Reply Pattern</a>
+     */
+    To requestReplyTo() default @To("");
 }

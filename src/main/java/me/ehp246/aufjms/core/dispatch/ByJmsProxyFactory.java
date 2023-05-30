@@ -72,10 +72,10 @@ public final class ByJmsProxyFactory {
         final var replyToName = propertyResolver.resolve(byJms.replyTo().value());
         final var replyTo = OneUtil.hasValue(replyToName)
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
-                : enableByJmsConfig.dispatchReplyAt();
+                : enableByJmsConfig.requestReplyAt();
 
-        final var replyTimeout = OneUtil.hasValue(byJms.replyTimeout())
-                ? Duration.parse(propertyResolver.resolve(byJms.replyTimeout()))
+        final var dispatchReplyTimeout = OneUtil.hasValue(byJms.requstTimeout())
+                ? Duration.parse(propertyResolver.resolve(byJms.requstTimeout()))
                 : null;
 
         final var ttl = Optional.of(propertyResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
@@ -87,7 +87,7 @@ public final class ByJmsProxyFactory {
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
                 new InvocationHandler() {
                     private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo,
-                            replyTimeout, ttl, delay, byJms.connectionFactory(), List.of(byJms.properties()));
+                            dispatchReplyTimeout, ttl, delay, byJms.connectionFactory(), List.of(byJms.properties()));
                     private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
                     private final int hashCode = new Object().hashCode();
 
