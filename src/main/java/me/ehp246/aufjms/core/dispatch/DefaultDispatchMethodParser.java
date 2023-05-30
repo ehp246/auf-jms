@@ -136,8 +136,8 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
             final JmsMsg msg;
             try {
-                msg = jmsDispatch.replyTimeout() == null ? replyFuture.get()
-                        : replyFuture.get(jmsDispatch.replyTimeout().toSeconds(), TimeUnit.SECONDS);
+                msg = jmsDispatch.requestTimeout() == null ? replyFuture.get()
+                        : replyFuture.get(jmsDispatch.requestTimeout().toSeconds(), TimeUnit.SECONDS);
             } catch (Exception e) {
                 if (reflected.isOnThrows(e.getClass())) {
                     throw e;
