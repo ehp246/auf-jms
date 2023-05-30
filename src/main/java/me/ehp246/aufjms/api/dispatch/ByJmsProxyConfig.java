@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.jms.At;
  * @author Lei Yang
  * @since 1.0
  */
-public record ByJmsProxyConfig(At to, At replyTo, Duration dispatchReplyTimeout, Duration ttl, Duration delay,
+public record ByJmsProxyConfig(At to, At replyTo, Duration requestTimeout, Duration ttl, Duration delay,
         String connectionFactory, List<String> properties) {
     public ByJmsProxyConfig(final At to) {
         this(to, null, null, null, null, null, List.of());

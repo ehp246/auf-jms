@@ -34,10 +34,6 @@ public interface JmsDispatch {
         return null;
     }
 
-    default Duration requestTimeout() {
-        return null;
-    }
-
     default At replyTo() {
         return null;
     }

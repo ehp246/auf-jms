@@ -50,7 +50,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     public DispatchMethodBinder parse(final Method method, final ByJmsProxyConfig config) {
         final var reflected = new ReflectedProxyMethod(method);
 
-        return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected));
+        return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected, config));
     }
 
     private InvocationDispatchBinder parseInvocationBinder(final ReflectedProxyMethod reflected,
@@ -122,12 +122,13 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                         parameter.getType()))
                 .orElse(null);
 
-        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex,
-                bodyOf, propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
+        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf,
+                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private InvocationReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected) {
+    private InvocationReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected,
+            final ByJmsProxyConfig config) {
         if (reflected.returnsVoid()) {
             return (LocalReturnBinder) dispatch -> null;
         }
@@ -136,8 +137,9 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
             final JmsMsg msg;
             try {
-                msg = jmsDispatch.requestTimeout() == null ? replyFuture.get()
-                        : replyFuture.get(jmsDispatch.requestTimeout().toSeconds(), TimeUnit.SECONDS);
+                final var requestTimeout = config.requestTimeout();
+                msg = requestTimeout == null ? replyFuture.get()
+                        : replyFuture.get(requestTimeout.toSeconds(), TimeUnit.SECONDS);
             } catch (Exception e) {
                 if (reflected.isOnThrows(e.getClass())) {
                     throw e;

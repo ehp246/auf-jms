@@ -124,12 +124,6 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
                 return config.replyTo();
             }
 
-//
-            @Override
-            public Duration requestTimeout() {
-                return config.dispatchReplyTimeout();
-            }
-
             @Override
             public Duration ttl() {
                 return ttl;
