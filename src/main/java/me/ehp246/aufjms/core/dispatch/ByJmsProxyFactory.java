@@ -1,16 +1,13 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,11 +16,9 @@ import org.springframework.lang.Nullable;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
-import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -84,53 +79,15 @@ public final class ByJmsProxyFactory {
         final var delay = Optional.of(propertyResolver.resolve(byJms.delay())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::delay);
 
+        final var proxyConfig = new ByJmsProxyConfig(destination, replyTo, dispatchReplyTimeout, ttl,
+                delay, byJms.connectionFactory(), List.of(byJms.properties()));
+
+        final var dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
+
+        final Function<Method, DispatchMethodBinder> binderFn = method -> methodBinderCache.computeIfAbsent(method,
+                m -> methodParser.parse(m, proxyConfig));
+
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
-                new InvocationHandler() {
-                    private final ByJmsProxyConfig proxyConfig = new ByJmsProxyConfig(destination, replyTo,
-                            dispatchReplyTimeout, ttl, delay, byJms.connectionFactory(), List.of(byJms.properties()));
-                    private final JmsDispatchFn dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
-                    private final int hashCode = new Object().hashCode();
-
-                    @Override
-                    public Object invoke(final Object proxy, final Method method, final Object[] args)
-                            throws Throwable {
-                        if (method.getName().equals("toString")) {
-                            return ByJmsProxyFactory.this.toString();
-                        }
-                        if (method.getName().equals("hashCode")) {
-                            return hashCode;
-                        }
-                        if (method.getName().equals("equals")) {
-                            return proxy == args[0];
-                        }
-                        if (method.isDefault()) {
-                            return MethodHandles.privateLookupIn(proxyInterface, MethodHandles.lookup())
-                                    .findSpecial(proxyInterface, method.getName(),
-                                            MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                                            proxyInterface)
-                                    .bindTo(proxy).invokeWithArguments(args);
-                        }
-
-                        final var methodBinder = methodBinderCache.computeIfAbsent(method,
-                                m -> methodParser.parse(m, proxyConfig));
-
-                        final var jmsDispatch = methodBinder.invocationBinder().apply(proxy, args);
-
-                        final var returnBinder = methodBinder.returnBinder();
-
-                        // Return msg expected?
-                        final CompletableFuture<JmsMsg> futureMsg = (returnBinder instanceof RemoteReturnBinder)
-                                ? replyExpectedDispatchMap.put(jmsDispatch.correlationId())
-                                : null;
-
-                        dispatchFn.send(jmsDispatch);
-
-                        if (returnBinder instanceof LocalReturnBinder localBinder) {
-                            return localBinder.apply(jmsDispatch);
-                        }
-
-                        return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
-                    }
-                });
+                new ProxyInvocationHandler(proxyInterface, dispatchFn, binderFn, replyExpectedDispatchMap));
     }
 }

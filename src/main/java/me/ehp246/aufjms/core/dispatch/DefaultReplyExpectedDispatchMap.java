@@ -13,14 +13,22 @@ final class DefaultReplyExpectedDispatchMap implements ReplyExpectedDispatchMap 
     private final ConcurrentHashMap<String, CompletableFuture<JmsMsg>> map = new ConcurrentHashMap<>();
 
     @Override
-    public CompletableFuture<JmsMsg> put(final String correlationId) {
-        final var future = new CompletableFuture<JmsMsg>();
-        map.put(correlationId, future);
-        return future;
+    public CompletableFuture<JmsMsg> add(final String correlationId) {
+        return map.compute(correlationId, (id, existing) -> {
+            if (existing != null) {
+                throw new IllegalArgumentException("Existing id: " + correlationId);
+            }
+            return new CompletableFuture<JmsMsg>();
+        });
     }
 
     @Override
     public CompletableFuture<JmsMsg> get(final String correlationId) {
         return map.get(correlationId);
+    }
+
+    @Override
+    public CompletableFuture<JmsMsg> remove(final String correlationId) {
+        return map.remove(correlationId);
     }
 }

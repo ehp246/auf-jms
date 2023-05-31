@@ -24,12 +24,17 @@ class ByJmsProxyFactoryTest {
     private final ReplyExpectedDispatchMap dispatchMap = new ReplyExpectedDispatchMap() {
 
         @Override
-        public CompletableFuture<JmsMsg> put(final String correlationId) {
+        public CompletableFuture<JmsMsg> add(final String correlationId) {
             return null;
         }
 
         @Override
         public CompletableFuture<JmsMsg> get(final String correlationId) {
+            return null;
+        }
+
+        @Override
+        public CompletableFuture<JmsMsg> remove(final String correlationId) {
             return null;
         }
 
