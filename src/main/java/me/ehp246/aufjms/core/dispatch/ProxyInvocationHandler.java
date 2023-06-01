@@ -62,11 +62,16 @@ final class ProxyInvocationHandler implements InvocationHandler {
 
         dispatchFn.send(jmsDispatch);
 
-        if (returnBinder instanceof LocalReturnBinder localBinder) {
-            return localBinder.apply(jmsDispatch);
+        if (futureMsg == null) {
+            return ((LocalReturnBinder) returnBinder).apply(jmsDispatch);
         }
 
-        return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
+        try {
+            return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
+        } finally {
+            futureMap.remove(jmsDispatch.correlationId());
+        }
+
     }
 
 }

@@ -134,10 +134,11 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         }
 
         final var bodyOf = new BodyOf(reflected.method().getReturnType());
+        final var requestTimeout = config.requestTimeout();
+
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
             final JmsMsg msg;
             try {
-                final var requestTimeout = config.requestTimeout();
                 msg = requestTimeout == null ? replyFuture.get()
                         : replyFuture.get(requestTimeout.toSeconds(), TimeUnit.SECONDS);
             } catch (Exception e) {

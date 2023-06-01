@@ -31,4 +31,11 @@ final class DefaultReplyExpectedDispatchMap implements ReplyExpectedDispatchMap 
     public CompletableFuture<JmsMsg> remove(final String correlationId) {
         return map.remove(correlationId);
     }
+
+    /**
+     * For internal access.
+     */
+    ConcurrentHashMap<String, CompletableFuture<JmsMsg>> getMap() {
+        return this.map;
+    }
 }
