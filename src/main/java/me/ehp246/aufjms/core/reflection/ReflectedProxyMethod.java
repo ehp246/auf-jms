@@ -17,11 +17,13 @@ public final class ReflectedProxyMethod {
     private final Class<?> declaringType;
     private final Method method;
     private final Parameter[] parameters;
+    private final List<Class<?>> exceptionTypes;
 
     public ReflectedProxyMethod(final Method method) {
         this.method = Objects.requireNonNull(method);
         this.declaringType = method.getDeclaringClass();
         this.parameters = method.getParameters();
+        this.exceptionTypes = List.of(method.getExceptionTypes());
     }
 
     public Optional<ReflectedParameter> firstPayloadParameter(final Set<Class<? extends Annotation>> exclusions) {
@@ -52,7 +54,7 @@ public final class ReflectedProxyMethod {
         return this.method;
     }
 
-    public Parameter getParameter(int index) {
+    public Parameter getParameter(final int index) {
         return this.parameters[index];
     }
 
@@ -63,5 +65,21 @@ public final class ReflectedProxyMethod {
         }
 
         return Optional.ofNullable(declaringType.getAnnotation(annotationClass));
+    }
+
+    /**
+     * Is the given type on the <code>throws</code>. Must be explicitly declared.
+     * Not on the clause doesn't mean the exception can not be thrown by the method,
+     * e.g., all runtime exceptions.
+     */
+    public boolean isOnThrows(final Class<?> type) {
+        return RuntimeException.class.isAssignableFrom(type)
+                || this.exceptionTypes.stream().filter(t -> t.isAssignableFrom(type)).findAny().isPresent();
+    }
+
+    public boolean returnsVoid() {
+        final var returnType = method.getReturnType();
+
+        return returnType == void.class || returnType == Void.class;
     }
 }

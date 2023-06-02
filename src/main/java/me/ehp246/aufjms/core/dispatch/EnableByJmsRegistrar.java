@@ -13,6 +13,7 @@ import org.springframework.beans.factory.support.BeanDefinitionOverrideException
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
@@ -54,13 +55,22 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
 
         final var enablerAttributes = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
 
+        // DispatchFns
         final var fns = (String[]) enablerAttributes.get("dispatchFns");
-        if (fns.length == 0) {
-            return;
+        if (fns.length >= 1) {
+            for (var i = 0; i < fns.length; i++) {
+                register(registry, "jmsDispatchFn-" + i, getFnBeanDefinition(fns[i]));
+            }
         }
 
-        for (var i = 0; i < fns.length; i++) {
-            register(registry, "jmsDispatchFn-" + i, getFnBeanDefinition(fns[i]));
+        // Request/Reply beans
+        final var dispatchReplyTo = (AnnotationAttributes) enablerAttributes.get("requestReplyTo");
+
+        if (!dispatchReplyTo.get("value").toString().isBlank()) {
+            // Map for returning dispatches.
+            register(registry, "replyExpectedDispatchMap", getReplyExpectedDispatchMapBeanDefinition());
+            // Returning msg listener
+            register(registry, "dispatchReplyListenerConfigurer", getDispatchReplyListenerConfigurerBeanDefinition());
         }
     }
 
@@ -86,6 +96,9 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         args.addGenericArgumentValue(map.get("ttl"));
         args.addGenericArgumentValue(map.get("delay"));
         args.addGenericArgumentValue(Arrays.asList((String[]) map.get("dispatchFns")));
+        final var dispatchReplyTo = (AnnotationAttributes) map.get("requestReplyTo");
+        args.addGenericArgumentValue(dispatchReplyTo.get("value"));
+        args.addGenericArgumentValue(dispatchReplyTo.get("type"));
 
         final var beanDefinition = new GenericBeanDefinition();
         beanDefinition.setBeanClass(EnableByJmsConfig.class);
@@ -123,4 +136,20 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
         return proxyBeanDefinition;
     }
 
+    private BeanDefinition getReplyExpectedDispatchMapBeanDefinition() {
+        final var beanDefinition = new GenericBeanDefinition();
+
+        beanDefinition.setBeanClass(DefaultRequestDispatchMap.class);
+
+        return beanDefinition;
+    }
+
+    private BeanDefinition getDispatchReplyListenerConfigurerBeanDefinition() {
+        final var beanDefinition = new GenericBeanDefinition();
+
+        beanDefinition.setBeanClass(ReplyListenerConfigurer.class);
+        beanDefinition.setFactoryBeanName(ReplyListenerConfigurer.class.getName());
+
+        return beanDefinition;
+    }
 }

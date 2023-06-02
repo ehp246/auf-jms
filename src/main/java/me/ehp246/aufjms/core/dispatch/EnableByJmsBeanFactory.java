@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
+import me.ehp246.aufjms.api.jms.At;
+import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -23,13 +25,16 @@ public final class EnableByJmsBeanFactory {
     }
 
     public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
-            final List<String> dispatchFns) {
+            final List<String> dispatchFns, final String requestReplyToValue,
+            final DestinationType requestReplyToType) {
         return new EnableByJmsConfig(scan,
                 Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
-                dispatchFns);
+                dispatchFns,
+                Optional.ofNullable(propertyResolver.resolve(requestReplyToValue)).filter(OneUtil::hasValue).map(
+                        value -> requestReplyToType == DestinationType.TOPIC ? At.toTopic(value) : At.toQueue(value))
+                        .orElse(null));
     }
-
 }

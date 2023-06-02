@@ -10,10 +10,12 @@ import org.springframework.context.annotation.Import;
 
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;
+import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.core.configuration.AufJmsConfiguration;
 import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactory;
+import me.ehp246.aufjms.core.dispatch.DefaultDispatchMethodParser;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsBeanFactory;
 import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 
@@ -31,7 +33,7 @@ import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
 @Retention(RUNTIME)
 @Target(TYPE)
 @Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, EnableByJmsBeanFactory.class,
-        ByJmsProxyFactory.class, })
+        ByJmsProxyFactory.class, DefaultDispatchMethodParser.class })
 public @interface EnableByJms {
     /**
      * Specifies the packages to scan for {@linkplain ByJms} interfaces.
@@ -77,4 +79,18 @@ public @interface EnableByJms {
      * Does not support Spring property placeholder.
      */
     String[] dispatchFns() default {};
+
+    /**
+     * Specifies the destination where the replies to out-going requests are
+     * expected to arrive.
+     * <p>
+     * It turns on the support of request/reply pattern.
+     * <p>
+     * Default is without request/reply support.
+     *
+     * @see <a href=
+     *      'https://docs.oracle.com/cd/E19316-01/820-6424/aerby/index.html'>The
+     *      Request-Reply Pattern</a>
+     */
+    To requestReplyTo() default @To("");
 }

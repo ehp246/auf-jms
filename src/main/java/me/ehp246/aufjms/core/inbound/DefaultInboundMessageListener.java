@@ -19,16 +19,15 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
  * @author Lei Yang
- *
  */
-final class DefaultInboundMessageListener implements SessionAwareMessageListener<Message> {
+public final class DefaultInboundMessageListener implements SessionAwareMessageListener<Message> {
     private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
 
     private final InvocableDispatcher dispatcher;
     private final InvocableFactory invocableFactory;
     private final MsgConsumer defaultConsumer;
 
-    DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final InvocableFactory invocableFactory,
+    public DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final InvocableFactory invocableFactory,
             @Nullable final MsgConsumer defaultConsumer) {
         super();
         this.dispatcher = dispatcher;

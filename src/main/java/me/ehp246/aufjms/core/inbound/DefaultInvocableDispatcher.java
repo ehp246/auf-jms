@@ -31,7 +31,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
-    DefaultInvocableDispatcher(final InvocableBinder binder, @Nullable final List<InvocationListener> listeners,
+    public DefaultInvocableDispatcher(final InvocableBinder binder, @Nullable final List<InvocationListener> listeners,
             @Nullable final Executor executor) {
         super();
         this.binder = binder;
