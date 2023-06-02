@@ -111,7 +111,7 @@ public @interface ByJms {
      * <p>
      * Supports Spring property placeholder.
      *
-     * @see {@linkplain EnableByJms#requestReplyTo()}
+     * @see EnableByJms#requestReplyTo()
      */
     String requestTimeout() default "";
 
