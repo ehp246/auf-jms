@@ -16,7 +16,7 @@ import me.ehp246.test.mock.MockTextMessage;
  * @author Lei Yang
  *
  */
-class DispatchReplyListenerTest {
+class RequestReplyListenerTest {
     private final Session session = Mockito.mock(Session.class);
 
     @Test
@@ -27,7 +27,7 @@ class DispatchReplyListenerTest {
         final var mockMap = Mockito.mock(ReplyFutureSupplier.class);
         Mockito.when(mockMap.get(Mockito.eq(message.getJMSCorrelationID()))).thenReturn(future);
 
-        new DispatchReplyListener(mockMap).onMessage(message, session);
+        new RequestReplyListener(mockMap).onMessage(message, session);
 
         Assertions.assertEquals(message, future.get().message());
     }
@@ -35,7 +35,7 @@ class DispatchReplyListenerTest {
     @Test
     void test_02() throws JMSException, InterruptedException, ExecutionException {
         Assertions
-                .assertDoesNotThrow(() -> new DispatchReplyListener(Mockito.mock(ReplyFutureSupplier.class))
+                .assertDoesNotThrow(() -> new RequestReplyListener(Mockito.mock(ReplyFutureSupplier.class))
                         .onMessage(new MockTextMessage(), session), "should not throw if id is not found");
     }
 }

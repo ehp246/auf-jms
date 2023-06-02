@@ -14,12 +14,12 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  *
  */
-final class DispatchReplyListener implements SessionAwareMessageListener<Message> {
+final class RequestReplyListener implements SessionAwareMessageListener<Message> {
     private final static Logger LOGGER = LogManager.getLogger();
 
     private final ReplyFutureSupplier futureSupplier;
 
-    DispatchReplyListener(final ReplyFutureSupplier futureSupplier) {
+    RequestReplyListener(final ReplyFutureSupplier futureSupplier) {
         super();
         this.futureSupplier = futureSupplier;
     }

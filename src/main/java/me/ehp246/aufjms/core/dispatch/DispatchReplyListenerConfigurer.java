@@ -50,12 +50,12 @@ final class DispatchReplyListenerConfigurer implements JmsListenerConfigurer {
                 container.setDestinationName(dispatchReplyAt.name());
                 container.setPubSubDomain(dispatchReplyAt instanceof AtTopic);
 
-                container.setupMessageListener(new DispatchReplyListener(futureSupplier));
+                container.setupMessageListener(new RequestReplyListener(futureSupplier));
             }
 
             @Override
             public String getId() {
-                return DispatchReplyListener.class.getSimpleName() + "@" + dispatchReplyAt;
+                return RequestReplyListener.class.getSimpleName() + "@" + dispatchReplyAt;
             }
 
         }, factory);
