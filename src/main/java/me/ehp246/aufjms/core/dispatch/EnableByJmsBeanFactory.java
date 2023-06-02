@@ -25,16 +25,16 @@ public final class EnableByJmsBeanFactory {
     }
 
     public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
-            final List<String> dispatchFns, final String dispatchReplyToValue,
-            final DestinationType dispatchReplyToType) {
+            final List<String> dispatchFns, final String requestReplyToValue,
+            final DestinationType requestReplyToType) {
         return new EnableByJmsConfig(scan,
                 Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 dispatchFns,
-                Optional.ofNullable(propertyResolver.resolve(dispatchReplyToValue)).filter(OneUtil::hasValue).map(
-                        value -> dispatchReplyToType == DestinationType.TOPIC ? At.toTopic(value) : At.toQueue(value))
+                Optional.ofNullable(propertyResolver.resolve(requestReplyToValue)).filter(OneUtil::hasValue).map(
+                        value -> requestReplyToType == DestinationType.TOPIC ? At.toTopic(value) : At.toQueue(value))
                         .orElse(null));
     }
 }
