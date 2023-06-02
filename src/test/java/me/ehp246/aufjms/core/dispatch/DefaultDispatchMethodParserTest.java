@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -34,7 +35,7 @@ import me.ehp246.test.mock.MockDispatch;
 class DefaultDispatchMethodParserTest {
     private final JsonByObjectMapper jsonService = Jackson.jsonService();
     private static final ByJmsProxyConfig config = new ByJmsProxyConfig(At.toQueue(UUID.randomUUID().toString()),
-            At.toTopic(UUID.randomUUID().toString()), Duration.ofSeconds(2), Duration.ofDays(1), Duration.ofSeconds(1),
+            At.toTopic(UUID.randomUUID().toString()), Duration.ofDays(2), Duration.ofDays(1), Duration.ofDays(12),
             UUID.randomUUID().toString(), List.of());
 
     private final DefaultDispatchMethodParser parser = new DefaultDispatchMethodParser(
@@ -790,5 +791,47 @@ class DefaultDispatchMethodParserTest {
 
         Assertions.assertEquals(expected,
                 remoteBinder.apply(new MockDispatch(), CompletableFuture.completedFuture(mockMsg)));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void timeout_01() throws Exception {
+        final var captor = TestUtil.newCaptor(ReturnCases.ReturnCase01.class);
+
+        captor.proxy().m04();
+
+        final var binder = parser.parse(captor.invocation().method(), config).returnBinder();
+
+        Assertions.assertEquals(true, binder instanceof RemoteReturnBinder);
+
+        final var remoteBinder = (RemoteReturnBinder) binder;
+
+        final var mockFuture = Mockito.mock(CompletableFuture.class);
+        Mockito.when(mockFuture.get(Mockito.eq(config.requestTimeout().toSeconds()), Mockito.eq(TimeUnit.SECONDS)))
+                .thenReturn(Mockito.mock(JmsMsg.class));
+
+        Assertions.assertEquals(null, remoteBinder.apply(new MockDispatch(), mockFuture),
+                "should call get with timeout");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void timeout_02() throws Exception {
+        final var captor = TestUtil.newCaptor(ReturnCases.ReturnCase01.class);
+
+        captor.proxy().m04();
+
+        final var binder = parser.parse(captor.invocation().method(), new ByJmsProxyConfig(At.toQueue("queue")))
+                .returnBinder();
+
+        Assertions.assertEquals(true, binder instanceof RemoteReturnBinder);
+
+        final var remoteBinder = (RemoteReturnBinder) binder;
+
+        final var mockFuture = Mockito.mock(CompletableFuture.class);
+        Mockito.when(mockFuture.get()).thenReturn(Mockito.mock(JmsMsg.class));
+
+        Assertions.assertEquals(null, remoteBinder.apply(new MockDispatch(), mockFuture),
+                "should call get without timeout");
     }
 }

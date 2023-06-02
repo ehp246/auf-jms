@@ -22,4 +22,9 @@ class ByJmsProxyFactoryTestCases {
     interface FutureMapCase01 {
         int get();
     }
+
+    @ByJms(value = @To("queue"), requestTimeout = "${local.timeout:}")
+    interface TimeoutCase01 {
+        int get();
+    }
 }

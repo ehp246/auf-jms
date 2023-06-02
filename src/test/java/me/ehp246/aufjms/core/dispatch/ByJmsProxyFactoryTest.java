@@ -5,7 +5,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.env.MockEnvironment;
 
+import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFn;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
@@ -15,13 +17,14 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactoryTestCases.FutureMapCase01;
+import me.ehp246.aufjms.core.dispatch.ByJmsProxyFactoryTestCases.TimeoutCase01;
 import me.ehp246.test.Jackson;
 import me.ehp246.test.mock.MockDispatch;
 
 class ByJmsProxyFactoryTest {
     private final JmsDispatchFn dispatchFn = dispatch -> null;
     private final JmsDispatchFnProvider dispatchFnProvider = name -> dispatchFn;
-    private final PropertyResolver propertyResolver = Object::toString;
+    private final PropertyResolver propertyResolver = new MockEnvironment()::resolvePlaceholders;
     private final EnableByJmsConfig localReturnConfig = new EnableByJmsConfig();
     private final EnableByJmsConfig remoteReturnConfig = new EnableByJmsConfig(List.of(), null, null, List.of(),
             At.toQueue("mock"));
@@ -119,5 +122,58 @@ class ByJmsProxyFactoryTest {
         Assertions.assertThrows(RuntimeException.class, () -> instance.get());
 
         Assertions.assertEquals(0, dispatchMap.getMap().size(), "should be removed");
+    }
+
+    @Test
+    void requestTimeout_01() {
+        final var configRef = new ByJmsProxyConfig[] { null };
+        final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider,
+                new MockEnvironment()::resolvePlaceholders,
+                (method, config) -> {
+                    configRef[0] = config;
+                    return new DispatchMethodBinder((proxy, args) -> new MockDispatch(),
+                            (RemoteReturnBinder) ((dispatch, future) -> -1));
+                },
+                dispatchMap);
+
+        final var instance = factory.newByJmsProxy(TimeoutCase01.class);
+
+        Assertions.assertEquals(-1, instance.get());
+        Assertions.assertEquals(null, configRef[0].requestTimeout());
+    }
+
+    @Test
+    void requestTimeout_02() {
+        final var configRef = new ByJmsProxyConfig[] { null };
+        final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider,
+                new MockEnvironment().withProperty("me.ehp246.aufjms.request.timeout", "PT3S")::resolvePlaceholders,
+                (method, config) -> {
+                    configRef[0] = config;
+                    return new DispatchMethodBinder((proxy, args) -> new MockDispatch(),
+                            (RemoteReturnBinder) ((dispatch, future) -> -1));
+                }, dispatchMap);
+
+        final var instance = factory.newByJmsProxy(TimeoutCase01.class);
+
+        Assertions.assertEquals(-1, instance.get());
+        Assertions.assertEquals("PT3S", configRef[0].requestTimeout().toString());
+    }
+
+    @Test
+    void requestTimeout_03() {
+        final var configRef = new ByJmsProxyConfig[] { null };
+        final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider,
+                new MockEnvironment().withProperty("me.ehp246.aufjms.request.timeout", "PT3S")
+                        .withProperty("local.timeout", "PT10S")::resolvePlaceholders,
+                (method, config) -> {
+                    configRef[0] = config;
+                    return new DispatchMethodBinder((proxy, args) -> new MockDispatch(),
+                            (RemoteReturnBinder) ((dispatch, future) -> -1));
+                }, dispatchMap);
+
+        final var instance = factory.newByJmsProxy(TimeoutCase01.class);
+
+        Assertions.assertEquals(-1, instance.get());
+        Assertions.assertEquals("PT10S", configRef[0].requestTimeout().toString(), "should use local");
     }
 }
