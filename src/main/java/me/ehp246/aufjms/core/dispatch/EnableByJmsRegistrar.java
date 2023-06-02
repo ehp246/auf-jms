@@ -147,8 +147,8 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
     private BeanDefinition getDispatchReplyListenerConfigurerBeanDefinition() {
         final var beanDefinition = new GenericBeanDefinition();
 
-        beanDefinition.setBeanClass(DispatchReplyListenerConfigurer.class);
-        beanDefinition.setFactoryBeanName(DispatchReplyListenerConfigurer.class.getName());
+        beanDefinition.setBeanClass(RequestReplyListenerConfigurer.class);
+        beanDefinition.setFactoryBeanName(RequestReplyListenerConfigurer.class.getName());
 
         return beanDefinition;
     }

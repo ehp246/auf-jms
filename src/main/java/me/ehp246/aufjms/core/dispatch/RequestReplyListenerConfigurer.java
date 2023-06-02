@@ -16,12 +16,12 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
  * @author Lei Yang
  *
  */
-final class DispatchReplyListenerConfigurer implements JmsListenerConfigurer {
+final class RequestReplyListenerConfigurer implements JmsListenerConfigurer {
     private final ConnectionFactoryProvider cfProvider;
     private final EnableByJmsConfig byJmsConfig;
     private final ReplyFutureSupplier futureSupplier;
 
-    public DispatchReplyListenerConfigurer(final ConnectionFactoryProvider cfProvider,
+    public RequestReplyListenerConfigurer(final ConnectionFactoryProvider cfProvider,
             final EnableByJmsConfig byJmsConfig, final ReplyFutureSupplier futureSupplier) {
         super();
         this.cfProvider = cfProvider;
