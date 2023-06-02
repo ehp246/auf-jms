@@ -113,7 +113,7 @@ public @interface ByJms {
      *
      * @see {@linkplain EnableByJms#requestReplyTo()}
      */
-    String requstTimeout() default "";
+    String requestTimeout() default "";
 
     /**
      * Specifies the return destination for out-bound messages.

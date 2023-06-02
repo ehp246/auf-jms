@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.reqres;
+package me.ehp246.test.embedded.request.case01;
 
 import java.util.concurrent.TimeoutException;
 
@@ -11,11 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import me.ehp246.aufjms.api.exception.JmsDispatchException;
 
 /**
+ * Local timeout and replyAt placeholder.
+ *
  * @author Lei Yang
  *
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = { "reply.timeout=PT1S", "reply.topic=reply.topic" })
-class ReqResTest {
+class RequestTest {
     @Autowired
     private ClientProxy proxy;
     @Autowired

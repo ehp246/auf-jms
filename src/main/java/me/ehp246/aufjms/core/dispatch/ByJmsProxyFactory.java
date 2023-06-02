@@ -20,6 +20,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -69,9 +70,10 @@ public final class ByJmsProxyFactory {
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName) : At.toTopic(replyToName)
                 : enableByJmsConfig.requestReplyAt();
 
-        final var dispatchReplyTimeout = OneUtil.hasValue(byJms.requstTimeout())
-                ? Duration.parse(propertyResolver.resolve(byJms.requstTimeout()))
-                : null;
+        final var requestTimeout = OneUtil.hasValue(byJms.requestTimeout())
+                ? Duration.parse(propertyResolver.resolve(byJms.requestTimeout()))
+                : Optional.ofNullable(propertyResolver.resolve("${" + AufJmsConstants.REQUEST_TIMEOUT + ":}"))
+                        .filter(OneUtil::hasValue).map(Duration::parse).orElse(null);
 
         final var ttl = Optional.of(propertyResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::ttl);
@@ -79,7 +81,7 @@ public final class ByJmsProxyFactory {
         final var delay = Optional.of(propertyResolver.resolve(byJms.delay())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::delay);
 
-        final var proxyConfig = new ByJmsProxyConfig(destination, replyTo, dispatchReplyTimeout, ttl,
+        final var proxyConfig = new ByJmsProxyConfig(destination, replyTo, requestTimeout, ttl,
                 delay, byJms.connectionFactory(), List.of(byJms.properties()));
 
         final var dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());

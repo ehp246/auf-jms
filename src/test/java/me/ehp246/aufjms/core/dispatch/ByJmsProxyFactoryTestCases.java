@@ -18,7 +18,7 @@ class ByJmsProxyFactoryTestCases {
         void ping();
     }
 
-    @ByJms(value = @To("queue"), requstTimeout = "PT1S")
+    @ByJms(value = @To("queue"), requestTimeout = "PT1S")
     interface FutureMapCase01 {
         int get();
     }

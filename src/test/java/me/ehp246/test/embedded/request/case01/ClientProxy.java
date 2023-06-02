@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.reqres;
+package me.ehp246.test.embedded.request.case01;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;

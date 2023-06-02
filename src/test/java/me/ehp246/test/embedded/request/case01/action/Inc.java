@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.reqres.action;
+package me.ehp246.test.embedded.request.case01.action;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 
