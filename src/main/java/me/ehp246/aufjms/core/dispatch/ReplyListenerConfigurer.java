@@ -16,12 +16,12 @@ import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
  * @author Lei Yang
  *
  */
-final class RequestReplyListenerConfigurer implements JmsListenerConfigurer {
+final class ReplyListenerConfigurer implements JmsListenerConfigurer {
     private final ConnectionFactoryProvider cfProvider;
     private final EnableByJmsConfig byJmsConfig;
     private final ReplyFutureSupplier futureSupplier;
 
-    public RequestReplyListenerConfigurer(final ConnectionFactoryProvider cfProvider,
+    public ReplyListenerConfigurer(final ConnectionFactoryProvider cfProvider,
             final EnableByJmsConfig byJmsConfig, final ReplyFutureSupplier futureSupplier) {
         super();
         this.cfProvider = cfProvider;
@@ -50,12 +50,12 @@ final class RequestReplyListenerConfigurer implements JmsListenerConfigurer {
                 container.setDestinationName(dispatchReplyAt.name());
                 container.setPubSubDomain(dispatchReplyAt instanceof AtTopic);
 
-                container.setupMessageListener(new RequestReplyListener(futureSupplier));
+                container.setupMessageListener(new ReplyListener(futureSupplier));
             }
 
             @Override
             public String getId() {
-                return RequestReplyListener.class.getSimpleName() + "@" + dispatchReplyAt;
+                return ReplyListener.class.getSimpleName() + "@" + dispatchReplyAt;
             }
 
         }, factory);
