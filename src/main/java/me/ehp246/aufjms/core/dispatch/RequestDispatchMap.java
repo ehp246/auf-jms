@@ -8,7 +8,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-public interface ReplyExpectedDispatchMap extends ReplyFutureSupplier {
+public interface RequestDispatchMap extends ReplyFutureSupplier {
     /**
      * Add a new future to the map for the id.
      * <p>

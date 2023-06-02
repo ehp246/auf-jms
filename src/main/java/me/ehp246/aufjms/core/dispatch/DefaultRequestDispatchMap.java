@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  * @author Lei Yang
  *
  */
-final class DefaultReplyExpectedDispatchMap implements ReplyExpectedDispatchMap {
+final class DefaultRequestDispatchMap implements RequestDispatchMap {
     private final ConcurrentHashMap<String, CompletableFuture<JmsMsg>> map = new ConcurrentHashMap<>();
 
     @Override

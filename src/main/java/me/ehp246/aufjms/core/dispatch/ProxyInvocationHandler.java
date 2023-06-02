@@ -19,11 +19,11 @@ final class ProxyInvocationHandler implements InvocationHandler {
     private final int hashCode = new Object().hashCode();
     private final JmsDispatchFn dispatchFn;
     private final Function<Method, DispatchMethodBinder> methodBinderSupplier;
-    private final ReplyExpectedDispatchMap futureMap;
+    private final RequestDispatchMap futureMap;
 
     ProxyInvocationHandler(final Class<?> proxyInterface, final JmsDispatchFn dispatchFn,
             final Function<Method, DispatchMethodBinder> methodBinderSupplier,
-            final ReplyExpectedDispatchMap futureMap) {
+            final RequestDispatchMap futureMap) {
         super();
         this.proxyInterface = proxyInterface;
         this.dispatchFn = dispatchFn;

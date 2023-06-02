@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
  * @author Lei Yang
  *
  */
-class DefaultReplyExpectedDispatchMapTest {
+class DefaultRequestDispatchMapTest {
 
     @Test
     void test_01() {
-        final var map = new DefaultReplyExpectedDispatchMap();
+        final var map = new DefaultRequestDispatchMap();
         final var id = UUID.randomUUID().toString();
 
         final var future = map.add(id);
@@ -26,7 +26,7 @@ class DefaultReplyExpectedDispatchMapTest {
 
     @Test
     void test_02() {
-        final var map = new DefaultReplyExpectedDispatchMap();
+        final var map = new DefaultRequestDispatchMap();
         final var id = UUID.randomUUID().toString();
 
         map.add(id);
@@ -36,7 +36,7 @@ class DefaultReplyExpectedDispatchMapTest {
 
     @Test
     void test_03() {
-        final var map = new DefaultReplyExpectedDispatchMap();
+        final var map = new DefaultRequestDispatchMap();
         final var id = UUID.randomUUID().toString();
 
         Assertions.assertEquals(null, map.get(id));

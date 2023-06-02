@@ -38,17 +38,17 @@ public final class ByJmsProxyFactory {
     private final JmsDispatchFnProvider dispatchFnProvider;
     private final PropertyResolver propertyResolver;
     private final EnableByJmsConfig enableByJmsConfig;
-    private final ReplyExpectedDispatchMap replyExpectedDispatchMap;
+    private final RequestDispatchMap requestDispatchMap;
     private final DispatchMethodParser methodParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig, final JmsDispatchFnProvider dispatchFnProvider,
             final PropertyResolver propertyResolver, final DispatchMethodParser methodParser,
-            @Nullable final ReplyExpectedDispatchMap replyExpectedDispatchMap) {
+            @Nullable final RequestDispatchMap requestDispatchMap) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
         this.propertyResolver = propertyResolver;
-        this.replyExpectedDispatchMap = replyExpectedDispatchMap;
+        this.requestDispatchMap = requestDispatchMap;
         this.methodParser = methodParser;
     }
 
@@ -91,6 +91,6 @@ public final class ByJmsProxyFactory {
                 .computeIfAbsent(method, m -> methodParser.parse(m, proxyConfig));
 
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
-                new ProxyInvocationHandler(proxyInterface, dispatchFn, binderSupplier, replyExpectedDispatchMap));
+                new ProxyInvocationHandler(proxyInterface, dispatchFn, binderSupplier, requestDispatchMap));
     }
 }

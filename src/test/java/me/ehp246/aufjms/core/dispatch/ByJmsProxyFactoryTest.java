@@ -30,7 +30,7 @@ class ByJmsProxyFactoryTest {
             At.toQueue("mock"));
     private final DispatchMethodParser methodParser = new DefaultDispatchMethodParser(propertyResolver,
             Jackson.jsonService());
-    private final ReplyExpectedDispatchMap dispatchMap = new DefaultReplyExpectedDispatchMap();
+    private final RequestDispatchMap dispatchMap = new DefaultRequestDispatchMap();
 
     private final ByJmsProxyFactory factory = new ByJmsProxyFactory(localReturnConfig, dispatchFnProvider,
             propertyResolver, methodParser, dispatchMap);
@@ -79,7 +79,7 @@ class ByJmsProxyFactoryTest {
 
     @Test
     void futureMap_01() {
-        final var dispatchMap = new DefaultReplyExpectedDispatchMap();
+        final var dispatchMap = new DefaultRequestDispatchMap();
         final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider, propertyResolver,
                 methodParser, dispatchMap);
 
@@ -94,7 +94,7 @@ class ByJmsProxyFactoryTest {
 
     @Test
     void futureMap_02() {
-        final var dispatchMap = new DefaultReplyExpectedDispatchMap();
+        final var dispatchMap = new DefaultRequestDispatchMap();
         final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider, propertyResolver,
                 (method, config) -> new DispatchMethodBinder((proxy, args) -> new MockDispatch(),
                         (RemoteReturnBinder) ((dispatch, future) -> 0)),
@@ -109,7 +109,7 @@ class ByJmsProxyFactoryTest {
 
     @Test
     void futureMap_03() {
-        final var dispatchMap = new DefaultReplyExpectedDispatchMap();
+        final var dispatchMap = new DefaultRequestDispatchMap();
         final var factory = new ByJmsProxyFactory(remoteReturnConfig, dispatchFnProvider, propertyResolver,
                 (method, config) -> new DispatchMethodBinder((proxy, args) -> new MockDispatch(),
                         (RemoteReturnBinder) ((dispatch, future) -> {

@@ -139,7 +139,7 @@ public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar
     private BeanDefinition getReplyExpectedDispatchMapBeanDefinition() {
         final var beanDefinition = new GenericBeanDefinition();
 
-        beanDefinition.setBeanClass(DefaultReplyExpectedDispatchMap.class);
+        beanDefinition.setBeanClass(DefaultRequestDispatchMap.class);
 
         return beanDefinition;
     }
