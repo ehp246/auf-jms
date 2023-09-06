@@ -19,7 +19,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
-import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.test.TestQueueListener;
 
 /**
@@ -68,14 +68,14 @@ class PropertyTest {
             @Override
             public Message createMessage(final Session session) throws JMSException {
                 final var msg = session.createTextMessage();
-                msg.setStringProperty(Log4jContext.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1",
+                msg.setStringProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1",
                         UUID.randomUUID().toString());
                 return msg;
             }
         });
 
         Assertions.assertEquals(true,
-                ref.get().get().map.get(Log4jContext.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1") instanceof String);
+                ref.get().get().map.get(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1") instanceof String);
     }
 
     @Test

@@ -4,6 +4,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -11,8 +12,6 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 public final class Log4jContext {
-    public static final String LOG4J_THREAD_CONTEXT_HEADER_PREFIX = "AufJmsLog4jThreadContext_";
-
     private Log4jContext() {
     }
 
@@ -33,8 +32,8 @@ public final class Log4jContext {
         ThreadContext.put(MsgContextName.AufJmsMsgType.name(), msg.type());
         ThreadContext.put(MsgContextName.AufJmsMsgCorrelationId.name(), msg.correlationId());
 
-        msg.propertyNames().stream().filter(name -> name.startsWith(LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext.put(name.replaceFirst(LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
+        msg.propertyNames().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> ThreadContext.put(name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
     }
 
@@ -58,8 +57,8 @@ public final class Log4jContext {
             ThreadContext.remove(value.name());
         }
 
-        msg.propertyNames().stream().filter(name -> name.startsWith(LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext.remove(name.replaceFirst(LOG4J_THREAD_CONTEXT_HEADER_PREFIX, "")));
+        msg.propertyNames().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> ThreadContext.remove(name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, "")));
     }
 
     public static void clear(final JmsDispatch dispatch) {

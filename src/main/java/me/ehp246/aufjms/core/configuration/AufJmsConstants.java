@@ -20,6 +20,7 @@ public final class AufJmsConstants {
      * Spring configuration property.
      */
     public static final String DISPATCH_LOGTER = "me.ehp246.aufjms.dispatchlogger.enabled";
+    public static final String LOG4J_THREAD_CONTEXT_HEADER_PREFIX = "AufJmsLog4jThreadContext_";
 
     private AufJmsConstants() {
         super();
