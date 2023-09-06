@@ -66,7 +66,7 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
 
             throw e;
         } finally {
-            Log4jContext.clearMsg();
+            Log4jContext.clear(msg);
         }
     }
 

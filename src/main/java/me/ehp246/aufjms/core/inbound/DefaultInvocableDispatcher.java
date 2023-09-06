@@ -118,7 +118,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                     runnable.run();
 
                 } finally {
-                    Log4jContext.clearMsg();
+                    Log4jContext.clear(msg);
                 }
             });
         }

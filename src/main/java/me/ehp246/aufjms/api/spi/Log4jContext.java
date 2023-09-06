@@ -46,13 +46,11 @@ public final class Log4jContext {
         ThreadContext.put(DispatchContextName.AufJmsDispatchCorrelationId.name(), dispatch.correlationId());
     }
 
-    public static void clearMsg() {
-        for (final var value : MsgContextName.values()) {
-            ThreadContext.remove(value.name());
-        }
-    }
-
     public static void clear(final JmsMsg msg) {
+        if (msg == null) {
+            return;
+        }
+
         for (final var value : MsgContextName.values()) {
             ThreadContext.remove(value.name());
         }

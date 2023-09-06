@@ -52,7 +52,7 @@ class Log4jContextTest {
         Log4jContext.clear((JmsDispatch) null);
 
         Log4jContext.set((JmsMsg) null);
-        Log4jContext.clearMsg();
+        Log4jContext.clear((JmsMsg) null);
     }
 
 }
