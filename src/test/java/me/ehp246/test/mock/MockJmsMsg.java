@@ -122,8 +122,7 @@ public class MockJmsMsg implements JmsMsg {
 
     @Override
     public Set<String> propertyNames() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.properties.keySet();
     }
 
     @Override

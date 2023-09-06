@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
+import me.ehp246.aufjms.api.spi.Log4jContext;
 import me.ehp246.test.TestQueueListener;
 
 /**
@@ -38,6 +40,11 @@ class PropertyTest {
     @Autowired
     private ListableBeanFactory beanFactory;
 
+    @BeforeEach
+    void clear() {
+        ref.set(new CompletableFuture<>());
+    }
+
     @Test
     void test_01() throws InterruptedException, ExecutionException {
         jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
@@ -52,6 +59,23 @@ class PropertyTest {
         });
 
         Assertions.assertEquals(true, ref.get().get().map.get("b1") instanceof Boolean);
+    }
+
+    @Test
+    void log4jHeader_01() throws InterruptedException, ExecutionException {
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setStringProperty(Log4jContext.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1",
+                        UUID.randomUUID().toString());
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(true,
+                ref.get().get().map.get(Log4jContext.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1") instanceof String);
     }
 
     @Test

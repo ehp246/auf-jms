@@ -11,11 +11,13 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 public final class Log4jContext {
+    public static final String LOG4J_THREAD_CONTEXT_HEADER_PREFIX = "AufJmsLog4jThreadContext_";
+
     private Log4jContext() {
     }
 
     private enum MsgContextName {
-        AufJmsMsgFrom, AufJmsMsgCorrelationId, AufJmsMsgType;
+        AufJmsMsgFrom, AufJmsMsgCorrelationId, AufJmsMsgType, AufJmsLog4jThreadContext;
     }
 
     private enum DispatchContextName {
@@ -26,9 +28,14 @@ public final class Log4jContext {
         if (msg == null) {
             return;
         }
+
         ThreadContext.put(MsgContextName.AufJmsMsgFrom.name(), OneUtil.toString(msg.destination()));
         ThreadContext.put(MsgContextName.AufJmsMsgType.name(), msg.type());
         ThreadContext.put(MsgContextName.AufJmsMsgCorrelationId.name(), msg.correlationId());
+
+        msg.propertyNames().stream().filter(name -> name.startsWith(LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> ThreadContext.put(name.replaceFirst(LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
+                        msg.property(name, String.class)));
     }
 
     public static void set(final JmsDispatch dispatch) {
@@ -44,6 +51,15 @@ public final class Log4jContext {
         for (final var value : MsgContextName.values()) {
             ThreadContext.remove(value.name());
         }
+    }
+
+    public static void clear(final JmsMsg msg) {
+        for (final var value : MsgContextName.values()) {
+            ThreadContext.remove(value.name());
+        }
+
+        msg.propertyNames().stream().filter(name -> name.startsWith(LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> ThreadContext.remove(name.replaceFirst(LOG4J_THREAD_CONTEXT_HEADER_PREFIX, "")));
     }
 
     public static void clear(final JmsDispatch dispatch) {
