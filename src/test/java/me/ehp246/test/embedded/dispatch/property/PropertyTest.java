@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import jakarta.jms.JMSException;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.test.EmbeddedArtemisConfig;
 import me.ehp246.test.TestQueueListener;
 import me.ehp246.test.embedded.dispatch.property.AppConfig.Case01;
@@ -20,7 +21,7 @@ import me.ehp246.test.embedded.dispatch.property.AppConfig.Case02;
  *
  */
 @SpringBootTest(classes = { AppConfig.class, TestQueueListener.class, EmbeddedArtemisConfig.class }, properties = {
-        "app.version=AufJms.2.0" })
+        "app.version=AufJms.2.0", "me.ehp246.aufjms.dispatchlogger.enabled=true" })
 class PropertyTest {
     @Autowired
     private Case01 case01;
@@ -129,5 +130,17 @@ class PropertyTest {
         Assertions.assertEquals(3, Collections.list(message.getPropertyNames()).size());
         Assertions.assertEquals(expected, message.getStringProperty("appName"));
         Assertions.assertEquals("1.0", message.getStringProperty("appVersion"));
+    }
+
+    @Test
+    void test_09() throws JMSException {
+        final var propertyName = AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "OrderId";
+        final var expected = UUID.randomUUID().toString();
+
+        case01.ping(Map.of(propertyName, expected));
+
+        final var message = listener.take();
+
+        Assertions.assertEquals(expected, message.getStringProperty(propertyName));
     }
 }

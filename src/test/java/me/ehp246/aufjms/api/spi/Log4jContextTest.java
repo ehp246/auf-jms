@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
+import me.ehp246.test.mock.MockDispatch;
 import me.ehp246.test.mock.MockJmsMsg;
 
 /**
@@ -31,7 +32,7 @@ class Log4jContextTest {
     }
 
     @Test
-    void log4jHeader_01() {
+    void log4jHeader_msg_01() {
         final var value = UUID.randomUUID().toString();
         final var name = UUID.randomUUID().toString();
         final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + name,
@@ -47,7 +48,24 @@ class Log4jContextTest {
     }
 
     @Test
-    void test() {
+    void log4jHeader_dispatch_01() {
+        final var value = UUID.randomUUID().toString();
+        final var name = UUID.randomUUID().toString();
+        final var dispatch = new MockDispatch()
+                .withProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + name,
+                value);
+
+        Log4jContext.set(dispatch);
+
+        mockContext.verify(() -> ThreadContext.put(name, value), Mockito.times(1));
+
+        Log4jContext.clear(dispatch);
+
+        mockContext.verify(() -> ThreadContext.remove(name), Mockito.times(1));
+    }
+
+    @Test
+    void test_01() {
         Log4jContext.set((JmsDispatch) null);
         Log4jContext.clear((JmsDispatch) null);
 
