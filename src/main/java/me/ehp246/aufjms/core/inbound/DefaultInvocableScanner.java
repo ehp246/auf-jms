@@ -60,11 +60,9 @@ final class DefaultInvocableScanner {
 
         return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
             try {
-                LOGGER.atTrace().log("Scanning {}", bean::getBeanClassName);
-
                 return Class.forName(bean.getBeanClassName());
             } catch (final ClassNotFoundException e) {
-                LOGGER.atError().log("This should not happen.", e);
+                LOGGER.atError().withThrowable(e).log("This should not happen: {}", e::getMessage);
             }
             return null;
         }).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
@@ -118,8 +116,6 @@ final class DefaultInvocableScanner {
         if (invokings.get("") == null) {
             throw new IllegalArgumentException("No invocation method defined by " + type.getName());
         }
-
-        LOGGER.atTrace().log("Registering {} on {}", msgTypes::toString, type::getCanonicalName);
 
         return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings), annotation.scope(),
                 annotation.invocation());

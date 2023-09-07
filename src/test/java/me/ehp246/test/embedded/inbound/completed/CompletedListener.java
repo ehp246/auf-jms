@@ -22,23 +22,21 @@ class CompletedListener implements OnInvoking, OnCompleted {
 
     @Override
     public void onCompleted(final Completed completed) {
+        this.completedRef.set(new CompletableFuture<>());
         this.completedRef.get().complete(completed);
     }
 
     @Override
     public void onInvoking(final BoundInvocable bound) {
+        this.boundRef.set(new CompletableFuture<>());
         this.boundRef.get().complete(bound);
     }
 
-    Completed takeCompleted() throws InterruptedException, ExecutionException {
-        final var completed = this.completedRef.get().get();
-        this.completedRef.set(new CompletableFuture<>());
-        return completed;
+    Completed getCompleted() throws InterruptedException, ExecutionException {
+        return this.completedRef.get().get();
     }
 
-    BoundInvocable takeBound() throws InterruptedException, ExecutionException {
-        final var bound = this.boundRef.get().get();
-        this.boundRef.set(new CompletableFuture<>());
-        return bound;
+    BoundInvocable getBound() throws InterruptedException, ExecutionException {
+        return this.boundRef.get().get();
     }
 }

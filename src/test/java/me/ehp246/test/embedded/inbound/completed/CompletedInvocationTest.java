@@ -31,7 +31,7 @@ class CompletedInvocationTest {
         final var id = UUID.randomUUID().toString();
         q1.send(id);
 
-        final var completed = listener.takeCompleted();
+        final var completed = listener.getCompleted();
 
         Assertions.assertEquals(id, completed.bound().msg().correlationId());
         Assertions.assertEquals(true, completed.returned() instanceof String);
@@ -43,7 +43,7 @@ class CompletedInvocationTest {
         final var id = UUID.randomUUID().toString();
         q1.send(id);
 
-        final var bound = listener.takeBound();
+        final var bound = listener.getBound();
 
         Assertions.assertEquals(true, bound.invocable().instance() instanceof OnMsg);
         Assertions.assertEquals(id, bound.arguments()[1]);
