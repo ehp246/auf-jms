@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
@@ -24,20 +22,14 @@ import me.ehp246.aufjms.core.reflection.EnabledScanner;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 public final class EnableByJmsRegistrar implements ImportBeanDefinitionRegistrar {
-    private final static Logger LOGGER = LogManager.getLogger(EnableByJmsRegistrar.class);
-
     @Override
     public void registerBeanDefinitions(final AnnotationMetadata metadata, final BeanDefinitionRegistry registry) {
         final var enableMap = metadata.getAnnotationAttributes(EnableByJms.class.getCanonicalName());
 
         register(registry, beanName(EnableByJmsConfig.class), getAppConfigBeanDefinition(enableMap));
 
-        LOGGER.atTrace().log("Scanning for {}", ByJms.class::getCanonicalName);
-
         for (final var found : new EnabledScanner(EnableByJms.class, ByJms.class, metadata).perform()
                 .collect(Collectors.toList())) {
-            LOGGER.atTrace().log("Registering {}", found::getBeanClassName);
-
             final Class<?> proxyInterface;
             try {
                 proxyInterface = Class.forName(found.getBeanClassName());

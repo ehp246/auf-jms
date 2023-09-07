@@ -14,6 +14,8 @@ public final class AufJmsConstants {
     public static final String POOL_SIZE = "me.ehp246.aufjms.executor.pool-size";
     public static final String AUF_JMS_OBJECT_MAPPER = "aufJmsObjectMapper";
 
+    public static final String LOG4J_THREAD_CONTEXT_HEADER_PREFIX = "AufJmsLog4jThreadContext";
+
     public static final Set<String> RESERVED_PROPERTIES = Set.of(JmsNames.GROUP_ID, JmsNames.GROUP_SEQ);
 
     /**

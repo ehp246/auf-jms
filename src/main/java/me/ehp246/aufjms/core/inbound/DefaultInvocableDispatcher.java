@@ -28,6 +28,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
     private final Executor executor;
     private final InvocableBinder binder;
+    private final List<InvocationListener.OnInvoking> invoking = new ArrayList<>();
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
@@ -38,6 +39,9 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
         this.executor = executor;
         for (final var listener : listeners == null ? List.of() : listeners) {
             // null tolerating
+            if (listener instanceof final InvocationListener.OnInvoking invoking) {
+                this.invoking.add(invoking);
+            }
             if (listener instanceof final InvocationListener.OnCompleted completed) {
                 this.completed.add(completed);
             }
@@ -57,11 +61,15 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
             try {
                 final var bound = binder.bind(invocable, msg);
 
-                assert (bound != null);
+                try {
+                    DefaultInvocableDispatcher.this.invoking.forEach(listener -> listener.onInvoking(bound));
+                } catch (final Exception e) {
+                    LOGGER.atTrace().withThrowable(e).log("OnInvoking listener failed: {}", e::getMessage);
+
+                    throw e;
+                }
 
                 final var outcome = bound.invoke();
-
-                assert (outcome != null);
 
                 if (outcome instanceof final Failed failed) {
                     if (DefaultInvocableDispatcher.this.failed.size() == 0) {
@@ -85,14 +93,12 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                     }
                 }
 
-                assert (outcome instanceof Completed);
-
                 final var completed = (Completed) outcome;
 
                 try {
                     DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
                 } catch (final Exception e) {
-                    LOGGER.atTrace().log("Completed listener failed: {}", e::getMessage);
+                    LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e::getMessage);
 
                     throw e;
                 }
@@ -118,7 +124,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                     runnable.run();
 
                 } finally {
-                    Log4jContext.clearMsg();
+                    Log4jContext.clear(msg);
                 }
             });
         }
