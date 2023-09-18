@@ -97,14 +97,41 @@ public final class TextJmsMsg implements JmsMsg {
         if (type == String.class) {
             return (T) JMSSupplier.invoke(() -> message.getStringProperty(name));
         }
-        if (type == int.class || type == Integer.class) {
+        if (type == int.class) {
             return (T) JMSSupplier.invoke(() -> message.getIntProperty(name));
         }
-        if (type == long.class || type == Long.class) {
+        if (type == Integer.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
+        }
+        if (type == byte.class) {
+            return (T) JMSSupplier.invoke(() -> message.getByteProperty(name));
+        }
+        if (type == Byte.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
+        }
+        if (type == double.class) {
+            return (T) JMSSupplier.invoke(() -> message.getDoubleProperty(name));
+        }
+        if (type == Double.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
+        }
+        if (type == float.class) {
+            return (T) JMSSupplier.invoke(() -> message.getFloatProperty(name));
+        }
+        if (type == Float.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
+        }
+        if (type == long.class) {
             return (T) JMSSupplier.invoke(() -> message.getLongProperty(name));
         }
-        if (type == boolean.class || type == Boolean.class) {
+        if (type == Long.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
+        }
+        if (type == boolean.class) {
             return (T) JMSSupplier.invoke(() -> message.getBooleanProperty(name));
+        }
+        if (type == Boolean.class) {
+            return (T) JMSSupplier.invoke(() -> message.getObjectProperty(name));
         }
         if (type.isEnum()) {
             return (T) JMSSupplier

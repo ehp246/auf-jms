@@ -26,7 +26,8 @@ import me.ehp246.test.TestQueueListener;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class }, properties = {
+@SpringBootTest(classes = { AppConfig.class, NamedStringCase.class, NamedIntCase.class,
+        NamedIntegerCase.class }, properties = {
         "interceptor.name.null=" }, webEnvironment = WebEnvironment.NONE)
 class PropertyTest {
     @Autowired
@@ -94,5 +95,132 @@ class PropertyTest {
 
         Assertions.assertEquals(null,
                 beanFactory.getBean("inboundEndpoint-4", InboundEndpoint.class).invocationListener());
+    }
+
+    @Test
+    void named_01() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedStringCase.class).reset();
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedStringCase");
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(null, namedCase.getValue());
+    }
+
+    @Test
+    void named_02() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedStringCase.class).reset();
+        final var expected = UUID.randomUUID().toString();
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedStringCase");
+                msg.setObjectProperty("Named", expected);
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(expected, namedCase.getValue());
+    }
+
+    @Test
+    void named_int_01() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedIntCase.class).reset();
+        final var expected = 123;
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedIntCase");
+                msg.setIntProperty("Named", expected);
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(expected, namedCase.getValue());
+    }
+
+    @Test
+    void named_int_02() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedIntCase.class).reset();
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedIntCase");
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(0, namedCase.getValue());
+    }
+
+    @Test
+    void named_integer_01() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedIntegerCase.class).reset();
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedIntegerCase");
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(null, namedCase.getValue());
+    }
+
+    @Test
+    void named_integer_02() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedIntegerCase.class).reset();
+        final var expected = 123;
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedIntegerCase");
+                msg.setIntProperty("Named", expected);
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(expected, namedCase.getValue());
+    }
+
+    @Test
+    void named_integer_03() throws InterruptedException, ExecutionException {
+        final var namedCase = this.beanFactory.getBean(NamedIntegerCase.class).reset();
+        final var expected = 123;
+
+        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
+
+            @Override
+            public Message createMessage(final Session session) throws JMSException {
+                final var msg = session.createTextMessage();
+                msg.setJMSType("NamedIntegerCase");
+                msg.setObjectProperty("Named", Integer.valueOf(expected));
+                return msg;
+            }
+        });
+
+        Assertions.assertEquals(expected, namedCase.getValue());
     }
 }
