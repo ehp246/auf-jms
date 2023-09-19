@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.inbound.failedmsg;
+package me.ehp246.test.embedded.inbound.failed;
 
 import java.util.concurrent.ExecutionException;
 
@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import me.ehp246.test.embedded.inbound.failedmsg.dltopic.OnDlqMsg;
-import me.ehp246.test.embedded.inbound.failedmsg.failed.FailMsg;
+import me.ehp246.test.embedded.inbound.failed.dltopic.OnDlqMsg;
+import me.ehp246.test.embedded.inbound.failed.invocation.FailMsg;
 
 /**
  * @author Lei Yang
@@ -37,7 +37,7 @@ class FailedInvocationTest {
     void test_01() throws InterruptedException, ExecutionException {
         final var id = UUID.randomUUID().toString();
 
-        sendQ1.send(id);
+        sendQ1.failedMsg(id);
 
         final var failed = appConfig.conRef1.get();
 
@@ -50,7 +50,7 @@ class FailedInvocationTest {
     void dltopic_01() throws InterruptedException, ExecutionException {
         final var id = UUID.randomUUID().toString();
 
-        sendQ2.send(id);
+        sendQ2.failedMsg(id);
 
         Assertions.assertEquals(id, onDlqMsg.msgRef.get().correlationId());
     }
