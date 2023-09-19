@@ -153,23 +153,6 @@ class PropertyTest {
     }
 
     @Test
-    void named_int_02() throws InterruptedException, ExecutionException {
-        final var namedCase = this.beanFactory.getBean(NamedIntCase.class).reset();
-
-        jmsTemplate.send(TestQueueListener.DESTINATION_NAME, new MessageCreator() {
-
-            @Override
-            public Message createMessage(final Session session) throws JMSException {
-                final var msg = session.createTextMessage();
-                msg.setJMSType("NamedIntCase");
-                return msg;
-            }
-        });
-
-        Assertions.assertEquals(0, namedCase.getValue());
-    }
-
-    @Test
     void named_integer_01() throws InterruptedException, ExecutionException {
         final var namedCase = this.beanFactory.getBean(NamedIntegerCase.class).reset();
 

@@ -14,9 +14,9 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  *
  */
 @Service
-@ForJmsType(scope = InstanceScope.BEAN)
+@ForJmsType(value = ".*", scope = InstanceScope.BEAN)
 public class FailMsg {
-    public final RuntimeException ex = new RuntimeException("Let it throw");
+    public final InterruptedException ex = new InterruptedException("Let it throw");
 
     @Invoking
     public void perform(final JmsMsg msg) throws InterruptedException, ExecutionException {
