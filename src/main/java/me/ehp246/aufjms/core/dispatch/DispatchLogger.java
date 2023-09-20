@@ -27,12 +27,11 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
 
     @Override
     public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        if (dispatch == null) {
+        if (dispatch == null || msg == null) {
             return;
         }
         LOGGER.atTrace().withMarker(AufJmsConstants.PROPERTIES).log("{}", dispatch::properties);
-        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}",
-                () -> msg == null || msg.text() == null ? "" : msg.text());
+        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
     }
 
     @Override
