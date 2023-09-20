@@ -15,6 +15,7 @@ import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
 import me.ehp246.aufjms.api.inbound.InvocableFactory;
 import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -42,12 +43,9 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
         }
 
         final var msg = TextJmsMsg.from(textMessage);
-        try {
-            Log4jContext.set(msg);
-
-            LOGGER.atDebug().log("Inbound from: {}, type: {}, correlation Id: {}", msg::destination, msg::type,
-                    msg::correlationId);
-            LOGGER.atTrace().log("Body: {}", msg::text);
+        try (final var closeble = Log4jContext.set(msg);) {
+            LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", msg::destination, msg::type, msg::correlationId);
+            LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
 
             final var invocable = invocableFactory.get(msg);
 
@@ -62,11 +60,17 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
 
             dispatcher.dispatch(invocable, msg);
         } catch (final Exception e) {
-            LOGGER.atError().withThrowable(e).log("Message failed: {}", e::getMessage);
+            LOGGER.atTrace().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("{}", e::getMessage);
 
-            throw e;
-        } finally {
-            Log4jContext.clear(msg);
+            if (e instanceof JMSException je) {
+                throw je;
+            }
+
+            if (e instanceof RuntimeException re) {
+                throw re;
+            }
+
+            throw new RuntimeException(e);
         }
     }
 

@@ -23,10 +23,12 @@ public final class Log4jContext {
         AufJmsDispatchTo, AufJmsDispatchCorrelationId, AufJmsDispatchType;
     }
 
-    public static void set(final JmsMsg msg) {
+    public static AutoCloseable set(final JmsMsg msg) {
         if (msg == null) {
-            return;
+            return () -> {
+            };
         }
+        final AutoCloseable closeable = () -> Log4jContext.clear(msg);
 
         ThreadContext.put(MsgContextName.AufJmsMsgFrom.name(), OneUtil.toString(msg.destination()));
         ThreadContext.put(MsgContextName.AufJmsMsgType.name(), msg.type());
@@ -34,12 +36,15 @@ public final class Log4jContext {
 
         final var propertyNames = msg.propertyNames();
         if (propertyNames == null) {
-            return;
+            return closeable;
         }
+
         propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
+
+        return closeable;
     }
 
     public static void set(final JmsDispatch dispatch) {

@@ -2,6 +2,9 @@ package me.ehp246.aufjms.core.configuration;
 
 import java.util.Set;
 
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
 import me.ehp246.aufjms.api.jms.JmsNames;
 
 /**
@@ -22,6 +25,14 @@ public final class AufJmsConstants {
      * Spring configuration property.
      */
     public static final String DISPATCH_LOGTER = "me.ehp246.aufjms.dispatchlogger.enabled";
+
+    /**
+     * Log4J
+     */
+    public final static Marker HEADERS = MarkerManager.getMarker("HEADERS");
+    public final static Marker PROPERTIES = MarkerManager.getMarker("PROPERTIES");
+    public final static Marker BODY = MarkerManager.getMarker("BODY");
+    public final static Marker EXCEPTION = MarkerManager.getMarker("EXCEPTION");
 
     private AufJmsConstants() {
         super();
