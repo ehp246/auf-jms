@@ -61,6 +61,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
             factory.setConnectionFactory(this.cfProvider.get(endpoint.connectionFactory()));
             factory.setSessionTransacted(endpoint.sessionMode() == Session.SESSION_TRANSACTED);
             factory.setSessionAcknowledgeMode(endpoint.sessionMode());
+            factory.setExceptionListener(endpoint.exceptionListener());
             factory.setErrorHandler(endpoint.errorHandler());
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {

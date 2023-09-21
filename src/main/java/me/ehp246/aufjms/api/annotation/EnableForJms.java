@@ -13,6 +13,7 @@ import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.util.ErrorHandler;
 
 import jakarta.jms.Connection;
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Queue;
@@ -170,13 +171,23 @@ public @interface EnableForJms {
 
         /**
          * Specifies the bean name of {@linkplain ErrorHandler} type to receive any
-         * uncaught exceptions during a message execution.
+         * uncaught exceptions during execution of a message.
          * <p>
          * Supports Spring property placeholder.
          *
          * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
          */
         String errorHandler() default "";
+
+        /**
+         * Specifies the bean name of {@linkplain ExceptionListener} type to receive
+         * {@linkplain JMSException} during execution of a message.
+         * <p>
+         * Supports Spring property placeholder.
+         *
+         * @see AbstractMessageListenerContainer#setExceptionListener(ExceptionListener)
+         */
+        String exceptionListener() default "";
 
         @Target({})
         @interface From {

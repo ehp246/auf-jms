@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.ErrorHandler;
 
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
@@ -147,6 +148,16 @@ class AppConfigs {
     static class AppConfig07 {
         @Bean
         ErrorHandler thisHandler() {
+            return t -> {
+            };
+        }
+    }
+
+    @EnableForJms(@Inbound(value = @From("q"), exceptionListener = "${exception.listener:}"))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig08 {
+        @Bean
+        ExceptionListener thisListener() {
             return t -> {
             };
         }

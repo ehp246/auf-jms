@@ -14,6 +14,7 @@ import org.springframework.jms.listener.DefaultMessageListenerContainer;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.util.ErrorHandler;
 
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.core.inbound.NoopConsumer;
@@ -137,5 +138,37 @@ class BeanTest {
 
         Assertions.assertEquals(appCtx.getBean(ErrorHandler.class),
                 appCtx.getBean(InboundEndpoint.class).errorHandler());
+    }
+
+    @Test
+    void exceptionListener_01() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.register(AppConfigs.AppConfig08.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(((DefaultMessageListenerContainer) appCtx.getBean(JmsListenerEndpointRegistry.class)
+                .getListenerContainer(endpoint.name())).getExceptionListener(), endpoint.exceptionListener());
+    }
+
+    @Test
+    void exceptionListener_02() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.setEnvironment(new MockEnvironment().withProperty("exception.listener", "none"));
+        appCtx.register(AppConfigs.AppConfig08.class);
+
+        Assertions.assertThrows(UnsatisfiedDependencyException.class, appCtx::refresh);
+    }
+
+    @Test
+    void exceptionListener_03() throws BeansException, InterruptedException, ExecutionException {
+        appCtx.setEnvironment(new MockEnvironment().withProperty("exception.listener", "thisListener"));
+        appCtx.register(AppConfigs.AppConfig08.class);
+        appCtx.refresh();
+
+        final var endpoint = appCtx.getBean(InboundEndpoint.class);
+
+        Assertions.assertEquals(appCtx.getBean("thisListener", ExceptionListener.class), endpoint.exceptionListener());
+        Assertions.assertEquals(((DefaultMessageListenerContainer) appCtx.getBean(JmsListenerEndpointRegistry.class)
+                .getListenerContainer(endpoint.name())).getExceptionListener(), endpoint.exceptionListener());
     }
 }
