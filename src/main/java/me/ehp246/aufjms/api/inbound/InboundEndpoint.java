@@ -1,5 +1,7 @@
 package me.ehp246.aufjms.api.inbound;
 
+import org.springframework.util.ErrorHandler;
+
 import jakarta.jms.Connection;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.jms.At;
@@ -32,6 +34,10 @@ public interface InboundEndpoint {
     }
 
     default InvocationListener invocationListener() {
+        return null;
+    }
+
+    default ErrorHandler errorHandler() {
         return null;
     }
 

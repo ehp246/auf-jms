@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.util.ErrorHandler;
 
 import me.ehp246.aufjms.api.annotation.EnableForJms;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
@@ -72,7 +73,11 @@ public final class InboundEndpointFactory {
                 .map(propertyResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
 
+        final var errorHandler = Optional.ofNullable(inboundAttributes.get("errorHandler").toString())
+                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                .map(name -> autowireCapableBeanFactory.getBean(name, ErrorHandler.class)).orElse(null);
+
         return new InboundEndpointRecord(from, registery, concurrency, beanName, autoStartup, connectionFactory,
-                invocationListener, defaultConsumer, (int) inboundAttributes.get("sessionMode"));
+                invocationListener, defaultConsumer, (int) inboundAttributes.get("sessionMode"), errorHandler);
     }
 }

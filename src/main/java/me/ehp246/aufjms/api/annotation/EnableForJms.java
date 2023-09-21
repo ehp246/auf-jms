@@ -9,6 +9,8 @@ import java.lang.annotation.Target;
 
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Import;
+import org.springframework.jms.listener.AbstractMessageListenerContainer;
+import org.springframework.util.ErrorHandler;
 
 import jakarta.jms.Connection;
 import jakarta.jms.JMSException;
@@ -165,6 +167,16 @@ public @interface EnableForJms {
          * Supports Spring property placeholder.
          */
         String invocationListener() default "";
+
+        /**
+         * Specifies the bean name of {@linkplain ErrorHandler} type to receive any
+         * uncaught exceptions during a message execution.
+         * <p>
+         * Supports Spring property placeholder.
+         *
+         * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
+         */
+        String errorHandler() default "";
 
         @Target({})
         @interface From {

@@ -18,6 +18,14 @@ public sealed interface InvocationListener {
         void onCompleted(final Completed completed);
     }
 
+    /**
+     * If the listener would like to propagate the received exception, it should
+     * throw the received explicitly. Otherwise, the received exception is
+     * effectively caught by the listener.
+     * <p>
+     * Throwing an exception in one listener will break the invocation of
+     * lower-ordered listeners.
+     */
     @FunctionalInterface
     public non-sealed interface OnFailed extends InvocationListener {
         void onFailed(Failed failed) throws Throwable;
