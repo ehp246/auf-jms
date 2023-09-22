@@ -4,8 +4,8 @@ import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
 
 /**
- * Indicates an invocation on {@linkplain BoundInvocable} has failed. Thrown by
- * {@linkplain InvocableDispatcher}.
+ * Indicates the invocation on {@linkplain BoundInvocable} has failed wrapping
+ * the cause. Thrown by {@linkplain InvocableDispatcher}.
  *
  * @author Lei Yang
  */

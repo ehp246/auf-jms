@@ -44,7 +44,8 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
 
         final var msg = TextJmsMsg.from(textMessage);
         try (final var closeble = Log4jContext.set(msg);) {
-            LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", msg::destination, msg::type, msg::correlationId);
+            LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", msg::destination, msg::type,
+                    msg::correlationId);
             LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
 
             final var invocable = invocableFactory.get(msg);
@@ -59,17 +60,9 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
             }
 
             dispatcher.dispatch(invocable, msg);
+        } catch (final JMSException | RuntimeException e) {
+            throw e;
         } catch (final Exception e) {
-            LOGGER.atTrace().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("{}", e::getMessage);
-
-            if (e instanceof JMSException je) {
-                throw je;
-            }
-
-            if (e instanceof RuntimeException re) {
-                throw re;
-            }
-
             throw new RuntimeException(e);
         }
     }
