@@ -47,22 +47,29 @@ public final class Log4jContext {
         return closeable;
     }
 
-    public static void set(final JmsDispatch dispatch) {
+    public static AutoCloseable set(final JmsDispatch dispatch) {
         if (dispatch == null) {
-            return;
+            return () -> {
+            };
         }
+
+        final AutoCloseable closeable = () -> Log4jContext.clear(dispatch);
+
         ThreadContext.put(DispatchContextName.AufJmsDispatchTo.name(), OneUtil.toString(dispatch.to()));
         ThreadContext.put(DispatchContextName.AufJmsDispatchType.name(), dispatch.type());
         ThreadContext.put(DispatchContextName.AufJmsDispatchCorrelationId.name(), dispatch.correlationId());
 
         final var properties = dispatch.properties();
         if (properties == null) {
-            return;
+            return closeable;
         }
+
         properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
                         properties.get(name).toString()));
+
+        return closeable;
     }
 
     public static void clear(final JmsMsg msg) {
