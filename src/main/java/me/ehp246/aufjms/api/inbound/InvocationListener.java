@@ -19,15 +19,20 @@ public sealed interface InvocationListener {
     }
 
     /**
-     * If the listener would like to propagate the received exception, it should
-     * throw the received explicitly. Otherwise, the received exception is
-     * effectively caught by the listener.
+     * When an invocation fails on a {@linkplain BoundInvocable},
+     * {@linkplain InvocableDispatcher} makes the best effort to call all
+     * {@linkplain OnFailed} listeners in turn passing in the failure.
      * <p>
-     * Throwing an exception in one listener will break the invocation of
-     * lower-ordered listeners.
+     * If a {@linkplain OnFailed} throws an exception, the exception will not be
+     * propagated. Instead it will be added to the
+     * {@linkplain Throwable#getSuppressed()} of the invocation failure which will
+     * be passed to the next {@linkplain OnFailed}.
+     * <p>
+     * After all {@linkplain OnFailed} have been executed, the original invocation
+     * failure will be thrown with suppressed exceptions from the listeners.
      */
     @FunctionalInterface
     public non-sealed interface OnFailed extends InvocationListener {
-        void onFailed(Failed failed) throws Throwable;
+        void onFailed(Failed failed);
     }
 }

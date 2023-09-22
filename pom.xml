@@ -330,7 +330,9 @@
 				<version>${maven-surefire-plugin.version}</version>
 				<configuration>
 					<systemPropertyVariables>
-						<me.ehp246.aufjms.dispatcher-logger.enabled>true</me.ehp246.aufjms.dispatcher-logger.enabled>
+						<me.ehp246.aufjms.dispatchlogger.enabled>false</me.ehp246.aufjms.dispatchlogger.enabled>
+						<log4j.configurationFile>test/main/resources/log4j2-surefire.xml</log4j.configurationFile>
+						<spring.main.banner-mode>off</spring.main.banner-mode>
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
