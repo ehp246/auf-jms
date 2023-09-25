@@ -3,6 +3,7 @@ package me.ehp246.aufjms.api.spi;
 import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -71,6 +72,15 @@ class Log4jContextTest {
 
         Log4jContext.set((JmsMsg) null);
         Log4jContext.clear((JmsMsg) null);
+    }
+
+    @Test
+    void test_02() {
+        Assertions.assertDoesNotThrow(Log4jContext.set((JmsDispatch) null)::close);
+        Assertions.assertDoesNotThrow(Log4jContext.set((JmsMsg) null)::close);
+
+        Assertions.assertDoesNotThrow(Log4jContext.set(Mockito.mock(JmsDispatch.class))::close);
+        Assertions.assertDoesNotThrow(Log4jContext.set(Mockito.mock(JmsMsg.class))::close);
     }
 
 }
