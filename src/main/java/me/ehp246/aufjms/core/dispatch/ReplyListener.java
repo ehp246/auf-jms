@@ -8,6 +8,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
 /**
@@ -32,13 +33,13 @@ final class ReplyListener implements SessionAwareMessageListener<Message> {
 
         final var msg = TextJmsMsg.from(textMessage);
 
-        LOGGER.atDebug().log("Reply to correlation Id: {}, type: {}", msg::correlationId, msg::type);
-        LOGGER.atTrace().log("Body: {}", msg::text);
+        LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}", msg::correlationId, msg::type);
+        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
 
         final var future = futureSupplier.get(msg.correlationId());
 
         if (future == null) {
-            LOGGER.atWarn().log("{} not found", msg::correlationId);
+            LOGGER.atTrace().log("{} not found", msg::correlationId);
         } else {
             future.complete(msg);
         }

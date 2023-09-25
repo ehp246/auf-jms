@@ -139,13 +139,16 @@ class DefaultInvocableDispatcherTest {
         final var expected = new RuntimeException();
 
         final var binder = bindToFail(expected);
-        new DefaultInvocableDispatcher(binder, List.of((InvocationListener.OnFailed) m -> {
-            ref[0] = m;
-        }), null).dispatch(invocable, msg);
+
+        final var threw = Assertions.assertThrows(RuntimeException.class,
+                () -> new DefaultInvocableDispatcher(binder, List.of((InvocationListener.OnFailed) m -> {
+                    ref[0] = m;
+                }), null).dispatch(invocable, msg));
 
         final var failed = ref[0];
 
         Assertions.assertEquals(expected, failed.thrown(), "should be the one thrown by application code");
+        Assertions.assertEquals(expected, threw);
         Assertions.assertEquals(binder.bind(null, null), failed.bound());
     }
 
@@ -160,22 +163,30 @@ class DefaultInvocableDispatcherTest {
                         }), null).dispatch(invocable, msg),
                 "should allow the listener to throw back to the broker");
 
-        Assertions.assertEquals(actual, expected);
+        Assertions.assertEquals(expected, actual.getSuppressed()[0], "should have it as suppressed");
     }
 
     @Test
     void failed_04() throws JMSException {
-        final var ref = new Failed[1];
-        final var expected = new RuntimeException();
+        final var ref = new Failed[2];
+        final var failure = new RuntimeException();
+        final var supressed = new NullPointerException();
 
         final var actual = Assertions.assertThrows(RuntimeException.class,
-                () -> new DefaultInvocableDispatcher(bindToFail(expected), List.of((InvocationListener.OnFailed) m -> {
+                () -> new DefaultInvocableDispatcher(bindToFail(failure), List.of((InvocationListener.OnFailed) m -> {
                     ref[0] = m;
-                    throw (RuntimeException) (m.thrown());
+                    throw supressed;
+                }, (InvocationListener.OnFailed) m -> {
+                    ref[1] = m;
+                    throw supressed;
                 }), null).dispatch(invocable, msg));
 
-        Assertions.assertEquals(actual, expected, "should be from the invoker");
-        Assertions.assertEquals(actual, ref[0].thrown(), "should allow the listener to throw");
+        Assertions.assertEquals(failure, actual, "should be from the invoker");
+        Assertions.assertEquals(actual, ref[0].thrown(), "should call with best effort");
+        Assertions.assertEquals(actual, ref[1].thrown(), "should call with best effort");
+        Assertions.assertEquals(actual.getSuppressed().length, 2);
+        Assertions.assertEquals(actual.getSuppressed()[0], supressed);
+        Assertions.assertEquals(actual.getSuppressed()[1], supressed);
     }
 
     @Test
@@ -183,14 +194,26 @@ class DefaultInvocableDispatcherTest {
         // Binder, listeners
         final var threadRef = new Thread[2];
 
-        new DefaultInvocableDispatcher((i, m) -> {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableDispatcher((i, m) -> {
             threadRef[0] = Thread.currentThread();
             final var bound = Mockito.mock(BoundInvocable.class);
-            Mockito.when(bound.invoke()).thenReturn(Mockito.mock(Failed.class));
+            Mockito.when(bound.invoke()).thenReturn(new Failed() {
+                private final Exception e = new IllegalArgumentException();
+
+                @Override
+                public BoundInvocable bound() {
+                    return bound;
+                }
+
+                @Override
+                public Throwable thrown() {
+                    return e;
+                }
+            });
             return bound;
         }, List.of((InvocationListener.OnFailed) m -> {
             threadRef[1] = Thread.currentThread();
-        }), null).dispatch(invocable, msg);
+        }), null).dispatch(invocable, msg));
 
         Assertions.assertEquals(threadRef[0], threadRef[1], "should be the same thread for binder, failed listener");
     }

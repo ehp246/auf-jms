@@ -23,10 +23,12 @@ public final class Log4jContext {
         AufJmsDispatchTo, AufJmsDispatchCorrelationId, AufJmsDispatchType;
     }
 
-    public static void set(final JmsMsg msg) {
+    public static AutoCloseable set(final JmsMsg msg) {
         if (msg == null) {
-            return;
+            return () -> {
+            };
         }
+        final AutoCloseable closeable = () -> Log4jContext.clear(msg);
 
         ThreadContext.put(MsgContextName.AufJmsMsgFrom.name(), OneUtil.toString(msg.destination()));
         ThreadContext.put(MsgContextName.AufJmsMsgType.name(), msg.type());
@@ -34,30 +36,40 @@ public final class Log4jContext {
 
         final var propertyNames = msg.propertyNames();
         if (propertyNames == null) {
-            return;
+            return closeable;
         }
+
         propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
+
+        return closeable;
     }
 
-    public static void set(final JmsDispatch dispatch) {
+    public static AutoCloseable set(final JmsDispatch dispatch) {
         if (dispatch == null) {
-            return;
+            return () -> {
+            };
         }
+
+        final AutoCloseable closeable = () -> Log4jContext.clear(dispatch);
+
         ThreadContext.put(DispatchContextName.AufJmsDispatchTo.name(), OneUtil.toString(dispatch.to()));
         ThreadContext.put(DispatchContextName.AufJmsDispatchType.name(), dispatch.type());
         ThreadContext.put(DispatchContextName.AufJmsDispatchCorrelationId.name(), dispatch.correlationId());
 
         final var properties = dispatch.properties();
         if (properties == null) {
-            return;
+            return closeable;
         }
+
         properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
                         properties.get(name).toString()));
+
+        return closeable;
     }
 
     public static void clear(final JmsMsg msg) {

@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.lang.Nullable;
 
+import me.ehp246.aufjms.api.exception.BoundInvocationFailedException;
 import me.ehp246.aufjms.api.inbound.Invocable;
 import me.ehp246.aufjms.api.inbound.InvocableBinder;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
@@ -17,7 +18,7 @@ import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.Log4jContext;
-import me.ehp246.aufjms.core.util.OneUtil;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 
 /**
  * @author Lei Yang
@@ -61,53 +62,33 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
             try {
                 final var bound = binder.bind(invocable, msg);
 
-                try {
-                    DefaultInvocableDispatcher.this.invoking.forEach(listener -> listener.onInvoking(bound));
-                } catch (final Exception e) {
-                    LOGGER.atTrace().withThrowable(e).log("OnInvoking listener failed: {}", e::getMessage);
-
-                    throw e;
-                }
+                DefaultInvocableDispatcher.this.invoking.forEach(listener -> listener.onInvoking(bound));
 
                 final var outcome = bound.invoke();
 
                 if (outcome instanceof final Failed failed) {
-                    if (DefaultInvocableDispatcher.this.failed.size() == 0) {
-                        throw failed.thrown();
+                    for (final var listener : DefaultInvocableDispatcher.this.failed) {
+                        try {
+                            listener.onFailed(failed);
+                        } catch (final Exception e) {
+                            failed.thrown().addSuppressed(e);
+                        }
                     }
 
-                    try {
-                        for (final var listener : DefaultInvocableDispatcher.this.failed) {
-                            listener.onFailed(failed);
-                        }
-
-                        /*
-                         * If none throws any exception, skip further execution and acknowledge the
-                         * message.
-                         */
-                        return;
-                    } catch (final Throwable e) {
-                        LOGGER.atTrace().log("Failure interceptor threw: {}", e::getMessage);
-
-                        throw e;
+                    if (failed.thrown() instanceof RuntimeException re) {
+                        throw re;
+                    } else {
+                        throw new BoundInvocationFailedException(failed.thrown());
                     }
                 }
 
                 final var completed = (Completed) outcome;
-
-                try {
-                    DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
-                } catch (final Exception e) {
-                    LOGGER.atTrace().withThrowable(e).log("Completed listener failed: {}", e::getMessage);
-
-                    throw e;
-                }
-            } catch (final Throwable e) {
-                throw OneUtil.ensureRuntime(e);
+                DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
             } finally {
                 try (invocable) {
                 } catch (final Exception e) {
-                    LOGGER.atError().withThrowable(e).log("Close failed, ignored: {}", e::getMessage);
+                    LOGGER.atWarn().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("Ignored: {}",
+                            e::getMessage);
                 }
             }
         };
@@ -118,13 +99,11 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
         } else {
             executor.execute(() -> {
-                try {
-                    Log4jContext.set(msg);
-
+                try (final var closeable = Log4jContext.set(msg)) {
                     runnable.run();
-
-                } finally {
-                    Log4jContext.clear(msg);
+                } catch (final Exception e) {
+                    LOGGER.atWarn().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("Ignored: {}",
+                            e::getMessage);
                 }
             });
         }

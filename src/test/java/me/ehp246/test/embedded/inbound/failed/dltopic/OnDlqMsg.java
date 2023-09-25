@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.inbound.failedmsg.dltopic;
+package me.ehp246.test.embedded.inbound.failed.dltopic;
 
 import java.util.concurrent.CompletableFuture;
 

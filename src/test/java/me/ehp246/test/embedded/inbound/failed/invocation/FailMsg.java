@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.inbound.failedmsg.failed;
+package me.ehp246.test.embedded.inbound.failed.invocation;
 
 import java.util.concurrent.ExecutionException;
 
@@ -16,10 +16,10 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 @Service
 @ForJmsType(value = ".*", scope = InstanceScope.BEAN)
 public class FailMsg {
-    public final RuntimeException ex = new RuntimeException("Let it throw");
+    public final InterruptedException ex = new InterruptedException("Let it throw");
 
     @Invoking
-    public void perform(JmsMsg msg) throws InterruptedException, ExecutionException {
+    public void perform(final JmsMsg msg) throws InterruptedException, ExecutionException {
         throw ex;
     }
 }

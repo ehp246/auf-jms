@@ -332,7 +332,7 @@ class DefaultDispatchMethodParserTest {
         captor.proxy().get(0);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
-                .invocationBinder().apply(null, captor.invocation().args().toArray())).printStackTrace();
+                .invocationBinder().apply(null, captor.invocation().args().toArray()));
     }
 
     @Test
@@ -342,7 +342,7 @@ class DefaultDispatchMethodParserTest {
         captor.proxy().get("0");
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
-                .invocationBinder().apply(null, captor.invocation().args().toArray())).printStackTrace();
+                .invocationBinder().apply(null, captor.invocation().args().toArray()));
     }
 
     @Test
@@ -374,7 +374,7 @@ class DefaultDispatchMethodParserTest {
         Assertions
                 .assertThrows(NullPointerException.class, () -> parser.parse(captor.invocation().method(), config)
                         .invocationBinder().apply(null, captor.invocation().args().toArray()).groupSeq())
-                .printStackTrace();
+        ;
     }
 
     @Test
@@ -476,7 +476,7 @@ class DefaultDispatchMethodParserTest {
         captor.proxy().m01(Instant.now());
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> parser.parse(captor.invocation().method(), config)
-                .invocationBinder().apply(null, captor.invocation().args().toArray())).printStackTrace();
+                .invocationBinder().apply(null, captor.invocation().args().toArray()));
         ;
     }
 

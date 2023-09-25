@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.inbound.failedmsg;
+package me.ehp246.test.embedded.inbound.failed;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -16,8 +16,8 @@ import me.ehp246.aufjms.api.inbound.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.test.EmbeddedArtemisConfig;
-import me.ehp246.test.embedded.inbound.failedmsg.dltopic.OnDlqMsg;
-import me.ehp246.test.embedded.inbound.failedmsg.failed.FailMsg;
+import me.ehp246.test.embedded.inbound.failed.dltopic.OnDlqMsg;
+import me.ehp246.test.embedded.inbound.failed.invocation.FailMsg;
 
 /**
  * @author Lei Yang

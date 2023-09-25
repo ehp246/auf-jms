@@ -5,7 +5,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.util.ErrorHandler;
 
+import jakarta.jms.ExceptionListener;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
@@ -139,5 +141,25 @@ class AppConfigs {
     @EnableForJms(@Inbound(value = @From("q1"), sessionMode = Session.CLIENT_ACKNOWLEDGE))
     @Import(EmbeddedArtemisConfig.class)
     static class AppConfig06 {
+    }
+
+    @EnableForJms(@Inbound(value = @From("q"), errorHandler = "${error.handler:}"))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig07 {
+        @Bean
+        ErrorHandler thisHandler() {
+            return t -> {
+            };
+        }
+    }
+
+    @EnableForJms(@Inbound(value = @From("q"), exceptionListener = "${exception.listener:}"))
+    @Import(EmbeddedArtemisConfig.class)
+    static class AppConfig08 {
+        @Bean
+        ExceptionListener thisListener() {
+            return t -> {
+            };
+        }
     }
 }

@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.inbound.failedmsg.dltopic;
+package me.ehp246.test.embedded.inbound.failed.dltopic;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;

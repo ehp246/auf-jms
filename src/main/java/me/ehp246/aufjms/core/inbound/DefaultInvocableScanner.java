@@ -104,11 +104,18 @@ final class DefaultInvocableScanner {
             invokings.put(invokingName, method);
         }
 
-        // Use name convention. There should be one and only.
+        /*
+         * Look for 'invoke', 'apply' in this order. There should be only one of either.
+         */
         if (invokings.get("") == null) {
             final var invokes = reflected.findMethods("invoke");
             if (invokes.size() == 1) {
                 invokings.put("", invokes.get(0));
+            } else {
+                final var applies = reflected.findMethods("apply");
+                if (applies.size() == 1) {
+                    invokings.put("", applies.get(0));
+                }
             }
         }
 

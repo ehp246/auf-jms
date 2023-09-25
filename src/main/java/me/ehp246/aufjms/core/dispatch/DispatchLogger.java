@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
+import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 
 /**
  * @author Lei Yang
@@ -20,16 +21,17 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
         if (dispatch == null) {
             return;
         }
-        LOGGER.atInfo().log("CorrelationId={}, To={}, Type={}", dispatch::correlationId, dispatch::to, dispatch::type);
+        LOGGER.atInfo().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", dispatch::correlationId, dispatch::to,
+                dispatch::type);
     }
 
     @Override
     public void preSend(final JmsDispatch dispatch, final JmsMsg msg) {
-        if (dispatch == null) {
+        if (dispatch == null || msg == null) {
             return;
         }
-        LOGGER.atTrace().log("Properties={}", dispatch::properties);
-        LOGGER.atTrace().log("Body={}", () -> msg == null || msg.text() == null ? "" : msg.text());
+        LOGGER.atTrace().withMarker(AufJmsConstants.PROPERTIES).log("{}", dispatch::properties);
+        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
     }
 
     @Override
@@ -41,6 +43,6 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
         if (e == null) {
             return;
         }
-        LOGGER.atTrace().log("Failed: {}", e::getMessage);
+        LOGGER.atTrace().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("{}", e::getMessage);
     }
 }

@@ -7,7 +7,7 @@
 		</Console>
 	</Appenders>
 	<Loggers>
-		<Logger name="me.ehp246" level="trace" additivity="false">
+		<Logger name="me.ehp246" level="warn" additivity="false">
             <AppenderRef ref="console" />
 		</Logger>
 		<Logger name="org.apache.qpid" level="warn" additivity="false">
