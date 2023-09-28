@@ -10,7 +10,7 @@ import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
-import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
+import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
-    private final ReflectedProxyMethod reflected;
+    private final ReflectedMethod reflected;
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;
     private final Function<Object[], String> correlIdFn;
@@ -31,7 +31,7 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
     private final int bodyIndex;
     private final BodyOf<?> bodyOf;
 
-    DefaultProxyInvocationBinder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
+    DefaultProxyInvocationBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
             final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs,
             final Map<String, String> propStatic, final Function<Object[], Duration> ttlFn,

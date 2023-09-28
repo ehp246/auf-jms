@@ -11,6 +11,7 @@ import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
+import me.ehp246.aufjms.api.annotation.OfThreadContext;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -166,5 +167,47 @@ interface InvocableBinderTestCases {
             return new Object[] { type, id, prop1, body };
         }
 
+    }
+
+    static class ThreadContextCase {
+        public void get() {
+        }
+
+        public void get(@OfThreadContext("name") @OfProperty final String firstName,
+                @OfThreadContext("name") @OfProperty final String lastName) {
+        }
+
+        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") final int id) {
+        }
+
+        public void getInBody(final Name name) {
+        }
+
+        public void getInBody(final Name name, @OfProperty final String zipCode) {
+        }
+
+        public void getInBody(final DupName name) {
+        }
+
+        public void getInBody(final Name name, final Name old) {
+        }
+
+
+        public void getOnBody(@OfThreadContext final Name name) {
+        }
+
+        record Name(@OfThreadContext String firstName, @OfThreadContext String lastName) {
+            @OfThreadContext
+            String fullName() {
+                return firstName + lastName;
+            }
+        }
+
+        record DupName(@OfThreadContext("name") String firstName, @OfThreadContext("name") String lastName) {
+            @OfThreadContext("name")
+            String fullName() {
+                return firstName + lastName;
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.api.inbound;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
@@ -23,6 +24,8 @@ public interface BoundInvocable {
      * <code>null</code>.
      */
     Object[] arguments();
+
+    Map<String, String> threadContext();
 
     default Invoked invoke() {
         try {

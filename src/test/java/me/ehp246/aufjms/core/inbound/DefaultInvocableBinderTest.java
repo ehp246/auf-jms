@@ -622,4 +622,24 @@ class DefaultInvocableBinderTest {
          */
         IntStream.range(0, count).forEach(i -> binder.bind(invocable, msg));
     }
+
+    @Test
+    void threadContext_01() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get");
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable, msg);
+
+        Assertions.assertEquals(0, bound.threadContext().size());
+    }
+
+    @Test
+    void threadContext_02() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+                String.class, String.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable, msg);
+
+        Assertions.assertEquals(1, bound.threadContext().size());
+        Assertions.assertEquals("null", bound.threadContext().get("name"));
+    }
 }

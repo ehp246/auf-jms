@@ -27,7 +27,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultProxyInvocationBinder.PropertyArg;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
-import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
+import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -48,12 +48,12 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
 
     @Override
     public DispatchMethodBinder parse(final Method method, final ByJmsProxyConfig config) {
-        final var reflected = new ReflectedProxyMethod(method);
+        final var reflected = new ReflectedMethod(method);
 
         return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected, config));
     }
 
-    private InvocationDispatchBinder parseInvocationBinder(final ReflectedProxyMethod reflected,
+    private InvocationDispatchBinder parseInvocationBinder(final ReflectedMethod reflected,
             final ByJmsProxyConfig config) {
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
                 .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])
@@ -127,7 +127,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private InvocationReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected,
+    private InvocationReturnBinder parseReturnBinder(final ReflectedMethod reflected,
             final ByJmsProxyConfig config) {
         if (reflected.returnsVoid()) {
             return (LocalReturnBinder) dispatch -> null;
@@ -152,7 +152,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         };
     }
 
-    private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {
+    private Map<String, String> propStatic(final ReflectedMethod reflected, final ByJmsProxyConfig config) {
         final var properties = config.properties();
         if ((properties.size() & 1) != 0) {
             throw new IllegalArgumentException(
@@ -171,7 +171,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return propStatic;
     }
 
-    private Map<Integer, PropertyArg> propArgs(final ReflectedProxyMethod reflected) {
+    private Map<Integer, PropertyArg> propArgs(final ReflectedMethod reflected) {
         final Map<Integer, PropertyArg> propArgs = new HashMap<Integer, PropertyArg>();
         for (final var p : reflected.allParametersWith(OfProperty.class)) {
             final var parameter = p.parameter();
