@@ -177,7 +177,13 @@ interface InvocableBinderTestCases {
                 @OfThreadContext("name") @OfProperty final String lastName) {
         }
 
-        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") final int id) {
+        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") @OfProperty final int id) {
+        }
+
+        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") @OfProperty final Integer id) {
+        }
+
+        public void getOnBody(@OfThreadContext final Name name) {
         }
 
         public void getInBody(final Name name) {
@@ -192,9 +198,6 @@ interface InvocableBinderTestCases {
         public void getInBody(final Name name, final Name old) {
         }
 
-
-        public void getOnBody(@OfThreadContext final Name name) {
-        }
 
         record Name(@OfThreadContext String firstName, @OfThreadContext String lastName) {
             @OfThreadContext

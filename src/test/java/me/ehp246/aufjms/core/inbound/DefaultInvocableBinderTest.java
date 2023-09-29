@@ -197,8 +197,7 @@ class DefaultInvocableBinderTest {
         final var mq = new MockJmsMsg();
         final var case01 = new InvocableBinderTestCases.MethodCase01();
 
-        final var outcome = binder
-                .bind(new InvocableRecord(case01, reflectingType.findMethod("m02")), mq).invoke();
+        final var outcome = binder.bind(new InvocableRecord(case01, reflectingType.findMethod("m02")), mq).invoke();
 
         Assertions.assertEquals(null, ((Completed) outcome).returned());
     }
@@ -641,5 +640,72 @@ class DefaultInvocableBinderTest {
 
         Assertions.assertEquals(1, bound.threadContext().size());
         Assertions.assertEquals("null", bound.threadContext().get("name"));
+    }
+
+    @Test
+    void threadContext_03() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+                String.class, String.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var lastName = UUID.randomUUID().toString();
+        final var bound = binder.bind(invocable, new MockJmsMsg().withProperty("LastName", lastName));
+
+        Assertions.assertEquals(1, bound.threadContext().size());
+        Assertions.assertEquals(lastName, bound.threadContext().get("name"), "should take the last one");
+    }
+
+    @Test
+    void threadContext_04() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+                String.class, int.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var expected = UUID.randomUUID().toString();
+        final var bound = binder.bind(invocable,
+                new MockJmsMsg().withText(toJson.apply(expected)).withProperty("Id", 123));
+
+        Assertions.assertEquals(2, bound.threadContext().size());
+        Assertions.assertEquals(expected, bound.threadContext().get("Name"), "should take the last one");
+        Assertions.assertEquals("123", bound.threadContext().get("SSN"));
+    }
+
+    @Test
+    void threadContext_05() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+                String.class, Integer.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var expected = UUID.randomUUID().toString();
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
+
+        Assertions.assertEquals(2, bound.threadContext().size());
+        Assertions.assertEquals(expected, bound.threadContext().get("Name"), "should take the last one");
+        Assertions.assertEquals("null", bound.threadContext().get("SSN"));
+    }
+
+    @Test
+    void threadContext_06() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getOnBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
+
+        Assertions.assertEquals(1, bound.threadContext().size());
+        Assertions.assertEquals(expected.toString(), bound.threadContext().get("Name"));
+    }
+
+    // @Test
+    void threadContext_07() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
+
+        Assertions.assertEquals(3, bound.threadContext().size());
+        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
+        Assertions.assertEquals(expected.lastName(), bound.threadContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
     }
 }

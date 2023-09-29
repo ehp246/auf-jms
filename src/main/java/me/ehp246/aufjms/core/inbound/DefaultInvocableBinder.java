@@ -167,16 +167,17 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     .map(JsonView::value).map(OneUtil::firstOrNull).orElse(null), parameter.getType());
 
             paramBinders.put(i, msg -> msg.text() == null ? null : fromJson.apply(msg.text(), bodyOf));
+
         }
 
         final var threadCOntextBinders = new ReflectedMethod(method).allParametersWith(OfThreadContext.class)
                 .stream().collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfThreadContext.class).value();
-                    return OneUtil.hasValue(name) ? name : p.parameter().getName();
+                    return OneUtil.hasValue(name) ? name : OneUtil.firstUpper(p.parameter().getName());
                 }, p -> {
                     final var index = p.index();
                     return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
-                }, (l, r) -> l));
+                }, (l, r) -> r));
 
         return new ArgBinders(paramBinders, threadCOntextBinders);
     }
