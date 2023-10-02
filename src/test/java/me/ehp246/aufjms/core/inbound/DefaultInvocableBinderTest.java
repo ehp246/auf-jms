@@ -690,11 +690,28 @@ class DefaultInvocableBinderTest {
                 UUID.randomUUID().toString());
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
-        Assertions.assertEquals(1, bound.threadContext().size());
-        Assertions.assertEquals(expected.toString(), bound.threadContext().get("Name"));
+        Assertions.assertEquals(4, bound.threadContext().size());
+        Assertions.assertEquals(expected.toString(), bound.threadContext().get("Name"), "should take all annotated");
+        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
+        Assertions.assertEquals(expected.lastName(), bound.threadContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
     }
 
-    // @Test
+    @Test
+    void threadContext_06_01() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getOnBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(null)));
+
+        Assertions.assertEquals(4, bound.threadContext().size());
+        Assertions.assertEquals("null", bound.threadContext().get("Name"), "should tolerate null");
+        Assertions.assertEquals("null", bound.threadContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
+        Assertions.assertEquals("null", bound.threadContext().get("FullName"));
+    }
+
+    @Test
     void threadContext_07() {
         final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
                 InvocableBinderTestCases.ThreadContextCase.Name.class);
@@ -707,5 +724,64 @@ class DefaultInvocableBinderTest {
         Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
         Assertions.assertEquals(expected.lastName(), bound.threadContext().get("LastName"));
         Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
+    }
+
+    @Test
+    void threadContext_08() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(), null);
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
+
+        Assertions.assertEquals(3, bound.threadContext().size());
+        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
+    }
+
+    @Test
+    void threadContext_09() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(null)));
+
+        Assertions.assertEquals(3, bound.threadContext().size());
+        Assertions.assertEquals("null", bound.threadContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
+        Assertions.assertEquals("null", bound.threadContext().get("FullName"));
+    }
+
+    @Test
+    void threadContext_10() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.ThreadContextCase.Name.class, String.class);
+        final var expectedName = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+        final var expectedFirstName = UUID.randomUUID().toString();
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable,
+                new MockJmsMsg().withText(toJson.apply(expectedName)).withProperty("FirstName", expectedFirstName));
+
+        Assertions.assertEquals(3, bound.threadContext().size());
+        Assertions.assertEquals(expectedFirstName, bound.threadContext().get("FirstName"),
+                "should follow the top parameters");
+        Assertions.assertEquals(expectedName.lastName(), bound.threadContext().get("LastName"));
+        Assertions.assertEquals(expectedName.fullName(), bound.threadContext().get("FullName"));
+    }
+
+    @Test
+    void threadContext_11() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class)
+                .findMethod("getInBodyDupped", InvocableBinderTestCases.ThreadContextCase.DupName.class);
+        final var expectedName = new InvocableBinderTestCases.ThreadContextCase.DupName(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expectedName)));
+
+        Assertions.assertEquals(1, bound.threadContext().size());
+        Assertions.assertEquals(true, Set.of(expectedName.lastName(), expectedName.firstName(), expectedName.fullName())
+                .contains(bound.threadContext().get("name")), "should be one of them");
     }
 }

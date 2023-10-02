@@ -189,15 +189,11 @@ interface InvocableBinderTestCases {
         public void getInBody(final Name name) {
         }
 
-        public void getInBody(final Name name, @OfProperty final String zipCode) {
+        public void getInBody(final Name name, @OfProperty @OfThreadContext final String firstName) {
         }
 
-        public void getInBody(final DupName name) {
+        public void getInBodyDupped(final DupName name) {
         }
-
-        public void getInBody(final Name name, final Name old) {
-        }
-
 
         record Name(@OfThreadContext String firstName, @OfThreadContext String lastName) {
             @OfThreadContext

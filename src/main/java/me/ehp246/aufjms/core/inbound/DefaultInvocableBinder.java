@@ -1,6 +1,7 @@
 package me.ehp246.aufjms.core.inbound;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +34,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.spi.BodyOfBuilder;
 import me.ehp246.aufjms.core.reflection.ReflectedMethod;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -76,7 +79,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Bind the Thread Context
          */
-        final var threadContextBinders = argBinders.threadContextBinders();
+        final var threadContextBinders = argBinders.threadContextParamBinders();
         final Map<String, String> threadContext = threadContextBinders == null ? Map.of()
                 : threadContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
                         entry -> threadContextBinders.get(entry.getKey()).apply(arguments)));
@@ -111,7 +114,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
 
         final var parameters = method.getParameters();
         final Map<Integer, Function<JmsMsg, Object>> paramBinders = new HashMap<>();
-
+        final var bodyArgIndexRef = new AtomicReference<Integer>();
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
             final var type = parameter.getType();
@@ -167,22 +170,58 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     .map(JsonView::value).map(OneUtil::firstOrNull).orElse(null), parameter.getType());
 
             paramBinders.put(i, msg -> msg.text() == null ? null : fromJson.apply(msg.text(), bodyOf));
-
+            bodyArgIndexRef.set(i);
         }
 
-        final var threadCOntextBinders = new ReflectedMethod(method).allParametersWith(OfThreadContext.class)
-                .stream().collect(Collectors.toMap(p -> {
+        final var threadCOntextBinders = new HashMap<String, Function<Object[], String>>();
+
+        /*
+         * Assume only one body parameter on the parameter list
+         */
+        final Integer bodyParamIndex = bodyArgIndexRef.get();
+        if (bodyParamIndex != null) {
+            final var bodyParam = parameters[bodyParamIndex];
+            /*
+             * Duplicated names will overwrite each other un-deterministically.
+             */
+            final var bodyBinders = new ReflectedType<>(bodyParam.getType()).streamSuppliersWith(OfThreadContext.class)
+                    .collect(Collectors.toMap(
+                            m -> Optional.of(m.getAnnotation(OfThreadContext.class).value()).filter(OneUtil::hasValue)
+                                    .orElseGet(() -> OneUtil.firstUpper(m.getName())),
+                            Function.identity(), (l, r) -> r))
+                    .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+                        final var m = entry.getValue();
+                        return (Function<Object[], String>) args -> {
+                            final var body = args[bodyParamIndex];
+                            if (body == null) {
+                                return "null";
+                            }
+                            try {
+                                return m.invoke(body) + "";
+                            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        };
+                    }));
+            threadCOntextBinders.putAll(bodyBinders);
+        }
+
+        /*
+         * Parameters overwrite the body.
+         */
+        threadCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfThreadContext.class).stream()
+                .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfThreadContext.class).value();
                     return OneUtil.hasValue(name) ? name : OneUtil.firstUpper(p.parameter().getName());
                 }, p -> {
                     final var index = p.index();
                     return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
-                }, (l, r) -> r));
+                }, (l, r) -> r)));
 
         return new ArgBinders(paramBinders, threadCOntextBinders);
     }
 
     record ArgBinders(Map<Integer, Function<JmsMsg, Object>> paramBinders,
-            Map<String, Function<Object[], String>> threadContextBinders) {
+            Map<String, Function<Object[], String>> threadContextParamBinders) {
     };
 }
