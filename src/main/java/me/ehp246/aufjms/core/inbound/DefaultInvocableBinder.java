@@ -23,7 +23,7 @@ import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
-import me.ehp246.aufjms.api.annotation.OfThreadContext;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.Invocable;
@@ -79,7 +79,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Bind the Thread Context
          */
-        final var threadContextBinders = argBinders.threadContextParamBinders();
+        final var threadContextBinders = argBinders.log4jContextBinders();
         final Map<String, String> threadContext = threadContextBinders == null ? Map.of()
                 : threadContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
                         entry -> threadContextBinders.get(entry.getKey()).apply(arguments)));
@@ -102,7 +102,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             }
 
             @Override
-            public Map<String, String> threadContext() {
+            public Map<String, String> log4jContext() {
                 return threadContext;
             }
 
@@ -184,9 +184,9 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             /*
              * Duplicated names will overwrite each other un-deterministically.
              */
-            final var bodyBinders = new ReflectedType<>(bodyParam.getType()).streamSuppliersWith(OfThreadContext.class)
+            final var bodyBinders = new ReflectedType<>(bodyParam.getType()).streamSuppliersWith(OfLog4jContext.class)
                     .collect(Collectors.toMap(
-                            m -> Optional.of(m.getAnnotation(OfThreadContext.class).value()).filter(OneUtil::hasValue)
+                            m -> Optional.of(m.getAnnotation(OfLog4jContext.class).value()).filter(OneUtil::hasValue)
                                     .orElseGet(() -> OneUtil.firstUpper(m.getName())),
                             Function.identity(), (l, r) -> r))
                     .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
@@ -209,9 +209,9 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Parameters overwrite the body.
          */
-        threadCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfThreadContext.class).stream()
+        threadCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
                 .collect(Collectors.toMap(p -> {
-                    final var name = p.parameter().getAnnotation(OfThreadContext.class).value();
+                    final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
                     return OneUtil.hasValue(name) ? name : OneUtil.firstUpper(p.parameter().getName());
                 }, p -> {
                     final var index = p.index();
@@ -222,6 +222,6 @@ public final class DefaultInvocableBinder implements InvocableBinder {
     }
 
     record ArgBinders(Map<Integer, Function<JmsMsg, Object>> paramBinders,
-            Map<String, Function<Object[], String>> threadContextParamBinders) {
+            Map<String, Function<Object[], String>> log4jContextBinders) {
     };
 }

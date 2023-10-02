@@ -12,4 +12,9 @@ import me.ehp246.test.TestQueueListener;
 @ByJms(@To(TestQueueListener.DESTINATION_NAME))
 interface Log4jContextCase {
     void ping(@OfProperty String aufJmsLog4jThreadContextOrderId);
+
+    void ping2(@OfProperty int accountId, Order order);
+
+    record Order(int id, int amount) {
+    }
 }

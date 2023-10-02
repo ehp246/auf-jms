@@ -628,7 +628,7 @@ class DefaultInvocableBinderTest {
         final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
         final var bound = binder.bind(invocable, msg);
 
-        Assertions.assertEquals(0, bound.threadContext().size());
+        Assertions.assertEquals(0, bound.log4jContext().size());
     }
 
     @Test
@@ -638,8 +638,8 @@ class DefaultInvocableBinderTest {
         final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
         final var bound = binder.bind(invocable, msg);
 
-        Assertions.assertEquals(1, bound.threadContext().size());
-        Assertions.assertEquals("null", bound.threadContext().get("name"));
+        Assertions.assertEquals(1, bound.log4jContext().size());
+        Assertions.assertEquals("null", bound.log4jContext().get("name"));
     }
 
     @Test
@@ -650,8 +650,8 @@ class DefaultInvocableBinderTest {
         final var lastName = UUID.randomUUID().toString();
         final var bound = binder.bind(invocable, new MockJmsMsg().withProperty("LastName", lastName));
 
-        Assertions.assertEquals(1, bound.threadContext().size());
-        Assertions.assertEquals(lastName, bound.threadContext().get("name"), "should take the last one");
+        Assertions.assertEquals(1, bound.log4jContext().size());
+        Assertions.assertEquals(lastName, bound.log4jContext().get("name"), "should take the last one");
     }
 
     @Test
@@ -663,9 +663,9 @@ class DefaultInvocableBinderTest {
         final var bound = binder.bind(invocable,
                 new MockJmsMsg().withText(toJson.apply(expected)).withProperty("Id", 123));
 
-        Assertions.assertEquals(2, bound.threadContext().size());
-        Assertions.assertEquals(expected, bound.threadContext().get("Name"), "should take the last one");
-        Assertions.assertEquals("123", bound.threadContext().get("SSN"));
+        Assertions.assertEquals(2, bound.log4jContext().size());
+        Assertions.assertEquals(expected, bound.log4jContext().get("Name"), "should take the last one");
+        Assertions.assertEquals("123", bound.log4jContext().get("SSN"));
     }
 
     @Test
@@ -676,9 +676,9 @@ class DefaultInvocableBinderTest {
         final var expected = UUID.randomUUID().toString();
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
-        Assertions.assertEquals(2, bound.threadContext().size());
-        Assertions.assertEquals(expected, bound.threadContext().get("Name"), "should take the last one");
-        Assertions.assertEquals("null", bound.threadContext().get("SSN"));
+        Assertions.assertEquals(2, bound.log4jContext().size());
+        Assertions.assertEquals(expected, bound.log4jContext().get("Name"), "should take the last one");
+        Assertions.assertEquals("null", bound.log4jContext().get("SSN"));
     }
 
     @Test
@@ -690,11 +690,11 @@ class DefaultInvocableBinderTest {
                 UUID.randomUUID().toString());
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
-        Assertions.assertEquals(4, bound.threadContext().size());
-        Assertions.assertEquals(expected.toString(), bound.threadContext().get("Name"), "should take all annotated");
-        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
-        Assertions.assertEquals(expected.lastName(), bound.threadContext().get("LastName"));
-        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
+        Assertions.assertEquals(4, bound.log4jContext().size());
+        Assertions.assertEquals(expected.toString(), bound.log4jContext().get("Name"), "should take all annotated");
+        Assertions.assertEquals(expected.firstName(), bound.log4jContext().get("FirstName"));
+        Assertions.assertEquals(expected.lastName(), bound.log4jContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -704,11 +704,11 @@ class DefaultInvocableBinderTest {
         final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(null)));
 
-        Assertions.assertEquals(4, bound.threadContext().size());
-        Assertions.assertEquals("null", bound.threadContext().get("Name"), "should tolerate null");
-        Assertions.assertEquals("null", bound.threadContext().get("FirstName"));
-        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
-        Assertions.assertEquals("null", bound.threadContext().get("FullName"));
+        Assertions.assertEquals(4, bound.log4jContext().size());
+        Assertions.assertEquals("null", bound.log4jContext().get("Name"), "should tolerate null");
+        Assertions.assertEquals("null", bound.log4jContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.log4jContext().get("LastName"));
+        Assertions.assertEquals("null", bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -720,10 +720,10 @@ class DefaultInvocableBinderTest {
                 UUID.randomUUID().toString());
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
-        Assertions.assertEquals(3, bound.threadContext().size());
-        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
-        Assertions.assertEquals(expected.lastName(), bound.threadContext().get("LastName"));
-        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
+        Assertions.assertEquals(3, bound.log4jContext().size());
+        Assertions.assertEquals(expected.firstName(), bound.log4jContext().get("FirstName"));
+        Assertions.assertEquals(expected.lastName(), bound.log4jContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -734,10 +734,10 @@ class DefaultInvocableBinderTest {
         final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(), null);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
-        Assertions.assertEquals(3, bound.threadContext().size());
-        Assertions.assertEquals(expected.firstName(), bound.threadContext().get("FirstName"));
-        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
-        Assertions.assertEquals(expected.fullName(), bound.threadContext().get("FullName"));
+        Assertions.assertEquals(3, bound.log4jContext().size());
+        Assertions.assertEquals(expected.firstName(), bound.log4jContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.log4jContext().get("LastName"));
+        Assertions.assertEquals(expected.fullName(), bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -747,10 +747,10 @@ class DefaultInvocableBinderTest {
         final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(null)));
 
-        Assertions.assertEquals(3, bound.threadContext().size());
-        Assertions.assertEquals("null", bound.threadContext().get("FirstName"));
-        Assertions.assertEquals("null", bound.threadContext().get("LastName"));
-        Assertions.assertEquals("null", bound.threadContext().get("FullName"));
+        Assertions.assertEquals(3, bound.log4jContext().size());
+        Assertions.assertEquals("null", bound.log4jContext().get("FirstName"));
+        Assertions.assertEquals("null", bound.log4jContext().get("LastName"));
+        Assertions.assertEquals("null", bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -764,11 +764,11 @@ class DefaultInvocableBinderTest {
         final var bound = binder.bind(invocable,
                 new MockJmsMsg().withText(toJson.apply(expectedName)).withProperty("FirstName", expectedFirstName));
 
-        Assertions.assertEquals(3, bound.threadContext().size());
-        Assertions.assertEquals(expectedFirstName, bound.threadContext().get("FirstName"),
+        Assertions.assertEquals(3, bound.log4jContext().size());
+        Assertions.assertEquals(expectedFirstName, bound.log4jContext().get("FirstName"),
                 "should follow the top parameters");
-        Assertions.assertEquals(expectedName.lastName(), bound.threadContext().get("LastName"));
-        Assertions.assertEquals(expectedName.fullName(), bound.threadContext().get("FullName"));
+        Assertions.assertEquals(expectedName.lastName(), bound.log4jContext().get("LastName"));
+        Assertions.assertEquals(expectedName.fullName(), bound.log4jContext().get("FullName"));
     }
 
     @Test
@@ -780,8 +780,8 @@ class DefaultInvocableBinderTest {
         final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expectedName)));
 
-        Assertions.assertEquals(1, bound.threadContext().size());
+        Assertions.assertEquals(1, bound.log4jContext().size());
         Assertions.assertEquals(true, Set.of(expectedName.lastName(), expectedName.firstName(), expectedName.fullName())
-                .contains(bound.threadContext().get("name")), "should be one of them");
+                .contains(bound.log4jContext().get("name")), "should be one of them");
     }
 }

@@ -25,7 +25,7 @@ public interface BoundInvocable {
      */
     Object[] arguments();
 
-    Map<String, String> threadContext();
+    Map<String, String> log4jContext();
 
     default Invoked invoke() {
         try {

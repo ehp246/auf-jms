@@ -4,16 +4,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+import org.apache.logging.log4j.ThreadContext;
+import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import jakarta.jms.JMSException;
 import jakarta.jms.TextMessage;
@@ -340,5 +345,80 @@ class DefaultInvocableDispatcherTest {
                 new ReflectedType<>(InvocableBinderTestCases.PerfCase.class).findMethods("m01").get(0));
 
         IntStream.range(0, LOOP).forEach(i -> dispatcher.dispatch(invocable, msg));
+    }
+
+    @Test
+    void log4jConext_01() {
+        final var contextRef = new Map[2];
+        final var key = UUID.randomUUID().toString();
+        final var context = Map.of(key, UUID.randomUUID().toString());
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableDispatcher((i, m) -> {
+            final var bound = Mockito.mock(BoundInvocable.class);
+            Mockito.when(bound.log4jContext()).thenReturn(context);
+            Mockito.when(bound.invoke()).then(new Answer<Object>() {
+
+                @Override
+                public Object answer(final InvocationOnMock invocation) throws Throwable {
+                    contextRef[0] = ThreadContext.getContext();
+                    return new Failed() {
+                        private final Exception e = new IllegalArgumentException();
+
+                        @Override
+                        public BoundInvocable bound() {
+                            return bound;
+                        }
+
+                        @Override
+                        public Throwable thrown() {
+                            return e;
+                        }
+                    };
+                }
+            });
+            return bound;
+        }, List.of((InvocationListener.OnFailed) m -> {
+            contextRef[1] = ThreadContext.getContext();
+        }), null).dispatch(invocable, msg));
+
+        Assertions.assertEquals(null, ThreadContext.get(key), "should clean up");
+        Assertions.assertEquals(context.get(key), contextRef[0].get(key), "should be there for the invoke");
+        Assertions.assertEquals(context.get(key), contextRef[1].get(key), "should be there for the listeners");
+    }
+
+    @Test
+    void log4jConext_02() {
+        final var contextRef = new Map[2];
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableDispatcher((i, m) -> {
+            final var bound = Mockito.mock(BoundInvocable.class);
+            Mockito.when(bound.invoke()).then(new Answer<Object>() {
+
+                @Override
+                public Object answer(final InvocationOnMock invocation) throws Throwable {
+                    contextRef[0] = ThreadContext.getContext();
+                    return new Failed() {
+                        private final Exception e = new IllegalArgumentException();
+
+                        @Override
+                        public BoundInvocable bound() {
+                            return bound;
+                        }
+
+                        @Override
+                        public Throwable thrown() {
+                            return e;
+                        }
+                    };
+                }
+            });
+            return bound;
+        }, List.of((InvocationListener.OnFailed) m -> {
+            contextRef[1] = ThreadContext.getContext();
+        }), null).dispatch(invocable, msg));
+
+        Assertions.assertEquals(0, ThreadContext.getContext().size());
+        Assertions.assertEquals(0, contextRef[0].size());
+        Assertions.assertEquals(0, contextRef[1].size());
     }
 }

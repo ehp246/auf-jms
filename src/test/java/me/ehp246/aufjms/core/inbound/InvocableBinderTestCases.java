@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
-import me.ehp246.aufjms.api.annotation.OfThreadContext;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -173,37 +173,37 @@ interface InvocableBinderTestCases {
         public void get() {
         }
 
-        public void get(@OfThreadContext("name") @OfProperty final String firstName,
-                @OfThreadContext("name") @OfProperty final String lastName) {
+        public void get(@OfLog4jContext("name") @OfProperty final String firstName,
+                @OfLog4jContext("name") @OfProperty final String lastName) {
         }
 
-        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") @OfProperty final int id) {
+        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final int id) {
         }
 
-        public void get(@OfThreadContext final String name, @OfThreadContext("SSN") @OfProperty final Integer id) {
+        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final Integer id) {
         }
 
-        public void getOnBody(@OfThreadContext final Name name) {
+        public void getOnBody(@OfLog4jContext final Name name) {
         }
 
         public void getInBody(final Name name) {
         }
 
-        public void getInBody(final Name name, @OfProperty @OfThreadContext final String firstName) {
+        public void getInBody(final Name name, @OfProperty @OfLog4jContext final String firstName) {
         }
 
         public void getInBodyDupped(final DupName name) {
         }
 
-        record Name(@OfThreadContext String firstName, @OfThreadContext String lastName) {
-            @OfThreadContext
+        record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
+            @OfLog4jContext
             String fullName() {
                 return firstName + lastName;
             }
         }
 
-        record DupName(@OfThreadContext("name") String firstName, @OfThreadContext("name") String lastName) {
-            @OfThreadContext("name")
+        record DupName(@OfLog4jContext("name") String firstName, @OfLog4jContext("name") String lastName) {
+            @OfLog4jContext("name")
             String fullName() {
                 return firstName + lastName;
             }
