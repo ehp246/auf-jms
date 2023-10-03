@@ -80,7 +80,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          * Bind the Thread Context
          */
         final var log4jContextBinders = argBinders.log4jContextBinders();
-        final Map<String, String> log4jContext = log4jContextBinders == null ? Map.of()
+        final Map<String, String> log4jContext = log4jContextBinders == null ? null
                 : log4jContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
                         entry -> log4jContextBinders.get(entry.getKey()).apply(arguments)));
 

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,12 +62,12 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
          * The runnable returned is expected to handle all execution and exception. The
          * caller simply invokes this runnable without further processing.
          */
-        final var boundRef = new AtomicReference<BoundInvocable>();
+        final var boundRef = new BoundInvocable[] { null };
         final var runnable = (Runnable) () -> {
             try {
-                boundRef.set(binder.bind(invocable, msg));
+                boundRef[0] = binder.bind(invocable, msg);
 
-                final var bound = boundRef.get();
+                final var bound = boundRef[0];
 
                 ThreadContext.putAll(bound.log4jContext() == null ? Map.of() : bound.log4jContext());
 
@@ -100,7 +99,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                     LOGGER.atWarn().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("Ignored: {}",
                             e::getMessage);
                 }
-                Optional.ofNullable(boundRef.get()).map(BoundInvocable::log4jContext).map(Map::keySet)
+                Optional.ofNullable(boundRef[0]).map(BoundInvocable::log4jContext).map(Map::keySet)
                         .ifPresent(ThreadContext::removeAll);
             }
         };
