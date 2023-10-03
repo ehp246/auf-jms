@@ -31,25 +31,35 @@ class Log4jContextTest {
     private ThreadContextInvocationLIstener invocationListener;
 
     @Test
-    void logging_01() throws InterruptedException, ExecutionException {
+    void property_01() throws InterruptedException, ExecutionException {
         final var expected = UUID.randomUUID().toString();
 
         case1.ping(expected);
 
-        Assertions.assertEquals(expected, dispatchListener.take());
+        Assertions.assertEquals(expected, dispatchListener.take().get("OrderId"));
+        Assertions.assertEquals(expected, onPing.take().get("OrderId"));
+    }
 
-        Assertions.assertEquals(expected, onPing.take());
+    @Test
+    void dispatch_01() throws InterruptedException, ExecutionException {
+        case1.ping2(1234, new Order(4321, 2));
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals("1234", localContext.get("accountId"));
+        Assertions.assertEquals("4321", localContext.get("order.id"));
+        Assertions.assertEquals("2", localContext.get("order.amount"));
     }
 
     @Test
     void invocable_01() throws InterruptedException, ExecutionException {
         case1.ping2(1234, new Order(4321, 2));
 
-        final var context = onPing2.take();
+        final var remoteContext = onPing2.take();
 
-        Assertions.assertEquals("1234", context.get("accountId"));
-        Assertions.assertEquals("4321", context.get("order.OrderId"));
-        Assertions.assertEquals("2", context.get("order.amount"));
+        Assertions.assertEquals("1234", remoteContext.get("accountId"));
+        Assertions.assertEquals("4321", remoteContext.get("order.OrderId"));
+        Assertions.assertEquals("2", remoteContext.get("order.amount"));
     }
 
     @Test

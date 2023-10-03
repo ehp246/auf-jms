@@ -39,9 +39,9 @@ public final class Log4jContext {
             return closeable;
         }
 
-        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
-                        name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
+                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
 
         return closeable;
@@ -64,9 +64,9 @@ public final class Log4jContext {
             return closeable;
         }
 
-        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext.put(
-                        name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, ""),
+                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
                         properties.get(name).toString()));
 
         return closeable;
@@ -85,9 +85,9 @@ public final class Log4jContext {
         if (propertyNames == null) {
             return;
         }
-        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext
-                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, "")));
+                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
     }
 
     public static void clear(final JmsDispatch dispatch) {
@@ -102,8 +102,8 @@ public final class Log4jContext {
         if (properties == null) {
             return;
         }
-        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX))
+        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
                 .forEach(name -> ThreadContext
-                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX, "")));
+                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
     }
 }

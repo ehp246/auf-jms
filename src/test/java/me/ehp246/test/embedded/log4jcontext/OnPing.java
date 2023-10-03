@@ -1,8 +1,8 @@
 package me.ehp246.test.embedded.log4jcontext;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -16,15 +16,15 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @ForJmsType(value = "Ping", scope = InstanceScope.BEAN)
 class OnPing {
-    private final AtomicReference<CompletableFuture<String>> ref = new AtomicReference<>(new CompletableFuture<>());
+    private CompletableFuture<Map<String, String>> ref = new CompletableFuture<>();
 
     public void invoke(final JmsMsg msg) {
-        this.ref.get().complete(ThreadContext.get("OrderId"));
+        this.ref.complete(ThreadContext.getContext());
     }
 
-    String take() throws InterruptedException, ExecutionException {
-        final var received = this.ref.get().get();
-        this.ref.set(new CompletableFuture<>());
+    Map<String, String> take() throws InterruptedException, ExecutionException {
+        final var received = this.ref.get();
+        this.ref = new CompletableFuture<>();
         return received;
     }
 }

@@ -1,5 +1,7 @@
 package me.ehp246.test.embedded.log4jcontext;
 
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -12,14 +14,16 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
  *
  */
 class ThreadContextDispatchListener implements DispatchListener.OnDispatch {
-    private final AtomicReference<String> ref = new AtomicReference<>();
+    private final AtomicReference<Map<String, String>> ref = new AtomicReference<>();
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {
-        ref.set(ThreadContext.get("OrderId"));
+        ref.set(ThreadContext.getContext());
     }
 
-    String take() {
-        return ref.getAndSet(null);
+    Map<String, String> take() throws InterruptedException, ExecutionException {
+        final var map = ref.get();
+        ref.set(null);
+        return map;
     }
 }
