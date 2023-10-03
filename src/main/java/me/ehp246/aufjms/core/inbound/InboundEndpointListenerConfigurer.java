@@ -21,6 +21,7 @@ import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.InvocableBinder;
 import me.ehp246.aufjms.api.jms.AtTopic;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
+import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
  * JmsListenerConfigurer used to register {@link InboundEndpoint}'s at run-time.
@@ -71,7 +72,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                     final var from = endpoint.from();
                     final var on = from.on();
 
-                    container.setBeanName(endpoint.name());
+                    container.setBeanName(OneUtil.firstUpper(endpoint.name()));
                     container.setAutoStartup(endpoint.autoStartup());
                     container.setMessageSelector(from.selector());
                     container.setDestinationName(on.name());
