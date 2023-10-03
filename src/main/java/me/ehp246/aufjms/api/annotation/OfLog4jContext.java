@@ -16,6 +16,9 @@ import org.apache.logging.log4j.ThreadContext;
  * annotation can be applied on both the client side, i.e., {@linkplain ByJms}
  * interfaces, and the server side, i.e., {@linkplain ForJmsType} classes.
  * <p>
+ * On the client side, applied to a parameter on a {@linkplain ByJms} interface,
+ * it specifies the key and value for {@linkplain ThreadContext}.
+ * <p>
  * On the server side, applied to a parameter of a {@linkplain ForJmsType}
  * {@linkplain Invoking} method, it specifies the supplier parameter for the
  * value of the named context.
@@ -24,12 +27,19 @@ import org.apache.logging.log4j.ThreadContext;
  * argument via {@linkplain Object#toString()}.
  * <p>
  * The annotation can also be applied to a supplier method defined by the type
- * of the body parameter.
+ * of the body parameter on either the client side and the server side.
  *
- * The supplier method must be <code>public</code>, has no parameter, and return
- * a value. The return value will be converted to {@linkplain String} via
+ * The supplier method must
+ * <li>be declared on the type directly, no recursion or inheritance</li>
+ * <li><code>public</code></li>
+ * <li>have no parameter</li>
+ * <li>return a value</li>
+ * <p>
+ * The return value will be converted to {@linkplain String} via
  * {@linkplain Object#toString()}. If no name is specified by the annotation,
  * the method name will be used as the context key.
+ * <p>
+ * <code>null</code> will be converted to string <code>"null"</code>.
  *
  * @author Lei Yang
  * @since 2.3.1

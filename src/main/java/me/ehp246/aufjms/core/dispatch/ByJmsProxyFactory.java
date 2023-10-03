@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
@@ -119,21 +120,27 @@ public final class ByJmsProxyFactory {
 
                     final var returnBinder = methodBinder.returnBinder();
 
-                    // Reply msg expected?
-                    final CompletableFuture<JmsMsg> futureMsg = (returnBinder instanceof RemoteReturnBinder)
-                            ? requestDispatchMap.add(jmsDispatch.correlationId())
-                            : null;
-
-                    dispatchFn.send(jmsDispatch);
-
-                    if (futureMsg == null) {
-                        return ((LocalReturnBinder) returnBinder).apply(jmsDispatch);
-                    }
-
+                    Optional.ofNullable(jmsDispatch.log4jContext()).ifPresent(ThreadContext::putAll);
                     try {
-                        return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
+                        // Reply msg expected?
+                        final CompletableFuture<JmsMsg> futureMsg = (returnBinder instanceof RemoteReturnBinder)
+                                ? requestDispatchMap.add(jmsDispatch.correlationId())
+                                : null;
+
+                        dispatchFn.send(jmsDispatch);
+
+                        if (futureMsg == null) {
+                            return ((LocalReturnBinder) returnBinder).apply(jmsDispatch);
+                        }
+
+                        try {
+                            return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
+                        } finally {
+                            requestDispatchMap.remove(jmsDispatch.correlationId());
+                        }
                     } finally {
-                        requestDispatchMap.remove(jmsDispatch.correlationId());
+                        Optional.ofNullable(jmsDispatch.log4jContext()).map(Map::keySet)
+                                .ifPresent(ThreadContext::removeAll);
                     }
                 });
     }

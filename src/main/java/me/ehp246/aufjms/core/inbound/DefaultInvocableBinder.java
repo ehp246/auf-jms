@@ -173,7 +173,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             bodyArgIndexRef.set(i);
         }
 
-        final var log4jCOntextBinders = new HashMap<String, Function<Object[], String>>();
+        final var log4jContextBinders = new HashMap<String, Function<Object[], String>>();
 
         /*
          * Assume only one body parameter on the parameter list
@@ -207,13 +207,13 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                             }
                         };
                     }));
-            log4jCOntextBinders.putAll(bodyFieldBinders);
+            log4jContextBinders.putAll(bodyFieldBinders);
         }
 
         /*
          * Parameters overwrite the body.
          */
-        log4jCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
+        log4jContextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
                 .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
@@ -222,7 +222,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
                 }, (l, r) -> r)));
 
-        return new ArgBinders(paramBinders, log4jCOntextBinders);
+        return new ArgBinders(paramBinders, log4jContextBinders);
     }
 
     record ArgBinders(Map<Integer, Function<JmsMsg, Object>> paramBinders,
