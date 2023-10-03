@@ -9,9 +9,9 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -184,6 +184,10 @@ interface InvocableBinderTestCases {
         }
 
         public void getOnBody(@OfLog4jContext final Name name) {
+        }
+
+        public void getOnBodyNamed(@OfLog4jContext("newName") final Name name,
+                @OfProperty @OfLog4jContext final String firstName) {
         }
 
         public void getInBody(final Name name) {

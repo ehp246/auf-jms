@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.logging.log4j.ThreadContext;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
-import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
+import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 
 /**
@@ -21,7 +21,7 @@ class OnPing2 {
     private final AtomicReference<CompletableFuture<Map<String, String>>> ref = new AtomicReference<>(
             new CompletableFuture<>());
 
-    public void invoke(final Order order, @OfProperty final int accountId) {
+    public void invoke(final Order order, @OfLog4jContext @OfProperty final int accountId) {
         this.ref.get().complete(ThreadContext.getContext());
     }
 
@@ -31,6 +31,6 @@ class OnPing2 {
         return received;
     }
 
-    record Order(@OfLog4jContext int id, @OfLog4jContext int amount) {
+    public record Order(@OfLog4jContext("OrderId") int id, @OfLog4jContext int amount) {
     }
 }

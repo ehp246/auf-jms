@@ -21,9 +21,9 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.Invocable;
@@ -79,10 +79,10 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Bind the Thread Context
          */
-        final var threadContextBinders = argBinders.log4jContextBinders();
-        final Map<String, String> threadContext = threadContextBinders == null ? Map.of()
-                : threadContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
-                        entry -> threadContextBinders.get(entry.getKey()).apply(arguments)));
+        final var log4jContextBinders = argBinders.log4jContextBinders();
+        final Map<String, String> log4jContext = log4jContextBinders == null ? Map.of()
+                : log4jContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
+                        entry -> log4jContextBinders.get(entry.getKey()).apply(arguments)));
 
         return new BoundInvocable() {
 
@@ -103,7 +103,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
 
             @Override
             public Map<String, String> log4jContext() {
-                return threadContext;
+                return log4jContext;
             }
 
         };
@@ -173,7 +173,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             bodyArgIndexRef.set(i);
         }
 
-        final var threadCOntextBinders = new HashMap<String, Function<Object[], String>>();
+        final var log4jCOntextBinders = new HashMap<String, Function<Object[], String>>();
 
         /*
          * Assume only one body parameter on the parameter list
@@ -184,10 +184,14 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             /*
              * Duplicated names will overwrite each other un-deterministically.
              */
-            final var bodyBinders = new ReflectedType<>(bodyParam.getType()).streamSuppliersWith(OfLog4jContext.class)
+            final var bodyParamContextName = Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class))
+                    .map(OfLog4jContext::value).filter(OneUtil::hasValue).orElseGet(() -> bodyParam.getName());
+            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
+                    .streamSuppliersWith(OfLog4jContext.class)
                     .collect(Collectors.toMap(
-                            m -> Optional.of(m.getAnnotation(OfLog4jContext.class).value()).filter(OneUtil::hasValue)
-                                    .orElseGet(() -> OneUtil.firstUpper(m.getName())),
+                            m -> bodyParamContextName + "."
+                                    + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                                            .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
                             Function.identity(), (l, r) -> r))
                     .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
                         final var m = entry.getValue();
@@ -203,22 +207,22 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                             }
                         };
                     }));
-            threadCOntextBinders.putAll(bodyBinders);
+            log4jCOntextBinders.putAll(bodyFieldBinders);
         }
 
         /*
          * Parameters overwrite the body.
          */
-        threadCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
+        log4jCOntextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
                 .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
-                    return OneUtil.hasValue(name) ? name : OneUtil.firstUpper(p.parameter().getName());
+                    return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
                     return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
                 }, (l, r) -> r)));
 
-        return new ArgBinders(paramBinders, threadCOntextBinders);
+        return new ArgBinders(paramBinders, log4jCOntextBinders);
     }
 
     record ArgBinders(Map<Integer, Function<JmsMsg, Object>> paramBinders,
