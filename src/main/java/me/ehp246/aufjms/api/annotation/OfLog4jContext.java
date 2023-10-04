@@ -30,11 +30,12 @@ import org.apache.logging.log4j.ThreadContext;
  * of the body parameter on either the client side and the server side.
  *
  * The supplier method must
+ * <ul>
  * <li>be declared on the type directly, no recursion or inheritance</li>
  * <li><code>public</code></li>
  * <li>have no parameter</li>
  * <li>return a value</li>
- * <p>
+ * </ul>
  * The return value will be converted to {@linkplain String} via
  * {@linkplain Object#toString()}. If no name is specified by the annotation,
  * the method name will be used as the context key.

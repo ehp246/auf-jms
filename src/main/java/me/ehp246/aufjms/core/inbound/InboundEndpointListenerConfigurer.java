@@ -72,7 +72,7 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                     final var from = endpoint.from();
                     final var on = from.on();
 
-                    container.setBeanName(OneUtil.firstUpper(endpoint.name()));
+                    container.setBeanName(OneUtil.firstUpper(endpoint.name()) + "@" + on);
                     container.setAutoStartup(endpoint.autoStartup());
                     container.setMessageSelector(from.selector());
                     container.setDestinationName(on.name());
