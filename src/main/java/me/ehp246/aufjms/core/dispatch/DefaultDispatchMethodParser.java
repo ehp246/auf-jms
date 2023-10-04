@@ -1,14 +1,19 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.ThreadContext;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -16,6 +21,7 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -26,8 +32,9 @@ import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultProxyInvocationBinder.PropertyArg;
+import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
-import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
+import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -48,12 +55,12 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
 
     @Override
     public DispatchMethodBinder parse(final Method method, final ByJmsProxyConfig config) {
-        final var reflected = new ReflectedProxyMethod(method);
+        final var reflected = new ReflectedMethod(method);
 
         return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected, config));
     }
 
-    private InvocationDispatchBinder parseInvocationBinder(final ReflectedProxyMethod reflected,
+    private InvocationDispatchBinder parseInvocationBinder(final ReflectedMethod reflected,
             final ByJmsProxyConfig config) {
         final var typeFn = reflected.allParametersWith(OfType.class).stream().findFirst()
                 .map(p -> (Function<Object[], String>) args -> (String) args[p.index()])
@@ -113,22 +120,64 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                     "Un-supported GroupSeq type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
         }).orElse(null);
 
-        final var bodyIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
+        final var bodyParamIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
                 .orElse(-1);
 
-        final var bodyOf = Optional.ofNullable(bodyIndex == -1 ? null : reflected.getParameter(bodyIndex))
+        final var bodyOf = Optional.ofNullable(bodyParamIndex == -1 ? null : reflected.getParameter(bodyParamIndex))
                 .map(parameter -> new BodyOf<>(Optional.ofNullable(parameter.getAnnotation(JsonView.class))
                         .map(JsonView::value).filter(OneUtil::hasValue).map(views -> views[0]).orElse(null),
                         parameter.getType()))
                 .orElse(null);
 
-        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyIndex, bodyOf,
-                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn);
+        final Map<String, Function<Object[], String>> log4jContextBinders = new HashMap<String, Function<Object[], String>>();
+        if (bodyParamIndex >= 0) {
+            final var bodyParam = reflected.getParameter(bodyParamIndex);
+            /*
+             * Duplicated names will overwrite each other un-deterministically.
+             */
+            final var bodyParamContextName = Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class))
+                    .map(OfLog4jContext::value).filter(OneUtil::hasValue).orElseGet(() -> bodyParam.getName());
+
+            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
+                    .streamSuppliersWith(OfLog4jContext.class)
+                    .collect(Collectors.toMap(
+                            m -> bodyParamContextName + "."
+                                    + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                                            .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
+                            Function.identity(), (l, r) -> r))
+                    .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+                        final var m = entry.getValue();
+                        return (Function<Object[], String>) args -> {
+                            final var body = args[bodyParamIndex];
+                            if (body == null) {
+                                return "null";
+                            }
+                            try {
+                                return m.invoke(body) + "";
+                            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        };
+                    }));
+            log4jContextBinders.putAll(bodyFieldBinders);
+        }
+
+        log4jContextBinders
+                .putAll(reflected.allParametersWith(OfLog4jContext.class).stream().collect(Collectors.toMap(p -> {
+                    final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
+                    return OneUtil.hasValue(name) ? name : p.parameter().getName();
+                }, p -> {
+                    final var index = p.index();
+                    return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
+                }, (l, r) -> r)));
+
+        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyParamIndex, bodyOf,
+                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn,
+                log4jContextBinders.isEmpty() ? null : log4jContextBinders);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private InvocationReturnBinder parseReturnBinder(final ReflectedProxyMethod reflected,
-            final ByJmsProxyConfig config) {
+    private InvocationReturnBinder parseReturnBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config) {
         if (reflected.returnsVoid()) {
             return (LocalReturnBinder) dispatch -> null;
         }
@@ -137,22 +186,27 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         final var requestTimeout = config.requestTimeout();
 
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
-            final JmsMsg msg;
+            Optional.ofNullable(jmsDispatch.log4jContext()).ifPresent(ThreadContext::putAll);
             try {
-                msg = requestTimeout == null ? replyFuture.get()
-                        : replyFuture.get(requestTimeout.toSeconds(), TimeUnit.SECONDS);
-            } catch (Exception e) {
-                if (reflected.isOnThrows(e.getClass())) {
-                    throw e;
+                final JmsMsg msg;
+                try {
+                    msg = requestTimeout == null ? replyFuture.get()
+                            : replyFuture.get(requestTimeout.toSeconds(), TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    if (reflected.isOnThrows(e.getClass())) {
+                        throw e;
+                    }
+                    throw new JmsDispatchException(e);
                 }
-                throw new JmsDispatchException(e);
-            }
 
-            return fromJson.apply(msg.text(), bodyOf);
+                return fromJson.apply(msg.text(), bodyOf);
+            } finally {
+                Optional.ofNullable(jmsDispatch.log4jContext()).map(Map::keySet).ifPresent(ThreadContext::removeAll);
+            }
         };
     }
 
-    private Map<String, String> propStatic(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config) {
+    private Map<String, String> propStatic(final ReflectedMethod reflected, final ByJmsProxyConfig config) {
         final var properties = config.properties();
         if ((properties.size() & 1) != 0) {
             throw new IllegalArgumentException(
@@ -171,7 +225,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return propStatic;
     }
 
-    private Map<Integer, PropertyArg> propArgs(final ReflectedProxyMethod reflected) {
+    private Map<Integer, PropertyArg> propArgs(final ReflectedMethod reflected) {
         final Map<Integer, PropertyArg> propArgs = new HashMap<Integer, PropertyArg>();
         for (final var p : reflected.allParametersWith(OfProperty.class)) {
             final var parameter = p.parameter();

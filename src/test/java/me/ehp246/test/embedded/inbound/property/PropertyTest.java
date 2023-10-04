@@ -69,14 +69,14 @@ class PropertyTest {
             @Override
             public Message createMessage(final Session session) throws JMSException {
                 final var msg = session.createTextMessage();
-                msg.setStringProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1",
+                msg.setStringProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + "b1",
                         UUID.randomUUID().toString());
                 return msg;
             }
         });
 
         Assertions.assertEquals(true,
-                ref.get().get().map.get(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + "b1") instanceof String);
+                ref.get().get().map.get(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + "b1") instanceof String);
     }
 
     @Test

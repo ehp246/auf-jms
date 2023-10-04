@@ -9,6 +9,7 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -166,5 +167,50 @@ interface InvocableBinderTestCases {
             return new Object[] { type, id, prop1, body };
         }
 
+    }
+
+    static class ThreadContextCase {
+        public void get() {
+        }
+
+        public void get(@OfLog4jContext("name") @OfProperty final String firstName,
+                @OfLog4jContext("name") @OfProperty final String lastName) {
+        }
+
+        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final int id) {
+        }
+
+        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final Integer id) {
+        }
+
+        public void getOnBody(@OfLog4jContext final Name name) {
+        }
+
+        public void getOnBodyNamed(@OfLog4jContext("newName") final Name name,
+                @OfProperty @OfLog4jContext final String firstName) {
+        }
+
+        public void getInBody(final Name name) {
+        }
+
+        public void getInBody(final Name name, @OfProperty @OfLog4jContext final String firstName) {
+        }
+
+        public void getInBodyDupped(final DupName name) {
+        }
+
+        record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
+            @OfLog4jContext
+            String fullName() {
+                return firstName + lastName;
+            }
+        }
+
+        record DupName(@OfLog4jContext("name") String firstName, @OfLog4jContext("name") String lastName) {
+            @OfLog4jContext("name")
+            String fullName() {
+                return firstName + lastName;
+            }
+        }
     }
 }

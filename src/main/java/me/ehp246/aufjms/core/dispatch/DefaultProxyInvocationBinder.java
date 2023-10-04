@@ -3,14 +3,16 @@ package me.ehp246.aufjms.core.dispatch;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
-import me.ehp246.aufjms.core.reflection.ReflectedProxyMethod;
+import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -18,7 +20,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
-    private final ReflectedProxyMethod reflected;
+    private final ReflectedMethod reflected;
     private final ByJmsProxyConfig config;
     private final Function<Object[], String> typeFn;
     private final Function<Object[], String> correlIdFn;
@@ -30,13 +32,14 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
     private final Map<String, String> propStatic;
     private final int bodyIndex;
     private final BodyOf<?> bodyOf;
+    private final Map<String, Function<Object[], String>> log4jContextBinders;
 
-    DefaultProxyInvocationBinder(final ReflectedProxyMethod reflected, final ByJmsProxyConfig config,
+    DefaultProxyInvocationBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
             final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs,
             final Map<String, String> propStatic, final Function<Object[], Duration> ttlFn,
             final Function<Object[], Duration> delayFn,
-            final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn) {
+            final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn, final Map<String, Function<Object[], String>> log4jContextBinders) {
         this.reflected = reflected;
         this.config = config;
         this.typeFn = typeFn;
@@ -49,6 +52,7 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
         this.propStatic = propStatic;
         this.bodyIndex = bodyIndex;
         this.bodyOf = bodyAs;
+        this.log4jContextBinders = log4jContextBinders;
     }
 
     @Override
@@ -91,6 +95,10 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
         }
 
         final var body = bodyIndex == -1 ? null : args[bodyIndex];
+
+        final Map<String, String> log4jContext = log4jContextBinders == null ? null
+                : log4jContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
+                        entry -> log4jContextBinders.get(entry.getKey()).apply(args)));
 
         return new JmsDispatch() {
 
@@ -149,6 +157,10 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
                 return delay;
             }
 
+            @Override
+            public Map<String, String> log4jContext() {
+                return log4jContext;
+            }
         };
     }
 

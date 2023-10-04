@@ -14,7 +14,8 @@ import me.ehp246.test.TestQueueListener;
  *
  */
 @EnableByJms
-@EnableForJms({ @Inbound(@From(TestQueueListener.DESTINATION_NAME)) })
+@EnableForJms({
+        @Inbound(value = @From(TestQueueListener.DESTINATION_NAME), invocationListener = "threadContextInvocationLIstener") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
 }

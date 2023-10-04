@@ -36,7 +36,7 @@ class Log4jContextTest {
     void log4jHeader_msg_01() {
         final var value = UUID.randomUUID().toString();
         final var name = UUID.randomUUID().toString();
-        final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + name,
+        final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
                 value);
 
         Log4jContext.set(mockJmsMsg);
@@ -53,7 +53,7 @@ class Log4jContextTest {
         final var value = UUID.randomUUID().toString();
         final var name = UUID.randomUUID().toString();
         final var dispatch = new MockDispatch()
-                .withProperty(AufJmsConstants.LOG4J_THREAD_CONTEXT_HEADER_PREFIX + name,
+                .withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
                 value);
 
         Log4jContext.set(dispatch);

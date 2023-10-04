@@ -1,16 +1,20 @@
 package me.ehp246.aufjms.core.dispatch;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
@@ -19,6 +23,7 @@ import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
+import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.OneUtil;
@@ -87,10 +92,56 @@ public final class ByJmsProxyFactory {
 
         final var dispatchFn = dispatchFnProvider.get(byJms.connectionFactory());
 
-        final Function<Method, DispatchMethodBinder> binderSupplier = method -> methodBinderCache
-                .computeIfAbsent(method, m -> methodParser.parse(m, proxyConfig));
+        final int hashCode = new Object().hashCode();
 
         return (T) Proxy.newProxyInstance(proxyInterface.getClassLoader(), new Class[] { proxyInterface },
-                new ProxyInvocationHandler(proxyInterface, dispatchFn, binderSupplier, requestDispatchMap));
+                (InvocationHandler) (proxy, method, args) -> {
+                    if (method.getName().equals("toString")) {
+                        return this.toString();
+                    }
+                    if (method.getName().equals("hashCode")) {
+                        return hashCode;
+                    }
+                    if (method.getName().equals("equals")) {
+                        return proxy == args[0];
+                    }
+                    if (method.isDefault()) {
+                        return MethodHandles.privateLookupIn(proxyInterface, MethodHandles.lookup())
+                                .findSpecial(proxyInterface, method.getName(),
+                                        MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
+                                        proxyInterface)
+                                .bindTo(proxy).invokeWithArguments(args);
+                    }
+
+                    final var methodBinder = methodBinderCache.computeIfAbsent(method,
+                            m -> methodParser.parse(m, proxyConfig));
+
+                    final var jmsDispatch = methodBinder.invocationBinder().apply(proxy, args);
+
+                    final var returnBinder = methodBinder.returnBinder();
+
+                    Optional.ofNullable(jmsDispatch.log4jContext()).ifPresent(ThreadContext::putAll);
+                    try {
+                        // Reply msg expected?
+                        final CompletableFuture<JmsMsg> futureMsg = (returnBinder instanceof RemoteReturnBinder)
+                                ? requestDispatchMap.add(jmsDispatch.correlationId())
+                                : null;
+
+                        dispatchFn.send(jmsDispatch);
+
+                        if (futureMsg == null) {
+                            return ((LocalReturnBinder) returnBinder).apply(jmsDispatch);
+                        }
+
+                        try {
+                            return ((RemoteReturnBinder) returnBinder).apply(jmsDispatch, futureMsg);
+                        } finally {
+                            requestDispatchMap.remove(jmsDispatch.correlationId());
+                        }
+                    } finally {
+                        Optional.ofNullable(jmsDispatch.log4jContext()).map(Map::keySet)
+                                .ifPresent(ThreadContext::removeAll);
+                    }
+                });
     }
 }

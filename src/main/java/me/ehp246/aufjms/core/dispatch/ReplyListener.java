@@ -39,7 +39,7 @@ final class ReplyListener implements SessionAwareMessageListener<Message> {
         final var future = futureSupplier.get(msg.correlationId());
 
         if (future == null) {
-            LOGGER.atTrace().log("{} not found", msg::correlationId);
+            LOGGER.atTrace().log("{} not found, ignored", msg::correlationId);
         } else {
             future.complete(msg);
         }

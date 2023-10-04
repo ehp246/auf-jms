@@ -66,6 +66,10 @@ public interface JmsDispatch {
         return null;
     }
 
+    default Map<String, String> log4jContext() {
+        return null;
+    }
+
     /**
      * Single body value. Generated correlation id.
      *
