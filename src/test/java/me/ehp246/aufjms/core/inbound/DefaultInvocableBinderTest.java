@@ -794,6 +794,23 @@ class DefaultInvocableBinderTest {
     }
 
     @Test
+    void log4jContext_10() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyPrec", InvocableBinderTestCases.Log4jContextCase.Name.class, String.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+
+        final var name = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+
+        final var log4jContext = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(name))).log4jContext();
+
+        Assertions.assertEquals(3, log4jContext.size());
+        Assertions.assertEquals(name.firstName(), log4jContext.get("firstName"), "should follow the body");
+        Assertions.assertEquals(name.lastName(), log4jContext.get("lastName"));
+        Assertions.assertEquals(name.fullName(), log4jContext.get("fullName"));
+    }
+
+    @Test
     void log4jContext_12() {
         final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
                 .findMethod("getOnBodyNamed", InvocableBinderTestCases.Log4jContextCase.Name.class, String.class);

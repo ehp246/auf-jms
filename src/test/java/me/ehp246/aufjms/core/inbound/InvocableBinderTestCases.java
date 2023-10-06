@@ -187,6 +187,10 @@ interface InvocableBinderTestCases {
         public void getOnBody(@OfLog4jContext final Name name) {
         }
 
+        public void getOnBodyPrec(@OfLog4jContext(op = OP.Introspect) final Name name,
+                @OfLog4jContext("firstName") @OfProperty("firstName") final String nameProperty) {
+        }
+
         public void getOnBodyNamed(@OfLog4jContext("newName") final Name name,
                 @OfProperty @OfLog4jContext final String firstName) {
         }
