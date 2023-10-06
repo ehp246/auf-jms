@@ -44,6 +44,14 @@ import org.apache.logging.log4j.ThreadContext;
  * there is an existing context on the thread, it will be overwritten by the new
  * value from the annotation. After execution, the all keys will be removed
  * resulting the lose of the original values.
+ * <p>
+ * In case of a name collision, the following defines the precedence from high
+ * to low:
+ * <ul>
+ * <li>supplier methods from body argument</li>
+ * <li>body argument itself</li>
+ * <li>other arguments, e.g., headers and properties</li>
+ * </ul>
  *
  * @author Lei Yang
  * @since 2.3.1

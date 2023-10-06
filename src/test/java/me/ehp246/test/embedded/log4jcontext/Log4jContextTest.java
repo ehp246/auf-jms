@@ -132,6 +132,16 @@ class Log4jContextTest {
     }
 
     @Test
+    void dispatch_06() throws InterruptedException, ExecutionException {
+        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        case1.ping(name, UUID.randomUUID().toString());
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(name.toString(), localContext.get("name"), "should follow the body");
+    }
+
+    @Test
     void invocable_01() throws InterruptedException, ExecutionException {
         case1.ping2(1234, new Order(4321, 2));
 

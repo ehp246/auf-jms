@@ -18,6 +18,8 @@ interface Log4jContextCase {
 
     void ping(@OfLog4jContext Name name);
 
+    void ping(@OfLog4jContext Name name, @OfProperty @OfLog4jContext String nameProperty);
+
     @OfType("Ping")
     void pingWithName(@OfLog4jContext("WithName.") Name name);
 
