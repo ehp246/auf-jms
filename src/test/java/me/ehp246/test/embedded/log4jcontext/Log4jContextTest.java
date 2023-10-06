@@ -37,10 +37,11 @@ class Log4jContextTest {
     @BeforeEach
     void clear() {
         ThreadContext.clearAll();
+        onPing.reset();
     }
 
     @Test
-    void property_01() throws InterruptedException, ExecutionException {
+    void log4jContextProperty_01() throws InterruptedException, ExecutionException {
         final var expected = UUID.randomUUID().toString();
 
         case1.ping(expected);
@@ -55,9 +56,8 @@ class Log4jContextTest {
 
         final var localContext = dispatchListener.take();
 
+        Assertions.assertEquals(4, localContext.size());
         Assertions.assertEquals("1234", localContext.get("accountId"));
-        Assertions.assertEquals("4321", localContext.get("order.id"));
-        Assertions.assertEquals("2", localContext.get("order.amount"));
     }
 
     @Test

@@ -20,6 +20,10 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
 class OnPing {
     private CompletableFuture<Map<String, String>> ref = new CompletableFuture<>();
 
+    void reset() {
+        this.ref = new CompletableFuture<>();
+    }
+
     public void invoke(final JmsMsg msg) {
         this.ref.complete(ThreadContext.getContext());
     }
