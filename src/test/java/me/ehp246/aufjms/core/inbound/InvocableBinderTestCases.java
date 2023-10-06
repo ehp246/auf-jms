@@ -10,6 +10,7 @@ import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext.OP;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -169,7 +170,7 @@ interface InvocableBinderTestCases {
 
     }
 
-    static class ThreadContextCase {
+    static class Log4jContextCase {
         public void get() {
         }
 
@@ -186,17 +187,21 @@ interface InvocableBinderTestCases {
         public void getOnBody(@OfLog4jContext final Name name) {
         }
 
+        public void getOnBodyPrec(@OfLog4jContext(op = OP.Introspect) final Name name,
+                @OfLog4jContext("firstName") @OfProperty("firstName") final String nameProperty) {
+        }
+
         public void getOnBodyNamed(@OfLog4jContext("newName") final Name name,
                 @OfProperty @OfLog4jContext final String firstName) {
         }
 
+        public void getOnBodyIntro(@OfLog4jContext(op = OP.Introspect) final Name name) {
+        }
+
+        public void getOnBodyIntroNamed(@OfLog4jContext(value = "Name.", op = OP.Introspect) final Name name) {
+        }
+
         public void getInBody(final Name name) {
-        }
-
-        public void getInBody(final Name name, @OfProperty @OfLog4jContext final String firstName) {
-        }
-
-        public void getInBodyDupped(final DupName name) {
         }
 
         record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
@@ -204,12 +209,10 @@ interface InvocableBinderTestCases {
             String fullName() {
                 return firstName + lastName;
             }
-        }
 
-        record DupName(@OfLog4jContext("name") String firstName, @OfLog4jContext("name") String lastName) {
-            @OfLog4jContext("name")
-            String fullName() {
-                return firstName + lastName;
+            @OfLog4jContext(op = OP.Introspect)
+            String middleName() {
+                return null;
             }
         }
     }

@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.inbound.BoundInvocable;
 import me.ehp246.aufjms.api.inbound.InvocationListener;
@@ -16,7 +17,8 @@ import me.ehp246.aufjms.api.inbound.Invoked.Failed;
  * @author Lei Yang
  *
  */
-class ThreadContextInvocationLIstener
+@Service
+class Log4jContextInvocationLIstener
         implements InvocationListener.OnCompleted, InvocationListener.OnFailed, InvocationListener.OnInvoking {
     private CompletableFuture<Map<String, String>> ref = new CompletableFuture<>();
     private final Map<String, String> map = new HashMap<String, String>();

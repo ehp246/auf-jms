@@ -1,5 +1,6 @@
 package me.ehp246.test.embedded.log4jcontext;
 
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 import me.ehp246.aufjms.api.annotation.EnableByJms;
@@ -13,9 +14,10 @@ import me.ehp246.test.TestQueueListener;
  * @author Lei Yang
  *
  */
+@ComponentScan
 @EnableByJms
 @EnableForJms({
-        @Inbound(value = @From(TestQueueListener.DESTINATION_NAME), invocationListener = "threadContextInvocationLIstener") })
+        @Inbound(value = @From(TestQueueListener.DESTINATION_NAME), invocationListener = "log4jContextInvocationLIstener") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
 }

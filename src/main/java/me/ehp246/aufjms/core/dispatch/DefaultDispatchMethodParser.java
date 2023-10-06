@@ -22,6 +22,7 @@ import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext.OP;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -130,46 +131,66 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                 .orElse(null);
 
         final Map<String, Function<Object[], String>> log4jContextBinders = new HashMap<String, Function<Object[], String>>();
-        if (bodyParamIndex >= 0) {
-            final var bodyParam = reflected.getParameter(bodyParamIndex);
-            /*
-             * Duplicated names will overwrite each other un-deterministically.
-             */
-            final var bodyParamContextName = Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class))
-                    .map(OfLog4jContext::value).filter(OneUtil::hasValue).orElseGet(() -> bodyParam.getName());
 
-            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
-                    .streamSuppliersWith(OfLog4jContext.class)
-                    .collect(Collectors.toMap(
-                            m -> bodyParamContextName + "."
-                                    + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
-                                            .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
-                            Function.identity(), (l, r) -> r))
-                    .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
-                        final var m = entry.getValue();
-                        return (Function<Object[], String>) args -> {
-                            final var body = args[bodyParamIndex];
-                            if (body == null) {
-                                return "null";
-                            }
-                            try {
-                                return m.invoke(body) + "";
-                            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                                throw new RuntimeException(e);
-                            }
-                        };
-                    }));
-            log4jContextBinders.putAll(bodyFieldBinders);
-        }
-
-        log4jContextBinders
-                .putAll(reflected.allParametersWith(OfLog4jContext.class).stream().collect(Collectors.toMap(p -> {
+        log4jContextBinders.putAll(reflected.allParametersWith(OfLog4jContext.class).stream()
+                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == OP.Default)
+                .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
-                    return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
+                    return (Function<Object[], String>) (args -> args[index] == null ? null : args[index] + "");
                 }, (l, r) -> r)));
+        /*
+         * There is an annotated body parameter.
+         */
+        if (bodyParamIndex >= 0 && reflected.getParameter(bodyParamIndex).getAnnotation(OfLog4jContext.class) != null) {
+            final var bodyParam = reflected.getParameter(bodyParamIndex);
+            final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
+
+            switch (ofLog4jContext.op()) {
+            case Introspect:
+                /*
+                 * Duplicated names will overwrite each other un-deterministically.
+                 */
+                final var bodyParamContextName = ofLog4jContext.value();
+
+                final var bodyFieldBinders = new ReflectedType<>(
+                        bodyParam.getType())
+                                .streamSuppliersWith(
+                                        OfLog4jContext.class)
+                                .filter(p -> p.getAnnotation(OfLog4jContext.class).op() == OP.Default)
+                                .collect(Collectors.toMap(
+                                        m -> bodyParamContextName
+                                                + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                                                        .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
+                                        Function.identity(), (l, r) -> r))
+                                .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+                                    final var m = entry.getValue();
+                                    return (Function<Object[], String>) args -> {
+                                        final var body = args[bodyParamIndex];
+                                        if (body == null) {
+                                            return null;
+                                        }
+                                        try {
+                                            final var ret = m.invoke(body);
+                                            return ret == null ? null : ret + "";
+                                        } catch (IllegalAccessException | IllegalArgumentException
+                                                | InvocationTargetException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    };
+                                }));
+                log4jContextBinders.putAll(bodyFieldBinders);
+                break;
+            default:
+                log4jContextBinders.put(
+                        Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
+                                .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
+                        args -> (args[bodyParamIndex] == null ? null : args[bodyParamIndex] + ""));
+                break;
+            }
+        }
 
         return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyParamIndex, bodyOf,
                 propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn,

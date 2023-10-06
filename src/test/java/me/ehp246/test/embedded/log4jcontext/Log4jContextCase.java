@@ -3,7 +3,9 @@ package me.ehp246.test.embedded.log4jcontext;
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext.OP;
 import me.ehp246.aufjms.api.annotation.OfProperty;
+import me.ehp246.aufjms.api.annotation.OfType;
 import me.ehp246.test.TestQueueListener;
 
 /**
@@ -14,7 +16,25 @@ import me.ehp246.test.TestQueueListener;
 interface Log4jContextCase {
     void ping(@OfProperty String aufJmsLog4jContextOrderId);
 
+    void ping(@OfLog4jContext Name name);
+
+    void ping(@OfLog4jContext Name name, @OfProperty @OfLog4jContext String nameProperty);
+
+    @OfType("Ping")
+    void pingWithName(@OfLog4jContext("WithName.") Name name);
+
+    @OfType("Ping")
+    void pingIntroWithName(@OfLog4jContext(value = "WithName.", op = OP.Introspect) Name name);
+
+    @OfType("Ping")
+    void pingIntro(@OfLog4jContext(op = OP.Introspect) Name name);
+
     void ping2(@OfLog4jContext @OfProperty int accountId, Order order);
+
+    void pingOnBody(Order order);
+
+    record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
+    }
 
     record Order(@OfLog4jContext int id, @OfLog4jContext int amount) {
     }
