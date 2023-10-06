@@ -209,12 +209,6 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
 
         switch (ofLog4jContext.op()) {
-        case Default:
-            log4jContextBinders.put(
-                    Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
-                            .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
-                    args -> args[bodyParamIndex] == null ? null : args[bodyParamIndex] + "");
-            break;
         case Introspect:
             /*
              * Duplicated names will overwrite each other un-deterministically.
@@ -245,6 +239,10 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             log4jContextBinders.putAll(bodyFieldBinders);
             break;
         default:
+            log4jContextBinders.put(
+                    Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
+                            .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
+                    args -> args[bodyParamIndex] == null ? null : args[bodyParamIndex] + "");
             break;
         }
 

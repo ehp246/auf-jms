@@ -2,13 +2,16 @@ package me.ehp246.test.embedded.log4jcontext;
 
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
+import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Name;
 import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Order;
 
 /**
@@ -27,9 +30,14 @@ class Log4jContextTest {
     @Autowired
     private OnPingOnBody onPingOnBody;
     @Autowired
-    private ThreadContextDispatchListener dispatchListener;
+    private Log4jContextDispatchListener dispatchListener;
     @Autowired
     private Log4jContextInvocationLIstener invocationListener;
+
+    @BeforeEach
+    void clear() {
+        ThreadContext.clearAll();
+    }
 
     @Test
     void property_01() throws InterruptedException, ExecutionException {
@@ -50,6 +58,77 @@ class Log4jContextTest {
         Assertions.assertEquals("1234", localContext.get("accountId"));
         Assertions.assertEquals("4321", localContext.get("order.id"));
         Assertions.assertEquals("2", localContext.get("order.amount"));
+    }
+
+    @Test
+    void dispatch_02() throws InterruptedException, ExecutionException {
+        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        case1.ping(name);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(4, localContext.size());
+        Assertions.assertEquals(name.toString(), localContext.get("name"));
+    }
+
+    @Test
+    void dispatch_02_01() throws InterruptedException, ExecutionException {
+        case1.ping((Name) null);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(4, localContext.size());
+        Assertions.assertEquals(null, localContext.get("name"));
+    }
+
+    @Test
+    void dispatch_03() throws InterruptedException, ExecutionException {
+        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        case1.pingWithName(name);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(4, localContext.size());
+        Assertions.assertEquals(name.toString(), localContext.get("WithName."));
+    }
+
+    @Test
+    void dispatch_04() throws InterruptedException, ExecutionException {
+        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        case1.pingIntroWithName(name);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(5, localContext.size());
+        Assertions.assertEquals(name.firstName(), localContext.get("WithName.firstName"));
+        Assertions.assertEquals(name.lastName(), localContext.get("WithName.lastName"));
+    }
+
+    @Test
+    void dispatch_04_01() throws InterruptedException, ExecutionException {
+        case1.pingIntroWithName(null);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(5, localContext.size());
+        Assertions.assertEquals(null, localContext.get("WithName.firstName"));
+        Assertions.assertEquals(null, localContext.get("WithName.lastName"));
+    }
+
+    @Test
+    void dispatch_05() throws InterruptedException, ExecutionException {
+        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+        case1.pingIntro(name);
+
+        final var localContext = dispatchListener.take();
+
+        Assertions.assertEquals(5, localContext.size());
+        Assertions.assertEquals(name.firstName(), localContext.get("firstName"));
+        Assertions.assertEquals(name.lastName(), localContext.get("lastName"));
     }
 
     @Test

@@ -1,12 +1,11 @@
 package me.ehp246.aufjms.core.dispatch;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import me.ehp246.aufjms.api.dispatch.ByJmsProxyConfig;
 import me.ehp246.aufjms.api.jms.At;
@@ -36,10 +35,10 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
 
     DefaultProxyInvocationBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
-            final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs,
-            final Map<String, String> propStatic, final Function<Object[], Duration> ttlFn,
-            final Function<Object[], Duration> delayFn,
-            final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn, final Map<String, Function<Object[], String>> log4jContextBinders) {
+            final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs, final Map<String, String> propStatic,
+            final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,
+            final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn,
+            final Map<String, Function<Object[], String>> log4jContextBinders) {
         this.reflected = reflected;
         this.config = config;
         this.typeFn = typeFn;
@@ -96,9 +95,17 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
 
         final var body = bodyIndex == -1 ? null : args[bodyIndex];
 
-        final Map<String, String> log4jContext = log4jContextBinders == null ? null
-                : log4jContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
-                        entry -> log4jContextBinders.get(entry.getKey()).apply(args)));
+        final Map<String, String> log4jContext;
+        if (log4jContextBinders == null || log4jContextBinders.size() == 0) {
+            log4jContext = null;
+        } else {
+            final var contextMap = new HashMap<String, String>();
+            for (final var entry : log4jContextBinders.entrySet()) {
+                contextMap.put(entry.getKey(), log4jContextBinders.get(entry.getKey()).apply(args));
+            }
+
+            log4jContext = Collections.unmodifiableMap(contextMap);
+        }
 
         return new JmsDispatch() {
 

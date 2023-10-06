@@ -39,6 +39,11 @@ import org.apache.logging.log4j.ThreadContext;
  * The return value, if not <code>null</code>, will be converted to
  * {@linkplain String} via {@linkplain Object#toString()}. If no name is
  * specified by the annotation, the method name will be used as the context key.
+ * <p>
+ * Note that there is only one {@linkplain ThreadContext} for each thread. If
+ * there is an existing context on the thread, it will be overwritten by the new
+ * value from the annotation. After execution, the all keys will be removed
+ * resulting the lose of the original values.
  *
  * @author Lei Yang
  * @since 2.3.1
@@ -70,6 +75,14 @@ public @interface OfLog4jContext {
     OP op() default OP.Default;
 
     enum OP {
-        Default, Introspect
+        /**
+         * Specifies to use the parameter's {@linkplain Object#toString()} as the value.
+         */
+        Default,
+        /**
+         * Specifies to look for {@linkplain OfLog4jContext}-annotated supplier methods
+         * for values instead of the argument itself.
+         */
+        Introspect
     }
 }
