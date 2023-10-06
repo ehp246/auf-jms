@@ -15,8 +15,7 @@ import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Order;
  * @author Lei Yang
  *
  */
-@SpringBootTest(classes = { AppConfig.class, OnPing.class, ThreadContextDispatchListener.class,
-        OnPing2.class, ThreadContextInvocationLIstener.class }, properties = {
+@SpringBootTest(classes = { AppConfig.class }, properties = {
         "me.ehp246.aufjms.dispatchlogger.enabled=true" }, webEnvironment = WebEnvironment.NONE)
 class Log4jContextTest {
     @Autowired
@@ -26,9 +25,11 @@ class Log4jContextTest {
     @Autowired
     private OnPing2 onPing2;
     @Autowired
+    private OnPingOnBody onPingOnBody;
+    @Autowired
     private ThreadContextDispatchListener dispatchListener;
     @Autowired
-    private ThreadContextInvocationLIstener invocationListener;
+    private Log4jContextInvocationLIstener invocationListener;
 
     @Test
     void property_01() throws InterruptedException, ExecutionException {
@@ -58,18 +59,26 @@ class Log4jContextTest {
         final var remoteContext = onPing2.take();
 
         Assertions.assertEquals("1234", remoteContext.get("accountId"));
-        Assertions.assertEquals("4321", remoteContext.get("order.OrderId"));
-        Assertions.assertEquals("2", remoteContext.get("order.amount"));
+    }
+
+    @Test
+    void bodyIntro_01() throws InterruptedException, ExecutionException {
+        final var order = new Order((int) (Math.random() * 100), (int) (Math.random() * 100));
+        case1.pingOnBody(order);
+
+        final var remoteContext = onPingOnBody.take();
+
+        Assertions.assertEquals(order.id() + "", remoteContext.get("Order_OrderId"));
+        Assertions.assertEquals(order.amount() + "", remoteContext.get("Order_amount"));
     }
 
     @Test
     void invocationListener_01() throws InterruptedException, ExecutionException {
-        case1.ping2(1234, new Order(4321, 2));
+        final var accountId = (int) (Math.random() * 100);
+        case1.ping2(accountId, new Order((int) (Math.random() * 100), (int) (Math.random() * 100)));
 
         final var context = invocationListener.take();
 
-        Assertions.assertEquals("1234", context.get("accountId"));
-        Assertions.assertEquals("4321", context.get("order.OrderId"));
-        Assertions.assertEquals("2", context.get("order.amount"));
+        Assertions.assertEquals(accountId + "", context.get("accountId"));
     }
 }

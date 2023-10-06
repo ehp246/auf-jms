@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
@@ -13,6 +14,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
  * @author Lei Yang
  *
  */
+@Service
 class ThreadContextDispatchListener implements DispatchListener.OnDispatch {
     private final AtomicReference<Map<String, String>> ref = new AtomicReference<>();
 

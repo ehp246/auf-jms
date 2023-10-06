@@ -16,6 +16,8 @@ interface Log4jContextCase {
 
     void ping2(@OfLog4jContext @OfProperty int accountId, Order order);
 
+    void pingOnBody(Order order);
+
     record Order(@OfLog4jContext int id, @OfLog4jContext int amount) {
     }
 }

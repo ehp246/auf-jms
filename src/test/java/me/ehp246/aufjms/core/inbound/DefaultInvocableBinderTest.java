@@ -624,8 +624,8 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_01() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get");
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("get");
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var bound = binder.bind(invocable, msg);
 
         Assertions.assertEquals(0, bound.log4jContext().size());
@@ -633,9 +633,9 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_02() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("get",
                 String.class, String.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var bound = binder.bind(invocable, msg);
 
         Assertions.assertEquals(1, bound.log4jContext().size());
@@ -644,9 +644,9 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_03() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("get",
                 String.class, String.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var lastName = UUID.randomUUID().toString();
         final var bound = binder.bind(invocable, new MockJmsMsg().withProperty("LastName", lastName));
 
@@ -656,9 +656,9 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_04() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("get",
                 String.class, int.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var expected = UUID.randomUUID().toString();
         final var bound = binder.bind(invocable,
                 new MockJmsMsg().withText(toJson.apply(expected)).withProperty("Id", 123));
@@ -670,9 +670,9 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_05() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("get",
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("get",
                 String.class, Integer.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var expected = UUID.randomUUID().toString();
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
@@ -683,10 +683,10 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_06() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getOnBody",
-                InvocableBinderTestCases.ThreadContextCase.Name.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
-        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("getOnBody",
+                InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+        final var expected = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
                 UUID.randomUUID().toString());
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
@@ -696,9 +696,9 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_06_01() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getOnBody",
-                InvocableBinderTestCases.ThreadContextCase.Name.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("getOnBody",
+                InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(null)));
 
         Assertions.assertEquals(1, bound.log4jContext().size());
@@ -707,10 +707,10 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_07() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
-                InvocableBinderTestCases.ThreadContextCase.Name.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
-        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+        final var expected = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
                 UUID.randomUUID().toString());
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
@@ -719,25 +719,90 @@ class DefaultInvocableBinderTest {
 
     @Test
     void log4jContext_08() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class).findMethod("getInBody",
-                InvocableBinderTestCases.ThreadContextCase.Name.class);
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
-        final var expected = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(), null);
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class).findMethod("getInBody",
+                InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+        final var expected = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(), null);
         final var bound = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(expected)));
 
         Assertions.assertEquals(0, bound.log4jContext().size());
     }
 
     @Test
-    void log4jContext_12() {
-        final var method = new ReflectedType<>(InvocableBinderTestCases.ThreadContextCase.class)
-                .findMethod("getOnBodyNamed", InvocableBinderTestCases.ThreadContextCase.Name.class, String.class);
+    void log4jContext_09() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyIntro",
+                InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
 
-        final var name = new InvocableBinderTestCases.ThreadContextCase.Name(UUID.randomUUID().toString(),
+        final var name = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+
+        final var log4jContext = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(name))).log4jContext();
+
+        Assertions.assertEquals(3, log4jContext.size());
+        Assertions.assertEquals(name.firstName(), log4jContext.get("firstName"));
+        Assertions.assertEquals(name.lastName(), log4jContext.get("lastName"));
+        Assertions.assertEquals(name.fullName(), log4jContext.get("fullName"));
+    }
+
+    @Test
+    void log4jContext_09_01() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyIntro", InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+
+        final var log4jContext = binder.bind(invocable, new MockJmsMsg()).log4jContext();
+
+        Assertions.assertEquals(3, log4jContext.size());
+        Assertions.assertEquals(null, log4jContext.get("firstName"));
+        Assertions.assertEquals(null, log4jContext.get("lastName"));
+        Assertions.assertEquals(null, log4jContext.get("fullName"));
+    }
+
+    @Test
+    void log4jContext_09_02() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyIntro", InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+
+        final var name = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(), null);
+
+        final var log4jContext = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(name))).log4jContext();
+
+        Assertions.assertEquals(3, log4jContext.size());
+        Assertions.assertEquals(name.firstName(), log4jContext.get("firstName"));
+        Assertions.assertEquals(name.lastName(), log4jContext.get("lastName"));
+        Assertions.assertEquals(name.fullName(), log4jContext.get("fullName"));
+    }
+
+    @Test
+    void log4jContext_11() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyIntroNamed", InvocableBinderTestCases.Log4jContextCase.Name.class);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
+
+        final var name = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+
+        final var log4jContext = binder.bind(invocable, new MockJmsMsg().withText(toJson.apply(name))).log4jContext();
+
+        Assertions.assertEquals(3, log4jContext.size());
+        Assertions.assertEquals(name.firstName(), log4jContext.get("Name.firstName"));
+        Assertions.assertEquals(name.lastName(), log4jContext.get("Name.lastName"));
+        Assertions.assertEquals(name.fullName(), log4jContext.get("Name.fullName"));
+    }
+
+    @Test
+    void log4jContext_12() {
+        final var method = new ReflectedType<>(InvocableBinderTestCases.Log4jContextCase.class)
+                .findMethod("getOnBodyNamed", InvocableBinderTestCases.Log4jContextCase.Name.class, String.class);
+
+        final var name = new InvocableBinderTestCases.Log4jContextCase.Name(UUID.randomUUID().toString(),
                 UUID.randomUUID().toString());
         final var firstName = UUID.randomUUID().toString();
 
-        final var invocable = new InvocableRecord(new InvocableBinderTestCases.ThreadContextCase(), method);
+        final var invocable = new InvocableRecord(new InvocableBinderTestCases.Log4jContextCase(), method);
 
         final var log4jContext = binder.bind(invocable,
                 new MockJmsMsg().withText(toJson.apply(name)).withProperty("FirstName", firstName)).log4jContext();
