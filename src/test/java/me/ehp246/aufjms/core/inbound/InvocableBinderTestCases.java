@@ -193,12 +193,6 @@ interface InvocableBinderTestCases {
         public void getInBody(final Name name) {
         }
 
-        public void getInBody(final Name name, @OfProperty @OfLog4jContext final String firstName) {
-        }
-
-        public void getInBodyDupped(final DupName name) {
-        }
-
         record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
             @OfLog4jContext
             String fullName() {

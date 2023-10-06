@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -80,9 +79,12 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          * Bind the Thread Context
          */
         final var log4jContextBinders = argBinders.log4jContextBinders();
-        final Map<String, String> log4jContext = log4jContextBinders == null ? null
-                : log4jContextBinders.entrySet().stream().collect(Collectors.toMap(Entry::getKey,
-                        entry -> log4jContextBinders.get(entry.getKey()).apply(arguments)));
+        final Map<String, String> log4jContext = new HashMap<>();
+        if (log4jContextBinders != null && log4jContextBinders.size() > 0) {
+            log4jContextBinders.entrySet().stream().forEach(entry -> {
+                log4jContext.put(entry.getKey(), log4jContextBinders.get(entry.getKey()).apply(arguments));
+            });
+        }
 
         return new BoundInvocable() {
 
@@ -114,7 +116,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
 
         final var parameters = method.getParameters();
         final Map<Integer, Function<JmsMsg, Object>> paramBinders = new HashMap<>();
-        final var bodyArgIndexRef = new AtomicReference<Integer>();
+        final var bodyArgIndexRef = new int[] { -1 };
         for (int i = 0; i < parameters.length; i++) {
             final var parameter = parameters[i];
             final var type = parameter.getType();
@@ -170,7 +172,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     .map(JsonView::value).map(OneUtil::firstOrNull).orElse(null), parameter.getType());
 
             paramBinders.put(i, msg -> msg.text() == null ? null : fromJson.apply(msg.text(), bodyOf));
-            bodyArgIndexRef.set(i);
+            bodyArgIndexRef[0] = i;
         }
 
         final var log4jContextBinders = new HashMap<String, Function<Object[], String>>();
@@ -178,36 +180,48 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Assume only one body parameter on the parameter list
          */
-        final Integer bodyParamIndex = bodyArgIndexRef.get();
-        if (bodyParamIndex != null) {
+        final int bodyParamIndex = bodyArgIndexRef[0];
+        if (bodyParamIndex >= 0) {
             final var bodyParam = parameters[bodyParamIndex];
-            /*
-             * Duplicated names will overwrite each other un-deterministically.
-             */
-            final var bodyParamContextName = Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class))
-                    .map(OfLog4jContext::value).filter(OneUtil::hasValue).orElseGet(() -> bodyParam.getName());
-            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
-                    .streamSuppliersWith(OfLog4jContext.class)
-                    .collect(Collectors.toMap(
-                            m -> bodyParamContextName + "."
-                                    + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
-                                            .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
-                            Function.identity(), (l, r) -> r))
-                    .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
-                        final var m = entry.getValue();
-                        return (Function<Object[], String>) args -> {
-                            final var body = args[bodyParamIndex];
-                            if (body == null) {
-                                return "null";
-                            }
-                            try {
-                                return m.invoke(body) + "";
-                            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                                throw new RuntimeException(e);
-                            }
-                        };
-                    }));
-            log4jContextBinders.putAll(bodyFieldBinders);
+            final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
+            if (ofLog4jContext != null) {
+                if (!ofLog4jContext.introspect()) {
+                    log4jContextBinders.put(
+                            Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
+                                    .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
+                            args -> args[bodyParamIndex] == null ? null : args[bodyParamIndex] + "");
+                } else {
+
+                    /*
+                     * Duplicated names will overwrite each other un-deterministically.
+                     */
+                    final var bodyParamContextName = Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class))
+                            .map(OfLog4jContext::value).filter(OneUtil::hasValue).orElseGet(() -> bodyParam.getName());
+                    final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
+                            .streamSuppliersWith(OfLog4jContext.class)
+                            .collect(Collectors.toMap(
+                                    m -> bodyParamContextName + "."
+                                            + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                                                    .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
+                                    Function.identity(), (l, r) -> r))
+                            .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+                                final var m = entry.getValue();
+                                return (Function<Object[], String>) args -> {
+                                    final var body = args[bodyParamIndex];
+                                    if (body == null) {
+                                        return "null";
+                                    }
+                                    try {
+                                        return m.invoke(body) + "";
+                                    } catch (IllegalAccessException | IllegalArgumentException
+                                            | InvocationTargetException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                };
+                            }));
+                    log4jContextBinders.putAll(bodyFieldBinders);
+                }
+            }
         }
 
         /*
@@ -219,7 +233,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
-                    return (Function<Object[], String>) (args -> args[index] == null ? "null" : args[index].toString());
+                    return (Function<Object[], String>) (args -> args[index] == null ? null : args[index] + "");
                 }, (l, r) -> r)));
 
         return new ArgBinders(paramBinders, log4jContextBinders);

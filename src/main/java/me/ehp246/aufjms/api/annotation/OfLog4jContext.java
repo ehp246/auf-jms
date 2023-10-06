@@ -36,11 +36,9 @@ import org.apache.logging.log4j.ThreadContext;
  * <li>have no parameter</li>
  * <li>return a value</li>
  * </ul>
- * The return value will be converted to {@linkplain String} via
- * {@linkplain Object#toString()}. If no name is specified by the annotation,
- * the method name will be used as the context key.
- * <p>
- * <code>null</code> will be converted to string <code>"null"</code>.
+ * The return value, if not <code>null</code>, will be converted to
+ * {@linkplain String} via {@linkplain Object#toString()}. If no name is
+ * specified by the annotation, the method name will be used as the context key.
  *
  * @author Lei Yang
  * @since 2.3.1
@@ -65,4 +63,6 @@ public @interface OfLog4jContext {
      * is desired.
      */
     String value() default "";
+
+    boolean introspect() default false;
 }
