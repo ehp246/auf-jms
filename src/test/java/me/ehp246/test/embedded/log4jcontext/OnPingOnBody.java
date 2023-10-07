@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.OP;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 
 /**
@@ -23,7 +23,7 @@ class OnPingOnBody {
     private final AtomicReference<CompletableFuture<Map<String, String>>> ref = new AtomicReference<>(
             new CompletableFuture<>());
 
-    public void apply(@OfLog4jContext(value = "Order_", op = OP.Introspect) final Order order) {
+    public void apply(@OfLog4jContext(value = "Order_", op = Op.Introspect) final Order order) {
         this.ref.get().complete(ThreadContext.getContext());
     }
 

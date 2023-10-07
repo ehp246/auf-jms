@@ -80,9 +80,9 @@ public @interface OfLog4jContext {
     /**
      * Specifies the operation of the annotation.
      */
-    OP op() default OP.Default;
+    Op op() default Op.Default;
 
-    enum OP {
+    enum Op {
         /**
          * Specifies to use the parameter's {@linkplain Object#toString()} as the value.
          */

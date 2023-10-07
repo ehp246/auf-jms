@@ -21,7 +21,7 @@ import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
 import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.OP;
+import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -184,7 +184,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         final var log4jContextBinders = new HashMap<String, Function<Object[], String>>();
 
         log4jContextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
-                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == OP.Default)
+                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == Op.Default)
                 .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
@@ -216,7 +216,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             final var bodyParamContextName = ofLog4jContext.value();
             final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
                     .streamSuppliersWith(OfLog4jContext.class)
-                    .filter(m -> m.getAnnotation(OfLog4jContext.class).op() == OP.Default)
+                    .filter(m -> m.getAnnotation(OfLog4jContext.class).op() == Op.Default)
                     .collect(Collectors.toMap(
                             m -> bodyParamContextName + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
                                     .filter(OneUtil::hasValue).orElseGet(m::getName),
