@@ -45,7 +45,7 @@
 
 		<qpid-jms-client.version>2.2.0</qpid-jms-client.version>
 
-		<spring-boot.version>3.0.7</spring-boot.version>
+		<spring-boot.version>3.0.13</spring-boot.version>
 
 		<artemis-jakarta-server.version>2.27.1</artemis-jakarta-server.version>
 		<azure-starter-servicebus-jms.version>5.0.0</azure-starter-servicebus-jms.version>
