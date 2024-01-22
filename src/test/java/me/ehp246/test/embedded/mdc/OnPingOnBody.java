@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.OfMDC;
-import me.ehp246.aufjms.api.annotation.OfProperty;
+import me.ehp246.aufjms.api.annotation.OfMDC.Op;
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 
 /**
@@ -18,12 +18,12 @@ import me.ehp246.aufjms.api.inbound.InstanceScope;
  *
  */
 @Service
-@ForJmsType(value = "Ping2", scope = InstanceScope.BEAN)
-class OnPing2 {
+@ForJmsType(value = "PingOnBody", scope = InstanceScope.BEAN)
+class OnPingOnBody {
     private final AtomicReference<CompletableFuture<Map<String, String>>> ref = new AtomicReference<>(
             new CompletableFuture<>());
 
-    public void apply(final Order order, @OfMDC @OfProperty final int accountId) {
+    public void apply(@OfMDC(value = "Order_", op = Op.Introspect) final Order order) {
         this.ref.get().complete(ThreadContext.getContext());
     }
 

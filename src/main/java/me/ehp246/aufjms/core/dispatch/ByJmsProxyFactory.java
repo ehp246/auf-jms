@@ -127,7 +127,7 @@ public final class ByJmsProxyFactory {
 
                     final var returnBinder = methodBinder.returnBinder();
 
-                    Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of).entrySet()
+                    Optional.ofNullable(jmsDispatch.mdc()).orElseGet(Map::of).entrySet()
                             .stream().forEach(e -> MDC.put(e.getKey(), e.getValue()));
                     try {
                         // Reply msg expected?
@@ -148,7 +148,7 @@ public final class ByJmsProxyFactory {
                             requestDispatchMap.remove(jmsDispatch.correlationId());
                         }
                     } finally {
-                        Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of)
+                        Optional.ofNullable(jmsDispatch.mdc()).orElseGet(Map::of)
                                 .entrySet().stream().forEach(e -> MDC.remove(e.getKey()));
                     }
                 });

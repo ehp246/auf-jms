@@ -66,7 +66,7 @@ public interface JmsDispatch {
         return null;
     }
 
-    default Map<String, String> log4jContext() {
+    default Map<String, String> mdc() {
         return null;
     }
 

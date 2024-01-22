@@ -87,8 +87,8 @@ public @interface OfMDC {
          */
         Default,
         /**
-         * Specifies to look for {@linkplain OfLog4jContext}-annotated supplier methods
-         * for values instead of the argument itself.
+         * Specifies to look for {@linkplain OfMDC}-annotated supplier methods for
+         * values instead of the argument itself.
          */
         Introspect
     }

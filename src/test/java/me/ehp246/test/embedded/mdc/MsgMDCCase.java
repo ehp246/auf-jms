@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import me.ehp246.aufjms.api.annotation.ByJms;
 import me.ehp246.aufjms.api.annotation.ByJms.To;
@@ -13,7 +13,7 @@ import me.ehp246.test.TestQueueListener;
  *
  */
 @ByJms(@To(TestQueueListener.DESTINATION_NAME))
-interface Log4jContextCase {
+interface MsgMDCCase {
     void ping(@OfProperty String aufJmsMsgMDCOrderId);
 
     void ping(@OfMDC Name name);

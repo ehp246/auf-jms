@@ -138,9 +138,9 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                         parameter.getType()))
                 .orElse(null);
 
-        final Map<String, Function<Object[], String>> log4jContextBinders = new HashMap<String, Function<Object[], String>>();
+        final Map<String, Function<Object[], String>> msgMDCBinders = new HashMap<String, Function<Object[], String>>();
 
-        log4jContextBinders.putAll(reflected.allParametersWith(OfMDC.class).stream()
+        msgMDCBinders.putAll(reflected.allParametersWith(OfMDC.class).stream()
                 .filter(p -> p.parameter().getAnnotation(OfMDC.class).op() == Op.Default)
                 .collect(Collectors.toMap(p -> {
                     final var name = p.parameter().getAnnotation(OfMDC.class).value();
@@ -156,14 +156,14 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         if (bodyParamIndex >= 0 && reflected.getParameter(bodyParamIndex)
                 .getAnnotation(OfMDC.class) != null) {
             final var bodyParam = reflected.getParameter(bodyParamIndex);
-            final var ofLog4jContext = bodyParam.getAnnotation(OfMDC.class);
+            final var ofMDC = bodyParam.getAnnotation(OfMDC.class);
 
-            switch (ofLog4jContext.op()) {
+            switch (ofMDC.op()) {
                 case Introspect:
                     /*
                      * Duplicated names will overwrite each other un-deterministically.
                      */
-                    final var bodyParamContextName = ofLog4jContext.value();
+                    final var bodyParamContextName = ofMDC.value();
 
                     final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
                             .streamSuppliersWith(OfMDC.class)
@@ -193,10 +193,10 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                                     }
                                 };
                             }));
-                    log4jContextBinders.putAll(bodyFieldBinders);
+                    msgMDCBinders.putAll(bodyFieldBinders);
                     break;
                 default:
-                    log4jContextBinders.put(
+                    msgMDCBinders.put(
                             Optional.ofNullable(bodyParam.getAnnotation(OfMDC.class))
                                     .map(OfMDC::value).filter(OneUtil::hasValue)
                                     .orElseGet(bodyParam::getName),
@@ -209,7 +209,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn,
                 bodyParamIndex, bodyOf, propArgs(reflected), propStatic(reflected, config), ttlFn,
                 delayFn, groupIdFn, groupSeqFn,
-                log4jContextBinders.isEmpty() ? null : log4jContextBinders);
+                msgMDCBinders.isEmpty() ? null : msgMDCBinders);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -223,7 +223,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         final var requestTimeout = config.requestTimeout();
 
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
-            Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of).entrySet().stream()
+            Optional.ofNullable(jmsDispatch.mdc()).orElseGet(Map::of).entrySet().stream()
                     .forEach(e -> MDC.put(e.getKey(), e.getValue()));
             try {
                 final JmsMsg msg;
@@ -239,7 +239,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
 
                 return fromJson.apply(msg.text(), bodyOf);
             } finally {
-                Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of).entrySet()
+                Optional.ofNullable(jmsDispatch.mdc()).orElseGet(Map::of).entrySet()
                         .stream().forEach(e -> MDC.remove(e.getKey()));
             }
         };

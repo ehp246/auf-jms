@@ -170,7 +170,7 @@ interface InvocableBinderTestCases {
 
     }
 
-    static class Log4jContextCase {
+    static class MsgMDCCase {
         public void get() {
         }
 

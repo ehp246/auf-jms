@@ -355,7 +355,7 @@ class DefaultInvocableDispatcherTest {
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableDispatcher((i, m) -> {
             final var bound = Mockito.mock(BoundInvocable.class);
-            Mockito.when(bound.log4jContext()).thenReturn(context);
+            Mockito.when(bound.mdc()).thenReturn(context);
             Mockito.when(bound.invoke()).then(new Answer<Object>() {
 
                 @Override

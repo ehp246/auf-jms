@@ -69,7 +69,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                 final var bound = boundRef[0];
 
-                Optional.ofNullable(bound.log4jContext()).orElseGet(Map::of).entrySet().stream()
+                Optional.ofNullable(bound.mdc()).orElseGet(Map::of).entrySet().stream()
                         .forEach(e -> MDC.put(e.getKey(), e.getValue()));
 
                 DefaultInvocableDispatcher.this.invoking
@@ -103,7 +103,7 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                             .setMessage("Ignored: {}").addArgument(e::getMessage).log();
                 }
 
-                Optional.ofNullable(boundRef[0]).map(BoundInvocable::log4jContext)
+                Optional.ofNullable(boundRef[0]).map(BoundInvocable::mdc)
                         .orElseGet(Map::of).entrySet().stream()
                         .forEach(e -> MDC.remove(e.getKey()));
             }
