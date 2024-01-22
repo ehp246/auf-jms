@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>2.3.3</version>
+	<version>3.0.0</version>
 	<name>Auf JMS</name>
 	<description>An annotation-driven declarative JMS development framework</description>
 
@@ -33,33 +33,36 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		
+		<jdk.version>21</jdk.version>
 
 		<jms-api.version>3.1.0</jms-api.version>
 
-		<spring-framework.version>6.0.3</spring-framework.version>
+		<spring-framework.version>6.1.3</spring-framework.version>
+		<spring-boot.version>3.2.2</spring-boot.version>
 
 		<log4j.version>2.19.0</log4j.version>
 
-		<jackson.core.version>2.14.1</jackson.core.version>
-		<jackson.databind.version>2.14.1</jackson.databind.version>
+		<jackson.version>2.16.1</jackson.version>
 
-		<qpid-jms-client.version>2.2.0</qpid-jms-client.version>
+		<qpid-jms-client.version>2.5.0</qpid-jms-client.version>
 
-		<spring-boot.version>3.0.13</spring-boot.version>
+		<artemis-jakarta-server.version>2.31.2</artemis-jakarta-server.version>
+		<azure-starter-servicebus-jms.version>5.8.0</azure-starter-servicebus-jms.version>
 
-		<artemis-jakarta-server.version>2.27.1</artemis-jakarta-server.version>
-		<azure-starter-servicebus-jms.version>5.0.0</azure-starter-servicebus-jms.version>
+		<junit-jupiter.version>5.10.1</junit-jupiter.version>
+		<junit-platform.version>1.10.1</junit-platform.version>
 
-		<junit-jupiter.version>5.8.2</junit-jupiter.version>
-		<junit-platform.version>1.9.2</junit-platform.version>
+		<mockito.version>5.9.0</mockito.version>
+		<mockito-inline.version>5.2.0</mockito-inline.version>
+		<bytebuddy.version>1.14.11</bytebuddy.version>
 
-		<mockito.version>4.3.1</mockito.version>
-
-		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
-		<maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
-		<maven-source-plugin.version>3.2.0</maven-source-plugin.version>
-		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+		<maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+		<maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+		<maven-jacoco-plugin.version>0.8.11</maven-jacoco-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -78,12 +81,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>${jackson.core.version}</version>
+			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.databind.version}</version>
+			<version>${jackson.version}</version>
 		</dependency>
 
 		<dependency>
@@ -264,21 +267,21 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-mrbean</artifactId>
-			<version>${jackson.core.version}</version>
+			<version>${jackson.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-parameter-names</artifactId>
-			<version>${jackson.core.version}</version>
+			<version>${jackson.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson.core.version}</version>
+			<version>${jackson.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -291,8 +294,14 @@
 		<dependency>
 		    <groupId>org.mockito</groupId>
 		    <artifactId>mockito-inline</artifactId>
-			<version>${mockito.version}</version>
+			<version>${mockito-inline.version}</version>
 		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>${bytebuddy.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -317,7 +326,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compiler-plugin.version}</version>
 				<configuration>
-					<release>17</release>
+					<release>${jdk.version}</release>
 					<encoding>UTF-8</encoding>
 					<compilerArgs>
 						<arg>-parameters</arg>
@@ -385,7 +394,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.7</version>
+				<version>${maven-jacoco-plugin.version}</version>
 				<executions>
 					<execution>
 						<goals>
