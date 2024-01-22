@@ -19,7 +19,7 @@ import me.ehp246.test.mock.MockJmsMsg;
  * @author Lei Yang
  *
  */
-class Log4jContextTest {
+class MsgMDCTest {
     private MockedStatic<ThreadContext> mockContext;
 
     @BeforeEach
@@ -39,11 +39,11 @@ class Log4jContextTest {
         final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
                 value);
 
-        Log4jContext.set(mockJmsMsg);
+        MsgMDC.set(mockJmsMsg);
 
         mockContext.verify(() -> ThreadContext.put(name, value), Mockito.times(1));
 
-        Log4jContext.clear(mockJmsMsg);
+        MsgMDC.clear(mockJmsMsg);
 
         mockContext.verify(() -> ThreadContext.remove(name), Mockito.times(1));
     }
@@ -56,31 +56,31 @@ class Log4jContextTest {
                 .withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
                 value);
 
-        Log4jContext.set(dispatch);
+        MsgMDC.set(dispatch);
 
         mockContext.verify(() -> ThreadContext.put(name, value), Mockito.times(1));
 
-        Log4jContext.clear(dispatch);
+        MsgMDC.clear(dispatch);
 
         mockContext.verify(() -> ThreadContext.remove(name), Mockito.times(1));
     }
 
     @Test
     void test_01() {
-        Log4jContext.set((JmsDispatch) null);
-        Log4jContext.clear((JmsDispatch) null);
+        MsgMDC.set((JmsDispatch) null);
+        MsgMDC.clear((JmsDispatch) null);
 
-        Log4jContext.set((JmsMsg) null);
-        Log4jContext.clear((JmsMsg) null);
+        MsgMDC.set((JmsMsg) null);
+        MsgMDC.clear((JmsMsg) null);
     }
 
     @Test
     void test_02() {
-        Assertions.assertDoesNotThrow(Log4jContext.set((JmsDispatch) null)::close);
-        Assertions.assertDoesNotThrow(Log4jContext.set((JmsMsg) null)::close);
+        Assertions.assertDoesNotThrow(MsgMDC.set((JmsDispatch) null)::close);
+        Assertions.assertDoesNotThrow(MsgMDC.set((JmsMsg) null)::close);
 
-        Assertions.assertDoesNotThrow(Log4jContext.set(Mockito.mock(JmsDispatch.class))::close);
-        Assertions.assertDoesNotThrow(Log4jContext.set(Mockito.mock(JmsMsg.class))::close);
+        Assertions.assertDoesNotThrow(MsgMDC.set(Mockito.mock(JmsDispatch.class))::close);
+        Assertions.assertDoesNotThrow(MsgMDC.set(Mockito.mock(JmsMsg.class))::close);
     }
 
 }

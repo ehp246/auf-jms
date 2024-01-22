@@ -20,8 +20,8 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
+import me.ehp246.aufjms.api.annotation.OfMDC;
+import me.ehp246.aufjms.api.annotation.OfMDC.Op;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -183,10 +183,10 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          */
         final var log4jContextBinders = new HashMap<String, Function<Object[], String>>();
 
-        log4jContextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
-                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == Op.Default)
+        log4jContextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfMDC.class).stream()
+                .filter(p -> p.parameter().getAnnotation(OfMDC.class).op() == Op.Default)
                 .collect(Collectors.toMap(p -> {
-                    final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
+                    final var name = p.parameter().getAnnotation(OfMDC.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
@@ -197,7 +197,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          */
         final var bodyReflectedParam = bodyParamef[0];
 
-        if (bodyReflectedParam == null || bodyReflectedParam.parameter().getAnnotation(OfLog4jContext.class) == null) {
+        if (bodyReflectedParam == null || bodyReflectedParam.parameter().getAnnotation(OfMDC.class) == null) {
             return new ArgBinders(paramBinders, log4jContextBinders);
         }
 
@@ -206,7 +206,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          */
         final var bodyParam = bodyReflectedParam.parameter();
         final var bodyParamIndex = bodyReflectedParam.index();
-        final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
+        final var ofLog4jContext = bodyParam.getAnnotation(OfMDC.class);
 
         switch (ofLog4jContext.op()) {
         case Introspect:
@@ -215,10 +215,10 @@ public final class DefaultInvocableBinder implements InvocableBinder {
              */
             final var bodyParamContextName = ofLog4jContext.value();
             final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
-                    .streamSuppliersWith(OfLog4jContext.class)
-                    .filter(m -> m.getAnnotation(OfLog4jContext.class).op() == Op.Default)
+                    .streamSuppliersWith(OfMDC.class)
+                    .filter(m -> m.getAnnotation(OfMDC.class).op() == Op.Default)
                     .collect(Collectors.toMap(
-                            m -> bodyParamContextName + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                            m -> bodyParamContextName + Optional.of(m.getAnnotation(OfMDC.class).value())
                                     .filter(OneUtil::hasValue).orElseGet(m::getName),
                             Function.identity(), (l, r) -> r))
                     .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
@@ -240,7 +240,7 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             break;
         default:
             log4jContextBinders.put(
-                    Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
+                    Optional.ofNullable(bodyParam.getAnnotation(OfMDC.class)).map(OfMDC::value)
                             .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
                     args -> args[bodyParamIndex] == null ? null : args[bodyParamIndex] + "");
             break;

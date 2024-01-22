@@ -9,15 +9,15 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.MDC;
 
 /**
- * Specifies the binding point for a Log4j {@linkplain ThreadContext} value. The
+ * Specifies the binding point for a SLF4J {@linkplain MDC} value. The
  * annotation can be applied on both the client side, i.e., {@linkplain ByJms}
  * interfaces, and the server side, i.e., {@linkplain ForJmsType} classes.
  * <p>
  * On the client side, applied to a parameter on a {@linkplain ByJms} interface,
- * it specifies the key and value for {@linkplain ThreadContext}.
+ * it specifies the key and value for {@linkplain MDC}.
  * <p>
  * On the server side, applied to a parameter of a {@linkplain ForJmsType}
  * {@linkplain Invoking} method, it specifies the supplier parameter for the
@@ -40,10 +40,10 @@ import org.apache.logging.log4j.ThreadContext;
  * {@linkplain String} via {@linkplain Object#toString()}. If no name is
  * specified by the annotation, the method name will be used as the context key.
  * <p>
- * Note that there is only one {@linkplain ThreadContext} for each thread. If
- * there is an existing context on the thread, it will be overwritten by the new
- * value from the annotation. After execution, the all keys will be removed
- * resulting the lose of the original values.
+ * Note that there is only one {@linkplain MDC} for each thread. If there is an
+ * existing context on the thread, it will be overwritten by the new value from
+ * the annotation. After execution, the all keys will be removed resulting the
+ * lose of the original values.
  * <p>
  * In case of a name collision, the following defines the precedence from high
  * to low:
@@ -54,22 +54,21 @@ import org.apache.logging.log4j.ThreadContext;
  * </ul>
  *
  * @author Lei Yang
- * @since 2.3.1
- * @see ThreadContext
+ * @since 3.0.0
+ * @see MDC
  * @see Parameter#getName()
  * @see Method#getName()
  * @see <a href='https://openjdk.org/jeps/118'>JEP 118: Access to Parameter
  *      Names at Runtime</a>
- * @see <a href=
- *      'https://logging.apache.org/log4j/2.x/manual/thread-context.html'>Log4j
- *      2 Thread Context</a>
+ * @see <a href= 'https://slf4j.org/manual.html#mdc'>Mapped Diagnostic Context
+ *      (MDC) support</a>
  *
  */
 @Retention(RUNTIME)
 @Target({ METHOD, PARAMETER })
-public @interface OfLog4jContext {
+public @interface OfMDC {
     /**
-     * Specifies the name of the {@linkplain ThreadContext}.
+     * Specifies the name of the {@linkplain MDC}.
      * <p>
      * When no value is specified, the context name is inferred from the parameter
      * name. For this to work properly, '<code>-parameters</code>' compiler option

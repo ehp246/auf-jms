@@ -9,8 +9,8 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
+import me.ehp246.aufjms.api.annotation.OfMDC;
+import me.ehp246.aufjms.api.annotation.OfMDC.Op;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -174,43 +174,43 @@ interface InvocableBinderTestCases {
         public void get() {
         }
 
-        public void get(@OfLog4jContext("name") @OfProperty final String firstName,
-                @OfLog4jContext("name") @OfProperty final String lastName) {
+        public void get(@OfMDC("name") @OfProperty final String firstName,
+                @OfMDC("name") @OfProperty final String lastName) {
         }
 
-        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final int id) {
+        public void get(@OfMDC final String name, @OfMDC("SSN") @OfProperty final int id) {
         }
 
-        public void get(@OfLog4jContext final String name, @OfLog4jContext("SSN") @OfProperty final Integer id) {
+        public void get(@OfMDC final String name, @OfMDC("SSN") @OfProperty final Integer id) {
         }
 
-        public void getOnBody(@OfLog4jContext final Name name) {
+        public void getOnBody(@OfMDC final Name name) {
         }
 
-        public void getOnBodyPrec(@OfLog4jContext(op = Op.Introspect) final Name name,
-                @OfLog4jContext("firstName") @OfProperty("firstName") final String nameProperty) {
+        public void getOnBodyPrec(@OfMDC(op = Op.Introspect) final Name name,
+                @OfMDC("firstName") @OfProperty("firstName") final String nameProperty) {
         }
 
-        public void getOnBodyNamed(@OfLog4jContext("newName") final Name name,
-                @OfProperty @OfLog4jContext final String firstName) {
+        public void getOnBodyNamed(@OfMDC("newName") final Name name,
+                @OfProperty @OfMDC final String firstName) {
         }
 
-        public void getOnBodyIntro(@OfLog4jContext(op = Op.Introspect) final Name name) {
+        public void getOnBodyIntro(@OfMDC(op = Op.Introspect) final Name name) {
         }
 
-        public void getOnBodyIntroNamed(@OfLog4jContext(value = "Name.", op = Op.Introspect) final Name name) {
+        public void getOnBodyIntroNamed(@OfMDC(value = "Name.", op = Op.Introspect) final Name name) {
         }
 
         public void getInBody(final Name name) {
         }
 
-        record Name(@OfLog4jContext String firstName, @OfLog4jContext String lastName) {
-            @OfLog4jContext
+        record Name(@OfMDC String firstName, @OfMDC String lastName) {
+            @OfMDC
             String fullName() {
                 return firstName + lastName;
             }
 
-            @OfLog4jContext(op = Op.Introspect)
+            @OfMDC(op = Op.Introspect)
             String middleName() {
                 return null;
             }

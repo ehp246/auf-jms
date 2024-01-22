@@ -1,6 +1,6 @@
 package me.ehp246.aufjms.api.spi;
 
-import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.MDC;
 
 import me.ehp246.aufjms.api.jms.JmsDispatch;
 import me.ehp246.aufjms.api.jms.JmsMsg;
@@ -11,8 +11,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @author Lei Yang
  *
  */
-public final class Log4jContext {
-    private Log4jContext() {
+public final class MsgMDC {
+    private MsgMDC() {
     }
 
     private enum MsgContextName {
@@ -28,19 +28,20 @@ public final class Log4jContext {
             return () -> {
             };
         }
-        final AutoCloseable closeable = () -> Log4jContext.clear(msg);
+        final AutoCloseable closeable = () -> MsgMDC.clear(msg);
 
-        ThreadContext.put(MsgContextName.AufJmsMsgFrom.name(), OneUtil.toString(msg.destination()));
-        ThreadContext.put(MsgContextName.AufJmsMsgType.name(), msg.type());
-        ThreadContext.put(MsgContextName.AufJmsMsgCorrelationId.name(), msg.correlationId());
+        MDC.put(MsgContextName.AufJmsMsgFrom.name(), OneUtil.toString(msg.destination()));
+        MDC.put(MsgContextName.AufJmsMsgType.name(), msg.type());
+        MDC.put(MsgContextName.AufJmsMsgCorrelationId.name(), msg.correlationId());
 
         final var propertyNames = msg.propertyNames();
         if (propertyNames == null) {
             return closeable;
         }
 
-        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext.put(
+        propertyNames.stream()
+                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> MDC.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
 
@@ -53,19 +54,20 @@ public final class Log4jContext {
             };
         }
 
-        final AutoCloseable closeable = () -> Log4jContext.clear(dispatch);
+        final AutoCloseable closeable = () -> MsgMDC.clear(dispatch);
 
-        ThreadContext.put(DispatchContextName.AufJmsDispatchTo.name(), OneUtil.toString(dispatch.to()));
-        ThreadContext.put(DispatchContextName.AufJmsDispatchType.name(), dispatch.type());
-        ThreadContext.put(DispatchContextName.AufJmsDispatchCorrelationId.name(), dispatch.correlationId());
+        MDC.put(DispatchContextName.AufJmsDispatchTo.name(), OneUtil.toString(dispatch.to()));
+        MDC.put(DispatchContextName.AufJmsDispatchType.name(), dispatch.type());
+        MDC.put(DispatchContextName.AufJmsDispatchCorrelationId.name(), dispatch.correlationId());
 
         final var properties = dispatch.properties();
         if (properties == null) {
             return closeable;
         }
 
-        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext.put(
+        properties.keySet().stream()
+                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> MDC.put(
                         name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
                         properties.get(name).toString()));
 
@@ -78,16 +80,17 @@ public final class Log4jContext {
         }
 
         for (final var value : MsgContextName.values()) {
-            ThreadContext.remove(value.name());
+            MDC.remove(value.name());
         }
 
         final var propertyNames = msg.propertyNames();
         if (propertyNames == null) {
             return;
         }
-        propertyNames.stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext
-                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
+        propertyNames.stream()
+                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> MDC.remove(
+                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
     }
 
     public static void clear(final JmsDispatch dispatch) {
@@ -95,15 +98,16 @@ public final class Log4jContext {
             return;
         }
         for (final var value : DispatchContextName.values()) {
-            ThreadContext.remove(value.name());
+            MDC.remove(value.name());
         }
 
         final var properties = dispatch.properties();
         if (properties == null) {
             return;
         }
-        properties.keySet().stream().filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
-                .forEach(name -> ThreadContext
-                        .remove(name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
+        properties.keySet().stream()
+                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .forEach(name -> MDC.remove(
+                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
     }
 }

@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.inbound;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 import org.springframework.lang.Nullable;
 
@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 import me.ehp246.aufjms.api.inbound.InvocableDispatcher;
 import me.ehp246.aufjms.api.inbound.InvocableFactory;
 import me.ehp246.aufjms.api.inbound.MsgConsumer;
-import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.api.spi.MsgMDC;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
 
@@ -22,14 +22,14 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  */
 public final class DefaultInboundMessageListener implements SessionAwareMessageListener<Message> {
-    private final static Logger LOGGER = LogManager.getLogger(InboundEndpoint.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(InboundEndpoint.class);
 
     private final InvocableDispatcher dispatcher;
     private final InvocableFactory invocableFactory;
     private final MsgConsumer defaultConsumer;
 
-    public DefaultInboundMessageListener(final InvocableDispatcher dispatcher, final InvocableFactory invocableFactory,
-            @Nullable final MsgConsumer defaultConsumer) {
+    public DefaultInboundMessageListener(final InvocableDispatcher dispatcher,
+            final InvocableFactory invocableFactory, @Nullable final MsgConsumer defaultConsumer) {
         super();
         this.dispatcher = dispatcher;
         this.invocableFactory = invocableFactory;
@@ -43,10 +43,12 @@ public final class DefaultInboundMessageListener implements SessionAwareMessageL
         }
 
         final var msg = TextJmsMsg.from(textMessage);
-        try (final var closeble = Log4jContext.set(msg);) {
-            LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", msg::destination, msg::type,
-                    msg::correlationId);
-            LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
+        try (final var closeble = MsgMDC.set(msg);) {
+            LOGGER.atDebug().addMarker(AufJmsConstants.HEADERS).setMessage("{}, {}, {}")
+                    .addArgument(msg::destination).addArgument(msg::type)
+                    .addArgument(msg::correlationId).log();
+            LOGGER.atTrace().addMarker(AufJmsConstants.BODY).setMessage("{}").addArgument(msg::text)
+                    .log();
 
             final var invocable = invocableFactory.get(msg);
 

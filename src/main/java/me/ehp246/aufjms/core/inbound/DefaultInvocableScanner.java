@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -32,7 +32,7 @@ import me.ehp246.aufjms.core.util.StreamOf;
  *
  */
 final class DefaultInvocableScanner {
-    private final static Logger LOGGER = LogManager.getLogger();
+    private final static Logger LOGGER = LoggerFactory.getLogger(DefaultInvocableScanner.class);
 
     private final PropertyResolver propertyResolver;
 
@@ -41,10 +41,13 @@ final class DefaultInvocableScanner {
         this.propertyResolver = propertyResolver;
     }
 
-    public DefaultInvocableRegistry registeryFrom(final Class<?>[] classes, final Set<String> scanPackages) {
+    public DefaultInvocableRegistry registeryFrom(final Class<?>[] classes,
+            final Set<String> scanPackages) {
         // Registering first, then scanning
-        final var all = Stream.concat(Optional.ofNullable(classes).map(List::of).orElseGet(List::of).stream()
-                .map(this::newDefinition).collect(Collectors.toSet()).stream(), perform(scanPackages).stream());
+        final var all = Stream.concat(
+                Optional.ofNullable(classes).map(List::of).orElseGet(List::of).stream()
+                        .map(this::newDefinition).collect(Collectors.toSet()).stream(),
+                perform(scanPackages).stream());
 
         return new DefaultInvocableRegistry().register(all);
     }
@@ -53,19 +56,23 @@ final class DefaultInvocableScanner {
         final var scanner = new ClassPathScanningCandidateComponentProvider(false) {
             @Override
             protected boolean isCandidateComponent(final AnnotatedBeanDefinition beanDefinition) {
-                return beanDefinition.getMetadata().isIndependent() || beanDefinition.getMetadata().isInterface();
+                return beanDefinition.getMetadata().isIndependent()
+                        || beanDefinition.getMetadata().isInterface();
             }
         };
         scanner.addIncludeFilter(new AnnotationTypeFilter(ForJmsType.class));
 
-        return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents).flatMap(Set::stream).map(bean -> {
-            try {
-                return Class.forName(bean.getBeanClassName());
-            } catch (final ClassNotFoundException e) {
-                LOGGER.atError().withThrowable(e).log("This should not happen: {}", e::getMessage);
-            }
-            return null;
-        }).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull).collect(Collectors.toSet());
+        return StreamOf.nonNull(scanPackages).map(scanner::findCandidateComponents)
+                .flatMap(Set::stream).map(bean -> {
+                    try {
+                        return Class.forName(bean.getBeanClassName());
+                    } catch (final ClassNotFoundException e) {
+                        LOGGER.atError().setCause(e).setMessage("This should not happen: {}")
+                                .addArgument(e::getMessage).log();
+                    }
+                    return null;
+                }).filter(Objects::nonNull).map(this::newDefinition).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     private InvocableTypeDefinition newDefinition(final Class<?> type) {
@@ -74,19 +81,20 @@ final class DefaultInvocableScanner {
             return null;
         }
 
-        if ((Modifier.isAbstract(type.getModifiers()) && annotation.scope().equals(InstanceScope.MESSAGE))
-                || type.isEnum()) {
+        if ((Modifier.isAbstract(type.getModifiers())
+                && annotation.scope().equals(InstanceScope.MESSAGE)) || type.isEnum()) {
             throw new IllegalArgumentException("Un-instantiable type " + type.getName());
         }
 
         final var msgTypes = Arrays
-                .asList(annotation.value().length == 0 ? new String[] { type.getSimpleName() } : annotation.value())
+                .asList(annotation.value().length == 0 ? new String[] { type.getSimpleName() }
+                        : annotation.value())
                 .stream().map(this.propertyResolver::resolve)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
-                .map(entry -> {
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream().map(entry -> {
                     if (entry.getValue() > 1) {
-                        throw new IllegalArgumentException(
-                                "Duplicate type '" + entry.getKey() + "' on " + type.getCanonicalName());
+                        throw new IllegalArgumentException("Duplicate type '" + entry.getKey()
+                                + "' on " + type.getCanonicalName());
                     }
                     return entry.getKey();
                 }).collect(Collectors.toSet());
@@ -124,7 +132,7 @@ final class DefaultInvocableScanner {
             throw new IllegalArgumentException("No invocation method defined by " + type.getName());
         }
 
-        return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings), annotation.scope(),
-                annotation.invocation());
+        return new InvocableTypeDefinition(msgTypes, type, Map.copyOf(invokings),
+                annotation.scope(), annotation.invocation());
     }
 }

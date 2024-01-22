@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.lang.Nullable;
 
 import me.ehp246.aufjms.api.exception.BoundInvocationFailedException;
@@ -21,7 +21,7 @@ import me.ehp246.aufjms.api.inbound.InvocationModel;
 import me.ehp246.aufjms.api.inbound.Invoked.Completed;
 import me.ehp246.aufjms.api.inbound.Invoked.Failed;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.api.spi.MsgMDC;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 
 /**
@@ -29,7 +29,7 @@ import me.ehp246.aufjms.core.configuration.AufJmsConstants;
  *
  */
 final class DefaultInvocableDispatcher implements InvocableDispatcher {
-    private final static Logger LOGGER = LogManager.getLogger(InvocableDispatcher.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(InvocableDispatcher.class);
 
     private final Executor executor;
     private final InvocableBinder binder;
@@ -37,8 +37,8 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
     private final List<InvocationListener.OnCompleted> completed = new ArrayList<>();
     private final List<InvocationListener.OnFailed> failed = new ArrayList<>();
 
-    public DefaultInvocableDispatcher(final InvocableBinder binder, @Nullable final List<InvocationListener> listeners,
-            @Nullable final Executor executor) {
+    public DefaultInvocableDispatcher(final InvocableBinder binder,
+            @Nullable final List<InvocationListener> listeners, @Nullable final Executor executor) {
         super();
         this.binder = binder;
         this.executor = executor;
@@ -69,9 +69,11 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
                 final var bound = boundRef[0];
 
-                ThreadContext.putAll(bound.log4jContext() == null ? Map.of() : bound.log4jContext());
+                Optional.ofNullable(bound.log4jContext()).orElseGet(Map::of).entrySet().stream()
+                        .forEach(e -> MDC.put(e.getKey(), e.getValue()));
 
-                DefaultInvocableDispatcher.this.invoking.forEach(listener -> listener.onInvoking(bound));
+                DefaultInvocableDispatcher.this.invoking
+                        .forEach(listener -> listener.onInvoking(bound));
 
                 final var outcome = bound.invoke();
 
@@ -92,15 +94,18 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
                 }
 
                 final var completed = (Completed) outcome;
-                DefaultInvocableDispatcher.this.completed.forEach(listener -> listener.onCompleted(completed));
+                DefaultInvocableDispatcher.this.completed
+                        .forEach(listener -> listener.onCompleted(completed));
             } finally {
                 try (invocable) {
                 } catch (final Exception e) {
-                    LOGGER.atWarn().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("Ignored: {}",
-                            e::getMessage);
+                    LOGGER.atWarn().setCause(e).addMarker(AufJmsConstants.EXCEPTION)
+                            .setMessage("Ignored: {}").addArgument(e::getMessage).log();
                 }
-                Optional.ofNullable(boundRef[0]).map(BoundInvocable::log4jContext).map(Map::keySet)
-                        .ifPresent(ThreadContext::removeAll);
+
+                Optional.ofNullable(boundRef[0]).map(BoundInvocable::log4jContext)
+                        .orElseGet(Map::of).entrySet().stream()
+                        .forEach(e -> MDC.remove(e.getKey()));
             }
         };
 
@@ -110,11 +115,11 @@ final class DefaultInvocableDispatcher implements InvocableDispatcher {
 
         } else {
             executor.execute(() -> {
-                try (final var closeable = Log4jContext.set(msg)) {
+                try (final var closeable = MsgMDC.set(msg)) {
                     runnable.run();
                 } catch (final Exception e) {
-                    LOGGER.atWarn().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("Ignored: {}",
-                            e::getMessage);
+                    LOGGER.atWarn().setCause(e).addMarker(AufJmsConstants.EXCEPTION)
+                            .setMessage("Ignored: {}").addArgument(e::getMessage).log();
                 }
             });
         }

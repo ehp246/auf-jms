@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jms.listener.SessionAwareMessageListener;
 
 import jakarta.jms.JMSException;
@@ -16,7 +16,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  *
  */
 final class ReplyListener implements SessionAwareMessageListener<Message> {
-    private final static Logger LOGGER = LogManager.getLogger();
+    private final static Logger LOGGER = LoggerFactory.getLogger(ReplyListener.class);
 
     private final ReplyFutureSupplier futureSupplier;
 
@@ -33,13 +33,16 @@ final class ReplyListener implements SessionAwareMessageListener<Message> {
 
         final var msg = TextJmsMsg.from(textMessage);
 
-        LOGGER.atDebug().withMarker(AufJmsConstants.HEADERS).log("{}, {}", msg::correlationId, msg::type);
-        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
+        LOGGER.atDebug().addMarker(AufJmsConstants.HEADERS).setMessage("{}, {}")
+                .addArgument(msg::correlationId).addArgument(msg::type).log();
+        LOGGER.atTrace().addMarker(AufJmsConstants.BODY).setMessage("{}").addArgument(msg::text)
+                .log();
 
         final var future = futureSupplier.get(msg.correlationId());
 
         if (future == null) {
-            LOGGER.atTrace().log("{} not found, ignored", msg::correlationId);
+            LOGGER.atTrace().setMessage("{} not found, ignored").addArgument(msg::correlationId)
+                    .log();
         } else {
             future.complete(msg);
         }

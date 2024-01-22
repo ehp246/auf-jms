@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import me.ehp246.aufjms.api.jms.ToJson;
  * @since 1.0
  */
 public final class JsonByObjectMapper implements FromJson, ToJson {
-    private final static Logger LOGGER = LogManager.getLogger(JsonByObjectMapper.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(JsonByObjectMapper.class);
 
     private final ObjectMapper objectMapper;
 
@@ -60,8 +60,8 @@ public final class JsonByObjectMapper implements FromJson, ToJson {
         final var type = Objects.requireNonNull(descriptor.reifying().get(0));
         final var reifying = descriptor.reifying();
 
-        final var reader = Optional.ofNullable(descriptor.view()).map(view -> objectMapper.readerWithView(view))
-                .orElseGet(objectMapper::reader);
+        final var reader = Optional.ofNullable(descriptor.view())
+                .map(view -> objectMapper.readerWithView(view)).orElseGet(objectMapper::reader);
         try {
             if (reifying.size() == 1) {
                 return reader.forType(type).readValue(json);
@@ -70,7 +70,8 @@ public final class JsonByObjectMapper implements FromJson, ToJson {
                 final var types = new ArrayList<Class<?>>(reifying);
 
                 final var size = types.size();
-                var javaType = typeFactory.constructParametricType(types.get(size - 2), types.get(size - 1));
+                var javaType = typeFactory.constructParametricType(types.get(size - 2),
+                        types.get(size - 1));
                 for (int i = size - 3; i >= 0; i--) {
                     javaType = typeFactory.constructParametricType(types.get(i), javaType);
                 }
@@ -78,7 +79,8 @@ public final class JsonByObjectMapper implements FromJson, ToJson {
                 return reader.forType(javaType).readValue(json);
             }
         } catch (final JsonProcessingException e) {
-            LOGGER.atTrace().withThrowable(e).log("Failed to de-serialize: {}", e::getMessage);
+            LOGGER.atTrace().setCause(e).setMessage("Failed to de-serialize: {}")
+                    .addArgument(e::getMessage).log();
 
             throw new RuntimeException(e);
         }

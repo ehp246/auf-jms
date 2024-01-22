@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.jms.annotation.JmsListenerConfigurer;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -30,7 +30,7 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @since 1.0
  */
 public final class InboundEndpointListenerConfigurer implements JmsListenerConfigurer {
-    final static Logger LOGGER = LogManager.getLogger(InboundEndpointListenerConfigurer.class);
+    final static Logger LOGGER = LoggerFactory.getLogger(InboundEndpointListenerConfigurer.class);
 
     private final Set<InboundEndpoint> endpoints;
     private final ExecutorProvider executorProvider;
@@ -40,8 +40,8 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
     public InboundEndpointListenerConfigurer(final ConnectionFactoryProvider cfProvider,
-            final Set<InboundEndpoint> endpoints, final ExecutorProvider executorProvider, final InvocableBinder binder,
-            final JmsDispatchFnProvider dispathFnProvider,
+            final Set<InboundEndpoint> endpoints, final ExecutorProvider executorProvider,
+            final InvocableBinder binder, final JmsDispatchFnProvider dispathFnProvider,
             final AutowireCapableBeanFactory autowireCapableBeanFactory) {
         super();
         this.cfProvider = Objects.requireNonNull(cfProvider);
@@ -55,8 +55,9 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
     @Override
     public void configureJmsListeners(final JmsListenerEndpointRegistrar registrar) {
         for (final var endpoint : this.endpoints) {
-            LOGGER.atTrace().log("Registering '{}' on '{}', '{}'", endpoint::name, () -> endpoint.from().on(),
-                    () -> endpoint.from().sub());
+            LOGGER.atTrace().setMessage("Registering '{}' on '{}', '{}'")
+                    .addArgument(endpoint::name).addArgument(() -> endpoint.from().on())
+                    .addArgument(() -> endpoint.from().sub()).log();
 
             final var factory = new DefaultJmsListenerContainerFactory();
             factory.setConnectionFactory(this.cfProvider.get(endpoint.connectionFactory()));
@@ -67,7 +68,8 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
 
             registrar.registerEndpoint(new JmsListenerEndpoint() {
                 @Override
-                public void setupListenerContainer(final MessageListenerContainer listenerContainer) {
+                public void setupListenerContainer(
+                        final MessageListenerContainer listenerContainer) {
                     final var container = (AbstractMessageListenerContainer) listenerContainer;
                     final var from = endpoint.from();
                     final var on = from.on();
@@ -85,13 +87,19 @@ public final class InboundEndpointListenerConfigurer implements JmsListenerConfi
                         container.setSubscriptionShared(sub.shared());
                     }
 
-                    container.setupMessageListener(new DefaultInboundMessageListener(
-                            new DefaultInvocableDispatcher(binder,
-                                    Arrays.asList(new ReplyInvoked(dispathFnProvider.get(endpoint.connectionFactory())),
-                                            endpoint.invocationListener()),
-                                    executorProvider.get(endpoint.concurrency())),
-                            new AutowireCapableInvocableFactory(autowireCapableBeanFactory, endpoint.typeRegistry()),
-                            endpoint.defaultConsumer()));
+                    container
+                            .setupMessageListener(
+                                    new DefaultInboundMessageListener(
+                                            new DefaultInvocableDispatcher(binder,
+                                                    Arrays.asList(
+                                                            new ReplyInvoked(dispathFnProvider.get(
+                                                                    endpoint.connectionFactory())),
+                                                            endpoint.invocationListener()),
+                                                    executorProvider.get(endpoint.concurrency())),
+                                            new AutowireCapableInvocableFactory(
+                                                    autowireCapableBeanFactory,
+                                                    endpoint.typeRegistry()),
+                                            endpoint.defaultConsumer()));
                 }
 
                 @Override

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.ThreadContext;
+import org.slf4j.MDC;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -21,8 +21,8 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDelay;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
+import me.ehp246.aufjms.api.annotation.OfMDC;
+import me.ehp246.aufjms.api.annotation.OfMDC.Op;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfTtl;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -43,8 +43,8 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *
  */
 public final class DefaultDispatchMethodParser implements DispatchMethodParser {
-    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set.of(OfType.class, OfProperty.class,
-            OfTtl.class, OfDelay.class, OfCorrelationId.class);
+    private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set
+            .of(OfType.class, OfProperty.class, OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
     private final PropertyResolver propertyResolver;
     private final FromJson fromJson;
@@ -58,7 +58,8 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     public DispatchMethodBinder parse(final Method method, final ByJmsProxyConfig config) {
         final var reflected = new ReflectedMethod(method);
 
-        return new DispatchMethodBinder(parseInvocationBinder(reflected, config), parseReturnBinder(reflected, config));
+        return new DispatchMethodBinder(parseInvocationBinder(reflected, config),
+                parseReturnBinder(reflected, config));
     }
 
     private InvocationDispatchBinder parseInvocationBinder(final ReflectedMethod reflected,
@@ -69,136 +70,151 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                         .map(an -> (Function<Object[], String>) args -> an.value())
                         .orElseGet(() -> args -> OneUtil.firstUpper(reflected.method().getName())));
 
-        final var correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream().findFirst().map(p -> {
-            final var index = p.index();
-            return (Function<Object[], String>) args -> (String) args[index];
-        }).orElse(null);
+        final var correlIdFn = reflected.allParametersWith(OfCorrelationId.class).stream()
+                .findFirst().map(p -> {
+                    final var index = p.index();
+                    return (Function<Object[], String>) args -> (String) args[index];
+                }).orElse(null);
 
         final var ttlFn = reflected.allParametersWith(OfTtl.class).stream().findFirst()
                 .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
-                .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class).map(
-                        a -> (Function<Object[], Duration>) args -> Duration.parse(propertyResolver.resolve(a.value())))
+                .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class)
+                        .map(a -> (Function<Object[], Duration>) args -> Duration
+                                .parse(propertyResolver.resolve(a.value())))
                         .orElse(null));
 
-        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst().map(p -> {
-            final var type = p.parameter().getType();
-            if (type.isAssignableFrom(String.class)) {
-                return (Function<Object[], Duration>) args -> {
-                    final var delayArg = args[p.index()];
-                    if (delayArg == null) {
-                        return null;
+        final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst()
+                .map(p -> {
+                    final var type = p.parameter().getType();
+                    if (type.isAssignableFrom(String.class)) {
+                        return (Function<Object[], Duration>) args -> {
+                            final var delayArg = args[p.index()];
+                            if (delayArg == null) {
+                                return null;
+                            }
+                            return Duration.parse((String) delayArg);
+                        };
+                    } else if (type.isAssignableFrom(Duration.class)) {
+                        return (Function<Object[], Duration>) args -> (Duration) args[p.index()];
                     }
-                    return Duration.parse((String) delayArg);
-                };
-            } else if (type.isAssignableFrom(Duration.class)) {
-                return (Function<Object[], Duration>) args -> (Duration) args[p.index()];
-            }
-            throw new IllegalArgumentException(
-                    "Un-supported Delay type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
-        }).orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(a -> {
-            final var parsed = Duration.parse(propertyResolver.resolve(a.value()));
-            return (Function<Object[], Duration>) args -> parsed;
-        }).orElse(null));
+                    throw new IllegalArgumentException("Un-supported Delay type '" + type.getName()
+                            + "' on '" + reflected.method().toString() + "'");
+                }).orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(a -> {
+                    final var parsed = Duration.parse(propertyResolver.resolve(a.value()));
+                    return (Function<Object[], Duration>) args -> parsed;
+                }).orElse(null));
 
-        final var groupIdFn = reflected.allParametersWith(OfGroupId.class).stream().findFirst().map(p -> {
-            final var type = p.parameter().getType();
-            if (type.isAssignableFrom(String.class)) {
-                return (Function<Object[], String>) args -> (String) args[p.index()];
-            }
-            throw new IllegalArgumentException(
-                    "Un-supported GroupId type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
-        }).orElseGet(() -> reflected.findOnMethodUp(OfGroupId.class).map(a -> {
-            final var parsed = propertyResolver.resolve(a.value());
-            return (Function<Object[], String>) args -> parsed;
-        }).orElse(null));
+        final var groupIdFn = reflected.allParametersWith(OfGroupId.class).stream().findFirst()
+                .map(p -> {
+                    final var type = p.parameter().getType();
+                    if (type.isAssignableFrom(String.class)) {
+                        return (Function<Object[], String>) args -> (String) args[p.index()];
+                    }
+                    throw new IllegalArgumentException("Un-supported GroupId type '"
+                            + type.getName() + "' on '" + reflected.method().toString() + "'");
+                }).orElseGet(() -> reflected.findOnMethodUp(OfGroupId.class).map(a -> {
+                    final var parsed = propertyResolver.resolve(a.value());
+                    return (Function<Object[], String>) args -> parsed;
+                }).orElse(null));
 
-        final var groupSeqFn = reflected.allParametersWith(OfGroupSeq.class).stream().findFirst().map(p -> {
-            final var type = p.parameter().getType();
-            if (type == int.class || type.isAssignableFrom(Integer.class)) {
-                return (Function<Object[], Integer>) args -> (Integer) args[p.index()];
-            }
-            throw new IllegalArgumentException(
-                    "Un-supported GroupSeq type '" + type.getName() + "' on '" + reflected.method().toString() + "'");
-        }).orElse(null);
+        final var groupSeqFn = reflected.allParametersWith(OfGroupSeq.class).stream().findFirst()
+                .map(p -> {
+                    final var type = p.parameter().getType();
+                    if (type == int.class || type.isAssignableFrom(Integer.class)) {
+                        return (Function<Object[], Integer>) args -> (Integer) args[p.index()];
+                    }
+                    throw new IllegalArgumentException("Un-supported GroupSeq type '"
+                            + type.getName() + "' on '" + reflected.method().toString() + "'");
+                }).orElse(null);
 
-        final var bodyParamIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS).map(ReflectedParameter::index)
-                .orElse(-1);
+        final var bodyParamIndex = reflected.firstPayloadParameter(PARAMETER_ANNOTATIONS)
+                .map(ReflectedParameter::index).orElse(-1);
 
-        final var bodyOf = Optional.ofNullable(bodyParamIndex == -1 ? null : reflected.getParameter(bodyParamIndex))
-                .map(parameter -> new BodyOf<>(Optional.ofNullable(parameter.getAnnotation(JsonView.class))
-                        .map(JsonView::value).filter(OneUtil::hasValue).map(views -> views[0]).orElse(null),
+        final var bodyOf = Optional
+                .ofNullable(bodyParamIndex == -1 ? null : reflected.getParameter(bodyParamIndex))
+                .map(parameter -> new BodyOf<>(Optional
+                        .ofNullable(parameter.getAnnotation(JsonView.class)).map(JsonView::value)
+                        .filter(OneUtil::hasValue).map(views -> views[0]).orElse(null),
                         parameter.getType()))
                 .orElse(null);
 
         final Map<String, Function<Object[], String>> log4jContextBinders = new HashMap<String, Function<Object[], String>>();
 
-        log4jContextBinders.putAll(reflected.allParametersWith(OfLog4jContext.class).stream()
-                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == Op.Default)
+        log4jContextBinders.putAll(reflected.allParametersWith(OfMDC.class).stream()
+                .filter(p -> p.parameter().getAnnotation(OfMDC.class).op() == Op.Default)
                 .collect(Collectors.toMap(p -> {
-                    final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
+                    final var name = p.parameter().getAnnotation(OfMDC.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
-                    return (Function<Object[], String>) (args -> args[index] == null ? null : args[index] + "");
+                    return (Function<Object[], String>) (args -> args[index] == null ? null
+                            : args[index] + "");
                 }, (l, r) -> r)));
         /*
          * There is an annotated body parameter.
          */
-        if (bodyParamIndex >= 0 && reflected.getParameter(bodyParamIndex).getAnnotation(OfLog4jContext.class) != null) {
+        if (bodyParamIndex >= 0 && reflected.getParameter(bodyParamIndex)
+                .getAnnotation(OfMDC.class) != null) {
             final var bodyParam = reflected.getParameter(bodyParamIndex);
-            final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
+            final var ofLog4jContext = bodyParam.getAnnotation(OfMDC.class);
 
             switch (ofLog4jContext.op()) {
-            case Introspect:
-                /*
-                 * Duplicated names will overwrite each other un-deterministically.
-                 */
-                final var bodyParamContextName = ofLog4jContext.value();
+                case Introspect:
+                    /*
+                     * Duplicated names will overwrite each other un-deterministically.
+                     */
+                    final var bodyParamContextName = ofLog4jContext.value();
 
-                final var bodyFieldBinders = new ReflectedType<>(
-                        bodyParam.getType())
-                                .streamSuppliersWith(
-                                        OfLog4jContext.class)
-                                .filter(p -> p.getAnnotation(OfLog4jContext.class).op() == Op.Default)
-                                .collect(Collectors.toMap(
-                                        m -> bodyParamContextName
-                                                + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
-                                                        .filter(OneUtil::hasValue).orElseGet(() -> m.getName()),
-                                        Function.identity(), (l, r) -> r))
-                                .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
-                                    final var m = entry.getValue();
-                                    return (Function<Object[], String>) args -> {
-                                        final var body = args[bodyParamIndex];
-                                        if (body == null) {
-                                            return null;
-                                        }
-                                        try {
-                                            final var ret = m.invoke(body);
-                                            return ret == null ? null : ret + "";
-                                        } catch (IllegalAccessException | IllegalArgumentException
-                                                | InvocationTargetException e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    };
-                                }));
-                log4jContextBinders.putAll(bodyFieldBinders);
-                break;
-            default:
-                log4jContextBinders.put(
-                        Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
-                                .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
-                        args -> (args[bodyParamIndex] == null ? null : args[bodyParamIndex] + ""));
-                break;
+                    final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
+                            .streamSuppliersWith(OfMDC.class)
+                            .filter(p -> p.getAnnotation(OfMDC.class)
+                                    .op() == Op.Default)
+                            .collect(
+                                    Collectors.toMap(
+                                            m -> bodyParamContextName + Optional
+                                                    .of(m.getAnnotation(OfMDC.class)
+                                                            .value())
+                                                    .filter(OneUtil::hasValue)
+                                                    .orElseGet(() -> m.getName()),
+                                            Function.identity(), (l, r) -> r))
+                            .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
+                                final var m = entry.getValue();
+                                return (Function<Object[], String>) args -> {
+                                    final var body = args[bodyParamIndex];
+                                    if (body == null) {
+                                        return null;
+                                    }
+                                    try {
+                                        final var ret = m.invoke(body);
+                                        return ret == null ? null : ret + "";
+                                    } catch (IllegalAccessException | IllegalArgumentException
+                                            | InvocationTargetException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                };
+                            }));
+                    log4jContextBinders.putAll(bodyFieldBinders);
+                    break;
+                default:
+                    log4jContextBinders.put(
+                            Optional.ofNullable(bodyParam.getAnnotation(OfMDC.class))
+                                    .map(OfMDC::value).filter(OneUtil::hasValue)
+                                    .orElseGet(bodyParam::getName),
+                            args -> (args[bodyParamIndex] == null ? null
+                                    : args[bodyParamIndex] + ""));
+                    break;
             }
         }
 
-        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn, bodyParamIndex, bodyOf,
-                propArgs(reflected), propStatic(reflected, config), ttlFn, delayFn, groupIdFn, groupSeqFn,
+        return new DefaultProxyInvocationBinder(reflected, config, typeFn, correlIdFn,
+                bodyParamIndex, bodyOf, propArgs(reflected), propStatic(reflected, config), ttlFn,
+                delayFn, groupIdFn, groupSeqFn,
                 log4jContextBinders.isEmpty() ? null : log4jContextBinders);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private InvocationReturnBinder parseReturnBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config) {
+    private InvocationReturnBinder parseReturnBinder(final ReflectedMethod reflected,
+            final ByJmsProxyConfig config) {
         if (reflected.returnsVoid()) {
             return (LocalReturnBinder) dispatch -> null;
         }
@@ -207,7 +223,8 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
         final var requestTimeout = config.requestTimeout();
 
         return (RemoteReturnBinder) (jmsDispatch, replyFuture) -> {
-            Optional.ofNullable(jmsDispatch.log4jContext()).ifPresent(ThreadContext::putAll);
+            Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of).entrySet().stream()
+                    .forEach(e -> MDC.put(e.getKey(), e.getValue()));
             try {
                 final JmsMsg msg;
                 try {
@@ -222,24 +239,26 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
 
                 return fromJson.apply(msg.text(), bodyOf);
             } finally {
-                Optional.ofNullable(jmsDispatch.log4jContext()).map(Map::keySet).ifPresent(ThreadContext::removeAll);
+                Optional.ofNullable(jmsDispatch.log4jContext()).orElseGet(Map::of).entrySet()
+                        .stream().forEach(e -> MDC.remove(e.getKey()));
             }
         };
     }
 
-    private Map<String, String> propStatic(final ReflectedMethod reflected, final ByJmsProxyConfig config) {
+    private Map<String, String> propStatic(final ReflectedMethod reflected,
+            final ByJmsProxyConfig config) {
         final var properties = config.properties();
         if ((properties.size() & 1) != 0) {
-            throw new IllegalArgumentException(
-                    "Properties should be in name/value pairs on " + reflected.method().getDeclaringClass());
+            throw new IllegalArgumentException("Properties should be in name/value pairs on "
+                    + reflected.method().getDeclaringClass());
         }
 
         final Map<String, String> propStatic = new HashMap<>();
         for (int i = 0; i < properties.size(); i += 2) {
             final var key = properties.get(i);
             if (propStatic.containsKey(key)) {
-                throw new IllegalArgumentException(
-                        "Duplicate '" + properties.get(i) + " on " + reflected.method().getDeclaringClass());
+                throw new IllegalArgumentException("Duplicate '" + properties.get(i) + " on "
+                        + reflected.method().getDeclaringClass());
             }
             propStatic.put(key, propertyResolver.resolve(properties.get(i + 1)));
         }
