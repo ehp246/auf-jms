@@ -16,7 +16,7 @@ public final class MsgMDC {
     }
 
     private enum MsgContextName {
-        AufJmsMsgFrom, AufJmsMsgCorrelationId, AufJmsMsgType, AufJmsLog4jThreadContext;
+        AufJmsMsgFrom, AufJmsMsgCorrelationId, AufJmsMsgType, AufJmsMsgMDC;
     }
 
     private enum DispatchContextName {

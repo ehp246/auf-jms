@@ -17,7 +17,7 @@ import org.springframework.util.ErrorHandler;
 import jakarta.jms.ExceptionListener;
 import jakarta.jms.Session;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
-import me.ehp246.aufjms.core.inbound.NoopConsumer;
+import me.ehp246.aufjms.core.inbound.NoOpConsumer;
 import me.ehp246.test.embedded.inbound.bean.AppConfigs.AppConfig03;
 
 /**
@@ -79,7 +79,7 @@ class BeanTest {
 
         final var endpoint = appCtx.getBean(InboundEndpoint.class);
 
-        Assertions.assertEquals(appCtx.getBean(NoopConsumer.class), endpoint.defaultConsumer());
+        Assertions.assertEquals(appCtx.getBean(NoOpConsumer.class), endpoint.defaultConsumer());
     }
 
     @Test
