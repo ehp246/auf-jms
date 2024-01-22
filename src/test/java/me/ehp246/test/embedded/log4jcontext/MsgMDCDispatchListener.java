@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatch;
  *
  */
 @Service
-class Log4jContextDispatchListener implements DispatchListener.OnDispatch {
+class MsgMDCDispatchListener implements DispatchListener.OnDispatch {
     private final AtomicReference<Map<String, String>> ref = new AtomicReference<>();
 
     @Override

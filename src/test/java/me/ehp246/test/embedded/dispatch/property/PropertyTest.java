@@ -134,7 +134,7 @@ class PropertyTest {
 
     @Test
     void test_09() throws JMSException {
-        final var propertyName = AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + "OrderId";
+        final var propertyName = AufJmsConstants.MSG_MDC_HEADER_PREFIX + "OrderId";
         final var expected = UUID.randomUUID().toString();
 
         case01.ping(Map.of(propertyName, expected));

@@ -40,9 +40,9 @@ public final class MsgMDC {
         }
 
         propertyNames.stream()
-                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .filter(name -> name.startsWith(AufJmsConstants.MSG_MDC_HEADER_PREFIX))
                 .forEach(name -> MDC.put(
-                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
+                        name.replaceFirst(AufJmsConstants.MSG_MDC_HEADER_PREFIX, ""),
                         msg.property(name, String.class)));
 
         return closeable;
@@ -66,9 +66,9 @@ public final class MsgMDC {
         }
 
         properties.keySet().stream()
-                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .filter(name -> name.startsWith(AufJmsConstants.MSG_MDC_HEADER_PREFIX))
                 .forEach(name -> MDC.put(
-                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, ""),
+                        name.replaceFirst(AufJmsConstants.MSG_MDC_HEADER_PREFIX, ""),
                         properties.get(name).toString()));
 
         return closeable;
@@ -88,9 +88,9 @@ public final class MsgMDC {
             return;
         }
         propertyNames.stream()
-                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .filter(name -> name.startsWith(AufJmsConstants.MSG_MDC_HEADER_PREFIX))
                 .forEach(name -> MDC.remove(
-                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
+                        name.replaceFirst(AufJmsConstants.MSG_MDC_HEADER_PREFIX, "")));
     }
 
     public static void clear(final JmsDispatch dispatch) {
@@ -106,8 +106,8 @@ public final class MsgMDC {
             return;
         }
         properties.keySet().stream()
-                .filter(name -> name.startsWith(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX))
+                .filter(name -> name.startsWith(AufJmsConstants.MSG_MDC_HEADER_PREFIX))
                 .forEach(name -> MDC.remove(
-                        name.replaceFirst(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX, "")));
+                        name.replaceFirst(AufJmsConstants.MSG_MDC_HEADER_PREFIX, "")));
     }
 }

@@ -14,7 +14,7 @@ import me.ehp246.test.TestQueueListener;
  */
 @ByJms(@To(TestQueueListener.DESTINATION_NAME))
 interface Log4jContextCase {
-    void ping(@OfProperty String aufJmsLog4jContextOrderId);
+    void ping(@OfProperty String aufJmsMsgMDCOrderId);
 
     void ping(@OfMDC Name name);
 

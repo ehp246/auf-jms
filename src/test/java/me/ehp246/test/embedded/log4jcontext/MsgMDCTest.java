@@ -20,7 +20,7 @@ import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Order;
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {
         "me.ehp246.aufjms.dispatchlogger.enabled=true" }, webEnvironment = WebEnvironment.NONE)
-class Log4jContextTest {
+class MsgMDCTest {
     @Autowired
     private Log4jContextCase case1;
     @Autowired
@@ -30,9 +30,9 @@ class Log4jContextTest {
     @Autowired
     private OnPingOnBody onPingOnBody;
     @Autowired
-    private Log4jContextDispatchListener dispatchListener;
+    private MsgMDCDispatchListener dispatchListener;
     @Autowired
-    private Log4jContextInvocationLIstener invocationListener;
+    private MsgMDCInvocationLIstener invocationListener;
 
     @BeforeEach
     void clear() {
@@ -41,7 +41,7 @@ class Log4jContextTest {
     }
 
     @Test
-    void log4jContextProperty_01() throws InterruptedException, ExecutionException {
+    void msgMDCProperty_01() throws InterruptedException, ExecutionException {
         final var expected = UUID.randomUUID().toString();
 
         case1.ping(expected);

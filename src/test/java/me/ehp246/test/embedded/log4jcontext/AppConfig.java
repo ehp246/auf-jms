@@ -16,8 +16,8 @@ import me.ehp246.test.TestQueueListener;
  */
 @ComponentScan
 @EnableByJms
-@EnableForJms({
-        @Inbound(value = @From(TestQueueListener.DESTINATION_NAME), invocationListener = "log4jContextInvocationLIstener") })
+@EnableForJms({ @Inbound(value = @From(TestQueueListener.DESTINATION_NAME),
+        invocationListener = "msgMDCInvocationLIstener") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
 }

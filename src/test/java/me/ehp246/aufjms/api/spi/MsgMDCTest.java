@@ -36,7 +36,7 @@ class MsgMDCTest {
     void log4jHeader_msg_01() {
         final var value = UUID.randomUUID().toString();
         final var name = UUID.randomUUID().toString();
-        final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
+        final var mockJmsMsg = new MockJmsMsg().withProperty(AufJmsConstants.MSG_MDC_HEADER_PREFIX + name,
                 value);
 
         MsgMDC.set(mockJmsMsg);
@@ -53,7 +53,7 @@ class MsgMDCTest {
         final var value = UUID.randomUUID().toString();
         final var name = UUID.randomUUID().toString();
         final var dispatch = new MockDispatch()
-                .withProperty(AufJmsConstants.LOG4J_CONTEXT_HEADER_PREFIX + name,
+                .withProperty(AufJmsConstants.MSG_MDC_HEADER_PREFIX + name,
                 value);
 
         MsgMDC.set(dispatch);
