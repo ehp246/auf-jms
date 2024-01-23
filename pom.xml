@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
@@ -33,7 +35,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		
+
 		<jdk.version>21</jdk.version>
 
 		<jms-api.version>3.1.0</jms-api.version>
@@ -63,7 +65,7 @@
 		<maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
 		<maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-		<maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
 		<maven-jacoco-plugin.version>0.8.11</maven-jacoco-plugin.version>
 	</properties>
 
@@ -130,12 +132,6 @@
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-suite-engine</artifactId>
 			<version>${junit-platform.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.platform</groupId>
-			<artifactId>junit-platform-runner</artifactId>
-			<version>${junit-platform.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
@@ -307,10 +303,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-		    <groupId>org.mockito</groupId>
-		    <artifactId>mockito-inline</artifactId>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
 			<version>${mockito-inline.version}</version>
-		    <scope>test</scope>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
@@ -355,7 +351,8 @@
 				<configuration>
 					<systemPropertyVariables>
 						<me.ehp246.aufjms.dispatchlogger.enabled>false</me.ehp246.aufjms.dispatchlogger.enabled>
-						<log4j.configurationFile>test/main/resources/log4j2-surefire.xml</log4j.configurationFile>
+						<log4j.configurationFile>
+							test/main/resources/log4j2-surefire.xml</log4j.configurationFile>
 						<spring.main.banner-mode>off</spring.main.banner-mode>
 					</systemPropertyVariables>
 				</configuration>
