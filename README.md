@@ -89,19 +89,20 @@ class RunJob {
 ```
 
 ## Runtime
-The latest version requires the following to run:
-* <a href='https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core'>Log4j 2</a>
+The latest major version 3 requires the following to run:
+* <a href='https://openjdk.org/projects/jdk/21/'>JDK 21</a>
+* <a href='https://jakarta.ee/specifications/messaging/3.1/'>JMS 3.1</a>
+* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring Framework 6.1</a>
 * <a href='https://mvnrepository.com/artifact/com.fasterxml.jackson'>Jackson 2</a>: Core and Databind
-* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring 6</a>
-* <a href='https://openjdk.org/projects/jdk/17/'>JDK 17</a>
 
 In addition to the above, the server-side features provided by `@EnableForJms` requires:
-* <a href='https://mvnrepository.com/artifact/org.springframework/spring-jms'>Spring JMS: 6</a>
-
-The latest Auf JMS, Spring 6 and Spring Boot 3 are built on <a href='https://jakarta.ee/specifications/messaging/3.0/apidocs/jakarta/jms/package-summary.html'>Jakarta Messaging API</a>.
+* <a href='https://mvnrepository.com/artifact/org.springframework/spring-jms'>Spring JMS</a>
 
 ## Release
 The release binaries can be found on [Maven Central](https://mvnrepository.com/artifact/me.ehp246/auf-jms).
+
+### Version 2
+The version 2 releases are on JDK 17, JMS 3.1, Spring 6.
 
 ### Version 1
 The version 1 releases are on <a href='https://javaee.github.io/jms-spec/pages/JMS20FinalRelease'>JMS 2.0</a> and Spring 5.
