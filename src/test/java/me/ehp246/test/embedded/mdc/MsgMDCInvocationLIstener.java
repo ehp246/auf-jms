@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.inbound.Invoked.Failed;
  *
  */
 @Service
-class Log4jContextInvocationLIstener
+class MsgMDCInvocationLIstener
         implements InvocationListener.OnCompleted, InvocationListener.OnFailed, InvocationListener.OnInvoking {
     private CompletableFuture<Map<String, String>> ref = new CompletableFuture<>();
     private final Map<String, String> map = new HashMap<String, String>();

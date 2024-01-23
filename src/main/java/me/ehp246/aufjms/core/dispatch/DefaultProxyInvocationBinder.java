@@ -31,14 +31,14 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
     private final Map<String, String> propStatic;
     private final int bodyIndex;
     private final BodyOf<?> bodyOf;
-    private final Map<String, Function<Object[], String>> log4jContextBinders;
+    private final Map<String, Function<Object[], String>> msgMDCBinders;
 
     DefaultProxyInvocationBinder(final ReflectedMethod reflected, final ByJmsProxyConfig config,
             final Function<Object[], String> typeFn, final Function<Object[], String> correlIdFn, final int bodyIndex,
             final BodyOf<?> bodyAs, final Map<Integer, PropertyArg> propArgs, final Map<String, String> propStatic,
             final Function<Object[], Duration> ttlFn, final Function<Object[], Duration> delayFn,
             final Function<Object[], String> groupIdFn, final Function<Object[], Integer> groupSeqFn,
-            final Map<String, Function<Object[], String>> log4jContextBinders) {
+            final Map<String, Function<Object[], String>> msgMDCBinders) {
         this.reflected = reflected;
         this.config = config;
         this.typeFn = typeFn;
@@ -51,7 +51,7 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
         this.propStatic = propStatic;
         this.bodyIndex = bodyIndex;
         this.bodyOf = bodyAs;
-        this.log4jContextBinders = log4jContextBinders;
+        this.msgMDCBinders = msgMDCBinders;
     }
 
     @Override
@@ -95,16 +95,16 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
 
         final var body = bodyIndex == -1 ? null : args[bodyIndex];
 
-        final Map<String, String> log4jContext;
-        if (log4jContextBinders == null || log4jContextBinders.size() == 0) {
-            log4jContext = null;
+        final Map<String, String> msgMDC;
+        if (msgMDCBinders == null || msgMDCBinders.size() == 0) {
+            msgMDC = null;
         } else {
             final var contextMap = new HashMap<String, String>();
-            for (final var entry : log4jContextBinders.entrySet()) {
-                contextMap.put(entry.getKey(), log4jContextBinders.get(entry.getKey()).apply(args));
+            for (final var entry : msgMDCBinders.entrySet()) {
+                contextMap.put(entry.getKey(), msgMDCBinders.get(entry.getKey()).apply(args));
             }
 
-            log4jContext = Collections.unmodifiableMap(contextMap);
+            msgMDC = Collections.unmodifiableMap(contextMap);
         }
 
         return new JmsDispatch() {
@@ -165,8 +165,8 @@ final class DefaultProxyInvocationBinder implements InvocationDispatchBinder {
             }
 
             @Override
-            public Map<String, String> log4jContext() {
-                return log4jContext;
+            public Map<String, String> mdc() {
+                return msgMDC;
             }
         };
     }

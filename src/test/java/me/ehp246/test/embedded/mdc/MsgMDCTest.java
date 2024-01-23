@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import java.util.concurrent.ExecutionException;
 
@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
-import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Name;
-import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Order;
+import me.ehp246.test.embedded.mdc.MsgMDCCase.Name;
+import me.ehp246.test.embedded.mdc.MsgMDCCase.Order;
 
 /**
  * @author Lei Yang
@@ -20,9 +20,9 @@ import me.ehp246.test.embedded.log4jcontext.Log4jContextCase.Order;
  */
 @SpringBootTest(classes = { AppConfig.class }, properties = {
         "me.ehp246.aufjms.dispatchlogger.enabled=true" }, webEnvironment = WebEnvironment.NONE)
-class Log4jContextTest {
+class MsgMDCTest {
     @Autowired
-    private Log4jContextCase case1;
+    private MsgMDCCase case1;
     @Autowired
     private OnPing onPing;
     @Autowired
@@ -30,9 +30,9 @@ class Log4jContextTest {
     @Autowired
     private OnPingOnBody onPingOnBody;
     @Autowired
-    private Log4jContextDispatchListener dispatchListener;
+    private MsgMDCDispatchListener dispatchListener;
     @Autowired
-    private Log4jContextInvocationLIstener invocationListener;
+    private MsgMDCInvocationLIstener invocationListener;
 
     @BeforeEach
     void clear() {
@@ -41,7 +41,7 @@ class Log4jContextTest {
     }
 
     @Test
-    void log4jContextProperty_01() throws InterruptedException, ExecutionException {
+    void msgMDCProperty_01() throws InterruptedException, ExecutionException {
         final var expected = UUID.randomUUID().toString();
 
         case1.ping(expected);
@@ -62,7 +62,7 @@ class Log4jContextTest {
 
     @Test
     void dispatch_02() throws InterruptedException, ExecutionException {
-        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        final var name = new MsgMDCCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
         case1.ping(name);
 
@@ -84,7 +84,7 @@ class Log4jContextTest {
 
     @Test
     void dispatch_03() throws InterruptedException, ExecutionException {
-        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        final var name = new MsgMDCCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
         case1.pingWithName(name);
 
@@ -96,7 +96,7 @@ class Log4jContextTest {
 
     @Test
     void dispatch_04() throws InterruptedException, ExecutionException {
-        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        final var name = new MsgMDCCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
         case1.pingIntroWithName(name);
 
@@ -120,7 +120,7 @@ class Log4jContextTest {
 
     @Test
     void dispatch_05() throws InterruptedException, ExecutionException {
-        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        final var name = new MsgMDCCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
         case1.pingIntro(name);
 
@@ -133,7 +133,7 @@ class Log4jContextTest {
 
     @Test
     void dispatch_06() throws InterruptedException, ExecutionException {
-        final var name = new Log4jContextCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        final var name = new MsgMDCCase.Name(UUID.randomUUID().toString(), UUID.randomUUID().toString());
         case1.ping(name, UUID.randomUUID().toString());
 
         final var localContext = dispatchListener.take();

@@ -17,12 +17,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import jakarta.jms.ConnectionFactory;
-import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
 import me.ehp246.aufjms.api.spi.PropertyResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
-import me.ehp246.aufjms.core.inbound.NoopConsumer;
+import me.ehp246.aufjms.core.inbound.NoOpConsumer;
 import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
 
 /**
@@ -31,7 +30,8 @@ import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
  */
 @Import({ DefaultDispatchFnProvider.class })
 public final class AufJmsConfiguration {
-    private final static List<String> MODULES = List.of("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
+    private final static List<String> MODULES = List.of(
+            "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
             "com.fasterxml.jackson.module.mrbean.MrBeanModule",
             "com.fasterxml.jackson.module.paramnames.ParameterNamesModule");
 
@@ -42,7 +42,8 @@ public final class AufJmsConfiguration {
     }
 
     @Bean("2744a1e7-9576-4f2e-8c56-6623247155e7")
-    public PropertyResolver propertyResolver(final org.springframework.core.env.PropertyResolver springResolver) {
+    public PropertyResolver propertyResolver(
+            final org.springframework.core.env.PropertyResolver springResolver) {
         return springResolver::resolveRequiredPlaceholders;
     }
 
@@ -57,13 +58,14 @@ public final class AufJmsConfiguration {
     }
 
     @Bean("44fc3968-7eba-47a3-a7b4-54e2b365d027")
-    public MsgConsumer noopConsumer() {
-        return new NoopConsumer();
+    public NoOpConsumer noOpConsumer() {
+        return new NoOpConsumer();
     }
 
     @Bean("ca50e6fd-0737-4cf2-ad54-77a2620c4735")
     public JsonByObjectMapper jsonByObjectMapper(final ApplicationContext appCtx) {
-        final var aufJmsObjectMapper = appCtx.getBeansOfType(ObjectMapper.class).get(AufJmsConstants.AUF_JMS_OBJECT_MAPPER);
+        final var aufJmsObjectMapper = appCtx.getBeansOfType(ObjectMapper.class)
+                .get(AufJmsConstants.AUF_JMS_OBJECT_MAPPER);
         if (aufJmsObjectMapper != null) {
             return new JsonByObjectMapper(aufJmsObjectMapper);
         }
@@ -74,15 +76,16 @@ public final class AufJmsConfiguration {
             // Can not find a default. Creating private.
         }
 
-        final ObjectMapper newMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
+        final ObjectMapper newMapper = new ObjectMapper()
+                .setSerializationInclusion(Include.NON_NULL)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         for (final var name : MODULES) {
             if (ClassUtils.isPresent(name, this.getClass().getClassLoader())) {
                 try {
-                    newMapper.registerModule((Module) Class.forName(name).getDeclaredConstructor((Class[]) null)
-                            .newInstance((Object[]) null));
+                    newMapper.registerModule((Module) Class.forName(name)
+                            .getDeclaredConstructor((Class[]) null).newInstance((Object[]) null));
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException | NoSuchMethodException | SecurityException
                         | ClassNotFoundException e) {

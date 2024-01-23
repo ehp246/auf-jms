@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +9,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.springframework.stereotype.Service;
 
 import me.ehp246.aufjms.api.annotation.ForJmsType;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
+import me.ehp246.aufjms.api.annotation.OfMDC;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 
@@ -23,7 +23,7 @@ class OnPing2 {
     private final AtomicReference<CompletableFuture<Map<String, String>>> ref = new AtomicReference<>(
             new CompletableFuture<>());
 
-    public void apply(final Order order, @OfLog4jContext @OfProperty final int accountId) {
+    public void apply(final Order order, @OfMDC @OfProperty final int accountId) {
         this.ref.get().complete(ThreadContext.getContext());
     }
 
@@ -33,6 +33,6 @@ class OnPing2 {
         return received;
     }
 
-    public record Order(@OfLog4jContext("OrderId") int id, @OfLog4jContext int amount) {
+    public record Order(@OfMDC("OrderId") int id, @OfMDC int amount) {
     }
 }

@@ -1,4 +1,4 @@
-package me.ehp246.test.embedded.log4jcontext;
+package me.ehp246.test.embedded.mdc;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
@@ -16,8 +16,8 @@ import me.ehp246.test.TestQueueListener;
  */
 @ComponentScan
 @EnableByJms
-@EnableForJms({
-        @Inbound(value = @From(TestQueueListener.DESTINATION_NAME), invocationListener = "log4jContextInvocationLIstener") })
+@EnableForJms({ @Inbound(value = @From(TestQueueListener.DESTINATION_NAME),
+        invocationListener = "msgMDCInvocationLIstener") })
 @Import(EmbeddedArtemisConfig.class)
 class AppConfig {
 }

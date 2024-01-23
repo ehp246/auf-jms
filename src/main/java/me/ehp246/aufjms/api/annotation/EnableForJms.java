@@ -7,7 +7,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.context.annotation.Import;
 import org.springframework.jms.listener.AbstractMessageListenerContainer;
 import org.springframework.util.ErrorHandler;
@@ -47,8 +47,9 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class, InboundEndpointFactory.class,
-        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
+@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class,
+        InboundEndpointFactory.class, InboundEndpointListenerConfigurer.class,
+        ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
     /**
      * Specifies the destinations to listen for incoming messages and their

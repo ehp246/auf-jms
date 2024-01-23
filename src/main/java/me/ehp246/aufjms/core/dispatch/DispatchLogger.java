@@ -1,7 +1,7 @@
 package me.ehp246.aufjms.core.dispatch;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import me.ehp246.aufjms.api.dispatch.DispatchListener;
 import me.ehp246.aufjms.api.jms.JmsDispatch;
@@ -14,15 +14,16 @@ import me.ehp246.aufjms.core.configuration.AufJmsConstants;
  */
 public final class DispatchLogger implements DispatchListener.OnDispatch, DispatchListener.PreSend,
         DispatchListener.PostSend, DispatchListener.OnException {
-    private final static Logger LOGGER = LogManager.getLogger();
+    private final static Logger LOGGER = LoggerFactory.getLogger(DispatchLogger.class);
 
     @Override
     public void onDispatch(final JmsDispatch dispatch) {
         if (dispatch == null) {
             return;
         }
-        LOGGER.atInfo().withMarker(AufJmsConstants.HEADERS).log("{}, {}, {}", dispatch::correlationId, dispatch::to,
-                dispatch::type);
+        LOGGER.atInfo().addMarker(AufJmsConstants.HEADERS).setMessage("{}, {}, {}")
+                .addArgument(dispatch::correlationId).addArgument(dispatch::to)
+                .addArgument(dispatch::type).log();
     }
 
     @Override
@@ -30,8 +31,10 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
         if (dispatch == null || msg == null) {
             return;
         }
-        LOGGER.atTrace().withMarker(AufJmsConstants.PROPERTIES).log("{}", dispatch::properties);
-        LOGGER.atTrace().withMarker(AufJmsConstants.BODY).log("{}", msg::text);
+        LOGGER.atTrace().addMarker(AufJmsConstants.PROPERTIES).setMessage("{}")
+                .addArgument(dispatch::properties).log();
+        LOGGER.atTrace().addMarker(AufJmsConstants.BODY).setMessage("{}").addArgument(msg::text)
+                .log();
     }
 
     @Override
@@ -43,6 +46,7 @@ public final class DispatchLogger implements DispatchListener.OnDispatch, Dispat
         if (e == null) {
             return;
         }
-        LOGGER.atTrace().withThrowable(e).withMarker(AufJmsConstants.EXCEPTION).log("{}", e::getMessage);
+        LOGGER.atTrace().setCause(e).addMarker(AufJmsConstants.EXCEPTION).setMessage("{}")
+                .addArgument(e::getMessage).log();
     }
 }

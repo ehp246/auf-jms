@@ -9,8 +9,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Destination;
@@ -24,7 +24,7 @@ import me.ehp246.aufjms.api.jms.JmsDispatchContext;
 import me.ehp246.aufjms.api.jms.JmsMsg;
 import me.ehp246.aufjms.api.jms.JmsNames;
 import me.ehp246.aufjms.api.jms.ToJson;
-import me.ehp246.aufjms.api.spi.Log4jContext;
+import me.ehp246.aufjms.api.spi.MsgMDC;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.OneUtil;
 import me.ehp246.aufjms.core.util.TextJmsMsg;
@@ -41,7 +41,7 @@ import me.ehp246.aufjms.core.util.TextJmsMsg;
  * @author Lei Yang
  */
 public final class DefaultDispatchFn implements JmsDispatchFn {
-    private final Logger LOGGER = LogManager.getLogger(JmsDispatchFn.class.getName());
+    private final Logger LOGGER = LoggerFactory.getLogger(JmsDispatchFn.class.getName());
 
     private final ToJson toJson;
     private final ConnectionFactory connectionFactory;
@@ -122,7 +122,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
     public JmsMsg send(final JmsDispatch dispatch) {
         Objects.requireNonNull(dispatch);
 
-        Log4jContext.set(dispatch);
+        MsgMDC.set(dispatch);
 
         JMSContext localContext = null;
         TextMessage message = null;
@@ -132,7 +132,8 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 listener.onDispatch(dispatch);
             }
 
-            localContext = this.jmsContext == null ? this.connectionFactory.createContext() : this.jmsContext;
+            localContext = this.jmsContext == null ? this.connectionFactory.createContext()
+                    : this.jmsContext;
 
             message = localContext.createTextMessage();
             msg = TextJmsMsg.from(message);
@@ -143,8 +144,8 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
             final Map<String, Object> properties = new HashMap<>(
                     Optional.ofNullable(dispatch.properties()).orElseGet(Map::of));
 
-            for (final var entry : Optional.ofNullable(JmsDispatchContext.properties()).orElseGet(Map::of)
-                    .entrySet()) {
+            for (final var entry : Optional.ofNullable(JmsDispatchContext.properties())
+                    .orElseGet(Map::of).entrySet()) {
                 properties.putIfAbsent(entry.getKey(), entry.getValue());
             }
 
@@ -171,8 +172,10 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
             message.setText(toPayload(dispatch));
 
             final var producer = localContext.createProducer()
-                    .setDeliveryDelay(Optional.ofNullable(dispatch.delay()).map(Duration::toMillis).orElse((long) 0))
-                    .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis).orElse((long) 0));
+                    .setDeliveryDelay(Optional.ofNullable(dispatch.delay()).map(Duration::toMillis)
+                            .orElse((long) 0))
+                    .setTimeToLive(Optional.ofNullable(dispatch.ttl()).map(Duration::toMillis)
+                            .orElse((long) 0));
 
             // Call listeners on preSend
             for (final var listener : this.preSends) {
@@ -186,8 +189,8 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 try {
                     listener.postSend(dispatch, msg);
                 } catch (final Exception e) {
-                    LOGGER.atTrace().withThrowable(e).log("Listener {} failed, ignoring: {}", listener::toString,
-                            e::getMessage);
+                    LOGGER.atTrace().setCause(e).setMessage("Listener {} failed, ignoring: {}")
+                            .addArgument(listener::toString).addArgument(e::getMessage).log();
                 }
             }
 
@@ -197,23 +200,24 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
                 try {
                     listener.onException(dispatch, msg, e);
                 } catch (final Exception e1) {
-                    LOGGER.atTrace().withThrowable(e1).log("Listener {} failed, ignoring: {}", listener::toString,
-                            e1::getMessage);
+                    LOGGER.atTrace().setCause(e1).setMessage("Listener {} failed, ignoring: {}")
+                            .addArgument(listener::toString).addArgument(e1::getMessage).log();
                 }
             }
 
-            throw new JmsDispatchFailedException(
-                    "Dispatch failed, CorrelationId=" + dispatch.correlationId() + ", " + e.getMessage(), e);
+            throw new JmsDispatchFailedException("Dispatch failed, CorrelationId="
+                    + dispatch.correlationId() + ", " + e.getMessage(), e);
         } finally {
             if (this.jmsContext == null && localContext != null) {
                 try {
                     localContext.close();
                 } catch (final Exception e) {
-                    LOGGER.atTrace().withThrowable(e).log("JMSCOntext close failed, ignoring: {}", e::getMessage);
+                    LOGGER.atTrace().setCause(e).setMessage("JMSCOntext close failed, ignoring: {}")
+                            .addArgument(e::getMessage).log();
                 }
             }
 
-            Log4jContext.clear(dispatch);
+            MsgMDC.clear(dispatch);
         }
     }
 
@@ -235,6 +239,7 @@ public final class DefaultDispatchFn implements JmsDispatchFn {
             return null;
         }
 
-        return to instanceof AtQueue ? jmsContext.createQueue(to.name()) : jmsContext.createTopic(to.name());
+        return to instanceof AtQueue ? jmsContext.createQueue(to.name())
+                : jmsContext.createTopic(to.name());
     }
 }

@@ -20,8 +20,8 @@ import me.ehp246.aufjms.api.annotation.OfCorrelationId;
 import me.ehp246.aufjms.api.annotation.OfDeliveryCount;
 import me.ehp246.aufjms.api.annotation.OfGroupId;
 import me.ehp246.aufjms.api.annotation.OfGroupSeq;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext;
-import me.ehp246.aufjms.api.annotation.OfLog4jContext.Op;
+import me.ehp246.aufjms.api.annotation.OfMDC;
+import me.ehp246.aufjms.api.annotation.OfMDC.Op;
 import me.ehp246.aufjms.api.annotation.OfProperty;
 import me.ehp246.aufjms.api.annotation.OfRedelivered;
 import me.ehp246.aufjms.api.annotation.OfType;
@@ -80,11 +80,11 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Bind the Thread Context
          */
-        final var log4jContextBinders = argBinders.log4jContextBinders();
-        final Map<String, String> log4jContext = new HashMap<>();
-        if (log4jContextBinders != null && log4jContextBinders.size() > 0) {
-            log4jContextBinders.entrySet().stream().forEach(entry -> {
-                log4jContext.put(entry.getKey(), log4jContextBinders.get(entry.getKey()).apply(arguments));
+        final var msgMDCBinders = argBinders.msgMDCBinders();
+        final Map<String, String> mdc = new HashMap<>();
+        if (msgMDCBinders != null && msgMDCBinders.size() > 0) {
+            msgMDCBinders.entrySet().stream().forEach(entry -> {
+                mdc.put(entry.getKey(), msgMDCBinders.get(entry.getKey()).apply(arguments));
             });
         }
 
@@ -106,8 +106,8 @@ public final class DefaultInvocableBinder implements InvocableBinder {
             }
 
             @Override
-            public Map<String, String> log4jContext() {
-                return log4jContext;
+            public Map<String, String> mdc() {
+                return mdc;
             }
 
         };
@@ -181,12 +181,12 @@ public final class DefaultInvocableBinder implements InvocableBinder {
         /*
          * Parameters, then the body.
          */
-        final var log4jContextBinders = new HashMap<String, Function<Object[], String>>();
+        final var msgMDCBinders = new HashMap<String, Function<Object[], String>>();
 
-        log4jContextBinders.putAll(new ReflectedMethod(method).allParametersWith(OfLog4jContext.class).stream()
-                .filter(p -> p.parameter().getAnnotation(OfLog4jContext.class).op() == Op.Default)
+        msgMDCBinders.putAll(new ReflectedMethod(method).allParametersWith(OfMDC.class).stream()
+                .filter(p -> p.parameter().getAnnotation(OfMDC.class).op() == Op.Default)
                 .collect(Collectors.toMap(p -> {
-                    final var name = p.parameter().getAnnotation(OfLog4jContext.class).value();
+                    final var name = p.parameter().getAnnotation(OfMDC.class).value();
                     return OneUtil.hasValue(name) ? name : p.parameter().getName();
                 }, p -> {
                     final var index = p.index();
@@ -197,8 +197,8 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          */
         final var bodyReflectedParam = bodyParamef[0];
 
-        if (bodyReflectedParam == null || bodyReflectedParam.parameter().getAnnotation(OfLog4jContext.class) == null) {
-            return new ArgBinders(paramBinders, log4jContextBinders);
+        if (bodyReflectedParam == null || bodyReflectedParam.parameter().getAnnotation(OfMDC.class) == null) {
+            return new ArgBinders(paramBinders, msgMDCBinders);
         }
 
         /*
@@ -206,19 +206,19 @@ public final class DefaultInvocableBinder implements InvocableBinder {
          */
         final var bodyParam = bodyReflectedParam.parameter();
         final var bodyParamIndex = bodyReflectedParam.index();
-        final var ofLog4jContext = bodyParam.getAnnotation(OfLog4jContext.class);
+        final var ofMDC = bodyParam.getAnnotation(OfMDC.class);
 
-        switch (ofLog4jContext.op()) {
+        switch (ofMDC.op()) {
         case Introspect:
             /*
              * Duplicated names will overwrite each other un-deterministically.
              */
-            final var bodyParamContextName = ofLog4jContext.value();
+            final var bodyParamContextName = ofMDC.value();
             final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
-                    .streamSuppliersWith(OfLog4jContext.class)
-                    .filter(m -> m.getAnnotation(OfLog4jContext.class).op() == Op.Default)
+                    .streamSuppliersWith(OfMDC.class)
+                    .filter(m -> m.getAnnotation(OfMDC.class).op() == Op.Default)
                     .collect(Collectors.toMap(
-                            m -> bodyParamContextName + Optional.of(m.getAnnotation(OfLog4jContext.class).value())
+                            m -> bodyParamContextName + Optional.of(m.getAnnotation(OfMDC.class).value())
                                     .filter(OneUtil::hasValue).orElseGet(m::getName),
                             Function.identity(), (l, r) -> r))
                     .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
@@ -236,20 +236,20 @@ public final class DefaultInvocableBinder implements InvocableBinder {
                             }
                         };
                     }));
-            log4jContextBinders.putAll(bodyFieldBinders);
+            msgMDCBinders.putAll(bodyFieldBinders);
             break;
         default:
-            log4jContextBinders.put(
-                    Optional.ofNullable(bodyParam.getAnnotation(OfLog4jContext.class)).map(OfLog4jContext::value)
+            msgMDCBinders.put(
+                    Optional.ofNullable(bodyParam.getAnnotation(OfMDC.class)).map(OfMDC::value)
                             .filter(OneUtil::hasValue).orElseGet(bodyParam::getName),
                     args -> args[bodyParamIndex] == null ? null : args[bodyParamIndex] + "");
             break;
         }
 
-        return new ArgBinders(paramBinders, log4jContextBinders);
+        return new ArgBinders(paramBinders, msgMDCBinders);
     }
 
     record ArgBinders(Map<Integer, Function<JmsMsg, Object>> paramBinders,
-            Map<String, Function<Object[], String>> log4jContextBinders) {
+            Map<String, Function<Object[], String>> msgMDCBinders) {
     };
 }
