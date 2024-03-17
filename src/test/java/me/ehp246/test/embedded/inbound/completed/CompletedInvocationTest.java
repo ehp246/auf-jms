@@ -2,8 +2,12 @@ package me.ehp246.test.embedded.inbound.completed;
 
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import jakarta.jms.JMSException;
 import me.ehp246.aufjms.api.inbound.InboundEndpoint;
 
 /**
@@ -25,6 +30,17 @@ class CompletedInvocationTest {
     private SendQ1 q1;
     @Autowired
     private CompletedListener listener;
+
+    @AfterEach
+    void afterEach() {
+        Assertions.assertEquals(0, ThreadContext.getContext().size());
+    }
+
+    @BeforeEach
+    void beforeEach() throws JMSException {
+        listener.reset();
+        ThreadContext.clearAll();
+    }
 
     @Test
     void completed_01() throws InterruptedException, ExecutionException {
