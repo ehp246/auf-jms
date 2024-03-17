@@ -20,15 +20,18 @@ class CompletedListener implements OnInvoking, OnCompleted {
     private final AtomicReference<CompletableFuture<Completed>> completedRef = new AtomicReference<>(
             new CompletableFuture<>());
 
+    public void reset() {
+        this.boundRef.set(new CompletableFuture<>());
+        this.completedRef.set(new CompletableFuture<>());
+    }
+    
     @Override
     public void onCompleted(final Completed completed) {
-        this.completedRef.set(new CompletableFuture<>());
         this.completedRef.get().complete(completed);
     }
 
     @Override
     public void onInvoking(final BoundInvocable bound) {
-        this.boundRef.set(new CompletableFuture<>());
         this.boundRef.get().complete(bound);
     }
 

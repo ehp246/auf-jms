@@ -12,7 +12,9 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.jgroups.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,6 +85,11 @@ class DefaultInvocableDispatcherTest {
         Mockito.when(bound.invoke()).thenReturn(failed);
 
         return (i, m) -> bound;
+    }
+
+    @BeforeEach
+    void beforeEach() throws JMSException {
+        ThreadContext.clearAll();
     }
 
     @Test
