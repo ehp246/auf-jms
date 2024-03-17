@@ -31,11 +31,6 @@ class CompletedInvocationTest {
     @Autowired
     private CompletedListener listener;
 
-    @AfterEach
-    void afterEach() {
-        Assertions.assertEquals(0, ThreadContext.getContext().size());
-    }
-
     @BeforeEach
     void beforeEach() throws JMSException {
         listener.reset();

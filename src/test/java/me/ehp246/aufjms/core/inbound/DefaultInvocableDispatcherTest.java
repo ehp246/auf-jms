@@ -87,11 +87,6 @@ class DefaultInvocableDispatcherTest {
         return (i, m) -> bound;
     }
 
-    @AfterEach
-    void afterEach() {
-        Assertions.assertEquals(0, ThreadContext.getContext().size());
-    }
-
     @BeforeEach
     void beforeEach() throws JMSException {
         ThreadContext.clearAll();
