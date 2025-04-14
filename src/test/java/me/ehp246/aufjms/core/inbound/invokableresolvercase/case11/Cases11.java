@@ -45,4 +45,8 @@ public class Cases11 {
         public void invoke() {
         }
     }
+
+    public static class Case5 {
+
+    }
 }
