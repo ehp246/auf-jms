@@ -18,7 +18,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @Service
 @ForJmsType(value = ".*", scope = InstanceScope.BEAN)
-class OnMsg {
+public class OnMsg {
     private final static Logger logger = LogManager.getLogger(OnMsg.class);
 
     private final CompletableFuture<JmsMsg> ref = new CompletableFuture<>();

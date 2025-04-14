@@ -10,13 +10,13 @@ import me.ehp246.aufjms.api.annotation.OfType;
  *
  */
 @ForJmsType(".*")
-class OnMsg {
+public class OnMsg {
     @Invoking
     public String perform(@OfType final String type, @OfCorrelationId final String id) {
         if (type.equalsIgnoreCase("throw")) {
             throw new RuntimeException();
         }
-        
+
         return id;
     }
 }

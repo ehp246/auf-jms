@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.inbound.InstanceScope;
  *
  */
 @ForJmsType(scope = InstanceScope.BEAN)
-class NamedStringCase {
+public class NamedStringCase {
     private AtomicReference<CompletableFuture<String>> ref;
 
     public NamedStringCase reset() {

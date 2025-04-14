@@ -7,7 +7,7 @@ import me.ehp246.aufjms.api.annotation.ForJmsType;
  *
  */
 @ForJmsType
-class Inc {
+public class Inc {
     public int invoke(int i) {
         return ++i;
     }

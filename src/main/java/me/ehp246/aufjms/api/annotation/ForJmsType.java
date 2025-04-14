@@ -14,13 +14,16 @@ import me.ehp246.aufjms.api.inbound.InvocationModel;
  * Indicates that the class defines methods that should be invoked on a message
  * by matching on message's JMS type, i.e., {@linkplain Message#getJMSType()}.
  * <p>
+ * The annotated class must be <code>public</code>.
+ * <p>
  * The method that is to be invoked is determined by the following lookup
  * process:
  * <ul>
  * <li>Only <code>public</code> methods declared directly on the class are
  * considered. No inherited.
  * <li>a method annotated by {@linkplain Invoking}. Or...
- * <li>a method named '<code>invoke</code>'.
+ * <li>a method named '<code>invoke</code>'. Or...
+ * <li>a method named '<code>apply</code>'.
  * </ul>
  * The signature and the declaration order are not considered. The first found
  * is accepted. If no method is found, it's an exception.

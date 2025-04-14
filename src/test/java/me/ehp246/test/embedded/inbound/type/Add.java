@@ -13,7 +13,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 @ForJmsType("Add")
-class Add {
+public class Add {
     @Autowired
     private AtomicReference<CompletableFuture<Integer>> ref;
 

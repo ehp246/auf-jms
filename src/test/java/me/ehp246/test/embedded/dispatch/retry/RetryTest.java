@@ -6,6 +6,7 @@ import org.jgroups.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -33,6 +34,7 @@ class RetryTest {
     }
 
     @Test
+    @Timeout(3)
     void test_02() throws InterruptedException, ExecutionException {
         final var expected = UUID.randomUUID().toString();
 

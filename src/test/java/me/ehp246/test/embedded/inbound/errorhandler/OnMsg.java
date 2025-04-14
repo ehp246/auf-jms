@@ -9,7 +9,7 @@ import me.ehp246.aufjms.api.inbound.InstanceScope;
  *
  */
 @ForJmsType(scope = InstanceScope.BEAN)
-class OnMsg {
+public class OnMsg {
     public void apply(@OfProperty final int named) {
     }
 }
