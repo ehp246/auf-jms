@@ -11,7 +11,7 @@ import me.ehp246.aufjms.api.annotation.Invoking;
  *
  */
 @ForJmsType(value = ".*")
-class OnMsg {
+public class OnMsg {
     private final CompletableFuture<Boolean> closeFuture;
 
     OnMsg(final CompletableFuture<Boolean> closeFuture) {

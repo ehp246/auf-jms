@@ -17,7 +17,7 @@ import me.ehp246.test.embedded.inbound.body.view.AppConfig.Received;
  */
 class OnMsg {
     @ForJmsType
-    static class Default {
+    public static class Default {
         @Autowired
         private List<CompletableFuture<Received>> receiving;
 
@@ -27,7 +27,7 @@ class OnMsg {
     }
 
     @ForJmsType
-    static class Id extends Default {
+    public static class Id extends Default {
         @Override
         public void invoke(@JsonView(JmsView.class) final Received payload) {
             super.invoke(payload);
@@ -35,7 +35,7 @@ class OnMsg {
     }
 
     @ForJmsType
-    static class IdPassword extends Default {
+    public static class IdPassword extends Default {
         @Override
         public void invoke(@JsonView(String.class) final Received payload) {
             super.invoke(payload);
@@ -43,7 +43,7 @@ class OnMsg {
     }
 
     @ForJmsType
-    static class None extends Default {
+    public static class None extends Default {
         @Override
         public void invoke(@JsonView(Integer.class) final Received payload) {
             super.invoke(payload);

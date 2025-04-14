@@ -17,7 +17,7 @@ import me.ehp246.aufjms.api.jms.JmsMsg;
  */
 @Service
 @ForJmsType(value = "Ping", scope = InstanceScope.BEAN)
-class OnPing {
+public class OnPing {
     private CompletableFuture<Map<String, String>> ref = new CompletableFuture<>();
 
     void reset() {

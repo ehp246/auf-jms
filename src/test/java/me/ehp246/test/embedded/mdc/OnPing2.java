@@ -19,7 +19,7 @@ import me.ehp246.aufjms.api.inbound.InstanceScope;
  */
 @Service
 @ForJmsType(value = "Ping2", scope = InstanceScope.BEAN)
-class OnPing2 {
+public class OnPing2 {
     private final AtomicReference<CompletableFuture<Map<String, String>>> ref = new AtomicReference<>(
             new CompletableFuture<>());
 

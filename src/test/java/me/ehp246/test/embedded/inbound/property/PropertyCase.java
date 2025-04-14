@@ -15,7 +15,7 @@ import me.ehp246.aufjms.api.annotation.OfProperty;
  *
  */
 @ForJmsType("")
-class PropertyCase {
+public class PropertyCase {
     @Autowired
     private AtomicReference<CompletableFuture<PropertyCase>> ref;
 

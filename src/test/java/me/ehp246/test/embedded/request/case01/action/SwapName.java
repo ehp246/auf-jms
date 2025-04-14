@@ -8,7 +8,7 @@ import me.ehp246.test.embedded.request.case01.Person;
  *
  */
 @ForJmsType
-class SwapName {
+public class SwapName {
     public Person invoke(final Person person) {
         return new Person(person.lastName(), person.firstName());
     }

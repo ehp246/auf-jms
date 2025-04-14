@@ -114,8 +114,6 @@ public final class DefaultInvocableBinder implements InvocableBinder {
     }
 
     private ArgBinders parse(final Method method) {
-        method.setAccessible(true);
-
         final var parameters = method.getParameters();
         final Map<Integer, Function<JmsMsg, Object>> paramBinders = new HashMap<>();
         final var bodyParamef = new ReflectedParameter[] { null };
@@ -214,13 +212,13 @@ public final class DefaultInvocableBinder implements InvocableBinder {
              * Duplicated names will overwrite each other un-deterministically.
              */
             final var bodyParamContextName = ofMDC.value();
-            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType())
-                    .streamSuppliersWith(OfMDC.class)
+            final var bodyFieldBinders = new ReflectedType<>(bodyParam.getType()).streamSuppliersWith(OfMDC.class)
                     .filter(m -> m.getAnnotation(OfMDC.class).op() == Op.Default)
-                    .collect(Collectors.toMap(
-                            m -> bodyParamContextName + Optional.of(m.getAnnotation(OfMDC.class).value())
-                                    .filter(OneUtil::hasValue).orElseGet(m::getName),
-                            Function.identity(), (l, r) -> r))
+                    .collect(
+                            Collectors.toMap(
+                                    m -> bodyParamContextName + Optional.of(m.getAnnotation(OfMDC.class).value())
+                                            .filter(OneUtil::hasValue).orElseGet(m::getName),
+                                    Function.identity(), (l, r) -> r))
                     .entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> {
                         final var m = entry.getValue();
                         return (Function<Object[], String>) args -> {
