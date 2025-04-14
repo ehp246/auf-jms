@@ -79,6 +79,7 @@ class ServerApplication {
 ```
 
 **Implement business logic by JMS type**
+
 ```java
 @ForJmsType
 class RunJob {
@@ -92,7 +93,7 @@ class RunJob {
 The latest major version 3 requires the following to run:
 * <a href='https://openjdk.org/projects/jdk/21/'>JDK 21</a>
 * <a href='https://jakarta.ee/specifications/messaging/3.1/'>JMS 3.1</a>
-* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring Framework 6.1</a>
+* <a href='https://mvnrepository.com/artifact/org.springframework'>Spring Framework 6.2</a>
 * <a href='https://mvnrepository.com/artifact/com.fasterxml.jackson'>Jackson 2</a>: Core and Databind
 
 In addition to the above, the server-side features provided by `@EnableForJms` requires:

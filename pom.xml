@@ -40,33 +40,31 @@
 
 		<jms-api.version>3.1.0</jms-api.version>
 
-		<slf4j.version>2.0.11</slf4j.version>
+		<spring-framework.version>6.2.5</spring-framework.version>
+		<spring-boot.version>3.4.4</spring-boot.version>
 
-		<spring-framework.version>6.1.14</spring-framework.version>
-		<spring-boot.version>3.2.2</spring-boot.version>
+		<slf4j.version>2.0.17</slf4j.version>
 
-		<jackson.version>2.16.1</jackson.version>
+		<jackson.version>2.18.3</jackson.version>
 
-		<qpid-jms-client.version>2.5.0</qpid-jms-client.version>
+		<log4j.version>2.24.3</log4j.version>
 
-		<log4j.version>2.22.1</log4j.version>
+		<qpid-jms-client.version>2.7.0</qpid-jms-client.version>
+		<artemis-jakarta-server.version>2.40.0</artemis-jakarta-server.version>
+		<azure-starter-servicebus-jms.version>5.22.0</azure-starter-servicebus-jms.version>
 
-		<artemis-jakarta-server.version>2.31.2</artemis-jakarta-server.version>
-		<azure-starter-servicebus-jms.version>5.8.0</azure-starter-servicebus-jms.version>
+		<junit-jupiter.version>5.12.1</junit-jupiter.version>
+		<junit-platform.version>1.12.1</junit-platform.version>
 
-		<junit-jupiter.version>5.10.1</junit-jupiter.version>
-		<junit-platform.version>1.10.1</junit-platform.version>
+		<mockito.version>5.16.1</mockito.version>
 
-		<mockito.version>5.9.0</mockito.version>
-		<mockito-inline.version>5.2.0</mockito-inline.version>
-		<bytebuddy.version>1.14.11</bytebuddy.version>
-
-		<maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-		<maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
-		<maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-		<maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
-		<maven-jacoco-plugin.version>0.8.11</maven-jacoco-plugin.version>
+		<maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+		<maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
+		<maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+		<maven-jacoco-plugin.version>0.8.13</maven-jacoco-plugin.version>
+		
+		<maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -164,7 +162,7 @@
 		<dependency>
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
-			<version>2.0.0</version>
+			<version>2.0.11</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -175,24 +173,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-			<version>${spring-boot.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot</artifactId>
-			<version>${spring-boot.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-autoconfigure</artifactId>
@@ -239,13 +219,13 @@
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging</artifactId>
-			<version>3.5.0.Final</version>
+			<version>3.6.1.Final</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-nop</artifactId>
-			<version>1.7.36</version>
+			<version>2.0.17</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -302,33 +282,7 @@
 			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
-			<version>${mockito-inline.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
-			<version>${bytebuddy.version}</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
-
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>sonatype-nexus-snapshots</id>
-			<name>Sonatype Nexus Snapshots</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-		<repository>
-			<id>sonatype-nexus-staging</id>
-			<name>Nexus Release Repository</name>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
 
 	<build>
 		<plugins>
@@ -355,6 +309,10 @@
 							test/main/resources/log4j2-surefire.xml</log4j.configurationFile>
 						<spring.main.banner-mode>off</spring.main.banner-mode>
 					</systemPropertyVariables>
+					<argLine>
+						-Xshare:off
+						-javaagent:"${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar"
+					</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
