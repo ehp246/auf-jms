@@ -71,7 +71,8 @@ final class DefaultInvocableScanner {
     private InvocableTypeDefinition newDefinition(final Class<?> type) {
         final var annotation = type.getAnnotation(ForJmsType.class);
         if (annotation == null) {
-            return null;
+            throw new IllegalArgumentException(
+                    ForJmsType.class.getName() + " annotation required on " + type.getName());
         }
 
         if ((Modifier.isAbstract(type.getModifiers()) && annotation.scope().equals(InstanceScope.MESSAGE))

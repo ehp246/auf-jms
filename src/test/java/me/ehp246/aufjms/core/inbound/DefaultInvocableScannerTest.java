@@ -206,4 +206,10 @@ class DefaultInvocableScannerTest {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableScanner(Object::toString)
                 .registeryFrom(null, Set.of("me.ehp246.aufjms.core.inbound.invokableresolvercase.error.case06")));
     }
+
+    @Test
+    void registrying_01() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new DefaultInvocableScanner(Object::toString)
+                .registeryFrom(new Class[] { Cases11.Case5.class }, null));
+    }
 }
