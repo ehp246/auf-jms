@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>me.ehp246</groupId>
 	<artifactId>auf-jms</artifactId>
-	<version>3.0.0</version>
+	<version>4.0.0</version>
 	<name>Auf JMS</name>
 	<description>An annotation-driven declarative JMS development framework</description>
 
@@ -357,6 +357,8 @@
 								<arg>--pinentry-mode</arg>
 								<arg>loopback</arg>
 							</gpgArguments>
+							<keyname>${gpg.keyname}</keyname>
+							<passphraseServerId>gpg-passphrase</passphraseServerId>
 						</configuration>
 					</execution>
 				</executions>
@@ -379,6 +381,16 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.7.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>sonatype-central</publishingServerId>
+					<autoPublish>true</autoPublish>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
