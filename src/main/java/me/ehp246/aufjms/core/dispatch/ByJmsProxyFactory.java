@@ -24,7 +24,7 @@ import me.ehp246.aufjms.api.dispatch.JmsDispatchFnProvider;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.configuration.AufJmsConstants;
 import me.ehp246.aufjms.core.util.OneUtil;
 
@@ -41,19 +41,19 @@ public final class ByJmsProxyFactory {
     private final Map<Method, DispatchMethodBinder> methodBinderCache = new ConcurrentHashMap<>();
 
     private final JmsDispatchFnProvider dispatchFnProvider;
-    private final PropertyResolver propertyResolver;
+    private final ExpressionResolver expressionResolver;
     private final EnableByJmsConfig enableByJmsConfig;
     private final RequestDispatchMap requestDispatchMap;
     private final DispatchMethodParser methodParser;
 
     public ByJmsProxyFactory(final EnableByJmsConfig enableByJmsConfig,
-            final JmsDispatchFnProvider dispatchFnProvider, final PropertyResolver propertyResolver,
+            final JmsDispatchFnProvider dispatchFnProvider, final ExpressionResolver expressionResolver,
             final DispatchMethodParser methodParser,
             @Nullable final RequestDispatchMap requestDispatchMap) {
         super();
         this.enableByJmsConfig = enableByJmsConfig;
         this.dispatchFnProvider = dispatchFnProvider;
-        this.propertyResolver = propertyResolver;
+        this.expressionResolver = expressionResolver;
         this.requestDispatchMap = requestDispatchMap;
         this.methodParser = methodParser;
     }
@@ -65,7 +65,7 @@ public final class ByJmsProxyFactory {
 
         final var byJms = proxyInterface.getAnnotation(ByJms.class);
 
-        final var toName = propertyResolver.resolve(byJms.value().value());
+        final var toName = expressionResolver.resolve(byJms.value().value());
         if (!OneUtil.hasValue(toName)) {
             throw new IllegalArgumentException("Un-supported To: '" + toName + "'");
         }
@@ -73,24 +73,24 @@ public final class ByJmsProxyFactory {
         final var destination = byJms.value().type() == DestinationType.QUEUE ? At.toQueue(toName)
                 : At.toTopic(toName);
 
-        final var replyToName = propertyResolver.resolve(byJms.replyTo().value());
+        final var replyToName = expressionResolver.resolve(byJms.replyTo().value());
         final var replyTo = OneUtil.hasValue(replyToName)
                 ? byJms.replyTo().type() == DestinationType.QUEUE ? At.toQueue(replyToName)
                         : At.toTopic(replyToName)
                 : enableByJmsConfig.requestReplyAt();
 
         final var requestTimeout = Optional
-                .ofNullable(propertyResolver.resolve(byJms.requestTimeout()))
+                .ofNullable(expressionResolver.resolve(byJms.requestTimeout()))
                 .filter(OneUtil::hasValue).map(Duration::parse)
                 .orElseGet(() -> Optional
-                        .ofNullable(propertyResolver
+                        .ofNullable(expressionResolver
                                 .resolve("${" + AufJmsConstants.REQUEST_TIMEOUT + ":}"))
                         .filter(OneUtil::hasValue).map(Duration::parse).orElse(null));
 
-        final var ttl = Optional.of(propertyResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
+        final var ttl = Optional.of(expressionResolver.resolve(byJms.ttl())).filter(OneUtil::hasValue)
                 .map(Duration::parse).orElseGet(enableByJmsConfig::ttl);
 
-        final var delay = Optional.of(propertyResolver.resolve(byJms.delay()))
+        final var delay = Optional.of(expressionResolver.resolve(byJms.delay()))
                 .filter(OneUtil::hasValue).map(Duration::parse).orElseGet(enableByJmsConfig::delay);
 
         final var proxyConfig = new ByJmsProxyConfig(destination, replyTo, requestTimeout, ttl,

@@ -32,8 +32,8 @@ import me.ehp246.aufjms.core.dispatch.EnableByJmsRegistrar;
  */
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, EnableByJmsBeanFactory.class,
-        ByJmsProxyFactory.class, DefaultDispatchMethodParser.class })
+@Import({ AufJmsConfiguration.class, EnableByJmsRegistrar.class, EnableByJmsBeanFactory.class, ByJmsProxyFactory.class,
+        DefaultDispatchMethodParser.class })
 public @interface EnableByJms {
     /**
      * Specifies the packages to scan for {@linkplain ByJms} interfaces.
@@ -50,7 +50,7 @@ public @interface EnableByJms {
      * The value can be overridden by higher-priority sources from
      * {@linkplain ByJms} proxies. The default is no TTL.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      */
     String ttl() default "";
 
@@ -61,7 +61,7 @@ public @interface EnableByJms {
      * The value can be overridden by higher-priority sources from
      * {@linkplain ByJms} proxies. The default is no delay.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      */
     String delay() default "";
 
@@ -76,7 +76,7 @@ public @interface EnableByJms {
      * index starts at <code>0</code>. E.g., {@code jmsDispatchFn-0},
      * {@code jmsDispatchFn-1}, and etc.
      * <p>
-     * Does not support Spring property placeholder.
+     * Does not support Spring property placeholder nor SpEL expression.
      */
     String[] dispatchFns() default {};
 

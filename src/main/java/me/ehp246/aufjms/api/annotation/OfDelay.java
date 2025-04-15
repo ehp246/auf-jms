@@ -23,7 +23,8 @@ import jakarta.jms.MessageProducer;
  * <p>
  * Can be applied to a method.
  * <p>
- * When applied to method, Spring property placeholder is supported.
+ * When applied to method, Spring property placeholder and SpEL expression are
+ * supported.
  * <p>
  * Only applicable to {@linkplain ByJms} interfaces.
  *

@@ -47,9 +47,8 @@ import me.ehp246.aufjms.core.inbound.InboundEndpointListenerConfigurer;
 @Documented
 @Retention(RUNTIME)
 @Target(TYPE)
-@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class,
-        InboundEndpointFactory.class, InboundEndpointListenerConfigurer.class,
-        ExecutorConfiguration.class, DefaultInvocableBinder.class })
+@Import({ AufJmsConfiguration.class, AnnotatedInboundEndpointRegistrar.class, InboundEndpointFactory.class,
+        InboundEndpointListenerConfigurer.class, ExecutorConfiguration.class, DefaultInvocableBinder.class })
 public @interface EnableForJms {
     /**
      * Specifies the destinations to listen for incoming messages and their
@@ -72,7 +71,7 @@ public @interface EnableForJms {
      * <p>
      * The setting applies to all {@linkplain InboundEndpoint}'s.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      */
     String defaultConsumer() default "44fc3968-7eba-47a3-a7b4-54e2b365d027";
 
@@ -110,14 +109,14 @@ public @interface EnableForJms {
          * where <code>'n'</code> is the index from {@linkplain EnableForJms#value()}
          * starting at <code>0</code>.
          * <p>
-         * Does not support Spring property placeholder.
+         * Does not support Spring property placeholder nor SpEL expression.
          */
         String name() default "";
 
         /**
          * Specifies whether the listener should be started automatically.
          * <p>
-         * Supports Spring property placeholder.
+         * Supports Spring property placeholder and SpEL expression.
          */
         String autoStartup() default "true";
 
@@ -166,7 +165,7 @@ public @interface EnableForJms {
          * If a {@linkplain RuntimeException} happens from the bean during execution,
          * the {@linkplain Message} will follow broker's dead-lettering process.
          * <p>
-         * Supports Spring property placeholder.
+         * Supports Spring property placeholder and SpEL expression.
          */
         String invocationListener() default "";
 
@@ -174,7 +173,7 @@ public @interface EnableForJms {
          * Specifies the bean name of {@linkplain ErrorHandler} type to receive any
          * uncaught exceptions during execution of a message.
          * <p>
-         * Supports Spring property placeholder.
+         * Supports Spring property placeholder and SpEL expression.
          *
          * @see AbstractMessageListenerContainer#setErrorHandler(ErrorHandler)
          */
@@ -184,7 +183,7 @@ public @interface EnableForJms {
          * Specifies the bean name of {@linkplain ExceptionListener} type to receive
          * {@linkplain JMSException} during execution of a message.
          * <p>
-         * Supports Spring property placeholder.
+         * Supports Spring property placeholder and SpEL expression.
          *
          * @see AbstractMessageListenerContainer#setExceptionListener(ExceptionListener)
          */
@@ -195,7 +194,7 @@ public @interface EnableForJms {
             /**
              * Defines the destination name.
              * <p>
-             * Supports Spring property placeholder.
+             * Supports Spring property placeholder and SpEL expression.
              */
             String value();
 
@@ -213,7 +212,7 @@ public @interface EnableForJms {
              * <p>
              * See the JMS specification for a detailed definition of selector expressions.
              * <p>
-             * Supports Spring property placeholder.
+             * Supports Spring property placeholder and SpEL expression.
              *
              * @see <a href=
              *      'https://jakarta.ee/specifications/messaging/3.0/jakarta-messaging-spec-3.0.html#message-selection'>Selector</a>
@@ -240,7 +239,7 @@ public @interface EnableForJms {
                  * Only applicable when {@linkplain From.Sub#shared()} and/or
                  * {@linkplain From.Sub#durable()} is <code>true</code>.
                  * <p>
-                 * Supports Spring property placeholder.
+                 * Supports Spring property placeholder and SpEL expression.
                  */
                 String name();
 

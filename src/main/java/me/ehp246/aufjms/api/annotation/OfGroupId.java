@@ -13,7 +13,8 @@ import java.lang.annotation.Target;
  * When applied to a parameter, Only {@linkplain String} type is supported. The
  * specified value on annotation is ignored. {@code null} is accepted.
  * <p>
- * When applied to a method, Spring property placeholder is supported.
+ * When applied to a method, Spring property placeholder and SpEL expression are
+ * supported.
  * <p>
  * When applied to a parameter of a method on {@linkplain ForJmsType} class, it
  * binds the parameter to the incoming message's value.

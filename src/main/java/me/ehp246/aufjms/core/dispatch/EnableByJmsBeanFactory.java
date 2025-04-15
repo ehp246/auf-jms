@@ -7,7 +7,7 @@ import java.util.Optional;
 import me.ehp246.aufjms.api.dispatch.EnableByJmsConfig;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -17,23 +17,23 @@ import me.ehp246.aufjms.core.util.OneUtil;
  *      org.springframework.beans.factory.support.BeanDefinitionRegistry)
  */
 public final class EnableByJmsBeanFactory {
-    private final PropertyResolver propertyResolver;
+    private final ExpressionResolver expressionResolver;
 
-    public EnableByJmsBeanFactory(final PropertyResolver propertyResolver) {
+    public EnableByJmsBeanFactory(final ExpressionResolver expressionResolver) {
         super();
-        this.propertyResolver = propertyResolver;
+        this.expressionResolver = expressionResolver;
     }
 
     public EnableByJmsConfig enableByJmsConfig(final List<Class<?>> scan, final String ttl, final String delay,
             final List<String> dispatchFns, final String requestReplyToValue,
             final DestinationType requestReplyToType) {
         return new EnableByJmsConfig(scan,
-                Optional.ofNullable(propertyResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
+                Optional.ofNullable(expressionResolver.resolve(ttl)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
-                Optional.ofNullable(propertyResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
+                Optional.ofNullable(expressionResolver.resolve(delay)).filter(OneUtil::hasValue).map(Duration::parse)
                         .orElse(null),
                 dispatchFns,
-                Optional.ofNullable(propertyResolver.resolve(requestReplyToValue)).filter(OneUtil::hasValue).map(
+                Optional.ofNullable(expressionResolver.resolve(requestReplyToValue)).filter(OneUtil::hasValue).map(
                         value -> requestReplyToType == DestinationType.TOPIC ? At.toTopic(value) : At.toQueue(value))
                         .orElse(null));
     }

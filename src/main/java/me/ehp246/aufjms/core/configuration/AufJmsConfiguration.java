@@ -5,9 +5,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.expression.StandardBeanExpressionResolver;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.ClassUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,7 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import jakarta.jms.ConnectionFactory;
 import me.ehp246.aufjms.api.jms.ConnectionFactoryProvider;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultDispatchFnProvider;
 import me.ehp246.aufjms.core.dispatch.DispatchLogger;
 import me.ehp246.aufjms.core.inbound.NoOpConsumer;
@@ -30,8 +34,7 @@ import me.ehp246.aufjms.provider.jackson.JsonByObjectMapper;
  */
 @Import({ DefaultDispatchFnProvider.class })
 public final class AufJmsConfiguration {
-    private final static List<String> MODULES = List.of(
-            "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
+    private final static List<String> MODULES = List.of("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule",
             "com.fasterxml.jackson.module.mrbean.MrBeanModule",
             "com.fasterxml.jackson.module.paramnames.ParameterNamesModule");
 
@@ -42,9 +45,16 @@ public final class AufJmsConfiguration {
     }
 
     @Bean("2744a1e7-9576-4f2e-8c56-6623247155e7")
-    public PropertyResolver propertyResolver(
-            final org.springframework.core.env.PropertyResolver springResolver) {
-        return springResolver::resolveRequiredPlaceholders;
+    public ExpressionResolver expressionResolver(final PropertyResolver springPropertyResolver,
+            final ConfigurableBeanFactory beanFactory) {
+        final var springSpelResolver = new StandardBeanExpressionResolver();
+        final var context = new BeanExpressionContext(beanFactory, null);
+        return exp -> {
+            if (exp.startsWith("#{")) {
+                return springSpelResolver.evaluate(exp, context).toString();
+            }
+            return springPropertyResolver.resolveRequiredPlaceholders(exp);
+        };
     }
 
     @Bean("90462ee7-99cd-4ce9-b299-89c983a8b069")
@@ -76,16 +86,15 @@ public final class AufJmsConfiguration {
             // Can not find a default. Creating private.
         }
 
-        final ObjectMapper newMapper = new ObjectMapper()
-                .setSerializationInclusion(Include.NON_NULL)
+        final ObjectMapper newMapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         for (final var name : MODULES) {
             if (ClassUtils.isPresent(name, this.getClass().getClassLoader())) {
                 try {
-                    newMapper.registerModule((Module) Class.forName(name)
-                            .getDeclaredConstructor((Class[]) null).newInstance((Object[]) null));
+                    newMapper.registerModule((Module) Class.forName(name).getDeclaredConstructor((Class[]) null)
+                            .newInstance((Object[]) null));
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException | NoSuchMethodException | SecurityException
                         | ClassNotFoundException e) {

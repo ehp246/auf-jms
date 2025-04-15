@@ -59,7 +59,8 @@ public @interface ByJms {
      * argument takes the precedence and is accepted. The value defined here is
      * ignored.
      * <p>
-     * Spring property placeholder is supported on values but not on names.
+     * Spring property placeholder and SpEL expression are supported on values but
+     * not on names.
      *
      */
     String[] properties() default {};
@@ -86,7 +87,7 @@ public @interface ByJms {
      * <p>
      * The default is to follow {@linkplain EnableByJms#ttl()}.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      */
     String ttl() default "";
 
@@ -98,7 +99,7 @@ public @interface ByJms {
      * <p>
      * The default is to follow {@linkplain EnableByJms#delay()}.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      */
     String delay() default "";
 
@@ -109,7 +110,7 @@ public @interface ByJms {
      * <p>
      * Only applies for request/reply pattern.
      * <p>
-     * Supports Spring property placeholder.
+     * Supports Spring property placeholder and SpEL expression.
      *
      * @see EnableByJms#requestReplyTo()
      */
@@ -135,7 +136,7 @@ public @interface ByJms {
         /**
          * Specifies the destination name for the proxy interface.
          * <p>
-         * Supports Spring property placeholder.
+         * Supports Spring property placeholder and SpEL expression.
          */
         String value();
 
