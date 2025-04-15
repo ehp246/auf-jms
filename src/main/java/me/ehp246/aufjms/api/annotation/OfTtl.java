@@ -21,7 +21,8 @@ import jakarta.jms.JMSProducer;
  * <p>
  * When applied to a parameter, the specified value is ignored.
  * <p>
- * When applied to a method, Spring property placeholder is supported.
+ * When applied to a method, Spring property placeholder and SpEL expression are
+ * supported.
  * <p>
  * Only applicable on {@linkplain ByJms} interfaces.
  *

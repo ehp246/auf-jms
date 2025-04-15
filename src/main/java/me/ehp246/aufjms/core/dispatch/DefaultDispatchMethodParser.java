@@ -31,7 +31,7 @@ import me.ehp246.aufjms.api.exception.JmsDispatchException;
 import me.ehp246.aufjms.api.jms.BodyOf;
 import me.ehp246.aufjms.api.jms.FromJson;
 import me.ehp246.aufjms.api.jms.JmsMsg;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.dispatch.DefaultProxyInvocationBinder.PropertyArg;
 import me.ehp246.aufjms.core.reflection.ReflectedMethod;
 import me.ehp246.aufjms.core.reflection.ReflectedParameter;
@@ -46,11 +46,11 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
     private final static Set<Class<? extends Annotation>> PARAMETER_ANNOTATIONS = Set
             .of(OfType.class, OfProperty.class, OfTtl.class, OfDelay.class, OfCorrelationId.class);
 
-    private final PropertyResolver propertyResolver;
+    private final ExpressionResolver expressionResolver;
     private final FromJson fromJson;
 
-    DefaultDispatchMethodParser(final PropertyResolver propertyResolver, final FromJson fromJson) {
-        this.propertyResolver = propertyResolver;
+    DefaultDispatchMethodParser(final ExpressionResolver expressionResolver, final FromJson fromJson) {
+        this.expressionResolver = expressionResolver;
         this.fromJson = fromJson;
     }
 
@@ -80,7 +80,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                 .map(p -> (Function<Object[], Duration>) args -> (Duration) args[p.index()])
                 .orElseGet(() -> reflected.findOnMethodUp(OfTtl.class)
                         .map(a -> (Function<Object[], Duration>) args -> Duration
-                                .parse(propertyResolver.resolve(a.value())))
+                                .parse(expressionResolver.resolve(a.value())))
                         .orElse(null));
 
         final var delayFn = reflected.allParametersWith(OfDelay.class).stream().findFirst()
@@ -100,7 +100,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                     throw new IllegalArgumentException("Un-supported Delay type '" + type.getName()
                             + "' on '" + reflected.method().toString() + "'");
                 }).orElseGet(() -> reflected.findOnMethodUp(OfDelay.class).map(a -> {
-                    final var parsed = Duration.parse(propertyResolver.resolve(a.value()));
+                    final var parsed = Duration.parse(expressionResolver.resolve(a.value()));
                     return (Function<Object[], Duration>) args -> parsed;
                 }).orElse(null));
 
@@ -113,7 +113,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                     throw new IllegalArgumentException("Un-supported GroupId type '"
                             + type.getName() + "' on '" + reflected.method().toString() + "'");
                 }).orElseGet(() -> reflected.findOnMethodUp(OfGroupId.class).map(a -> {
-                    final var parsed = propertyResolver.resolve(a.value());
+                    final var parsed = expressionResolver.resolve(a.value());
                     return (Function<Object[], String>) args -> parsed;
                 }).orElse(null));
 
@@ -260,7 +260,7 @@ public final class DefaultDispatchMethodParser implements DispatchMethodParser {
                 throw new IllegalArgumentException("Duplicate '" + properties.get(i) + " on "
                         + reflected.method().getDeclaringClass());
             }
-            propStatic.put(key, propertyResolver.resolve(properties.get(i + 1)));
+            propStatic.put(key, expressionResolver.resolve(properties.get(i + 1)));
         }
         return propStatic;
     }

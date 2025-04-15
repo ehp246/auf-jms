@@ -20,7 +20,8 @@ import jakarta.jms.Message;
  * <p>
  * When applied to a parameter, the specified value is ignored.
  * <p>
- * When applied to a method, Spring property placeholder is supported.
+ * When applied to a method, Spring property placeholder and SpEL expression are
+ * supported.
  *
  * @author Lei Yang
  * @since 1.0

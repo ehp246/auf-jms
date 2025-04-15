@@ -23,7 +23,7 @@ import me.ehp246.aufjms.api.annotation.ForJmsType;
 import me.ehp246.aufjms.api.annotation.Invoking;
 import me.ehp246.aufjms.api.inbound.InstanceScope;
 import me.ehp246.aufjms.api.inbound.InvocableTypeDefinition;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.reflection.ReflectedType;
 import me.ehp246.aufjms.core.util.StreamOf;
 
@@ -34,11 +34,11 @@ import me.ehp246.aufjms.core.util.StreamOf;
 final class DefaultInvocableScanner {
     private final static Logger LOGGER = LoggerFactory.getLogger(DefaultInvocableScanner.class);
 
-    private final PropertyResolver propertyResolver;
+    private final ExpressionResolver expressionResolver;
 
-    public DefaultInvocableScanner(final PropertyResolver propertyResolver) {
+    public DefaultInvocableScanner(final ExpressionResolver expressionResolver) {
         super();
-        this.propertyResolver = propertyResolver;
+        this.expressionResolver = expressionResolver;
     }
 
     public DefaultInvocableRegistry registeryFrom(final Class<?>[] classes, final Set<String> scanPackages) {
@@ -85,7 +85,7 @@ final class DefaultInvocableScanner {
 
         final var msgTypes = Arrays
                 .asList(annotation.value().length == 0 ? new String[] { type.getSimpleName() } : annotation.value())
-                .stream().map(this.propertyResolver::resolve)
+                .stream().map(this.expressionResolver::resolve)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
                 .map(entry -> {
                     if (entry.getValue() > 1) {

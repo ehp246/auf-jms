@@ -14,7 +14,7 @@ import me.ehp246.aufjms.api.inbound.InvocationListener;
 import me.ehp246.aufjms.api.inbound.MsgConsumer;
 import me.ehp246.aufjms.api.jms.At;
 import me.ehp246.aufjms.api.jms.DestinationType;
-import me.ehp246.aufjms.api.spi.PropertyResolver;
+import me.ehp246.aufjms.api.spi.ExpressionResolver;
 import me.ehp246.aufjms.core.util.OneUtil;
 
 /**
@@ -26,22 +26,22 @@ import me.ehp246.aufjms.core.util.OneUtil;
  * @see EnableForJms
  */
 public final class InboundEndpointFactory {
-    private final PropertyResolver propertyResolver;
+    private final ExpressionResolver expressionResolver;
     private final AutowireCapableBeanFactory autowireCapableBeanFactory;
     private final DefaultInvocableScanner invocableScanner;
 
     public InboundEndpointFactory(final AutowireCapableBeanFactory autowireCapableBeanFactory,
-            final PropertyResolver propertyResolver) {
+            final ExpressionResolver expressionResolver) {
         super();
         this.autowireCapableBeanFactory = autowireCapableBeanFactory;
-        this.propertyResolver = propertyResolver;
-        this.invocableScanner = new DefaultInvocableScanner(propertyResolver);
+        this.expressionResolver = expressionResolver;
+        this.invocableScanner = new DefaultInvocableScanner(expressionResolver);
     }
 
     @SuppressWarnings("unchecked")
     public InboundEndpoint newInstance(final Map<String, Object> inboundAttributes, final Set<String> scanPackages,
             final String beanName, final String defaultConsumerName) {
-        final var defaultConsumer = Optional.ofNullable(defaultConsumerName).map(propertyResolver::resolve)
+        final var defaultConsumer = Optional.ofNullable(defaultConsumerName).map(expressionResolver::resolve)
                 .filter(OneUtil::hasValue).map(name -> autowireCapableBeanFactory.getBean(name, MsgConsumer.class))
                 .orElse(null);
 
@@ -49,37 +49,37 @@ public final class InboundEndpointFactory {
 
         final var subAttribute = (Map<String, Object>) fromAttribute.get("sub");
 
-        final var atName = propertyResolver.resolve(fromAttribute.get("value").toString());
+        final var atName = expressionResolver.resolve(fromAttribute.get("value").toString());
         final var atType = (DestinationType) (fromAttribute.get("type"));
 
         final InboundEndpoint.From from = new InboundEndpointRecord.From(
                 atType == DestinationType.TOPIC ? At.toTopic(atName) : At.toQueue(atName),
-                propertyResolver.resolve(fromAttribute.get("selector").toString()),
-                new InboundEndpointRecord.Sub(propertyResolver.resolve(subAttribute.get("name").toString()),
+                expressionResolver.resolve(fromAttribute.get("selector").toString()),
+                new InboundEndpointRecord.Sub(expressionResolver.resolve(subAttribute.get("name").toString()),
                         (Boolean) (subAttribute.get("shared")), (Boolean) (subAttribute.get("durable"))));
 
         final int concurrency = Integer
-                .parseInt(propertyResolver.resolve(inboundAttributes.get("concurrency").toString()));
+                .parseInt(expressionResolver.resolve(inboundAttributes.get("concurrency").toString()));
 
         final boolean autoStartup = Boolean
-                .parseBoolean(propertyResolver.resolve(inboundAttributes.get("autoStartup").toString()));
+                .parseBoolean(expressionResolver.resolve(inboundAttributes.get("autoStartup").toString()));
 
-        final String connectionFactory = propertyResolver
+        final String connectionFactory = expressionResolver
                 .resolve(inboundAttributes.get("connectionFactory").toString());
 
         final var registery = this.invocableScanner.registeryFrom((Class<?>[]) inboundAttributes.get("register"),
                 scanPackages);
 
         final var invocationListener = Optional.ofNullable(inboundAttributes.get("invocationListener").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                .map(expressionResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, InvocationListener.class)).orElse(null);
 
         final var errorHandler = Optional.ofNullable(inboundAttributes.get("errorHandler").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                .map(expressionResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, ErrorHandler.class)).orElse(null);
 
         final var exceptionListener = Optional.ofNullable(inboundAttributes.get("exceptionListener").toString())
-                .map(propertyResolver::resolve).filter(OneUtil::hasValue)
+                .map(expressionResolver::resolve).filter(OneUtil::hasValue)
                 .map(name -> autowireCapableBeanFactory.getBean(name, ExceptionListener.class)).orElse(null);
 
         return new InboundEndpointRecord(from, registery, concurrency, beanName, autoStartup, connectionFactory,
