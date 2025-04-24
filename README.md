@@ -1,6 +1,6 @@
 # Auf JMS
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/me.ehp246/auf-jms/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/me.ehp246/auf-jms)
+[![Sonatype Central](https://maven-badges.sml.io/sonatype-central/me.ehp246/auf-jms/badge.svg?style=flat-square)](https://central.sonatype.com/artifact/me.ehp246/auf-jms)
 
 ## Introduction
 Auf JMS is aimed at <a href='https://spring.io/'>Spring</a>-based applications that need to implement a messaging architecture on top of JMS brokers. It offers an annotation-driven and declarative programming model that abstracts away low-level JMS API's by offering a set of annotations and conventions with which application developers declare the intentions via plain Java classes and provided annotations. 
