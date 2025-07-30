@@ -1,6 +1,19 @@
 # Auf JMS
 
-[![Sonatype Central](https://maven-badges.sml.io/sonatype-central/me.ehp246/auf-jms/badge.svg?style=flat-square)](https://central.sonatype.com/artifact/me.ehp246/auf-jms)
+[![Java CI with Maven](https://github.com/ehp246/auf-jms/actions/workflows/build.yml/badge.svg)](https://github.com/ehp246/auf-jms/actions/workflows/build.yml)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ehp246_auf-jms&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ehp246_auf-jms)
+
 
 ## Introduction
 Auf JMS is aimed at <a href='https://spring.io/'>Spring</a>-based applications that need to implement a messaging architecture on top of JMS brokers. It offers an annotation-driven and declarative programming model that abstracts away low-level JMS API's by offering a set of annotations and conventions with which application developers declare the intentions via plain Java classes and provided annotations. 
